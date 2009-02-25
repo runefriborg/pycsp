@@ -1,34 +1,28 @@
 from common import *
 from pycsp import *
 from random import random
+import sys
 
 @process
-def producer(jobs, bagsize, bags):
-    _,outc=jobs.join(reader=False, writer=True)
+def producer(job_out, bagsize, bags):
     for i in range(bags):
-        outc(bagsize)
-    jobs.leave(reader=False, writer=True)
+        job_out(bagsize)
+    retire(job_out)
     
 @process
-def worker(jobs, results):
-    inc, _=jobs.join(reader=True, writer=False)
-    _,cout=results.join(reader=False, writer=True)
-    try:
-        while True:
-            cnt=inc()
-            sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
-            cout((cnt,sum))
-    except ChannelPoisonException:
-        results.leave(reader=False, writer=True)
+def worker(job_in, result_out):
+    while True:
+        cnt=job_in()
+        sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
+        result_out((cnt,sum))
 
 @process
-def consumer(results):
-    inc, _=results.join(reader=True, writer=False)
+def consumer(result_in):
     cnt=0
     sum=0
     try:
         while True:
-            c,s=inc()
+            c,s=result_in()
             cnt+=c
             sum+=s
     except ChannelPoisonException:
@@ -39,7 +33,7 @@ results=Channel()
 workers=[]
 
 for i in range(10):
-    workers.append(worker(jobs,results))
-Parallel(producer(jobs,1000, 1000),
+    workers.append(worker(IN(jobs),OUT(results)))
+Parallel(producer(OUT(jobs),1000, 1000),
          workers,
-         consumer(results))
+         consumer(IN(results)))
