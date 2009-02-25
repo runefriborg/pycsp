@@ -3,21 +3,21 @@ from pycsp import *
 import random
 
 def sleep_random():
-    time.sleep(random.random())
+    time.sleep(random.random()/10)
 
 @process
-def writer(c, id, cnt, sleeper):
+def writer(cout, id, cnt, sleeper):
     for i in range(cnt):
         if sleeper: sleeper()
-        c.write((id, i))
+        cout((id, i))
     
 @process
-def par_reader(c1,c2,c3,c4, cnt, sleeper):
-    alt = Alternation({c1:'', c2:'', c3:'', c4:''})
+def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
+    alt = Alternation({cin1:'', cin2:'', cin3:'', cin4:''})
     for i in range(cnt*4):
         if sleeper: sleeper()
         c,msg = alt.select()
-        print 'From ',c.name,'got',msg
+        print 'From ',c ,'got',msg
 
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
@@ -28,11 +28,11 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(par_reader(c1,c2,c3,c4,cnt, read_sleeper),
-             writer(c1,0,cnt, write_sleeper),
-             writer(c2,1,cnt, write_sleeper),
-             writer(c3,2,cnt, write_sleeper),
-             writer(c4,3,cnt, write_sleeper))
+    Parallel(par_reader(IN(c1),IN(c2),IN(c3),IN(c4),cnt, read_sleeper),
+             writer(OUT(c1),0,cnt, write_sleeper),
+             writer(OUT(c2),1,cnt, write_sleeper),
+             writer(OUT(c3),2,cnt, write_sleeper),
+             writer(OUT(c4),3,cnt, write_sleeper))
 
 Any2One_Alting_Test(sleep_random, sleep_random)
         
