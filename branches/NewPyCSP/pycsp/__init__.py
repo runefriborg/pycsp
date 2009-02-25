@@ -7,7 +7,7 @@ Copyright (c) 2007 John Markus Bjørndalen, jmb@cs.uit.no.
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from __future__ import with_statement
 from alternation import *
 from channel import *
+from channelend import *
 from process import * 
