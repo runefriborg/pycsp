@@ -1,28 +1,13 @@
 import threading
 import time
 import random
+import inspect
+
 from channel import *
 
 ACTIVE, CANCEL, DONE, POISON = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
-
-def choice(func):
-    def _call(*args, **kwargs):
-        return Choice(func, *args, **kwargs)
-    return _call
-
-class Choice(threading.Thread):
-    def __init__(self, fn, *args, **kwargs):
-        threading.Thread.__init__(self)
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-    def run(self, ChannelInput=None):
-        self.retval = None
-        # Store the returned value from the process
-        self.kwargs['ChannelInput']=ChannelInput
-        self.retval = self.fn(*self.args, **self.kwargs)
 
 class Alternation:
     def __init__(self, guards):
@@ -80,10 +65,26 @@ class Alternation:
     def execute(self):
         act, c, req, op = self.choose()
         if self.guards[act]:
-            if op==WRITE:
-                self.guards[act].run()
+            action = self.guards[act]
+            if callable(action):
+                # Execute callback function
+                if op==WRITE:
+                    self.guards[act]()
+                else:
+                    self.guards[act](ChannelInput=req.msg)
             else:
-                self.guards[act].run(ChannelInput=req.msg)
+                # Fetch process frame and namespace
+                processframe= inspect.currentframe().f_back
+                
+                # Compile source provided in a string.
+                code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
+                f_globals = processframe.f_globals
+                f_locals = processframe.f_locals
+                if not op==WRITE:
+                    f_locals.update({'ChannelInput':req.msg})
+
+                # Execute action
+                exec(code, f_globals, f_locals)
 
     def select(self):
         act, c, req, op = self.choose()
