@@ -6,9 +6,11 @@ ACTIVE, CANCEL, DONE, POISON = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
+
 class ChannelPoisonException(Exception): 
     def __init__(self):
         pass
+
 
 class ReqStatus:
     def __init__(self, state=ACTIVE):
@@ -44,36 +46,44 @@ class ChannelReq:
 
 
     def offer(self, recipient):
-        self.status.cond.acquire()
-        recipient.status.cond.acquire()
-        if self.status.state==ACTIVE and recipient.status.state==ACTIVE:
-            recipient.msg=self.msg
-            self.status.state=DONE
-            self.result=SUCCESS
-            recipient.status.state=DONE
-            recipient.result=SUCCESS
-            self.status.cond.notifyAll()
-            recipient.status.cond.notifyAll()
-        recipient.status.cond.release()
-        self.status.cond.release()
+        # Eliminate unnecessary locking, by adding an extra test
+        if self.status.state == recipient.status.state == ACTIVE:
+            self.status.cond.acquire()
+            recipient.status.cond.acquire()
+            if self.status.state == recipient.status.state == ACTIVE:
+                recipient.msg=self.msg
+                self.status.state=DONE
+                self.result=SUCCESS
+                recipient.status.state=DONE
+                recipient.result=SUCCESS
+                self.status.cond.notifyAll()
+                recipient.status.cond.notifyAll()
+            recipient.status.cond.release()
+            self.status.cond.release()
 
         
 class Channel:
     def __init__(self, name=None):
         self.readqueue=[]
         self.writequeue=[]
-        self.cond=threading.Condition()
         self.name=name
         self.ispoisoned=False
         self.readers=0
         self.writers=0
 
+        # We can remove the condition from Channel, because all operations
+        # on the queues can be done atomic, because of the Global Interpreter Lock
+        # preventing us from accessing Python lists simultaneously from multiple threads.
+        # self.cond=threading.Condition()
+        #
+        # But what about match(). We can now have interleaving processes calling match
+        # meaning, that several might be offering messages. Offering is protected. Is that enough?.
+        # If it is, then this might be a very clean method to ensure a correct locking.
+
+    
     def check_poison(self):
-        self.cond.acquire()
         if self.ispoisoned:
-            self.cond.release()
             raise ChannelPoisonException()
-        self.cond.release()
         
     def read(self):
         done=False
@@ -109,45 +119,33 @@ class Channel:
     def post_read(self, req):
         if self.ispoisoned:
             raise ChannelPoisonException()
-        self.cond.acquire()
-        self.readqueue.append(req)
-        self.cond.release()
+        self.readqueue.append(req) # ATOMIC
         self.match()
 
     def remove_read(self, req):
-        self.cond.acquire()
-        self.readqueue.remove(req)
-        self.cond.release()
+        self.readqueue.remove(req) # ATOMIC
+
         
     def post_write(self, req):
         if self.ispoisoned:
             raise ChannelPoisonException()
-        self.cond.acquire()
-        self.writequeue.append(req)
-        self.cond.release()
+        self.writequeue.append(req) # ATOMIC
         self.match()
 
     def remove_write(self, req):
-        self.cond.acquire()
-        self.writequeue.remove(req)
-        self.cond.release()
+        self.writequeue.remove(req) # ATOMIC
 
     def match(self):
-        self.cond.acquire()
-        if self.readqueue and self.writequeue:
-            for w in self.writequeue:
-                for r in self.readqueue:
-                    w.offer(r)
-        self.cond.release()
+        for w in self.writequeue[:]: # ATOMIC copy
+            for r in self.readqueue[:]: # ATOMIC copy
+                w.offer(r)
 
     def poison(self):
-        self.cond.acquire()
         self.ispoisoned=True
-        for p in self.readqueue:
+        for p in self.readqueue[:]: # ATOMIC copy
             p.poison()
-        for p in self.writequeue:
+        for p in self.writequeue[:]: # ATOMIC copy
             p.poison()
-        self.cond.release()
 
     def join(self, reader=True, writer=True):
         r=None
@@ -166,7 +164,7 @@ class Channel:
         if writer:
             self.writers-=1
         if self.readers==0 or self.writers==0:
-            self.poison()
+            self.poison()        
     
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
