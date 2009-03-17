@@ -32,6 +32,12 @@ class Process(threading.Thread):
                 ch.poison()
 
 def Parallel(*plist):
+    _parallel(plist, True)
+
+def Spawn(*plist):
+    _parallel(plist, False)
+
+def _parallel(plist, block = True):
     processes=[]
     for p in plist:
         if type(p)==list:
@@ -39,13 +45,19 @@ def Parallel(*plist):
                 processes.append(q)
         else:
             processes.append(p)
+
     for p in processes:
         p.start()
-    for p in processes:
-        p.join()
-    # return a list of the return values from the processes
-    return [p.retval for p in processes]
-            
+
+    if block:
+        for p in processes:
+            p.join()
+
+        # return a list of the return values from the processes
+        return [p.retval for p in processes]
+
+    return
+    
 def Sequence(*processes):
     """Sequence construct. Takes a list of processes (Python threads) which are started.
     The Sequence construct returns when all given processes exit."""
