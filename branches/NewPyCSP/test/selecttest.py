@@ -1,5 +1,6 @@
 from common import *
 from pycsp import *
+import time
 import random
 
 def sleep_random():

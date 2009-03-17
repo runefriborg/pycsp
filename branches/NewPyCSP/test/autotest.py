@@ -1,5 +1,7 @@
 from common import *
 from pycsp import *
+import time
+import random
 
 def action(ChannelInput=None):
     print '.',
@@ -24,19 +26,19 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
         if sleeper: sleeper()
         Alternation(
             {
-                cin1:"print '#',; print cin3(),; print '#',",
-                cin2:"print 'id='+str(ChannelInput[0]),",
-                cin3:action(),
-                cin4:action()
+                cin1:action,
+                cin2:action,
+                cin3:action,
+                cin4:action
             }
         ).execute()
 
 
 def sleep_one():
-    time.sleep(0.1)
+    time.sleep(0.01)
 
 def sleep_random():
-    time.sleep(random.random()/10)
+    time.sleep(random.random()/100)
 
 
 def One2One_Test(read_sleeper, write_sleeper):

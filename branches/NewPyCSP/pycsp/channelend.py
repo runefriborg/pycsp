@@ -40,7 +40,7 @@ class ChannelEndWrite(ChannelEnd):
     def __call__(self, val):
         if self.isretired:
             raise ChannelEndException('Not allowed to write to retired channelend!')
-        self.channel.write(val)
+        self.channel._write(val)
 
     def retire(self):
         if self.isretired:
@@ -57,7 +57,7 @@ class ChannelEndRead(ChannelEnd):
     def __call__(self):
         if self.isretired:
             raise ChannelEndException('Not allowed to read from retired channelend!')
-        return self.channel.read()
+        return self.channel._read()
 
     def retire(self):
         if self.isretired:

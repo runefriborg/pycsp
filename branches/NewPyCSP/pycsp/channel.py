@@ -1,6 +1,4 @@
 import threading
-import time
-import random
 
 ACTIVE, CANCEL, DONE, POISON = range(4)
 READ, WRITE = range(2)
@@ -85,7 +83,7 @@ class Channel:
         if self.ispoisoned:
             raise ChannelPoisonException()
         
-    def read(self):
+    def _read(self):
         done=False
         while not done:
             req=ChannelReq(ReqStatus(), name=self.name)
@@ -101,7 +99,7 @@ class Channel:
         return None #Here we should handle that a read was cancled...
 
     
-    def write(self, msg):
+    def _write(self, msg):
         self.check_poison()
         done=False
         while not done:
@@ -151,10 +149,10 @@ class Channel:
         r=None
         w=None
         if reader:
-            r=self.read
+            r=self._read
             self.readers+=1
         if writer:
-            w=self.write
+            w=self._write
             self.writers+=1
         return (r,w)
 

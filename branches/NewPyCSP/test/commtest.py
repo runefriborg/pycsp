@@ -1,5 +1,7 @@
 from common import *
 from pycsp import *
+import time
+import random
 
 def action(ChannelInput=None):
     print '.',
@@ -30,10 +32,10 @@ def par_writer(cout1,cout2,cout3,cout4, cnt, sleeper):
         Alternation({(cout1, i):None, (cout2,i):None, (cout3,i):None, (cout4,i):None}).execute()
 
 def sleep_random():
-    time.sleep(random.random()/10)
+    time.sleep(random.random()/100)
 
 def sleep_one():
-    time.sleep(0.1)
+    time.sleep(0.01)
 
 def One2One_Test(read_sleeper, write_sleeper):
     c1=Channel('C1')

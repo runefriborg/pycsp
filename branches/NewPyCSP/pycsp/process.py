@@ -1,5 +1,4 @@
 import threading
-import time
 
 from channel import ChannelPoisonException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
