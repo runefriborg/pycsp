@@ -1,0 +1,7 @@
+all versions - 0.5.0
+----------
+The PyCSP library has been completely rewritten.
+
+There is no backwards compatibility.
+
+For now please look at the examples for documentation on how to use the library.
