@@ -1,6 +1,5 @@
 from common import *
 from pycsp import *
-import random
 
 # Based on the exercise q7.occ from the source distribution of kroc-1.4
 # 
@@ -30,22 +29,22 @@ def philosopher(id, left, right, down, up):
                 )
             # notify security you have finished
             up(True)
+
     except ChannelPoisonException:
         print 'philospher '+str(id)+' has eaten '+str(eat)+' times'
 
 @process
 def fork(left, right):
     while True:
-        any = None
         Alternation({
 
                 # philosopher left picks up fork
                 # philosopher left puts down fork
-                left:"any = left()",
+                left:"left()",
 
                 # philosopher right picks up fork
                 # philosopher right puts down fork                
-                right:"any = right()"
+                right:"right()"
 
                 }).execute()
 
@@ -69,7 +68,7 @@ def security(steps, down, up):
     poison(*down)
     poison(*up)
     
-
+@process
 def secure_college(steps):
     left, right, up, down = 4*[5*[Channel()]]
 
@@ -80,4 +79,4 @@ def secure_college(steps):
         )
     
 
-secure_college(1000)
+Sequence(secure_college(1000))
