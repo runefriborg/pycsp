@@ -6,7 +6,6 @@ PyCSP implementation of the CSP Core functionality (Channels, Processes, PAR, AL
 Copyright (c) 2007 John Markus Bjørndalen, jmb@cs.uit.no.
 See LICENSE.txt for licensing details (MIT License). 
 """
-
 from __future__ import with_statement
 import time
 import threading
@@ -16,9 +15,11 @@ import Channels
 from Guards import *
 from Channels import *
 import types
+from functools import wraps
 
 def process(func):
     "Decorator for creating process functions"
+    @wraps(func)
     def _call(*args, **kwargs):
         return Process(func, *args, **kwargs)
     return _call
