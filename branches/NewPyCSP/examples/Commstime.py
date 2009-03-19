@@ -2,6 +2,7 @@
 # -*- coding: latin-1 -*-
 from common import *
 from pycsp import *
+import time
 
 @process
 def Prefix(cin, cout, prefixItem=None):

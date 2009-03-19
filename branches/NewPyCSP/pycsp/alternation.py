@@ -17,22 +17,25 @@ class Alternation:
         reqs={}
         done = False
         try:
-            for choice in self.guards.keys():
-                if not done:
-                    if type(choice)==tuple: 
-                        c, msg = choice
-                        req=ChannelReq(req_status,msg=msg)
-                        c.post_write(req)
-                        op=WRITE
-                    else:
-                        req=ChannelReq(req_status)
-                        c=choice
-                        c.post_read(req)
-                        op=READ
-                    reqs[choice]=(c, req, op)
+            pri_idx = 0
+            for prioritized_item in self.guards:
+                for choice in prioritized_item.keys():
+                    if not done:
+                        if type(choice)==tuple: 
+                            c, msg = choice
+                            req=ChannelReq(req_status,msg=msg)
+                            c.post_write(req)
+                            op=WRITE
+                        else:
+                            req=ChannelReq(req_status)
+                            c=choice
+                            c.post_read(req)
+                            op=READ
+                        reqs[choice]=(pri_idx, c, req, op)
+                pri_idx += 1
         except ChannelPoisonException:
             for r in reqs.keys():
-                c, req, op = reqs[r]
+                pri_idx, c, req, op = reqs[r]
                 if op==READ:
                     c.remove_read(req)
                 else:
@@ -45,7 +48,7 @@ class Alternation:
         act=None
         poison=False
         for k in reqs.keys():
-            c, req, op = reqs[k]
+            pri_idx, c, req, op = reqs[k]
             if op==READ:
                 c.remove_read(req)
             else:
@@ -56,20 +59,20 @@ class Alternation:
                 poison=True
         if poison:
             raise ChannelPoisonException()
-        c, req, op = reqs[act]
+        pri_idx, c, req, op = reqs[act]
 
-        return (act, c, req, op)
+        return (pri_idx, act, c, req, op)
 
     def execute(self):
-        act, c, req, op = self.choose()
-        if self.guards[act]:
-            action = self.guards[act]
+        pri_idx, act, c, req, op = self.choose()
+        if self.guards[pri_idx][act]:
+            action = self.guards[pri_idx][act]
             if callable(action):
                 # Execute callback function
                 if op==WRITE:
-                    self.guards[act]()
+                    self.guards[pri_idx][act]()
                 else:
-                    self.guards[act](ChannelInput=req.msg)
+                    self.guards[pri_idx][act](ChannelInput=req.msg)
             else:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe().f_back
@@ -85,7 +88,7 @@ class Alternation:
                 exec(code, f_globals, f_locals)
 
     def select(self):
-        act, c, req, op = self.choose()
+        pri_idx, act, c, req, op = self.choose()
         return (c, req.msg)
 
 

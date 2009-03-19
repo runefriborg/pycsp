@@ -24,14 +24,14 @@ def writer(cout, id, cnt, sleeper):
 def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
     while True:
         if sleeper: sleeper()
-        Alternation(
+        Alternation([
             {
                 cin1:action,
                 cin2:action,
                 cin3:action,
                 cin4:action
             }
-        ).execute()
+        ]).execute()
 
 
 def sleep_one():

@@ -45,7 +45,7 @@ def Dispatcher(register, inc):
             request_alternation = {}
             for req in services[service_id]:
                 request_alternation[(req,(GET, result))] = None
-            Alternation(request_alternation).execute()
+            Alternation([request_alternation]).execute()
         else:
             result("Service not found!<br>")
         
@@ -58,10 +58,10 @@ def Dispatcher(register, inc):
 
     try:
         while True:
-            Alternation({
+            Alternation([{
                     register:add_service,
                     inc:dispatch
-                  }).execute()
+                  }]).execute()
 
     except ChannelPoisonException:
         poison(register, inc)

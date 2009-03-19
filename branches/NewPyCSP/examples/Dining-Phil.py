@@ -59,17 +59,18 @@ def security(steps, down, up):
     max = 4
     n_sat_down = [0] # use call by reference
     for step in xrange(steps):
-        guards = []
+        guards = []p
+
+        if n_sat_down[0] < max: # don't allow max at a time
+                        
+            for i in range(5):
+                # philosopher wanting to sit down
+                guards.append({down[i]:"n_sat_down[0] += 1"})
 
         for i in range(5):
             # philosopher wanting to stand up
             # always allow this
             guards.append({up[i]:"n_sat_down[0] -= 1"})
-
-        for i in range(5):
-            # philosopher wanting to sit down
-            if n_sat_down[0] < max: # don't allow max at a time
-                guards.append({down[i]:"n_sat_down[0] += 1"})
 
         Alternation(guards).execute()
 

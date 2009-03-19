@@ -14,7 +14,7 @@ def writer(cout, id, cnt, sleeper):
     
 @process
 def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation({cin1:'', cin2:'', cin3:'', cin4:''})
+    alt = Alternation([{cin1:'', cin2:'', cin3:'', cin4:''}])
     for i in range(cnt*4):
         if sleeper: sleeper()
         c,msg = alt.select()

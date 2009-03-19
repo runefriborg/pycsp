@@ -23,13 +23,13 @@ def writer(cout, id, cnt, sleeper):
 def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
-        Alternation({cin1:action(), cin2:action(), cin3:action(), cin4:action()}).execute()
+        Alternation([{cin1:action(), cin2:action(), cin3:action(), cin4:action()}]).execute()
 
 @process
 def par_writer(cout1,cout2,cout3,cout4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
-        Alternation({(cout1, i):None, (cout2,i):None, (cout3,i):None, (cout4,i):None}).execute()
+        Alternation([{(cout1, i):None, (cout2,i):None, (cout3,i):None, (cout4,i):None}]).execute()
 
 def sleep_random():
     time.sleep(random.random()/100)
