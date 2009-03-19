@@ -7,10 +7,11 @@ Copyright (c) 2007 John Markus Bjørndalen, jmb@cs.uit.no.
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-version = (0,3,0)
-
 from __future__ import with_statement
 from Guards import *
 from Channels import *
 from BarrierImpl import Barrier
 from CoreImpl import * 
+
+version = (0,3,0)
+
