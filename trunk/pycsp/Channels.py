@@ -176,8 +176,33 @@ class One2OneChannel(Channel):
             # we entered first, tell reader that we are waiting
             self._pending = True
             if self._ialt != None:
-                # The channel is enabled as an input guard, so do the wake-up-call. 
+                # The channel is enabled as an input guard, so do the wake-up-call.
+                # 
+                # NB: we release the condition/lock to avoid a
+                # deadlock situation that might occur if an ALT tries
+                # to run disable() on this guard while we try to run
+                # schedule(). In that case, the ALT has already
+                # grabbed its lock, and we keep this lock, which could
+                # cause a deadlock when both try to grab the other
+                # lock.
+                #
+                # The code below looks like a potential race
+                # condition: if this writer calls schedule and gets
+                # blocked, another writer can enter and set _pending to
+                # False and send a notify() to a non-existing reader
+                # while the alt will eventually be awoken by the
+                # schedule() and never find this channel in the
+                # disable() phase (since _pending is False).
+                #
+                # The reason why this is still safe is that this is a
+                # One2OneChannel, which has a single writer. The
+                # Any2One channels use an extra lock, so multiple
+                # writers can never enter _write() at the same time
+                # even if we release this lock.
+                # 
+                self._cond.release()
                 self._ialt.schedule()
+                self._cond.acquire()
         self.rwMonitor.wait()
 
     @synchronized
