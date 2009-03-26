@@ -84,33 +84,29 @@ class Channel:
             raise ChannelPoisonException()
         
     def _read(self):
-        done=False
-        while not done:
-            req=ChannelReq(ReqStatus(), name=self.name)
-            self.post_read(req)
-            self.check_poison()            
-            req.wait()
-            self.remove_read(req)
-            if req.result==SUCCESS:
-                done=True
-                return req.msg
-            self.check_poison()
+        self.check_poison()
+        req=ChannelReq(ReqStatus(), name=self.name)
+        self.post_read(req)
+        req.wait()
+        self.remove_read(req)
+        if req.result==SUCCESS:
+            return req.msg
+        self.check_poison()
+
         print 'We should not get here in read!!!', req.status.state
         return None #Here we should handle that a read was cancled...
 
     
     def _write(self, msg):
         self.check_poison()
-        done=False
-        while not done:
-            req=ChannelReq(ReqStatus(), msg)
-            self.post_write(req)
-            req.wait()
-            self.remove_write(req)
-            if req.result==SUCCESS:
-                done=True
-                return req.msg
-            self.check_poison()
+        req=ChannelReq(ReqStatus(), msg)
+        self.post_write(req)
+        req.wait()
+        self.remove_write(req)
+        if req.result==SUCCESS:
+            return req.msg
+        self.check_poison()
+
         print 'We should not get here in write!!!', req.status
         return None #Here we should handle that a read was cancled...
 

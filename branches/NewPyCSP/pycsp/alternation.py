@@ -15,23 +15,21 @@ class Alternation:
     def choose(self):
         req_status=ReqStatus()
         reqs={}
-        done = False
         try:
             pri_idx = 0
             for prioritized_item in self.guards:
                 for choice in prioritized_item.keys():
-                    if not done:
-                        if type(choice)==tuple: 
-                            c, msg = choice
-                            req=ChannelReq(req_status,msg=msg)
-                            c.post_write(req)
-                            op=WRITE
-                        else:
-                            req=ChannelReq(req_status)
-                            c=choice
-                            c.post_read(req)
-                            op=READ
-                        reqs[choice]=(pri_idx, c, req, op)
+                    if type(choice)==tuple: 
+                        c, msg = choice
+                        req=ChannelReq(req_status,msg=msg)
+                        c.post_write(req)
+                        op=WRITE
+                    else:
+                        req=ChannelReq(req_status)
+                        c=choice
+                        c.post_read(req)
+                        op=READ
+                    reqs[choice]=(pri_idx, c, req, op)
                 pri_idx += 1
         except ChannelPoisonException:
             for r in reqs.keys():
