@@ -31,9 +31,10 @@ class ChannelReq:
 
     def poison(self):
         self.status.cond.acquire()
-        self.status.state=POISON
-        self.result=POISON
-        self.status.cond.notifyAll()
+        if self.result != SUCCESS or self.status.state != DONE:
+            self.status.state=POISON
+            self.result=POISON
+            self.status.cond.notifyAll()
         self.status.cond.release()
 
     def wait(self):
