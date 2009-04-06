@@ -59,7 +59,7 @@ def security(steps, down, up):
     max = 4
     n_sat_down = [0] # use call by reference
     for step in xrange(steps):
-        guards = []p
+        guards = []
 
         if n_sat_down[0] < max: # don't allow max at a time
                         
