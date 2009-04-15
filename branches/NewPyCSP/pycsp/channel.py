@@ -142,24 +142,23 @@ class Channel:
         for p in self.writequeue[:]: # ATOMIC copy
             p.poison()
 
-    def join(self, reader=True, writer=True):
-        r=None
-        w=None
-        if reader:
-            r=self._read
-            self.readers+=1
-        if writer:
-            w=self._write
-            self.writers+=1
-        return (r,w)
+    def join_reader(self):
+        self.readers+=1
 
-    def leave(self, reader=True, writer=True):
-        if reader:
-            self.readers-=1
-        if writer:
-            self.writers-=1
-        if self.readers==0 or self.writers==0:
-            self.poison()        
+    def join_writer(self):
+        self.writers+=1
+
+    def leave_reader(self):
+        self.readers-=1
+        if self.readers==0:
+            self.poison()
+            return
+
+    def leave_writer(self):
+        self.writers-=1
+        if self.writers==0:
+            self.poison()
+            return
     
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
