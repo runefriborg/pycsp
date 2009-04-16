@@ -7,13 +7,6 @@ ACTIVE, DONE, POISON = range(3)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
-def io(func):
-    "Decorator for blocking io operations. In PyCSP threading it has no effect, other than improving readability and compatibility"
-    def _call(*args, **kwargs):
-        return func(*args, **kwargs)
-    return _call
-
-
 def process(func):
     "Decorator for creating process functions"
     def _call(*args, **kwargs):
@@ -72,3 +65,18 @@ def Sequence(*processes):
         p.run()
     # return a list of the return values from the processes
     return [p.retval for p in processes]
+
+
+# Optional
+def Blocking(*plist):
+    L = []
+    for p in plist:
+        L.append(p())
+    return L
+
+def io(func):
+    "Decorator for blocking io operations. In PyCSP threading it has no effect, other than improving readability and compatibility"
+    def _call(*args, **kwargs):
+        return func(*args, **kwargs)
+    return _call
+
