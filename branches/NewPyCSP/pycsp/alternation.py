@@ -1,11 +1,16 @@
-import threading
 import inspect
 
 from channel import *
 
-ACTIVE, CANCEL, DONE, POISON = range(4)
+ACTIVE, DONE, POISON = range(3)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
+
+def choice(func):
+    "Decorator for creating actions. It has no effect, other than improving readability"
+    def _call(*args, **kwargs):
+        return func(*args, **kwargs)
+    return _call
 
 class Alternation:
     def __init__(self, guards):

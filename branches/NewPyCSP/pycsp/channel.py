@@ -1,6 +1,6 @@
 import threading
 
-ACTIVE, CANCEL, DONE, POISON = range(4)
+ACTIVE, DONE, POISON = range(3)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
@@ -65,10 +65,17 @@ class Channel:
     def __init__(self, name=None):
         self.readqueue=[]
         self.writequeue=[]
-        self.name=name
         self.ispoisoned=False
         self.readers=0
         self.writers=0
+
+        if name == None:
+            # Create name based on host ID and current time
+            import uuid
+            self.name = str(uuid.uuid1())
+        else:
+            self.name=name
+                    
 
         # We can remove the condition from Channel, because all operations
         # on the queues can be done atomic, because of the Global Interpreter Lock

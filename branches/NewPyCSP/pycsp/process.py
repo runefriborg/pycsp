@@ -3,9 +3,15 @@ import threading
 from channel import ChannelPoisonException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
 
-ACTIVE, CANCEL, DONE, POISON = range(4)
+ACTIVE, DONE, POISON = range(3)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
+
+def io(func):
+    "Decorator for blocking io operations. In PyCSP threading it has no effect, other than improving readability and compatibility"
+    def _call(*args, **kwargs):
+        return func(*args, **kwargs)
+    return _call
 
 
 def process(func):
