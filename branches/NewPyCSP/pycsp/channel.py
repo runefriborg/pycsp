@@ -1,15 +1,25 @@
+"""
+Channel module
+
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+See LICENSE.txt for licensing details (MIT License). 
+"""
+
+# Imports
 import threading
 
+# Constants
 ACTIVE, DONE, POISON = range(3)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
-
+# Exceptions
 class ChannelPoisonException(Exception): 
     def __init__(self):
         pass
 
-
+# Classes
 class ReqStatus:
     def __init__(self, state=ACTIVE):
         self.state=state
@@ -62,6 +72,24 @@ class ChannelReq:
 
         
 class Channel:
+    """ Channel class. Blocking communication
+    
+    >>> from __init__ import *
+
+    >>> @process
+    ... def P1(cout):
+    ...     while True:
+    ...         cout('Hello World')
+
+    >>> C = Channel()
+    >>> Spawn(P1(OUT(C)))
+    
+    >>> cin = IN(C)
+    >>> cin()
+    'Hello World'
+
+    >>> retire(cin)
+    """
     def __init__(self, name=None):
         self.readqueue=[]
         self.writequeue=[]
@@ -75,16 +103,11 @@ class Channel:
             self.name = str(uuid.uuid1())
         else:
             self.name=name
-                    
 
         # We can remove the condition from Channel, because all operations
         # on the queues can be done atomic, because of the Global Interpreter Lock
         # preventing us from accessing Python lists simultaneously from multiple threads.
         # self.cond=threading.Condition()
-        #
-        # But what about match(). We can now have interleaving processes calling match
-        # meaning, that several might be offering messages. Offering is protected. Is that enough?.
-        # If it is, then this might be a very clean method to ensure a correct locking.
 
     
     def check_poison(self):
@@ -170,3 +193,8 @@ class Channel:
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
 
+
+# Run tests
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

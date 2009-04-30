@@ -1,18 +1,70 @@
-import inspect
+"""
+Alternation module
 
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+See LICENSE.txt for licensing details (MIT License). 
+"""
+
+# Imports
+import inspect
 from channel import *
 
+# Constants
 ACTIVE, DONE, POISON = range(3)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
+# Decorators
 def choice(func):
-    "Decorator for creating actions. It has no effect, other than improving readability"
+    """
+    Decorator for creating actions. It has no effect, other than improving readability
+    
+    >>> @choice 
+    ... def action(ChannelInput):
+    ...     pass
+
+    >>> from guard import Skip
+    >>> Alternation([{Skip():action}]).execute()
+    """
     def _call(*args, **kwargs):
         return func(*args, **kwargs)
     return _call
 
+# Classes
 class Alternation:
+    """
+    Alternation ( add description )
+
+    >>> from __init__ import *
+
+    >>> L = []
+
+    >>> @choice 
+    ... def action(ChannelInput):
+    ...     L.append(ChannelInput)
+
+    >>> @process
+    ... def P1(cout, n=5):
+    ...     for i in range(n):
+    ...         cout(i)
+    
+    >>> @process
+    ... def P2(cin1, cin2, n=10):
+    ...     alt = Alternation([{cin1:action, cin2:action}])
+    ...     for i in range(n):
+    ...         alt.execute()
+                
+    >>> C1, C2 = Channel(), Channel()
+    >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+
+    >>> len(L)
+    10
+
+    >>> L.sort()
+    >>> L
+    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+    """
     def __init__(self, guards):
         self.guards=guards
         pass
@@ -67,6 +119,32 @@ class Alternation:
         return (pri_idx, act, c, req, op)
 
     def execute(self):
+        """
+        Selects the guard and executes the attached action. Action is a function or python code passed in a string.
+
+        >>> from __init__ import *
+        >>> L1,L2 = [],[]
+
+        >>> @process
+        ... def P1(cout, n):
+        ...     for i in range(n):
+        ...         cout(i)
+
+        >>> @process
+        ... def P2(cin1, cin2, n):
+        ...     alt = Alternation([{
+        ...               cin1:"L1.append(ChannelInput)",
+        ...               cin2:"L2.append(ChannelInput)"
+        ...           }])
+        ...     for i in range(n):
+        ...         alt.execute()
+
+        >>> C1, C2 = Channel(), Channel()
+        >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
+
+        >>> len(L1), len(L2)
+        (10, 5)
+        """
         pri_idx, act, c, req, op = self.choose()
         if self.guards[pri_idx][act]:
             action = self.guards[pri_idx][act]
@@ -91,8 +169,43 @@ class Alternation:
                 exec(code, f_globals, f_locals)
 
     def select(self):
+        """
+        Selects the guard.
+
+        >>> from __init__ import *
+        >>> L1,L2 = [],[]
+
+        >>> @process
+        ... def P1(cout, n=5):
+        ...     for i in range(n):
+        ...         cout(i)
+
+        >>> @process
+        ... def P2(cin1, cin2, n=10):
+        ...     alt = Alternation([{
+        ...               cin1:None,
+        ...               cin2:None
+        ...           }])
+        ...     for i in range(n):
+        ...         (g, msg) = alt.select()
+        ...         if g == cin1:
+        ...             L1.append(msg)
+        ...         if g == cin2:
+        ...             L2.append(msg)
+
+        >>> C1, C2 = Channel(), Channel()
+        >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+
+        >>> len(L1), len(L2)
+        (5, 5)
+        """
+
         pri_idx, act, c, req, op = self.choose()
         return (c, req.msg)
 
 
 
+# Run tests
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
