@@ -73,9 +73,13 @@ class Timeout(Guard):
     >>> time_start = time.time()
     >>> (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
     >>> time_passed = time.time() - time_start
-    >>> time_passed > 0.5 and time_passed < 0.6
-    True
 
+    >>> time_passed >= 0.5
+    True
+    
+    >>> time_passed < 0.6
+    True
+    
     >>> isinstance(g, Timeout) and msg == None
     True
     """
