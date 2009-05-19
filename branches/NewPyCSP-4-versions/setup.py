@@ -18,6 +18,6 @@ For now please look at the examples for documentation on how to use the library.
       author_email='jmb@cs.uit.no',
       url='http://code.google.com/p/pycsp/',
       license='MIT',
-      packages=['pycsp'],
+      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net'],
       platforms=['any'],
       )
