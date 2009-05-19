@@ -73,7 +73,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Import threads version
-from threads import *
+from pycsp.threads import *
 
 # Run tests
 if __name__ == '__main__':
@@ -82,28 +82,28 @@ if __name__ == '__main__':
     mods = []
 
     try:
-        import greenlets
-        mods.append(greenlets)
+        import pycsp.greenlets
+        mods.append(pycsp.greenlets)
     except ImportError:
         print "Skipping doctest for greenlets"
         print
 
     try:
-        import processes
-        mods.append(processes)
+        import pycsp.processes
+        mods.append(pycsp.processes)
     except ImportError:
         print "Skipping doctest for processes"
         print
 
     try:
-        import net
-        mods.append(net)
+        import pycsp.net
+        mods.append(pycsp.net)
     except ImportError:
         print "Skipping doctest for net"
         print
 
-    import threads
-    mods.append(threads)
+    import pycsp.threads
+    mods.append(pycsp.threads)
 
     suite = unittest.TestSuite()
     for mod in mods:
