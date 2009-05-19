@@ -21,6 +21,6 @@ else:
 print 'Using version', version
 
 if sys.platform == 'win32' and (version[3] == 'processes'):
-    print 'These tests are not compatible with PyCSP.processes and win32.'
+    print 'The examples are not compatible with PyCSP.processes and win32.'
     sys.exit(0)
 

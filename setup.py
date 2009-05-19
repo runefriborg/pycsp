@@ -3,16 +3,21 @@
 # 
 # see http://docs.python.org/dist/dist.html
 # 
-from distutils.core import setup
-
+from setuptools import setup
 
 setup(name='pycsp',
-      version='0.3.0',
+      version='0.6.0',
       description='PyCSP - Python CSP Library',
+      long_description="""
+The PyCSP library has been completely rewritten.
+
+There is no backwards compatibility with versions prior to 0.5.0.
+
+For now please look at the examples for documentation on how to use the library.""",
       author='John Markus Bjørndalen',
       author_email='jmb@cs.uit.no',
-      url='http://www.cs.uit.no/~johnm/code/PyCSP/',
+      url='http://code.google.com/p/pycsp/',
       license='MIT',
-      packages=['pycsp', 'pycsp.net', 'pycsp.plugNplay'],
+      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net'],
       platforms=['any'],
       )
