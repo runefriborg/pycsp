@@ -1,0 +1,11 @@
+#summary Library requirements
+#labels Featured
+
+= Introduction =
+
+PyCSP 0.6.0 has introduced 4 versions:
+  * Threads
+  * Processes
+  * Greenlets
+  * Net
+
