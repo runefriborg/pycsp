@@ -1,21 +1,22 @@
 #summary Library dependencies
 #labels Featured
 
-PyCSP 0.6.0 has introduced 4 versions:
+PyCSP 0.6.0 has introduced the 4 versions:
   * Threads
   * Processes
   * Greenlets
   * Net
 
-==Threads==
+
+===Threads===
 Works with the entire Python 2.x string.
 
-==Processes==
+===Processes===
 Needs the multiprocessing module available in Python 2.6+
 
-==Greenlets==
-...
+===Greenlets===
+Greenlets from Pylib (http://codespeak.net/py/dist/)
 
-==Net==
+===Net===
 Python 2.6+
 Pyro 3.8+
