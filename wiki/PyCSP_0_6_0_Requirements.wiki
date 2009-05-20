@@ -2,7 +2,7 @@
 #labels Featured
 
 PyCSP 0.6.0 has introduced the 4 versions:
-  * Threads
+  * Threads (default)
   * Processes
   * Greenlets
   * Net
@@ -15,8 +15,7 @@ Works with the entire Python 2.x string.
 Needs the multiprocessing module available in Python 2.6+
 
 ===Greenlets===
-Greenlets from Pylib (http://codespeak.net/py/dist/)
+Requires greenlets from Pylib (http://codespeak.net/py/dist/)
 
 ===Net===
-Python 2.6+
-Pyro 3.8+
+Requires Python 2.6+ and Pyro 3.8+
