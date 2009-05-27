@@ -16,7 +16,7 @@ from channel import Channel, ChannelPoisonException
 from channelend import retire, poison, IN, OUT, ChannelEndException
 from process import io, Process, process, Sequence, Parallel, Spawn
 
-version = (0,6,0, 'threads')
+version = (0,6,1, 'threads')
 
 def test_suite():
     import unittest

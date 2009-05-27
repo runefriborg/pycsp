@@ -1,10 +1,18 @@
+0.6.0 - 0.6.1
+----------
+* Fixed possible deadlock, when doing several concurrent alternations on an input
+  and output guard. This is an issue in pycsp.threads and pycsp.net.
+ - See examples/problems/deadlock_doing_alternation_on_input_and_output_pre_0.6.1.py
+
+
 0.5.2 - 0.6.0
 ----------
 * Added 3 new implementations of PyCSP
  - Processes : Uses the multiprocessing module.
  - Greenlets(coroutine) : Uses a third party py.magic.greenlet module from pylib.
  - Net : Uses Pyro to enable all channels as remote channels.
-* Modified examples and tests to support all 4 implementations (threads, processes, greenlets, net)
+* Modified examples and tests to support all 4 implementations (threads, processes,
+  greenlets, net)
 * import pycsp, defaults to pycsp.threads
 * Added a TestSuite system to doctest. Execute python __init__.py to run testsuites.
 

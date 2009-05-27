@@ -57,18 +57,35 @@ class ChannelReq:
     def offer(self, recipient):
         # Eliminate unnecessary locking, by adding an extra test
         if self.status.state == recipient.status.state == ACTIVE:
-            self.status.cond.acquire()
-            recipient.status.cond.acquire()
+
+            s_cond = self.status.cond
+            r_cond = recipient.status.cond
+
+            # Ensuring to lock in the correct order.
+            if s_cond < r_cond:
+                s_cond.acquire()
+                r_cond.acquire()
+            else:
+                r_cond.acquire()
+                s_cond.acquire()
+
             if self.status.state == recipient.status.state == ACTIVE:
                 recipient.msg=self.msg
                 self.status.state=DONE
                 self.result=SUCCESS
                 recipient.status.state=DONE
                 recipient.result=SUCCESS
-                self.status.cond.notifyAll()
-                recipient.status.cond.notifyAll()
-            recipient.status.cond.release()
-            self.status.cond.release()
+                s_cond.notifyAll()
+                r_cond.notifyAll()
+
+            # Ensuring that we also release in the correct order. ( done in the opposite order of locking )
+            if s_cond < r_cond:
+                r_cond.release()
+                s_cond.release()
+            else:
+                s_cond.release()
+                r_cond.release()
+
 
 
 class RealChannel():
