@@ -3,6 +3,8 @@
 * Fixed possible deadlock, when doing several concurrent alternations on an input
   and output guard. This is an issue in pycsp.threads and pycsp.net.
  - See examples/problems/deadlock_doing_alternation_on_input_and_output_pre_0.6.1.py
+* Added a Pyro nameserver lookup to the PyroServerProcess thread, to avoid sharing
+  of a global Pyro nameserver proxy, which is not recommended by Pyro.
 
 
 0.5.2 - 0.6.0

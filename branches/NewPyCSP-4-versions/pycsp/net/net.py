@@ -23,25 +23,32 @@ FAIL, SUCCESS = range(2)
 
 # Classes
 class PyroServerProcess(threading.Thread):
-    def __init__(self, ns):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.ns = ns
         self.managerObj = None
         self.cond = threading.Condition()
 
     def run(self):
         self.cond.acquire()
+
+        # locate the NS
+        locator = Pyro.naming.NameServerLocator()
+
+        # Searching Name Server...
+        ns = locator.getNS()
+
+        # Init server
         Pyro.core.initServer()
         Pyro.config.PYRO_NS_DEFAULTGROUP=':PyCSP'
 
         # make sure our namespace group exists
         try:
-            self.ns.createGroup(':PyCSP')
+            ns.createGroup(':PyCSP')
         except Pyro.errors.NamingError:
             pass
 
         daemon = Pyro.core.Daemon()
-        daemon.useNameServer(self.ns)
+        daemon.useNameServer(ns)
         self.managerObj = PyroServerManager()
         daemon.connectPersistent(self.managerObj, 'SERVER-'+str(Configuration().get(NET_SERVER_ID)))
         self.cond.notify()
@@ -206,7 +213,7 @@ class PyroClientManager(object):
             def create_server():
                 # Create server
 
-                cls.__instance.server_process = PyroServerProcess(ns)
+                cls.__instance.server_process = PyroServerProcess()
 
                 cls.__instance.server_process.cond.acquire()
                 cls.__instance.server_process.daemon = True
