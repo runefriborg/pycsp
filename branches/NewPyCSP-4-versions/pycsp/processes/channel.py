@@ -135,7 +135,7 @@ class ShmManager(object):
         if not write:
             req.mem_id = -1
         else:
-            s = pickle.dumps(msg)
+            s = pickle.dumps(msg, pickle.HIGHEST_PROTOCOL)
             req.mem_id = self.MemoryHandler.alloc_and_write(s)
         
         req.result = FAIL
