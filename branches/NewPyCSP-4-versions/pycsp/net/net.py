@@ -572,11 +572,13 @@ class Alternation:
         else:
             for choice in self.guards[pri_idx].keys():
                 if type(choice)==tuple:
-                    if choice[0].channel.name == c_result:
-                        return choice[0], self.guards[pri_idx][choice]
+                    if not isinstance(choice[0], Guard):
+                        if choice[0].channel.name == c_result:
+                            return choice[0], self.guards[pri_idx][choice]
                 else:
-                    if choice.channel.name == c_result:
-                        return choice, self.guards[pri_idx][choice]
+                    if not isinstance(choice, Guard):
+                        if choice.channel.name == c_result:
+                            return choice, self.guards[pri_idx][choice]
         
         raise Exception('Internal Error: Could not find guard in alternation guard list')
                     
