@@ -10,9 +10,9 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Test for Greenlets
 import sys
-try: from py.magic import greenlet
+try: from greenlet import greenlet
 except ImportError, e:
-    sys.stderr.write("PyCSP.greenlets requires Pylib, recommended version is 0.9.2 and is\navailable from http://codespeak.net/py/dist/.\n\n")
+    sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
     raise ImportError(e)
 
 # Imports

@@ -7,7 +7,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-from py.magic import greenlet
+from greenlet import greenlet
 
 from scheduling import Scheduler
 from channel import ChannelPoisonException, Channel

@@ -5,7 +5,7 @@
  - See examples/problems/deadlock_doing_alternation_on_input_and_output_pre_0.6.1.py
 * Added a Pyro nameserver lookup to the PyroServerProcess thread, to avoid sharing
   of a global Pyro nameserver proxy, which is not recommended by Pyro.
-
+* Changed greenlet dependency to the greenlet 0.2 module available at http://pypi.python.org/pypi/greenlet
 
 0.5.2 - 0.6.0
 ----------
