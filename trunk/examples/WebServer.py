@@ -8,6 +8,15 @@ if sys.platform == 'win32' and (version[3] == 'processes'):
     sys.exit(0)
 
 @process
+def HelloWorld(register):
+    request_channel = Channel('HelloWorld'+str(id))
+    cin = IN(request_channel)
+    register(('/hello.html', OUT(request_channel)))
+    while True:
+        (request_string, cout) = cin()
+        cout("Hello at " + time.strftime("%H:%M:%S", time.localtime()))
+
+@process
 def Time(register):
     request_chan = Channel('Time-'+str(id))
     cin = IN(request_chan)
@@ -153,5 +162,6 @@ Parallel(entry(request),
          Dispatcher(IN(register), IN(request)),
          [Time(OUT(register)) for i in range(2)],
          [Sleep(i, OUT(register)) for i in range(50)],
-         [Index(i, OUT(register)) for i in range(2)])
+         [Index(i, OUT(register)) for i in range(2)],
+         HelloWorld(OUT(register)))
 

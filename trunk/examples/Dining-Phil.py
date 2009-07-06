@@ -35,7 +35,7 @@ def philosopher(id, left, right, down, up):
             # notify security you have finished
             up(True)
 
-    except ChannelPoisonException:
+    except ChannelRetireException:
         retire(left)
         retire(right)
         print 'philosopher '+str(id)+' has eaten '+str(eat)+' times'

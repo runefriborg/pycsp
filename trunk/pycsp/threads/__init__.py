@@ -12,8 +12,8 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 from guard import Skip, Timeout
 from alternation import choice, Alternation
-from channel import Channel, ChannelPoisonException
-from channelend import retire, poison, IN, OUT, ChannelEndException
+from channel import Channel, ChannelPoisonException, ChannelRetireException
+from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn
 
 version = (0,6,1, 'threads')
