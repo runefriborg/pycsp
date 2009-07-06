@@ -6,12 +6,9 @@ elements = 64
 
 @process
 def element(this_read, next_write):
-    try:
-	while True:
-            token = this_read()
-	    next_write(token + 1)
-    except ChannelPoisonException:
-        retire(this_read, next_write)
+    while True:
+        token = this_read()
+        next_write(token + 1)
 
 @process
 def root(cycles, tokens, this_read, next_write):

@@ -11,7 +11,7 @@ import inspect
 from channel import *
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
@@ -96,20 +96,21 @@ class Alternation:
                         op=READ
                     reqs[choice]=(pri_idx, c, req, op)
                 pri_idx += 1
-        except ChannelPoisonException:
+        except (ChannelPoisonException, ChannelRetireException) as e:
             for r in reqs.keys():
                 pri_idx, c, req, op = reqs[r]
                 if op==READ:
                     c.remove_read(req)
                 else:
                     c.remove_write(req)
-            raise ChannelPoisonException()
+            raise e
         req_status.cond.acquire()
         if req.status.state==ACTIVE:
             req_status.cond.wait()
         req_status.cond.release()
         act=None
         poison=False
+        retire=False
         for k in reqs.keys():
             pri_idx, c, req, op = reqs[k]
             if op==READ:
@@ -120,8 +121,13 @@ class Alternation:
                 act=k
             if req.result==POISON:
                 poison=True
+            if req.result==RETIRE:
+                retire=True
         if poison:
             raise ChannelPoisonException()
+        if retire:
+            raise ChannelRetireException()
+
         pri_idx, c, req, op = reqs[act]
 
         return (pri_idx, act, c, req, op)
