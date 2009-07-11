@@ -165,9 +165,9 @@ class Alternation:
             if callable(action):
                 # Execute callback function
                 if op==WRITE:
-                    self.guards[pri_idx][act]()
+                    action()
                 else:
-                    self.guards[pri_idx][act](ChannelInput=req.msg)
+                    action(ChannelInput=req.msg)
             else:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe().f_back
