@@ -1,5 +1,4 @@
 from common import *
-from pycsp import *
 from random import random
 
 @process
@@ -24,7 +23,7 @@ def consumer(result_in):
            print sum
            sum=(sum*cnt+result_in())/(cnt+1)    #Get result
    except ChannelRetireException:
-       print sum            #We are done - print result
+       print 'Result:',sum            #We are done - print result
 
 jobs=Channel()
 results=Channel()
