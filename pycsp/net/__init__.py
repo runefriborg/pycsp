@@ -23,8 +23,8 @@ from configuration import *
 from net import Channel, Alternation
 from alternation import choice
 from guard import Skip, Timeout
-from channel import ChannelPoisonException
-from channelend import retire, poison, IN, OUT, ChannelEndException
+from channel import ChannelPoisonException, ChannelRetireException
+from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn
 
 version = (0,6,1, 'net')

@@ -119,9 +119,9 @@ class Alternation:
                 c.remove_write(req)
             if req.result==SUCCESS:
                 act=k
-            if req.result==POISON:
+            elif req.result==POISON:
                 poison=True
-            if req.result==RETIRE:
+            elif req.result==RETIRE:
                 retire=True
         if poison:
             raise ChannelPoisonException()

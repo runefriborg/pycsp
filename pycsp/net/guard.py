@@ -12,7 +12,7 @@ from channel import ChannelReq, ReqStatus
 import uuid
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
@@ -35,9 +35,6 @@ class Guard():
         pass
 
     def remove_write(self, req):
-        pass
-
-    def poison(self):
         pass
 
 
@@ -66,7 +63,7 @@ class Skip(Guard):
 
 class Timeout(Guard):
     """
-    Timeout spawns a timer thread, when posted. If removed or poisoned
+    Timeout spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
     
     >>> from __init__ import *
@@ -118,11 +115,6 @@ class Timeout(Guard):
         self.posted = (None, None)
 
     def remove_write(self, req):
-        self.timer.cancel()
-        del self.timer
-        self.posted = (None, None)
-
-    def poison(self):
         self.timer.cancel()
         del self.timer
         self.posted = (None, None)

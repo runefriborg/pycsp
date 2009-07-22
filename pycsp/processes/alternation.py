@@ -11,7 +11,7 @@ import inspect
 from channel import *
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
@@ -105,7 +105,7 @@ class Alternation:
                     reqs[choice]=(pri_idx, c, req_id, op)
                 pri_idx += 1
 
-        except ChannelPoisonException:
+        except (ChannelPoisonException, ChannelRetireException) as e:
 
             # Clean up
             self.manager.ReqStatusDataPool.retire(req_status_id)
@@ -116,16 +116,16 @@ class Alternation:
                     c.remove_read(req_id)
                 else:
                     c.remove_write(req_id)
-
                 self.manager.ChannelReqDataPool.retire(req_id)
 
-            raise ChannelPoisonException()
+            raise e
 
         # If noone have offered a channelrequest, we wait.
         self.manager.ReqStatus_wait(req_status_id)
 
         act=None
         poison=False
+        retire=False
 
         for k in reqs.keys():
             _, c, req_id, op = reqs[k]
@@ -137,18 +137,23 @@ class Alternation:
             req = self.manager.ChannelReqDataPool.get(req_id)
             if req.result==SUCCESS:
                 act=k
-            if req.result==POISON:
+            elif req.result==POISON:
                 poison=True
+            elif req.result==RETIRE:
+                retire=True
 
-        if poison:
+        if poison or retire:
 
             # Clean up
             self.manager.ReqStatusDataPool.retire(req_status_id)
             for k in reqs.keys():
                 _, _, req_id, _ = reqs[k]
                 self.manager.ChannelReqDataPool.retire(req_id)
-
-            raise ChannelPoisonException()
+            
+            if poison:
+                raise ChannelPoisonException()
+            if retire:
+                raise ChannelRetireException()
 
         # Read selected guard
         pri_idx, c, req_id, op = reqs[act]

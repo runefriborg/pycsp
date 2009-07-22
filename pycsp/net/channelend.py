@@ -5,6 +5,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 See LICENSE.txt for licensing details (MIT License). 
 """
+from channel import ChannelRetireException
 
 # Functions
 def IN(channel):
@@ -29,7 +30,7 @@ def OUT(channel):
 
 def retire(*list_of_channelEnds):
     """ Retire reader or writer, to do auto-poisoning
-    When all readers or writer of a channel have retired. The channel is poisoned.
+    When all readers or writer of a channel have retired. The channel is retired.
     
     >>> from __init__ import *
     >>> C = Channel()
@@ -40,7 +41,7 @@ def retire(*list_of_channelEnds):
 
     >>> try:
     ...     cout1('fail')
-    ... except ChannelEndException:
+    ... except ChannelRetireException:
     ...     True
     True
 
@@ -76,11 +77,6 @@ def poison(*list_of_channelEnds):
     for channelEnd in list_of_channelEnds:
         channelEnd.poison()
 
-# Exceptions
-class ChannelEndException(Exception):
-    def __init__(self, msg):
-        Exception.__init__(self, msg)
-
 # Classes
 class ChannelEndWrite():
     def __init__(self, channel):
@@ -89,17 +85,16 @@ class ChannelEndWrite():
 
     def __call__(self, msg):
         if self.isretired:
-            raise ChannelEndException('Not allowed to write to retired channelend!')
+            raise ChannelRetireException()
         return self.channel._write(msg)
         
     def poison(self):
         self.channel.poison()
 
     def retire(self):
-        if self.isretired:
-            raise ChannelEndException('Cannot retire twice!')
-        self.channel.leave_writer()
-        self.isretired = True
+        if not self.isretired:
+            self.channel.leave_writer()
+            self.isretired = True
 
     def __repr__(self):
         if self.channel.name == None:
@@ -115,17 +110,16 @@ class ChannelEndRead():
 
     def __call__(self):
         if self.isretired:
-            raise ChannelEndException('Not allowed to write to retired channelend!')
+            raise ChannelRetireException()
         return self.channel._read()
         
     def poison(self):
         self.channel.poison()
 
     def retire(self):
-        if self.isretired:
-            raise ChannelEndException('Cannot retire twice!')
-        self.channel.leave_reader()
-        self.isretired = True
+        if not self.isretired:
+            self.channel.leave_reader()
+            self.isretired = True
 
     def __repr__(self):
         if self.channel.name == None:
