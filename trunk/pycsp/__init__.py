@@ -34,18 +34,15 @@ Modules
 >>> alt.execute()
 abort
 
->>> retire(cout) or poison(cout)
 >>> retire(cout)
-Traceback (most recent call last):
-ChannelEndException: Cannot retire twice!
 
 >>> cout('FAIL')
 Traceback (most recent call last):
-ChannelEndException: Not allowed to write to retired channelend!
+ChannelRetireException
 
 >>> FAIL = cin()
 Traceback (most recent call last):
-ChannelPoisonException
+ChannelRetireException
 
 
 A reader process
@@ -73,7 +70,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Import threads version
-from pycsp.threads import *
+from threads import *
 
 # Run tests
 if __name__ == '__main__':
@@ -82,28 +79,28 @@ if __name__ == '__main__':
     mods = []
 
     try:
-        import pycsp.greenlets
-        mods.append(pycsp.greenlets)
+        import greenlets
+        mods.append(greenlets)
     except ImportError:
         print "Skipping doctest for greenlets"
         print
 
     try:
-        import pycsp.processes
-        mods.append(pycsp.processes)
+        import processes
+        mods.append(processes)
     except ImportError:
         print "Skipping doctest for processes"
         print
 
     try:
-        import pycsp.net
-        mods.append(pycsp.net)
+        import net
+        mods.append(net)
     except ImportError:
         print "Skipping doctest for net"
         print
 
-    import pycsp.threads
-    mods.append(pycsp.threads)
+    import threads
+    mods.append(threads)
 
     suite = unittest.TestSuite()
     for mod in mods:

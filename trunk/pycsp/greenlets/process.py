@@ -10,11 +10,11 @@ See LICENSE.txt for licensing details (MIT License).
 from greenlet import greenlet
 
 from scheduling import Scheduler
-from channel import ChannelPoisonException, Channel
+from channel import ChannelPoisonException, ChannelRetireException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
@@ -88,11 +88,19 @@ class Process():
             self.fn(*self.args, **self.kwargs)
             self.executed = True
         except ChannelPoisonException, e:
-            self.executed = True
+            # look for channels and channel ends
+            for ch in [x for x in self.args if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite) or isinstance(x, Channel)]:
+                ch.poison()
+        except ChannelRetireException, e:
             # look for channel ends
-            for x in self.args:
-                if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite) or isinstance(x, Channel):
-                    x.poison()
+            for ch_end in [x for x in self.args if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite)]:
+                # Ignore if try to retire an already retired channel end.
+                try:
+                    ch_end.retire()
+                except ChannelRetireException:
+                    pass
+            
+
 
     
 

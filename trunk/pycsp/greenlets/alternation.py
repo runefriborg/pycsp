@@ -11,7 +11,7 @@ import inspect
 from channel import *
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
@@ -98,7 +98,7 @@ class Alternation:
                     reqs[choice]=(pri_idx, c, req, op)
                 pri_idx += 1
 
-        except ChannelPoisonException:
+        except (ChannelPoisonException, ChannelRetireException) as e:
 
             for r in reqs.keys():
                 pri_idx, c, req, op = reqs[r]
@@ -106,20 +106,23 @@ class Alternation:
                     c.remove_read(req)
                 else:
                     c.remove_write(req)
-            raise ChannelPoisonException()
+            raise e
 
         # If noone have offered a channelrequest, we wait.
         self.s.current.wait()
 
         act=None
         poison=False
+        retire=False
         for k in reqs.keys():
             _, c, req, op = reqs[k]
 
             if req.result==SUCCESS:
                 act=k
-            if req.result==POISON:
+            elif req.result==POISON:
                 poison=True
+            elif req.result==RETIRE:
+                retire=True
 
             if op==READ:
                 c.remove_read(req)
@@ -128,6 +131,8 @@ class Alternation:
 
         if poison:
             raise ChannelPoisonException()
+        if retire:
+            raise ChannelRetireException()
 
         # Read selected guard
         pri_idx, c, req, op = reqs[act]

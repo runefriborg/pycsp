@@ -15,12 +15,16 @@ import mem
 from configuration import *
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
 # Exceptions
 class ChannelPoisonException(Exception): 
+    def __init__(self):
+        pass
+
+class ChannelRetireException(Exception): 
     def __init__(self):
         pass
 
@@ -38,6 +42,7 @@ class ChannelSyncData(ctypes.Structure):
     _fields_ = [("readers",ctypes.c_int),
                 ("writers",ctypes.c_int),
                 ("ispoisoned",ctypes.c_int),
+                ("isretired",ctypes.c_int),
                 ("copies",ctypes.c_int),
                 ("readqueue",ctypes.c_int*Configuration().get(PROCESSES_ALLOC_QUEUE_PER_CHANNEL)),
                 ("readqueue_len", ctypes.c_int),
@@ -152,6 +157,17 @@ class ShmManager(object):
         cond.notify_all()
         cond.release()
 
+    def ChannelReq_retire(self, req_id):
+        req = self.ChannelReqDataPool.get(req_id)
+        req_status = self.ReqStatusDataPool.get(req.status_id)
+        cond = self.SharedConditionPool.get(req_status.condition_id)
+
+        cond.acquire()
+        req_status.state = RETIRE
+        req.result = RETIRE
+        cond.notify_all()
+        cond.release()
+
     def ChannelReq_wait(self, req_id):
         req = self.ChannelReqDataPool.get(req_id)
         req_status = self.ReqStatusDataPool.get(req.status_id)
@@ -254,6 +270,7 @@ class Channel:
         self.syncData.writers = 0
 
         self.syncData.ispoisoned = 0
+        self.syncData.isretired = 0
         self.syncData.copies = 0
             
     # Destructor
@@ -281,7 +298,7 @@ class Channel:
         if self.syncData == None:
             self.syncData = self.manager.ChannelDataPool.get(self.syncData_id)
 
-    def check_poison(self, cleanup_req_id = None):        
+    def check_termination(self, cleanup_req_id = None):        
         self.restore()
 
         self.lock.acquire()
@@ -294,6 +311,15 @@ class Channel:
 
             self.lock.release()
             raise ChannelPoisonException()
+        if self.syncData.isretired == 1:
+            if cleanup_req_id != None:
+                # Clean up
+                req = self.manager.ChannelReqDataPool.get(cleanup_req_id)
+                self.manager.ReqStatusDataPool.retire(req.status_id)
+                self.manager.ChannelReqDataPool.retire(cleanup_req_id)
+
+            self.lock.release()
+            raise ChannelRetireException()
         self.lock.release()
 
     def _read(self):
@@ -307,7 +333,7 @@ class Channel:
             self.manager.ChannelReq_reset(req_id, req_status_id)
 
             self.post_read(req_id)
-            self.check_poison(cleanup_req_id = req_id)
+            self.check_termination(cleanup_req_id = req_id)
             self.manager.ChannelReq_wait(req_id)
             self.remove_read(req_id)
 
@@ -322,7 +348,7 @@ class Channel:
 
                 return msg
 
-            self.check_poison(cleanup_req_id = req_id)
+            self.check_termination(cleanup_req_id = req_id)
             
         print 'We should not get here in read!!!', req.status.state
         return None #Here we should handle that a read was cancled...
@@ -331,7 +357,7 @@ class Channel:
     def _write(self, msg):
         self.restore()
 
-        self.check_poison()
+        self.check_termination()
         done=False
         while not done:
             req_id = self.manager.ChannelReqDataPool.new()
@@ -352,21 +378,14 @@ class Channel:
                 self.manager.ChannelReqDataPool.retire(req_id)
 
                 return done
-            self.check_poison(cleanup_req_id = req_id)
+            self.check_termination(cleanup_req_id = req_id)
 
         print 'We should not get here in write!!!', req.status
         return None #Here we should handle that a read was cancled...
 
     def post_read(self, req_id):
         self.restore()
-
-        if self.syncData.ispoisoned == 1:
-            # Clean up
-            req = self.manager.ChannelReqDataPool.get(req_id)
-            self.manager.ReqStatusDataPool.retire(req.status_id)
-            self.manager.ChannelReqDataPool.retire(req_id)
-            
-            raise ChannelPoisonException()
+        self.check_termination()
 
         self.lock.acquire()
         if self.conf.get(PROCESSES_ALLOC_QUEUE_PER_CHANNEL) == self.syncData.readqueue_len:
@@ -396,16 +415,7 @@ class Channel:
         
     def post_write(self, req_id):
         self.restore()
-
-        if self.syncData.ispoisoned == 1:
-
-            # Clean up
-            req = self.manager.ChannelReqDataPool.get(req_id)
-                     
-            self.manager.ReqStatusDataPool.retire(req.status_id)
-            self.manager.ChannelReqDataPool.retire(req_id)
-
-            raise ChannelPoisonException()
+        self.check_termination()
 
         self.lock.acquire()
         if self.conf.get(PROCESSES_ALLOC_QUEUE_PER_CHANNEL) == self.syncData.writequeue_len:
@@ -472,22 +482,26 @@ class Channel:
         self.restore()
 
         self.lock.acquire()
-        self.syncData.readers-=1
-        if self.syncData.readers==0:
-            self.lock.release()
-            self.poison()
-            return
+        if self.syncData.isretired != 1:
+            self.syncData.readers-=1
+            if self.syncData.readers==0:
+                # Set channel retired
+                self.syncData.isretired = 1
+                for req_id in self.syncData.writequeue[0:self.syncData.writequeue_len]:
+                    self.manager.ChannelReq_retire(req_id)
         self.lock.release()
 
     def leave_writer(self):
         self.restore()
 
         self.lock.acquire()
-        self.syncData.writers-=1
-        if self.syncData.writers==0:
-            self.lock.release()
-            self.poison()
-            return
+        if self.syncData.isretired != 1:
+            self.syncData.writers-=1
+            if self.syncData.writers==0:
+                # Set channel retired
+                self.syncData.isretired = 1
+                for req_id in self.syncData.readqueue[0:self.syncData.readqueue_len]:
+                    self.manager.ChannelReq_retire(req_id)
         self.lock.release()        
             
     def status(self):

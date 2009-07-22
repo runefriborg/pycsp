@@ -10,12 +10,16 @@ See LICENSE.txt for licensing details (MIT License).
 from scheduling import Scheduler
 
 # Constants
-ACTIVE, DONE, POISON = range(3)
+ACTIVE, DONE, POISON, RETIRE = range(4)
 READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
 # Exceptions
 class ChannelPoisonException(Exception): 
+    def __init__(self):
+        pass
+
+class ChannelRetireException(Exception): 
     def __init__(self):
         pass
 
@@ -29,6 +33,10 @@ class ChannelReq:
     def poison(self):
         self.result = POISON
         self.process.notify(POISON)
+
+    def retire(self):
+        self.result = RETIRE
+        self.process.notify(RETIRE)
 
     def offer(self, recipient):
         if self.process.state == recipient.process.state == ACTIVE:
@@ -82,15 +90,18 @@ class Channel:
         self.writers = 0
 
         self.ispoisoned = False
+        self.isretired = False
 
         self.s = Scheduler()
         
-    def check_poison(self):        
+    def check_termination(self):        
         if self.ispoisoned:
             raise ChannelPoisonException()
+        if self.isretired:
+            raise ChannelRetireException()
 
     def _read(self):
-        self.check_poison()
+        self.check_termination()
 
         p = self.s.current
         
@@ -115,14 +126,14 @@ class Channel:
         if req.result==SUCCESS:
             return req.msg
         
-        self.check_poison()
+        self.check_termination()
             
         print 'We should not get here in read!!!', req.status.state
         return None #Here we should handle that a read was cancled...
 
     
     def _write(self, msg):
-        self.check_poison()
+        self.check_termination()
 
         p = self.s.current
         
@@ -147,7 +158,7 @@ class Channel:
         if req.result==SUCCESS:
             return True
     
-        self.check_poison()
+        self.check_termination()
 
         print 'We should not get here in write!!!', req.status
         return None #Here we should handle that a read was cancled...
@@ -190,16 +201,23 @@ class Channel:
         self.writers+=1
 
     def leave_reader(self):
-        self.readers-=1
-        if self.readers==0:
-            self.poison()
-            return
+        if not self.isretired:
+            self.readers-=1
+            if self.readers==0:
+                # Set channel retired
+                self.isretired = True
+                for p in self.writequeue[:]:
+                    p.retire()
 
     def leave_writer(self):
-        self.writers-=1
-        if self.writers==0:
-            self.poison()
-            return
+        if not self.isretired:
+            self.writers-=1
+            if self.writers==0:
+                # Set channel retired
+                self.isretired = True
+                for p in self.readqueue[:]: # ATOMIC copy
+                    p.retire()
+
             
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)

@@ -6,7 +6,7 @@
 from setuptools import setup
 
 setup(name='pycsp',
-      version='0.6.0',
+      version='0.6.1',
       description='PyCSP - Python CSP Library',
       long_description="""
 The PyCSP library has been completely rewritten.
