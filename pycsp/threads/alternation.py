@@ -105,7 +105,7 @@ class Alternation:
                     c.remove_write(req)
             raise e
         req_status.cond.acquire()
-        if req.status.state==ACTIVE:
+        if req_status.state==ACTIVE:
             req_status.cond.wait()
         req_status.cond.release()
         act=None
