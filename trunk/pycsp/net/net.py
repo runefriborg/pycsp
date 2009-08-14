@@ -14,6 +14,7 @@ import Pyro.naming, Pyro.core
 from configuration import *
 from alternation import *
 from channel import *
+from channelend import *
 from guard import *
 
 # Constants
@@ -326,6 +327,20 @@ class Channel:
             except Pyro.errors.ProtocolError:
                 # Connection refused. Try again
                 server.adapter.rebindURI()    
+
+    def __pos__(self):
+        return self.reader()
+
+    def __neg__(self):
+        return self.writer()
+
+    def reader(self):
+        self.join_reader()
+        return ChannelEndRead(self)
+
+    def writer(self):
+        self.join_writer()
+        return ChannelEndWrite(self)
 
     def join_reader(self):
         server = Pyro.core.getProxyForURI(self.URI)

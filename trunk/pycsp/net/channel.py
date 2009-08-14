@@ -8,6 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 import threading
+from channelend import ChannelRetireException
 
 # Constants
 ACTIVE, DONE, POISON, RETIRE = range(4)
@@ -16,10 +17,6 @@ FAIL, SUCCESS = range(2)
 
 # Exceptions
 class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
-
-class ChannelRetireException(Exception): 
     def __init__(self):
         pass
 

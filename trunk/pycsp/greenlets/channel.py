@@ -8,6 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 from scheduling import Scheduler
+from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
 
 # Constants
 ACTIVE, DONE, POISON, RETIRE = range(4)
@@ -16,10 +17,6 @@ FAIL, SUCCESS = range(2)
 
 # Exceptions
 class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
-
-class ChannelRetireException(Exception): 
     def __init__(self):
         pass
 
@@ -193,6 +190,19 @@ class Channel:
             map(ChannelReq.poison, self.readqueue)
             map(ChannelReq.poison, self.writequeue)
 
+    def __pos__(self):
+        return self.reader()
+
+    def __neg__(self):
+        return self.writer()
+
+    def reader(self):
+        self.join_reader()
+        return ChannelEndRead(self)
+
+    def writer(self):
+        self.join_writer()
+        return ChannelEndWrite(self)
 
     def join_reader(self):
         self.readers+=1

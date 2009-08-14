@@ -42,7 +42,7 @@ def Consumer(cin):
     print "DT = %f.\nTime per ch : %f/(4*%d) = %f s = %f us" % \
         (dt, dt, N, tchan, tchan * 1000000)
     print "consumer done, posioning channel"
-    retire(cin)
+    poison(cin)
 
 def CommsTimeBM():
     # Create channels
@@ -52,10 +52,10 @@ def CommsTimeBM():
     d = Channel("d")
 
     print "Running commstime test"
-    Parallel(Prefix(IN(c), OUT(a), prefixItem = 0),  # initiator
-             Delta2(IN(a), OUT(b), OUT(d)),         # forwarding to two
-             Successor(IN(b), OUT(c)),               # feeding back to prefix
-             Consumer(IN(d)))                         # timing process
+    Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
+             Delta2(+a, -b, -d),         # forwarding to two
+             Successor(+b, -c),               # feeding back to prefix
+             Consumer(+d))                         # timing process
 
 N_BM = 10
 for i in range(N_BM):

@@ -13,6 +13,7 @@ import sys
 import multiprocessing as mp
 import mem
 from configuration import *
+from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
 
 # Constants
 ACTIVE, DONE, POISON, RETIRE = range(4)
@@ -21,10 +22,6 @@ FAIL, SUCCESS = range(2)
 
 # Exceptions
 class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
-
-class ChannelRetireException(Exception): 
     def __init__(self):
         pass
 
@@ -463,6 +460,20 @@ class Channel:
             self.manager.ChannelReq_poison(req_id)
         self.lock.release()
 
+
+    def __pos__(self):
+        return self.reader()
+
+    def __neg__(self):
+        return self.writer()
+
+    def reader(self):
+        self.join_reader()
+        return ChannelEndRead(self)
+
+    def writer(self):
+        self.join_writer()
+        return ChannelEndWrite(self)
 
     def join_reader(self):
         self.restore()
