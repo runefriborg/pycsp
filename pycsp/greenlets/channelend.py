@@ -6,7 +6,10 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from channel import ChannelRetireException
+# Exceptions
+class ChannelRetireException(Exception): 
+    def __init__(self):
+        pass
 
 # Functions
 def IN(channel):

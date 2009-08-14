@@ -8,6 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 import threading
+from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
 
 # Constants
 ACTIVE, DONE, POISON, RETIRE = range(4)
@@ -19,9 +20,6 @@ class ChannelPoisonException(Exception):
     def __init__(self):
         pass
 
-class ChannelRetireException(Exception): 
-    def __init__(self):
-        pass
 
 # Classes
 class ReqStatus:
@@ -201,8 +199,22 @@ class Channel:
         for p in self.writequeue[:]: # ATOMIC copy
             p.poison()
 
+    def __pos__(self):
+        return self.reader()
+
+    def __neg__(self):
+        return self.writer()
+
+    def reader(self):
+        self.join_reader()
+        return ChannelEndRead(self)
+
+    def writer(self):
+        self.join_writer()
+        return ChannelEndWrite(self)
+
     def join_reader(self):
-        self.readers+=1
+        self.readers+=1        
 
     def join_writer(self):
         self.writers+=1
