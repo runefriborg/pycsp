@@ -15,7 +15,7 @@ Works with the entire Python 2.x string.
 Needs the multiprocessing module available in Python 2.6+
 
 ===Greenlets===
-Requires greenlets from Pylib (http://codespeak.net/py/dist/)
+Requires greenlets (http://pypi.python.org/pypi/greenlet)
 
 ===Net===
 Requires Python 2.6+ and Pyro 3.8+
