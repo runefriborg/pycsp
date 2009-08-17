@@ -7,6 +7,8 @@
 * Added a Pyro nameserver lookup to the PyroServerProcess thread, to avoid sharing
   of a global Pyro nameserver proxy, which is not recommended by Pyro.
 * Changed greenlet dependency to the greenlet 0.2 module available at http://pypi.python.org/pypi/greenlet
+* Added new Channel methods for returning ChannelEnd objects. +C / -C  and  C.reader() / C.writer()
+
 
 0.5.2 - 0.6.0
 ----------
