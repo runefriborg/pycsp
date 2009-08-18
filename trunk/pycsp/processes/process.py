@@ -51,9 +51,7 @@ def io(func):
 
     >>> sleep(0.01)
     """
-    def _call(*args, **kwargs):
-        return func(*args, **kwargs)
-    return _call
+    return func
 
 # Classes
 class Process(mp.Process):
