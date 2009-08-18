@@ -44,14 +44,12 @@ def io(func):
 
     >>> sleep(0.01)
     """
-    def _call(*args, **kwargs):
-        return func(*args, **kwargs)
-    return _call
+    return func
 
 
 # Classes
 class Process(threading.Thread):
-    """ Process(...)
+    """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     """
     def __init__(self, fn, *args, **kwargs):
