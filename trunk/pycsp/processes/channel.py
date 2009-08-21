@@ -149,9 +149,10 @@ class ShmManager(object):
         cond = self.SharedConditionPool.get(req_status.condition_id)
 
         cond.acquire()
-        req_status.state = POISON
-        req.result = POISON
-        cond.notify_all()
+        if req.result == FAIL and req_status.state == ACTIVE:
+            req_status.state = POISON
+            req.result = POISON
+            cond.notify_all()
         cond.release()
 
     def ChannelReq_retire(self, req_id):
@@ -160,9 +161,10 @@ class ShmManager(object):
         cond = self.SharedConditionPool.get(req_status.condition_id)
 
         cond.acquire()
-        req_status.state = RETIRE
-        req.result = RETIRE
-        cond.notify_all()
+        if req.result == FAIL and req_status.state == ACTIVE:
+            req_status.state = RETIRE
+            req.result = RETIRE
+            cond.notify_all()
         cond.release()
 
     def ChannelReq_wait(self, req_id):
@@ -170,7 +172,7 @@ class ShmManager(object):
         req_status = self.ReqStatusDataPool.get(req.status_id)
         cond = self.SharedConditionPool.get(req_status.condition_id)
 
-        # (optimization) First check. If this fails we can be positive that it is ok, to skip the locking.
+        # (optimization) First check. If this fails we can be positive that it is ok to skip the locking.
         if req_status.state == ACTIVE:
             cond.acquire()
             while req_status.state == ACTIVE:

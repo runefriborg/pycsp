@@ -3,15 +3,15 @@ import time
 import random
 
 @choice
-def action(ChannelInput=None):
-    print '.',
+def action(id, __channel_input=None):
+    print id,
 
 @process
 def reader(cin, id,  sleeper):
     while True:
         if sleeper: sleeper()
         got=cin()
-        print '.',
+        print id,
     
 @process
 def writer(cout, id, cnt, sleeper):
@@ -26,10 +26,10 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
         if sleeper: sleeper()
         Alternation([
             {
-                cin1:action,
-                cin2:action,
-                cin3:action,
-                cin4:action
+                cin1:action(0),
+                cin2:action(1),
+                cin3:action(2),
+                cin4:action(3)
             }
         ]).execute()
 
@@ -44,15 +44,15 @@ def sleep_random():
 
 
 def One2One_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
+    c1=Channel()
     Parallel(reader(IN(c1), 0 , read_sleeper), writer(OUT(c1),1,10, write_sleeper))
     print
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
 
@@ -64,7 +64,7 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
     print
 
 def Any2Any_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
+    c1=Channel()
     cnt = 10
 
     Parallel(reader(IN(c1),0, read_sleeper), writer(OUT(c1),0,cnt, write_sleeper),

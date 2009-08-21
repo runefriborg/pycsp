@@ -8,6 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 import inspect
+import types
 from channel import *
 
 # Constants
@@ -18,21 +19,40 @@ FAIL, SUCCESS = range(2)
 # Decorators
 def choice(func):
     """
-    Decorator for creating actions. It has no effect, other than improving readability
+    Decorator for creating choice objets
     
-    >>> @choice 
-    ... def action(ChannelInput):
+    >>> @choice
+    ... def action(__channel_input=None):
     ...     print 'Hello'
 
     >>> from guard import Skip
-    >>> Alternation([{Skip():action}]).execute()
+    >>> Alternation([{Skip():action()}]).execute()
     Hello
     """
-    def _call(*args, **kwargs):
-        return func(*args, **kwargs)
-    return _call
+    # __choice_fn func_name used to identify function in Alternation.execute
+    def __choice_fn(*args, **kwargs):
+        return Choice(func, *args, **kwargs)
+    return __choice_fn
 
 # Classes
+class Choice:
+    """ Choice(func, *args, **kwargs)
+    It is recommended to use the @choice decorator, to create Choice instances
+    """
+    def __init__(self, fn, *args, **kwargs):
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+    def invoke_on_input(self, __channel_input):
+        self.kwargs['__channel_input'] = __channel_input
+        self.fn(*self.args, **self.kwargs)
+        del self.kwargs['__channel_input']
+
+    def invoke_on_output(self):
+        self.fn(*self.args, **self.kwargs)
+
+
 class Alternation:
     """
     Alternation supports input and output guards. Guards are ChannelEnd
@@ -56,10 +76,10 @@ class Alternation:
     ...     L = []
     ...
     ...     @choice
-    ...     def action(ChannelInput):
-    ...         L.append(ChannelInput)
+    ...     def action(__channel_input):
+    ...         L.append(__channel_input)
     ...
-    ...     alt = Alternation([{cin1:action, cin2:action}])
+    ...     alt = Alternation([{cin1:action(), cin2:action()}])
     ...     for i in range(n):
     ...         alt.execute()
     ...
@@ -73,9 +93,24 @@ class Alternation:
     """
 
     def __init__(self, guards):
-        self.guards=guards
+        # Preserve tuple entries and convert dictionary entries to tuple entries
+        self.guards = []
+        for g in guards:
+            if type(g) == types.TupleType:
+                self.guards.append(g)
+            elif type(g) == types.DictType:
+                for elem in g.keys():
+                    if type(elem) == types.TupleType:
+                        self.guards.append((elem[0], elem[1], g[elem]))
+                    else:
+                        self.guards.append((elem, g[elem]))
+
+        # The internal representation of guards is a prioritized list
+        # of tuples:
+        #   input guard: (channel end, action) 
+        #   output guard: (channel end, msg, action)
+
         self.manager = ShmManager()
-        pass
 
     def choose(self):
         req_status_id = self.manager.ReqStatusDataPool.new()
@@ -83,35 +118,34 @@ class Alternation:
 
         reqs={}
         try:
-            pri_idx = 0
-            for prioritized_item in self.guards:
-                for choice in prioritized_item.keys():
-                    if type(choice)==tuple: 
-                        c, msg = choice
-                        
-                        req_id = self.manager.ChannelReqDataPool.new()
-                        self.manager.ChannelReq_reset(req_id, req_status_id, msg=msg, write=True)
+            idx = 0
+            for prio_item in self.guards:
+                if len(prio_item) == 3:
+                    c, msg, action = prio_item
 
-                        c.post_write(req_id)
-                        op=WRITE
-                    else:
-                        c=choice
+                    req_id = self.manager.ChannelReqDataPool.new()
+                    self.manager.ChannelReq_reset(req_id, req_status_id, msg=msg, write=True)
 
-                        req_id = self.manager.ChannelReqDataPool.new()
-                        self.manager.ChannelReq_reset(req_id, req_status_id)
+                    c.post_write(req_id)
+                    op=WRITE
+                else:
+                    c, action = prio_item
 
-                        c.post_read(req_id)
-                        op=READ
-                    reqs[choice]=(pri_idx, c, req_id, op)
-                pri_idx += 1
+                    req_id = self.manager.ChannelReqDataPool.new()
+                    self.manager.ChannelReq_reset(req_id, req_status_id)
+
+                    c.post_read(req_id)
+                    op=READ
+                reqs[req_id]=(idx, c, op)
+                idx += 1
 
         except (ChannelPoisonException, ChannelRetireException) as e:
 
             # Clean up
             self.manager.ReqStatusDataPool.retire(req_status_id)
-        
-            for r in reqs.keys():
-                pri_idx, c, req_id, op = reqs[r]
+
+            for req_id in reqs.keys():
+                _, c, op = reqs[req_id]
                 if op==READ:
                     c.remove_read(req_id)
                 else:
@@ -127,8 +161,8 @@ class Alternation:
         poison=False
         retire=False
 
-        for k in reqs.keys():
-            _, c, req_id, op = reqs[k]
+        for req_id in reqs.keys():
+            _, c, op = reqs[req_id]
             if op==READ:
                 c.remove_read(req_id)
             else:
@@ -136,7 +170,7 @@ class Alternation:
             
             req = self.manager.ChannelReqDataPool.get(req_id)
             if req.result==SUCCESS:
-                act=k
+                act=req_id
             elif req.result==POISON:
                 poison=True
             elif req.result==RETIRE:
@@ -146,8 +180,7 @@ class Alternation:
 
             # Clean up
             self.manager.ReqStatusDataPool.retire(req_status_id)
-            for k in reqs.keys():
-                _, _, req_id, _ = reqs[k]
+            for req_id in reqs.keys():
                 self.manager.ChannelReqDataPool.retire(req_id)
             
             if poison:
@@ -156,19 +189,18 @@ class Alternation:
                 raise ChannelRetireException()
 
         # Read selected guard
-        pri_idx, c, req_id, op = reqs[act]
+        idx, c, op = reqs[act]
 
         # Read msg
-        req = self.manager.ChannelReqDataPool.get(req_id)
+        req = self.manager.ChannelReqDataPool.get(act)
         msg = pickle.loads(self.manager.MemoryHandler.read_and_free(req.mem_id))
 
         # Clean up
         self.manager.ReqStatusDataPool.retire(req_status_id)
-        for k in reqs.keys():
-            _, _, req_id, _ = reqs[k]
+        for req_id in reqs.keys():
             self.manager.ChannelReqDataPool.retire(req_id)
 
-        return (pri_idx, act, c, msg, op)
+        return (idx, c, msg, op)
 
     def execute(self):
         """
@@ -185,8 +217,8 @@ class Alternation:
         ... def P2(cin1, cin2, n):
         ...     L1,L2 = [],[]
         ...     alt = Alternation([{
-        ...               cin1:"L1.append(ChannelInput)",
-        ...               cin2:"L2.append(ChannelInput)"
+        ...               cin1:"L1.append(__channel_input)",
+        ...               cin2:"L2.append(__channel_input)"
         ...           }])
         ...     for i in range(n):
         ...         alt.execute()
@@ -196,16 +228,31 @@ class Alternation:
         >>> C1, C2 = Channel(), Channel()
         >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
         """
-        pri_idx, act, c, msg, op = self.choose()
-        if self.guards[pri_idx][act]:
-            action = self.guards[pri_idx][act]
-            if callable(action):
-                # Execute callback function
+        idx, c, msg, op = self.choose()
+        if self.guards[idx]:
+            action = self.guards[idx][-1]
+
+            # Executing Choice object method
+            if isinstance(action, Choice):
                 if op==WRITE:
-                    action()
+                    action.invoke_on_output()
                 else:
-                    action(ChannelInput=msg)
-            else:
+                    action.invoke_on_input(msg)
+
+            # Executing callback function object
+            elif callable(action):
+                # Choice function not allowed as callback
+                if type(action) == types.FunctionType and action.func_name == '__choice_fn':
+                    raise Exception('@choice function is not instantiated. Please use action() and not just action')
+                else:
+                    # Execute callback function
+                    if op==WRITE:
+                        action()
+                    else:
+                        action(__channel_input=msg)
+
+            # Compiling and executing string
+            elif type(action) == types.StringType:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe().f_back
                 
@@ -213,11 +260,16 @@ class Alternation:
                 code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
                 f_globals = processframe.f_globals
                 f_locals = processframe.f_locals
-                if not op==WRITE:
-                    f_locals.update({'ChannelInput':msg})
+                if op==READ:
+                    f_locals.update({'__channel_input':msg})
 
                 # Execute action
                 exec(code, f_globals, f_locals)
+
+            elif type(action) == types.NoneType:
+                pass
+            else:
+                raise Exception('Failed executing action: '+str(action))
 
     def select(self):
         """
@@ -249,9 +301,7 @@ class Alternation:
         >>> C1, C2 = Channel(), Channel()
         >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
         """
-
-        pri_idx, act, c, msg, op = self.choose()
-        
+        idx, c, msg, op = self.choose()        
         return (c, msg)
 
 

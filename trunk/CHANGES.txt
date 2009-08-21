@@ -1,3 +1,22 @@
+0.6.1 - 0.6.2
+----------
+* Channel the reserved variable name for reading channel inputs from ChannelInput
+  to __channel_input.
+* @choice will now create a function that instantiates a Choice object. This can be used to
+  send other arguments to the wrapped choice function.
+  Example:
+	@choice
+	def action(id, __channel_input):
+	    print id, __channel_input
+
+	Alternation([{cin:action(42)}]).execute()
+
+* Changed the internal representation of guards in Alternation and added an optional syntax
+  for usage in the guardlist. These are now equivalent and legal arguments for Alternation.
+ - input guard: [{cin1:action()}]  <->  [(cin1, action())]
+ - output guard: [{(cout1, msg):action()}] <-> [(cout1, msg, action()]
+
+
 0.6.0 - 0.6.1
 ----------
 * Changed retire() behaviour, to propagate a retire pill. Added ChannelRetireException.

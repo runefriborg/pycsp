@@ -42,7 +42,7 @@ class ChannelReq:
 
     def poison(self):
         self.status.cond.acquire()
-        if self.result != SUCCESS or self.status.state != DONE:
+        if self.result == FAIL and self.status.state == ACTIVE:
             self.status.state=POISON
             self.result=POISON
             self.status.cond.notifyAll()
@@ -50,11 +50,11 @@ class ChannelReq:
 
     def retire(self):
         self.status.cond.acquire()
-        if self.result != SUCCESS or self.status.state != DONE:
+        if self.result == FAIL and self.status.state == ACTIVE:
             self.status.state=RETIRE
             self.result=RETIRE
             self.status.cond.notifyAll()
-        self.status.cond.release()
+        self.status.cond.release()        
 
     def wait(self):
         self.status.cond.acquire()

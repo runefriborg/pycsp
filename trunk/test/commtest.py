@@ -3,7 +3,7 @@ import time
 import random
 
 @choice
-def action(ChannelInput=None):
+def action(__channel_input=None):
     print '.',
     
 @process
@@ -40,10 +40,10 @@ def sleep_one():
     time.sleep(0.01)
 
 def One2One_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     
@@ -53,7 +53,7 @@ def One2One_Test(read_sleeper, write_sleeper):
              reader(IN(c4),3,cnt, read_sleeper), writer(OUT(c4),3,cnt, write_sleeper))
 
 def Any2One_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
+    c1=Channel()
 
     cnt = 10
     
@@ -64,7 +64,7 @@ def Any2One_Test(read_sleeper, write_sleeper):
              writer(OUT(c1),3,cnt, write_sleeper))
 
 def One2Any_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
+    c1=Channel()
 
     cnt = 10
     
@@ -75,10 +75,10 @@ def One2Any_Test(read_sleeper, write_sleeper):
              reader(IN(c1),3,cnt, read_sleeper))
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     
@@ -90,10 +90,10 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
 
 def One_Alting2Any_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     
@@ -104,7 +104,7 @@ def One_Alting2Any_Test(read_sleeper, write_sleeper):
              reader(IN(c4),3,cnt, read_sleeper))
 
 def Any2Any_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
+    c1=Channel()
     cnt = 10
 
     Parallel(reader(IN(c1),0,cnt, read_sleeper), writer(OUT(c1),0,cnt, write_sleeper),
@@ -113,10 +113,10 @@ def Any2Any_Test(read_sleeper, write_sleeper):
              reader(IN(c1),3,cnt, read_sleeper), writer(OUT(c1),3,cnt, write_sleeper))
 
 def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     
