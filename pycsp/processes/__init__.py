@@ -23,7 +23,7 @@ from channel import Channel, ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn
 
-version = (0,6,1, 'processes')
+version = (0,6,2, 'processes')
 
 def test_suite():
     import unittest

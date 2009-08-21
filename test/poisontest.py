@@ -4,7 +4,7 @@ import time
 import random
 
 @choice
-def action(ChannelInput=None):
+def action(__channel_input=None):
     print '.',
 
 @process

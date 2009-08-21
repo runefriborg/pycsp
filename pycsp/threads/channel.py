@@ -43,7 +43,7 @@ class ChannelReq:
 
     def poison(self):
         self.status.cond.acquire()
-        if self.result != SUCCESS or self.status.state != DONE:
+        if self.result == FAIL and self.status.state == ACTIVE:
             self.status.state=POISON
             self.result=POISON
             self.status.cond.notifyAll()
@@ -51,7 +51,7 @@ class ChannelReq:
 
     def retire(self):
         self.status.cond.acquire()
-        if self.result != SUCCESS or self.status.state != DONE:
+        if self.result == FAIL and self.status.state == ACTIVE:
             self.status.state=RETIRE
             self.result=RETIRE
             self.status.cond.notifyAll()
@@ -228,8 +228,6 @@ class Channel:
                 for p in self.writequeue[:]: # ATOMIC copy
                     p.retire()
 
-            
-
     def leave_writer(self):
         if not self.isretired:
             self.writers-=1
@@ -238,7 +236,7 @@ class Channel:
                 self.isretired = True
                 for p in self.readqueue[:]: # ATOMIC copy
                     p.retire()
-
+        
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
 

@@ -8,6 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 import inspect
+import types
 from channel import *
 
 # Constants
@@ -18,22 +19,41 @@ FAIL, SUCCESS = range(2)
 # Decorators
 def choice(func):
     """
-    Decorator for creating actions. It has no effect, other than improving readability
-
-    >>> from __init__ import *    
-    >>> @choice 
-    ... def action(ChannelInput):
+    Decorator for creating choice objets
+    
+    >>> from __init__ import *
+    >>> @choice
+    ... def action(__channel_input=None):
     ...     print 'Hello'
 
     >>> from guard import Skip
-    >>> Alternation([{Skip():action}]).execute()
+    >>> Alternation([{Skip():action()}]).execute()
     Hello
     """
-    def _call(*args, **kwargs):
-        return func(*args, **kwargs)
-    return _call
+    # __choice_fn func_name used to identify function in Alternation.execute
+    def __choice_fn(*args, **kwargs):
+        return Choice(func, *args, **kwargs)
+    return __choice_fn
 
 # Classes
+class Choice:
+    """ Choice(func, *args, **kwargs)
+    It is recommended to use the @choice decorator, to create Choice instances
+    """
+    def __init__(self, fn, *args, **kwargs):
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+    def invoke_on_input(self, __channel_input):
+        self.kwargs['__channel_input'] = __channel_input
+        self.fn(*self.args, **self.kwargs)
+        del self.kwargs['__channel_input']
+
+    def invoke_on_output(self):
+        self.fn(*self.args, **self.kwargs)
+
+
 class RealAlternation:
     """
     RealAlternation is the Alternation object that handles synchronization
@@ -47,55 +67,56 @@ class RealAlternation:
         req_status=ReqStatus()
         reqs={}
         try:
-            pri_idx = 0
-            for prioritized_item in self.guards:
-                for choice in prioritized_item.keys():
-                    if type(choice)==tuple: 
-                        c, msg = choice
-                        req=ChannelReq(req_status,msg=msg)
-                        c.post_write(req)
-                        op=WRITE
-                    else:
-                        req=ChannelReq(req_status)
-                        c=choice
-                        c.post_read(req)
-                        op=READ
-                    reqs[choice]=(pri_idx, c, req, op)
-                pri_idx += 1
+            idx = 0
+            for prio_item in self.guards:
+                c, op, msg = prio_item
+                if op==WRITE:
+                    req=ChannelReq(req_status,msg=msg)
+                    c.post_write(req)
+                else:
+                    req=ChannelReq(req_status)
+                    c.post_read(req)
+                reqs[req]=(idx, c, op)
+                idx += 1
+
         except (ChannelPoisonException, ChannelRetireException) as e:
-            for r in reqs.keys():
-                pri_idx, c, req, op = reqs[r]
+            for req in reqs.keys():
+                _, c, op = reqs[req]
                 if op==READ:
                     c.remove_read(req)
                 else:
                     c.remove_write(req)
             raise e
+
+        # If noone have offered a channelrequest, we wait.
         req_status.cond.acquire()
-        if req.status.state==ACTIVE:
+        if req_status.state==ACTIVE:
             req_status.cond.wait()
         req_status.cond.release()
+
         act=None
         poison=False
         retire=False
-        for k in reqs.keys():
-            pri_idx, c, req, op = reqs[k]
+        for req in reqs.keys():
+            _, c, op = reqs[req]
             if op==READ:
                 c.remove_read(req)
             else:
                 c.remove_write(req)
             if req.result==SUCCESS:
-                act=k
+                act=req
             elif req.result==POISON:
                 poison=True
             elif req.result==RETIRE:
                 retire=True
+
         if poison:
             raise ChannelPoisonException()
         if retire:
             raise ChannelRetireException()
-        pri_idx, c, req, op = reqs[act]
-        return (pri_idx, act, c, req, op)
 
+        idx, c, op = reqs[act]
+        return (idx, act, c, op)
 
 
 

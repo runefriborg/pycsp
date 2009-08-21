@@ -27,7 +27,7 @@ from channel import ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn
 
-version = (0,6,1, 'net')
+version = (0,6,2, 'net')
 
 def test_suite():
     import unittest

@@ -77,8 +77,8 @@ def Sleep(id, register):
 def Dispatcher(register, inc):
     services = {}
 
-    def dispatch(ChannelInput):
-        (GET, result) = ChannelInput
+    def dispatch(__channel_input):
+        (GET, result) = __channel_input
 
         print 'Dispather got:',GET,result
 
@@ -92,13 +92,13 @@ def Dispatcher(register, inc):
             request_alternation = {}
             for req in services[service_id]:
                 request_alternation[(req,(GET, result))] = None
-            Alternation([request_alternation]).execute()
+            Alternation([request_alternation]).select()
 
         else:
             result("Service '"+str(service_id)+"' not found!<br>")
         
-    def add_service(ChannelInput):
-        (id, request) = ChannelInput
+    def add_service(__channel_input):
+        (id, request) = __channel_input
         if services.has_key(id):
             services[id].append(request)
         else:

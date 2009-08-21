@@ -76,26 +76,20 @@ class PyroServerManager(Pyro.core.ObjBase):
         self.lock.acquire()
         id = str(uuid.uuid1())
 
-        # Swap channelends for channels, preserve guards
+        # Swap channel names for channels, preserve guards
         new_guards = []
-        for D in reduced_guards:
-            new_D = {}
-            for c in D.keys():
-                (op, msg) = D[c]
+        for prio_item in reduced_guards:
+            c, op, msg = prio_item
 
-                if not isinstance(c, Guard):
-                    # Swap channelend for channel
-                    if not self.ChannelIndex.has_key(c):
-                        self.lock.release()
-                        raise ChannelPoisonException()
+            if not isinstance(c, Guard):
+                # Swap channel name for channel
+                if not self.ChannelIndex.has_key(c):
+                    self.lock.release()
+                    raise ChannelPoisonException()
+                
+                c = self.ChannelIndex[c]
 
-                    c = self.ChannelIndex[c]
-
-                if op == READ:
-                    new_D[c] = None
-                else:
-                    new_D[(c,msg)] = None
-            new_guards.append(new_D)
+            new_guards.append((c, op, msg))
 
         self.AlternationIndex[id] = RealAlternation(new_guards)
         self.lock.release()
@@ -106,10 +100,10 @@ class PyroServerManager(Pyro.core.ObjBase):
 
 
     def Alternation_choose(self, id):
-        pri_idx, act, c, req, op = self.AlternationIndex[id].choose()
+        idx, req, c, op = self.AlternationIndex[id].choose()
         if isinstance(c, RealChannel):
             c = c.name
-        return pri_idx, c, req.msg, op
+        return idx, c, req.msg, op
 
     def Channel(self, name = None):
         self.lock.acquire()
@@ -404,8 +398,8 @@ class Alternation:
     >>> L = []
 
     >>> @choice 
-    ... def action(ChannelInput):
-    ...     L.append(ChannelInput)
+    ... def action(__channel_input):
+    ...     L.append(__channel_input)
 
     >>> @process
     ... def P1(cout, n=5):
@@ -414,7 +408,7 @@ class Alternation:
     
     >>> @process
     ... def P2(cin1, cin2, n=10):
-    ...     alt = Alternation([{cin1:action, cin2:action}])
+    ...     alt = Alternation([{cin1:action(), cin2:action()}])
     ...     for i in range(n):
     ...         alt.execute()
                 
@@ -431,26 +425,39 @@ class Alternation:
     def __init__(self, guards):
         self.id = None
         self.URI = PyroClientManager().URI
-        self.guards = guards
 
+        # Preserve tuple entries and convert dictionary entries to tuple entries
+        self.guards = []
+        for g in guards:
+            if type(g) == types.TupleType:
+                self.guards.append(g)
+            elif type(g) == types.DictType:
+                for elem in g.keys():
+                    if type(elem) == types.TupleType:
+                        self.guards.append((elem[0], elem[1], g[elem]))
+                    else:
+                        self.guards.append((elem, g[elem]))
+
+        # The internal representation of guards is a prioritized list
+        # of tuples:
+        #   input guard: (channel end, action) 
+        #   output guard: (channel end, msg, action)
+
+        # Replace channel end objects with channel name
         reduced_guards = []
-        for prioritized_item in self.guards:
-            reduced_D = {}
-            for choice in prioritized_item.keys():
+        for g in self.guards:
+            if len(g)==3:
+                c, msg, action = g
+                op = WRITE
+            else:
+                c, action = g
                 msg = None
-                if type(choice)==tuple:
-                    op = WRITE
-                    c, msg = choice
-                else:
-                    op = READ
-                    c = choice
+                op = READ
                 
-                if isinstance(c, Guard):
-                    reduced_D[c] = (op, msg)
-                else:
-                    reduced_D[c.channel.name] = (op, msg)
-
-            reduced_guards.append(reduced_D)
+            if isinstance(c, Guard):
+                reduced_guards.append((c, op, msg))
+            else:
+                reduced_guards.append((c.channel.name, op, msg))
 
         server = Pyro.core.getProxyForURI(self.URI)
         ok = False
@@ -502,8 +509,8 @@ class Alternation:
         >>> @process
         ... def P2(cin1, cin2, n):
         ...     alt = Alternation([{
-        ...               cin1:"L1.append(ChannelInput)",
-        ...               cin2:"L2.append(ChannelInput)"
+        ...               cin1:"L1.append(__channel_input)",
+        ...               cin2:"L2.append(__channel_input)"
         ...           }])
         ...     for i in range(n):
         ...         alt.execute()
@@ -514,17 +521,31 @@ class Alternation:
         >>> len(L1), len(L2)
         (10, 5)
         """
-        pri_idx, c, msg, op = self.choose()
-        c, action = self.get_guard(pri_idx, c)
-        
-        if action:
-            if callable(action):
-                # Execute callback function
+        (idx, _, msg, op) = self.choose()
+        if self.guards[idx]:
+            action = self.guards[idx][-1]
+
+            # Executing Choice object method
+            if isinstance(action, Choice):
                 if op==WRITE:
-                    action()
+                    action.invoke_on_output()
                 else:
-                    action(ChannelInput=msg)
-            else:
+                    action.invoke_on_input(msg)
+
+            # Executing callback function object
+            elif callable(action):
+                # Choice function not allowed as callback
+                if type(action) == types.FunctionType and action.func_name == '__choice_fn':
+                    raise Exception('@choice function is not instantiated. Please use action() and not just action')
+                else:
+                    # Execute callback function
+                    if op==WRITE:
+                        action()
+                    else:
+                        action(__channel_input=msg)
+
+            # Compiling and executing string
+            elif type(action) == types.StringType:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe().f_back
                 
@@ -532,11 +553,17 @@ class Alternation:
                 code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
                 f_globals = processframe.f_globals
                 f_locals = processframe.f_locals
-                if not op==WRITE:
-                    f_locals.update({'ChannelInput':msg})
+                if op==READ:
+                    f_locals.update({'__channel_input':msg})
 
                 # Execute action
                 exec(code, f_globals, f_locals)
+
+            elif type(action) == types.NoneType:
+                pass
+            else:
+                raise Exception('Failed executing action: '+str(action))
+
 
     def select(self):
         """
@@ -570,33 +597,13 @@ class Alternation:
         (5, 5)
         """
 
-        pri_idx, c, msg, op = self.choose()
-        c, action = self.get_guard(pri_idx, c)
+        idx, c, msg, op = self.choose()
+
+        # Lookup real guard
+        c = self.guards[idx][0]
 
         return (c, msg)
     
-    def get_guard(self, pri_idx, c_result):
-        if isinstance(c_result, Guard):                    
-            for choice in self.guards[pri_idx].keys():
-                if type(choice)==tuple:
-                    if choice[0].id == c_result.id:
-                        return choice[0], self.guards[pri_idx][choice]
-                else:
-                    if choice.id == c_result.id:
-                        return choice, self.guards[pri_idx][choice]
-        else:
-            for choice in self.guards[pri_idx].keys():
-                if type(choice)==tuple:
-                    if not isinstance(choice[0], Guard):
-                        if choice[0].channel.name == c_result:
-                            return choice[0], self.guards[pri_idx][choice]
-                else:
-                    if not isinstance(choice, Guard):
-                        if choice.channel.name == c_result:
-                            return choice, self.guards[pri_idx][choice]
-        
-        raise Exception('Internal Error: Could not find guard in alternation guard list')
-                    
                 
 # Run tests
 if __name__ == '__main__':
