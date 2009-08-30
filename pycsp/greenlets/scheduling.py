@@ -254,16 +254,16 @@ class Scheduler(object):
 
     # Get next greenlet available for scheduling
     def getNext(self):
-        if self.next:
-            # Quick choice
-            self.current = self.next.pop(0)
-            return self.current
-        elif self.new:
+        if self.new:
             # Returning scheduler, to avoid exceeding the recursion limit.
             # All new greenlets must be started from the scheduler, to have the
             # scheduler as parent greenlet.
             # Switch to main loop
             return self
+        elif self.next:
+            # Quick choice
+            self.current = self.next.pop(0)
+            return self.current
         else:
             # Some processes are blocking or all have been executed.
             # Switch to main loop.
