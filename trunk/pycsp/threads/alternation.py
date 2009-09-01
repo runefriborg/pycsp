@@ -111,7 +111,7 @@ class Alternation:
         #   input guard: (channel end, action) 
         #   output guard: (channel end, msg, action)
 
-    def __abort(self):
+    def __abort(self, reqs):
         for req in reqs.keys():
             _, c, op = reqs[req]
             if op==READ:
@@ -138,10 +138,10 @@ class Alternation:
                 reqs[req]=(idx, c, op)
                 idx += 1
         except ChannelPoisonException, e:
-            self.__abort()
+            self.__abort(reqs)
             raise e
         except ChannelRetireException, e:
-            self.__abort()
+            self.__abort(reqs)
             raise e
 
         # If noone have offered a channelrequest, we wait.
