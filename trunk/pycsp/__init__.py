@@ -74,6 +74,7 @@ from threads import *
 
 # Run tests
 if __name__ == '__main__':
+    import sys
     import unittest
     import doctest
     mods = []
@@ -86,8 +87,12 @@ if __name__ == '__main__':
         print
 
     try:
-        import processes
-        mods.append(processes)
+        if sys.platform == 'win32':
+            print "Skipping doctest for processes"
+            print
+        else:
+            import processes
+            mods.append(processes)
     except ImportError:
         print "Skipping doctest for processes"
         print
