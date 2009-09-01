@@ -2,7 +2,8 @@ from common import *
 import time
 import random
 
-def action(ChannelInput=None):
+@choice
+def action(__channel_input=None):
     print '.',
 
 def reader(cin, id,  sleeper):
@@ -22,10 +23,10 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
         if sleeper: sleeper()
         Alternation([
             {
-                cin1:action,
-                cin2:action,
-                cin3:action,
-                cin4:action
+                cin1:action(),
+                cin2:action(),
+                cin3:action(),
+                cin4:action()
             }
         ]).execute()
 

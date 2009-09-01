@@ -34,21 +34,21 @@ def par_reader_timeout_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
     retire(cin1, cin2, cin3, cin4)
 
 def par_reader_skip_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:"print 'From cin1 got', ChannelInput",
-                        cin2:"print 'From cin2 got', ChannelInput"},
+    alt = Alternation([{cin1:"print 'From cin1 got', __channel_input",
+                        cin2:"print 'From cin2 got', __channel_input"},
                        {Skip():"print 'Skip'"},
-                       {cin3:"print 'From cin3 got', ChannelInput",
-                        cin4:"print 'From cin4 got', ChannelInput"}])
+                       {cin3:"print 'From cin3 got', __channel_input",
+                        cin4:"print 'From cin4 got', __channel_input"}])
     for i in range(cnt*4):
         if sleeper: sleeper()
         alt.execute()
     retire(cin1, cin2, cin3, cin4)
 
 def par_reader_timeout_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:"print 'From cin1 got', ChannelInput",
-                        cin2:"print 'From cin2 got', ChannelInput"},
-                       {cin3:"print 'From cin3 got', ChannelInput",
-                        cin4:"print 'From cin4 got', ChannelInput"},
+    alt = Alternation([{cin1:"print 'From cin1 got', __channel_input",
+                        cin2:"print 'From cin2 got', __channel_input"},
+                       {cin3:"print 'From cin3 got', __channel_input",
+                        cin4:"print 'From cin4 got', __channel_input"},
                        {Timeout(seconds=0.1):"print 'Timeout(seconds=0.1)'"}])
     for i in range(cnt*4):
         if sleeper: sleeper()
