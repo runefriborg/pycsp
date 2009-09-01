@@ -38,6 +38,11 @@ def test_suite():
 
 # Run tests
 if __name__ == '__main__':
+
+    if sys.platform == 'win32' and (version[3] == 'processes'):
+        print 'These tests are not compatible with PyCSP.processes and win32.'
+        sys.exit(0)
+
     import unittest
 
     suite = test_suite()
