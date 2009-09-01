@@ -22,11 +22,10 @@ another.
 
 = Getting Started =
 
-Start by fetching PyCSP from svn:
+Start by fetching the latest [http://code.google.com/p/pycsp/downloads/list tarball]
 
 {{{
-svn checkout http://pycsp.googlecode.com/svn/trunk/
-{{{
+svn checkout http://pycsp.googlecode.com/svn/trunk/ pycsp
+}}}
 
-
-
+To start playing, you don't have to install 
