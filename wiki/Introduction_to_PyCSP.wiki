@@ -22,10 +22,102 @@ another.
 
 = Getting Started =
 
-Start by fetching the latest [http://code.google.com/p/pycsp/downloads/list tarball]
+Start by fetching the latest [http://code.google.com/p/pycsp/downloads/list tarball].
+
+Unpack and to install run
 
 {{{
-svn checkout http://pycsp.googlecode.com/svn/trunk/ pycsp
+python setup.py install
 }}}
 
-To start playing, you don't have to install 
+You can now try starting your python interpreter and type `import pycsp`. If no errors, then you are good to go. 
+
+Open a new file and put
+
+{{{
+from pycsp.threads import *
+}}}
+
+as your first line.
+
+= Creating Processes =
+
+This is a process with one output channel end:
+
+{{{
+@process
+def counter(cout, limit=1000)
+  for i in xrange(limit):
+    cout(i)
+}}}
+
+
+= Starting Processes =
+
+To start two instances of our newly created counter process we have the following options.
+
+== In parallel ==
+
+{{{
+Parallel(counter(...), counter(...))
+}}}
+
+=== In sequence ==
+
+{{{
+Sequence(counter(...), counter(...))
+}}}
+
+These will block until both counter processes have terminated.
+
+= Channels and channel ends =
+
+Channels can have any number of readers and writers and will block until a read or write have been committed to the opposite action.
+
+{{{
+A = Channel('A')
+}}}
+
+To communicate on a channel you are required to join it first.
+
+`cin = A.reader()` or `cout = A.writer()`
+
+
+= A Simple Application =
+
+{{{
+@process
+def counter(cout, limit):
+  for i in xrange(limit):
+    cout(i)
+  poison(cout)
+
+@process
+def printer(cin):
+  while True:
+    print cin(),
+
+A = Channel('A')
+Parallel(
+  counter(A.writer(), limit=10),
+  printer(A.reader())
+)
+}}}
+
+Output:
+{{{
+0 1 2 3 4 5 6 7 8 9
+}}}
+
+
+= More Examples =
+
+For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/examples examples].
+
+
+
+
+
+
+
+
