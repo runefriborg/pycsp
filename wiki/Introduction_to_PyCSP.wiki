@@ -1,9 +1,40 @@
-#summary One-sentence summary of this page.
+#summary This is a short introduction on how to use PyCSP
 #labels Featured
 
 = Introduction =
 
-Add your content here.
+PyCSP provides an API that can be used to write concurrent
+applications using CSP. The API is implemented in four versions:
+Threads, processes, greenlets and net. All implementations share an
+almost identical API making it trivial to switch from one implementation to 
+another.
+
+  * pycsp.threads - A CSP process is implemented as an OS thread.
+  The internal synchronization is handled by thread-locking
+  mechanisms. This is the default implementation. Because of the Python Global Interpeter Lock, this is best suited for applications that spend most of their time in external routines.
+
+  * pycsp.processes - A CSP process is implemented as an OS process.
+  The internal synchronization is more complex than pycsp.threads and
+  is built on top of the multiprocessing module available in Python
+  2.6. This implementation is not affected by the Global Interpreter
+  Lock\footnote{Python uses a Global Interpreter Lock, the GIL, to
+    protect the interpreter when multiple threads execute Python code.
+    The GIL limits concurrency when executing Python code, but
+    libraries commonly mitigate the problem by releasing the GIL
+    when executing external code.}, but has some limitations on a
+  Windows OS and generally has a larger communication overhead than the threaded version.
+
+  * pycsp.greenlets - This uses co-routines instead of threads.
+  Greenlets is a simple co-routine implementation that is bundled
+  together with pylib. It provides the possibility to create 100.000
+  CSP processes in a single CSP network. This version is optimal for
+  single-core architectures since it provides the fastest communication.
+
+  * pycsp.net - A proof-of-concept net implementation of
+  pycsp.threads. All synchronization is handled in a single process.
+  This provides the same functionality as pycsp.threads, but adding a
+  larger cost and a bottleneck by introducing the
+  ChannelServerProcess. It uses Pyro \cite{pyro} for communication.
 
 
 = Details =
