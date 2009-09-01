@@ -21,7 +21,7 @@ def consumer(result_in):
             c,s=result_in()
             cnt+=c
             sum+=s
-    except ChannelPoisonException:
+    except ChannelRetireException:
         print 4.0*sum/cnt
 
 if __name__ == '__main__':
