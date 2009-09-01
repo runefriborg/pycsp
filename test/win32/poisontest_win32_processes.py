@@ -2,7 +2,8 @@ from common import *
 import time
 import random
 
-def action(ChannelInput=None):
+@choice
+def action(__channel_input=None):
     print '.',
 
 def reader(cin, id,  sleeper):
