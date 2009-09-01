@@ -48,10 +48,10 @@ D = Channel('D')
 printC = Channel()
 
 Parallel(
-    Prefix(B.reader(), A.writer(), prefix=0),
-    Prefix(C.reader(), B.writer(), prefix=1),
-    Pairs(D.reader(), C.writer()),
-    Delta2(A.reader(), D.writer(), printC.writer()),
-    Printer(printC.reader(), limit=20)
+    Prefix(+B, -A, prefix=0),
+    Prefix(+C, -B, prefix=1),
+    Pairs(+D, -C),
+    Delta2(+A, -D, -printC),
+    Printer(+printC, limit=20)
 )
 
