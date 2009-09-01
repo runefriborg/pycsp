@@ -110,7 +110,15 @@ class Alternation:
         # of tuples:
         #   input guard: (channel end, action) 
         #   output guard: (channel end, msg, action)
-        
+
+    def __abort(self):
+        for req in reqs.keys():
+            _, c, op = reqs[req]
+            if op==READ:
+                c.remove_read(req)
+            else:
+                c.remove_write(req)
+
     def choose(self):
         req_status=ReqStatus()
         reqs={}
@@ -129,13 +137,11 @@ class Alternation:
                     op=READ
                 reqs[req]=(idx, c, op)
                 idx += 1
-        except (ChannelPoisonException, ChannelRetireException) as e:
-            for req in reqs.keys():
-                _, c, op = reqs[req]
-                if op==READ:
-                    c.remove_read(req)
-                else:
-                    c.remove_write(req)
+        except ChannelPoisonException, e:
+            self.__abort()
+            raise e
+        except ChannelRetireException, e:
+            self.__abort()
             raise e
 
         # If noone have offered a channelrequest, we wait.
