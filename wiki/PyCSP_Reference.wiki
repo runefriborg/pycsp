@@ -108,7 +108,6 @@
     42
 }}}
 
-=== ChannelPoisonException ===
 === retire ===
  Retire reader or writer, to do auto-poisoning
     When all readers or writer of a channel have retired. The channel is retired.
@@ -132,7 +131,6 @@
     >>> retire(cin)
 
 }}}
-=== ChannelRetireException ===
 == Channels and Channel ends ==
 === Channel ===
  Channel class. Blocking communication
