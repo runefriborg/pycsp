@@ -1,6 +1,8 @@
 #summary Documentation for all components in PyCSP
 
 
+#sidebar TableOfContents
+
 = Overview =
 
 Link [Stuff test] 
