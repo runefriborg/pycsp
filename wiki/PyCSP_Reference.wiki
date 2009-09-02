@@ -21,19 +21,93 @@
 }}}
     True
     
+= Parallel =
+ Parallel(P1, [P2, .. ,PN])
+{{{
+    >>> from __init__ import *
+}}}
+    
+{{{
+    >>> @process
+    ... def P1(cout, id):
+    ...     for i in range(10):
+    ...         cout(id)
+}}}
 
-
-= Stuff =
-
-
-= Introduction =
-
-Add your content here.
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+{{{
+    >>> @process
+    ... def P2(cin):
+    ...     for i in range(10):
+    ...         cin()
+}}}
+    
+{{{
+    >>> C = [Channel() for i in range(10)]
+    >>> Cin = map(IN, C)
+    >>> Cout = map(OUT, C)
+}}}
+    
+{{{
+    >>> Parallel([P1(Cout[i], i) for i in range(10)],[P2(Cin[i]) for i in range(10)])
+}}}
+    
+= Sequence =
+ Sequence(P1, [P2, .. ,PN])
+    The Sequence construct returns when all given processes exit.
+{{{
+    >>> from __init__ import *
+}}}
+    
+{{{
+    >>> @process
+    ... def P1(cout):
+    ...     Sequence([Process(cout,i) for i in range(10)])
+}}}
+    
+{{{
+    >>> C = Channel()
+    >>> Spawn(P1(OUT(C)))
+}}}
+    
+{{{
+    >>> L = []
+    >>> cin = IN(C)
+    >>> for i in range(10):
+    ...    L.append(cin())
+}}}
+    
+{{{
+    >>> L
+}}}
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    
+= Spawn =
+ Spawn(P1, [P2, .. ,PN])
+{{{
+    >>> from __init__ import *
+}}}
+    
+{{{
+    >>> @process
+    ... def P1(cout, id):
+    ...     for i in range(10):
+    ...         cout(id)
+}}}
+    
+{{{
+    >>> C = Channel()
+    >>> Spawn([P1(OUT(C), i) for i in range(10)])
+}}}
+    
+{{{
+    >>> L = []
+    >>> cin = IN(C)
+    >>> for i in range(100):
+    ...    L.append(cin())
+}}}
+    
+{{{
+    >>> len(L)
+}}}
+    100
+    
