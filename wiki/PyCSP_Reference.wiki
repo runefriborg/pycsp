@@ -1,4 +1,3 @@
-
 #summary Documentation for all components in PyCSP
 
 = Overview =
