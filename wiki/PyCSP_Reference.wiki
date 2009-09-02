@@ -6,7 +6,7 @@
 
 <wiki:toc max_depth="1" />
 
-= Process / @process =
+== Process / @process ==
 
     @process decorator for creating process functions
 
@@ -19,7 +19,7 @@
 }}}
     True
 
-= Parallel =
+== Parallel ==
  Parallel(P1, [P2, .. ,PN])
 {{{
     >>> from __init__ import *
@@ -40,7 +40,8 @@
 
     >>> Parallel([P1(Cout[i], i) for i in range(10)],[P2(Cin[i]) for i in range(10)])
 
-= Sequence =
+}}}
+== Sequence ==
  Sequence(P1, [P2, .. ,PN])
     The Sequence construct returns when all given processes exit.
 {{{
@@ -62,7 +63,7 @@
 }}}
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-= Spawn =
+== Spawn ==
  Spawn(P1, [P2, .. ,PN])
 {{{
     >>> from __init__ import *
