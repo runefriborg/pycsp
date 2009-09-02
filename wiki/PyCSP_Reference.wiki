@@ -4,7 +4,7 @@
 
 = Overview =
 
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="3" />
 
 == Process / @process ==
 
@@ -16,8 +16,8 @@
     ...     pass
 
     >>> isinstance(P(), Process)
-}}}
     True
+}}}
 
 == Parallel ==
  Parallel(P1, [P2, .. ,PN])
@@ -60,8 +60,8 @@
     ...    L.append(cin())
 
     >>> L
-}}}
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+}}}
 
 == Spawn ==
  Spawn(P1, [P2, .. ,PN])
@@ -82,5 +82,5 @@
     ...    L.append(cin())
 
     >>> len(L)
-}}}
     100
+}}}
