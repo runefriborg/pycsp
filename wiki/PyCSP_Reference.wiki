@@ -1,12 +1,10 @@
 #summary Documentation for all components in PyCSP
 
 
-#sidebar TableOfContents
 
 = Overview =
 
-Link [Stuff test] 
-
+<wiki:toc max_depth="1" />
 
 
 
