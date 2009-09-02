@@ -6,6 +6,21 @@
 
 <wiki:toc max_depth="1" />
 
+= Process / @process =
+
+    @process decorator for creating process functions
+
+{{{
+    >>> @process
+    ... def P():
+    ...     pass
+}}}
+
+{{{
+    >>> isinstance(P(), Process)
+}}}
+    True
+    
 
 
 = Stuff =
