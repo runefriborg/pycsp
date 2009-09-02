@@ -330,3 +330,39 @@
     True
 }}}
 
+== Specific for pycsp.greenlets: @io ==
+
+    @io decorator for blocking io operations.
+    Execution is moved to seperate threads and the current greenlet is yielded.
+
+
+{{{
+    >>> @io
+    ... def sleep(n):
+    ...     import time
+    ...     time.sleep(n)
+
+    >>> @process
+    ... def P1():
+    ...     sleep(0.05)
+
+    Sleeping for 10 times 0.05 seconds, which equals roughly half a second
+}}}
+    in the sequential case.
+{{{
+    >>> time_start = time.time()
+    >>> Sequence([P1() for i in range(10)])
+    >>> diff = time.time() - time_start
+    >>> diff >= 0.5 and diff < 0.6
+    True
+}}}
+
+    In parallel, it should be close to 0.05 seconds.
+{{{
+    >>> time_start = time.time()
+    >>> Parallel([P1() for i in range(10)])
+    >>> diff = time.time() - time_start
+    >>> diff >= 0.05 and diff < 0.1
+    True
+}}}
+
