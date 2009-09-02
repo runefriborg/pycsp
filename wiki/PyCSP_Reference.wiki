@@ -22,9 +22,8 @@
 == Starting Processes ==
 === Parallel ===
  Parallel(P1, [P2, .. ,PN])
-{{{
-    >>> from __init__ import *
 
+{{{
     >>> @process
     ... def P1(cout, id):
     ...     for i in range(10):
@@ -45,9 +44,8 @@
 === Sequence ===
  Sequence(P1, [P2, .. ,PN])
     The Sequence construct returns when all given processes exit.
-{{{
-    >>> from __init__ import *
 
+{{{
     >>> @process
     ... def P1(cout):
     ...     Sequence([Process(cout,i) for i in range(10)])
@@ -66,9 +64,8 @@
 
 === Spawn ===
  Spawn(P1, [P2, .. ,PN])
-{{{
-    >>> from __init__ import *
 
+{{{
     >>> @process
     ... def P1(cout, id):
     ...     for i in range(10):
