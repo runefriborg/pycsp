@@ -153,7 +153,7 @@
     >>> retire(cin)
 
 }}}
-== Joining to Read ==
+=== Joining to Read ===
  Join as reader
 {{{
     >>> C = Channel()
@@ -161,7 +161,7 @@
     True
 }}}
 
-== Joining to Write ==
+=== Joining to Write ===
  Join as writer
 {{{
     >>> C = Channel()
@@ -170,7 +170,6 @@
 }}}
 
 == External Choice / Choosing a Channel ==
-=== Alternation ===
 
     Alternation supports input and output guards. Guards are ChannelEnd
     or Guard objects.
@@ -211,6 +210,66 @@
     >>> L.sort()
     >>> L
     [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+}}}
+
+=== Alternation(...).select() ===
+
+        Selects the guard.
+
+{{{
+        >>> L1,L2 = [],[]
+
+        >>> @process
+        ... def P1(cout, n=5):
+        ...     for i in range(n):
+        ...         cout(i)
+
+        >>> @process
+        ... def P2(cin1, cin2, n=10):
+        ...     alt = Alternation([{
+        ...               cin1:None,
+        ...               cin2:None
+        ...           }])
+        ...     for i in range(n):
+        ...         (g, msg) = alt.select()
+        ...         if g == cin1:
+        ...             L1.append(msg)
+        ...         if g == cin2:
+        ...             L2.append(msg)
+
+        >>> C1, C2 = Channel(), Channel()
+        >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+
+        >>> len(L1), len(L2)
+        (5, 5)
+}}}
+
+=== Alternation(...).execute() ===
+
+        Selects the guard and executes the attached action. Action is a function or python code passed in a string.
+
+{{{
+        >>> L1,L2 = [],[]
+
+        >>> @process
+        ... def P1(cout, n):
+        ...     for i in range(n):
+        ...         cout(i)
+
+        >>> @process
+        ... def P2(cin1, cin2, n):
+        ...     alt = Alternation([{
+        ...               cin1:"L1.append(__channel_input)",
+        ...               cin2:"L2.append(__channel_input)"
+        ...           }])
+        ...     for i in range(n):
+        ...         alt.execute()
+
+        >>> C1, C2 = Channel(), Channel()
+        >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
+
+        >>> len(L1), len(L2)
+        (10, 5)
 }}}
 
 === @choice ===
