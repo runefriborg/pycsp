@@ -131,8 +131,7 @@
     >>> retire(cin)
 
 }}}
-== Channels and Channel ends ==
-=== Channel ===
+== Channels ==
  Channel class. Blocking communication
 
 
@@ -154,3 +153,121 @@
     >>> retire(cin)
 
 }}}
+== Joining to Read ==
+ Join as reader
+{{{
+    >>> C = Channel()
+    >>> isinstance(IN(C), ChannelEndRead)
+    True
+}}}
+
+== Joining to Write ==
+ Join as writer
+{{{
+    >>> C = Channel()
+    >>> isinstance(OUT(C), ChannelEndWrite)
+    True
+}}}
+
+== External Choice / Choosing a Channel ==
+=== Alternation ===
+
+    Alternation supports input and output guards. Guards are ChannelEnd
+    or Guard objects.
+
+    Note that alternation always performs the guard that was chosen,
+    i.e. channel input or output is executed within the alternation so
+    even the empty choice with an alternation execution or a choice where
+    the results are simply ignored, still performs the guarded input or
+    output.
+
+
+{{{
+    >>> L = []
+
+    >>> @choice 
+    ... def action(__channel_input):
+    ...     L.append(__channel_input)
+
+    >>> @process
+    ... def P1(cout, n=5):
+    ...     for i in range(n):
+    ...         cout(i)
+
+    >>> @process
+    ... def P2(cin1, cin2, n=10):
+    ...     alt = Alternation([{cin1:action(), cin2:action()}])
+    ...     for i in range(n):
+    ...         alt.execute()
+
+    >>> C1, C2 = Channel(), Channel()
+    >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+
+    >>> len(L)
+    10
+}}}
+
+{{{
+    >>> L.sort()
+    >>> L
+    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+}}}
+
+=== @choice ===
+
+    Decorator for creating choice objets
+
+{{{
+    >>> @choice
+    ... def action(__channel_input=None):
+    ...     print 'Hello'
+
+    >>> from guard import Skip
+    >>> Alternation([{Skip():action()}]).execute()
+    Hello
+}}}
+
+== Guards ==
+=== Skip ===
+
+    Skip will try to accept a read or a write, the moment it is posted.
+
+
+{{{
+    >>> C = Channel()
+    >>> Cin = IN(C)
+    >>> (g, msg) = Alternation([{Skip():None}, {Cin:None}]).select()
+
+    >>> isinstance(g, Skip) and msg == None
+    True
+}}}
+
+=== Timeout ===
+
+    Timeout spawns a timer thread, when posted. If removed
+    before timeout, then the timer thread is cancelled.
+
+{{{
+    >>> import time
+
+    >>> C = Channel()
+    >>> Cin = IN(C)
+
+    >>> time_start = time.time()
+    >>> (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
+    >>> time_passed = time.time() - time_start
+
+    >>> time_passed >= 0.5
+    True
+}}}
+
+{{{
+    >>> time_passed < 0.6
+    True
+}}}
+
+{{{
+    >>> isinstance(g, Timeout) and msg == None
+    True
+}}}
+
