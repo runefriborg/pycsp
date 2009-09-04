@@ -18,6 +18,11 @@ another.
   * pycsp.net - A proof-of-concept net implementation of pycsp.threads. All synchronization is handled in a single process. This provides the same functionality as pycsp.threads, but adding a larger cost and a bottleneck by introducing the ChannelServerProcess. It requires Pyro (http://pyro.sourceforge.net/) for communication.
 
 
+Requirements:
+  * pycsp.threads - Works with the entire Python 2.x string.
+  * pycsp.processes - Needs the multiprocessing module available in Python 2.6+
+  * pycsp.greenlets - Requires greenlets (http://pypi.python.org/pypi/greenlet)
+  * pycsp.net - Requires Python 2.6+ and Pyro 3.8+
 
 
 = Getting Started =
@@ -113,8 +118,6 @@ Output:
 = More Examples =
 
 For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/examples examples].
-
-
 
 
 
