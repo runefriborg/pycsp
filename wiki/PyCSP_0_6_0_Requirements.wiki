@@ -1,5 +1,4 @@
 #summary Library dependencies
-#labels Featured
 
 PyCSP 0.6.0 has introduced the 4 versions:
   * Threads (default)
