@@ -13,7 +13,7 @@ another.
 
   * pycsp.processes - A CSP process is implemented as an OS process. The internal synchronization is more complex than pycsp.threads and is built on top of the multiprocessing module available in Python 2.6. This implementation is not affected by the Global Interpreter Lock, but has some limitations on a Windows OS and generally has a larger communication overhead than the threaded version.
 
-  * pycsp.greenlets - This uses co-routines instead of threads. Greenlets is a simple co-routine implementation that is bundled together with pylib. It provides the possibility to create 100.000 CSP processes in a single CSP network. This version is optimal for single-core architectures since it provides the fastest communication.
+  * pycsp.greenlets - This uses co-routines instead of threads. Greenlets is a simple co-routine implementation and can be downloaded [http://pypi.python.org/pypi/greenlet here]. It provides the possibility to create 100.000 CSP processes in a single CSP network. This version is optimal for single-core architectures since it provides the fastest communication.
 
   * pycsp.net - A proof-of-concept net implementation of pycsp.threads. All synchronization is handled in a single process. This provides the same functionality as pycsp.threads, but adding a larger cost and a bottleneck by introducing the ChannelServerProcess. It requires Pyro (http://pyro.sourceforge.net/) for communication.
 
@@ -118,8 +118,6 @@ Output:
 = More Examples =
 
 For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/examples examples].
-
-
 
 
 
