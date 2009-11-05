@@ -11,7 +11,6 @@ def worker(job_in, result_out):
    while True:
        cnt=job_in()           #Get task
        sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
-       
        result_out((4.0*sum)/cnt)  #Forward result
 
 @process
@@ -20,7 +19,7 @@ def consumer(result_in):
    try:
        while True:
            cnt+=1
-           print sum
+           print str(cnt) + ' ' + str(sum)
            sum=(sum*cnt+result_in())/(cnt+1)    #Get result
    except ChannelRetireException:
        print 'Result:',sum            #We are done - print result
@@ -28,6 +27,7 @@ def consumer(result_in):
 jobs=Channel()
 results=Channel()
 
-Parallel(producer(OUT(jobs),1000, 10000),
-        [worker(IN(jobs),OUT(results)) for i in range(10)],
-        consumer(IN(results)))
+Parallel(
+   producer(OUT(jobs),10000, 1000),
+   10 * worker(IN(jobs),OUT(results)),
+   consumer(IN(results)))

@@ -7,6 +7,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
+import types
 import threading
 from channel import ChannelPoisonException, ChannelRetireException
 from net import Channel
@@ -64,16 +65,77 @@ class Process(threading.Thread):
             self.fn(*self.args, **self.kwargs)
         except ChannelPoisonException, e:
             # look for channels and channel ends
-            for ch in [x for x in self.args if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite) or isinstance(x, Channel)]:
-                ch.poison()
+            self.__check_poison(self.args)
         except ChannelRetireException, e:
             # look for channel ends
-            for ch_end in [x for x in self.args if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite)]:
+            self.__check_retire(self.args)
+
+    def __check_poison(self, args):
+        for arg in args:
+            if isinstance(arg, ChannelEndRead) or isinstance(arg, ChannelEndWrite) or isinstance(arg, Channel):
+                arg.poison()
+            elif types.ListType == type(arg):
+                self.__check_poison(arg)
+            elif types.DictType == type(arg):
+                self.__check_poison(arg.keys)
+                self.__check_poison(arg.values)
+
+    def __check_retire(self, args):
+        for arg in args:
+            if isinstance(arg, ChannelEndRead) or isinstance(arg, ChannelEndWrite):
                 # Ignore if try to retire an already retired channel end.
                 try:
-                    ch_end.retire()
+                    arg.retire()
                 except ChannelRetireException:
                     pass
+            elif types.ListType == type(arg):
+                self.__check_retire(arg)
+            elif types.DictType == type(arg):
+                self.__check_retire(arg.keys)
+                self.__check_retire(arg.values)
+
+    # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+    def __mul__(self, multiplier):
+        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+
+    # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+    def __rmul__(self, multiplier):
+        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+
+    # Copy lists and dictionaries
+    def __mul_channel_ends(self, args):
+        if types.ListType == type(args) or types.TupleType == type(args):
+            R = []
+            for item in args:
+                if isinstance(item, ChannelEndRead):
+                    R.append(item.channel.reader())
+                elif isinstance(item, ChannelEndWrite):
+                    R.append(item.channel.writer())
+                elif item == types.ListType or item == types.DictType:
+                    R.append(self.__mul_channel_ends(item))
+                else:
+                    R.append(item)
+            if types.TupleType == type(args):
+                return tuple(R)
+            else:
+                return R
+            
+        elif types.DictType == type(args):
+            R = {}
+            for key in args:
+                if isinstance(key, ChannelEndRead):
+                    R[key.channel.reader()] = args[key]
+                elif isinstance(key, ChannelEndWrite):
+                    R[key.channel.writer()] = args[key]
+                elif isinstance(args[key], ChannelEndRead):
+                    R[key] = args[key].channel.reader() 
+                elif isinstance(args[key], ChannelEndWriter):
+                    R[key] = args[key].channel.writer() 
+                elif args[key] == types.ListType or args[key] == types.DictType:
+                    R[key] = self.__mul_channel_ends(args[key])
+            return R
+        return args
+
 
 # Functions
 def Parallel(*plist):

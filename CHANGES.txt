@@ -15,8 +15,16 @@
   for usage in the guardlist. These are now equivalent and legal arguments for Alternation.
  - input guard: [{cin1:action()}]  <->  [(cin1, action())]
  - output guard: [{(cout1, msg):action()}] <-> [(cout1, msg, action()]
+
 * Fixed a bug in reference counting for retire, that could result in a race condition.
-* (greenlets) Fixed bug where retire could overwrite a committed request.
+* Fixed (greenlets) bug where retire could overwrite a committed request.
+* Fixed propagation of poison and retire, when channelends are in lists / dictionaries.
+* Added syntactic sugar to allow multiplying processes.
+  Example:
+	Parallel(
+		producer(OUT(jobs),10000, 1000),
+		10 * worker(IN(jobs),OUT(results)),
+		consumer(IN(results)))
 
 
 0.6.0 - 0.6.1
