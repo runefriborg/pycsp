@@ -16,6 +16,7 @@
  - input guard: [{cin1:action()}]  <->  [(cin1, action())]
  - output guard: [{(cout1, msg):action()}] <-> [(cout1, msg, action()]
 * Fixed a bug in reference counting for retire, that could result in a race condition.
+* (greenlets) Fixed bug where retire could overwrite a committed request.
 
 
 0.6.0 - 0.6.1

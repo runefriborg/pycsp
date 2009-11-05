@@ -28,12 +28,14 @@ class ChannelReq:
         self.process = process
 
     def poison(self):
-        self.result = POISON
-        self.process.notify(POISON)
+        if self.result != SUCCESS:
+            self.result = POISON
+            self.process.notify(POISON)
 
     def retire(self):
-        self.result = RETIRE
-        self.process.notify(RETIRE)
+        if self.result != SUCCESS:
+            self.result = RETIRE
+            self.process.notify(RETIRE)
 
     def offer(self, recipient):
         if self.process.state == recipient.process.state == ACTIVE:
@@ -125,7 +127,7 @@ class Channel:
         
         self.check_termination()
             
-        print 'We should not get here in read!!!', req.status.state
+        print 'We should not get here in read!!!'
         return None #Here we should handle that a read was cancled...
 
     
@@ -157,7 +159,7 @@ class Channel:
     
         self.check_termination()
 
-        print 'We should not get here in write!!!', req.status
+        print 'We should not get here in write!!!'
         return None #Here we should handle that a read was cancled...
 
     def post_read(self, req):
