@@ -117,9 +117,13 @@ class RealChannel():
         else:
             self.name=name
 
-        # We can avoid protecting the Channel using a lock, because all operations
-        # on the queues can be done atomic, because of the Global Interpreter Lock
-        # preventing us from accessing Python lists simultaneously from multiple threads.
+        # This lock is used to ensure atomic updates of the channelend
+        # reference counting
+        self.lock = threading.RLock()
+
+        # We can avoid protecting the queue operations with this lock
+        # , because of the Global Interpreter Lock preventing us from
+        # updating Python lists simultaneously from multiple threads.
     
     def check_termination(self):
         if self.ispoisoned:
@@ -184,12 +188,17 @@ class RealChannel():
             p.poison()
 
     def join_reader(self):
+        self.lock.acquire()
         self.readers+=1
+        self.lock.release()
 
     def join_writer(self):
+        self.lock.acquire()
         self.writers+=1
+        self.lock.release()
 
     def leave_reader(self):
+        self.lock.acquire()
         if not self.isretired:
             self.readers-=1
             if self.readers==0:
@@ -197,10 +206,10 @@ class RealChannel():
                 self.isretired = True
                 for p in self.writequeue[:]: # ATOMIC copy
                     p.retire()
-
-            
+        self.lock.release()
 
     def leave_writer(self):
+        self.lock.acquire()
         if not self.isretired:
             self.writers-=1
             if self.writers==0:
@@ -208,6 +217,7 @@ class RealChannel():
                 self.isretired = True
                 for p in self.readqueue[:]: # ATOMIC copy
                     p.retire()
+        self.lock.release()
     
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
