@@ -1,6 +1,6 @@
 0.6.1 - 0.6.2
 ----------
-* Channel the reserved variable name for reading channel inputs from ChannelInput
+* Changed the reserved variable name for reading channel inputs from ChannelInput
   to __channel_input.
 * @choice will now create a function that instantiates a Choice object. This can be used to
   send other arguments to the wrapped choice function.
@@ -15,6 +15,7 @@
   for usage in the guardlist. These are now equivalent and legal arguments for Alternation.
  - input guard: [{cin1:action()}]  <->  [(cin1, action())]
  - output guard: [{(cout1, msg):action()}] <-> [(cout1, msg, action()]
+* Fixed a bug in reference counting for retire, that could result in a race condition.
 
 
 0.6.0 - 0.6.1

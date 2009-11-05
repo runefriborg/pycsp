@@ -132,9 +132,13 @@ class Channel:
         else:
             self.name=name
 
-        # We can avoid protecting the Channel using a lock, because all operations
-        # on the queues can be done atomic, because of the Global Interpreter Lock
-        # preventing us from accessing Python lists simultaneously from multiple threads.
+        # This lock is used to ensure atomic updates of the channelend
+        # reference counting
+        self.lock = threading.RLock()
+
+        # We can avoid protecting the queue operations with this lock
+        # , because of the Global Interpreter Lock preventing us from
+        # updating Python lists simultaneously from multiple threads.
 
     
     def check_termination(self):
@@ -178,7 +182,6 @@ class Channel:
     def remove_read(self, req):
         self.readqueue.remove(req) # ATOMIC
 
-        
     def post_write(self, req):
         self.check_termination()
         self.writequeue.append(req) # ATOMIC
@@ -199,9 +202,11 @@ class Channel:
         for p in self.writequeue[:]: # ATOMIC copy
             p.poison()
 
+    # syntactic sugar: cin = +chan
     def __pos__(self):
         return self.reader()
-
+    
+    # syntactic sugar: cout = -chan
     def __neg__(self):
         return self.writer()
 
@@ -214,12 +219,17 @@ class Channel:
         return ChannelEndWrite(self)
 
     def join_reader(self):
-        self.readers+=1        
+        self.lock.acquire()
+        self.readers+=1
+        self.lock.release()
 
     def join_writer(self):
+        self.lock.acquire()
         self.writers+=1
+        self.lock.release()
 
     def leave_reader(self):
+        self.lock.acquire()
         if not self.isretired:
             self.readers-=1
             if self.readers==0:
@@ -227,8 +237,10 @@ class Channel:
                 self.isretired = True
                 for p in self.writequeue[:]: # ATOMIC copy
                     p.retire()
+        self.lock.release()
 
     def leave_writer(self):
+        self.lock.acquire()
         if not self.isretired:
             self.writers-=1
             if self.writers==0:
@@ -236,7 +248,8 @@ class Channel:
                 self.isretired = True
                 for p in self.readqueue[:]: # ATOMIC copy
                     p.retire()
-        
+        self.lock.release()        
+
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
 
