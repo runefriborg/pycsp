@@ -24,19 +24,14 @@ FAIL, SUCCESS = range(2)
 
 # Classes
 class PyroServerProcess(threading.Thread):
-    def __init__(self):
+    def __init__(self, ns):
         threading.Thread.__init__(self)
         self.managerObj = None
         self.cond = threading.Condition()
+        self.ns = ns
 
     def run(self):
         self.cond.acquire()
-
-        # locate the NS
-        locator = Pyro.naming.NameServerLocator()
-
-        # Searching Name Server...
-        ns = locator.getNS()
 
         # Init server
         Pyro.core.initServer()
@@ -44,12 +39,14 @@ class PyroServerProcess(threading.Thread):
 
         # make sure our namespace group exists
         try:
-            ns.createGroup(':PyCSP')
-        except Pyro.errors.NamingError:
+            self.ns.createGroup(':PyCSP')
+        except Pyro.errors.NamingError, e:
             pass
 
+
         daemon = Pyro.core.Daemon()
-        daemon.useNameServer(ns)
+        daemon.useNameServer(self.ns)
+
         self.managerObj = PyroServerManager()
         daemon.connectPersistent(self.managerObj, 'SERVER-'+str(Configuration().get(NET_SERVER_ID)))
         self.cond.notify()
@@ -204,11 +201,10 @@ class PyroClientManager(object):
             cls.__instance = object.__new__(cls)
             cls.__instance.nameserver = ns
 
-
             def create_server():
                 # Create server
 
-                cls.__instance.server_process = PyroServerProcess()
+                cls.__instance.server_process = PyroServerProcess(cls.__instance.nameserver)
 
                 cls.__instance.server_process.cond.acquire()
                 cls.__instance.server_process.daemon = True
@@ -224,6 +220,7 @@ class PyroClientManager(object):
             try:
                 # Fetch URI for server and test
                 URI= ns.resolve('SERVER-'+str(Configuration().get(NET_SERVER_ID)))
+                
                 server = Pyro.core.getProxyForURI(URI)
                 server.test()
 
@@ -283,7 +280,6 @@ class Channel:
 
     def _read(self):
         server = Pyro.core.getProxyForURI(self.URI)
-        #print '_read',server
 
         ok = False
         while not ok:
@@ -297,7 +293,6 @@ class Channel:
 
     def _write(self, msg):
         server = Pyro.core.getProxyForURI(self.URI)
-        #print '_write',server
 
         ok = False
         while not ok:
