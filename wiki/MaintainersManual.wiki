@@ -6,33 +6,41 @@ Procedure for creating new release.
 == Test ==
 
 Unittesting:
+{{{
 cd trunk/pycsp
 python __init__.py
+}}}
 
 Tests:
+{{{
 cd trunk/test
 Run all tests for all implementations
+}}}
 
 Examples:
+{{{
 cd trunk/examples
 Run all examples for all implementations
-
+}}}
 == Verify ==
-
+{{{
 Update version ids for all implementations.
 Update CHANGES.txt to match the actual changes for this version.
 Run svn stat to ensure that all relevant files have been committed to trunk.
+}}}
 
 == Create tag release ==
-
+{{{
 svn copy https://pycsp.googlecode.com/svn/trunk https://pycsp.googlecode.com/svn/tags/PyCSP-0.6.2 -m 'Tag release 0.6.2'
+}}}
 
 == Create tgz release file ==
 
+{{{
 svn update
 cd tags/PyCSP-0.6.2
 python setup.py build sdist
-
+}}}
 == Test install ==
 
 Do test install on as many platforms as possible.
@@ -40,7 +48,5 @@ Check that pycsp can be imported and run a few examples.
 
 == Upload tgz to Google Code ==
 
-http://code.google.com/p/pycsp/downloads/list
-Set as Featured.
-
-
+Go to [Downloads http://code.google.com/p/pycsp/downloads/list], upload and
+set as Featured.
