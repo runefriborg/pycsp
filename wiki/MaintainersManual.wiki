@@ -48,5 +48,5 @@ Check that pycsp can be imported and run a few examples.
 
 == Upload tgz to Google Code ==
 
-Go to [Downloads http://code.google.com/p/pycsp/downloads/list], upload and
+Go to [http://code.google.com/p/pycsp/downloads/list Downloads ], upload and
 set as Featured.
