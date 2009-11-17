@@ -111,7 +111,7 @@ class Process(threading.Thread):
                     R.append(item.channel.reader())
                 elif isinstance(item, ChannelEndWrite):
                     R.append(item.channel.writer())
-                elif item == types.ListType or item == types.DictType:
+                elif item == types.ListType or item == types.DictType or item == types.TupleType:
                     R.append(self.__mul_channel_ends(item))
                 else:
                     R.append(item)
@@ -131,7 +131,7 @@ class Process(threading.Thread):
                     R[key] = args[key].channel.reader() 
                 elif isinstance(args[key], ChannelEndWriter):
                     R[key] = args[key].channel.writer() 
-                elif args[key] == types.ListType or args[key] == types.DictType:
+                elif args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
                     R[key] = self.__mul_channel_ends(args[key])
             return R
         return args
