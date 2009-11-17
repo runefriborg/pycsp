@@ -14,37 +14,37 @@ def philosopher(id, left, right, down, up):
         while True:
             # think
             # Skip
+
             # get permission to sit down
             down(True)
 
-            # pick up the forks
-            Parallel(
-                Process(left, True),
-                Process(right, True)
-                )
+            # pick up the forks (left and right)
+            Alternation([
+                {(left,True):"right(True)"},
+                {(right,True):"left(True)"}
+                ]).execute()
 
             # eat
             eat += 1
 
-            # put down the forks
-            Parallel(
-                Process(left, True),
-                Process(right, True)
-                )
+            # put down the forks (left and right)
+            Alternation([
+                {(left,True):"right(True)"},
+                {(right,True):"left(True)"}
+                ]).execute()
 
             # notify security you have finished
             up(True)
 
     except ChannelRetireException:
-        retire(left)
-        retire(right)
         print 'philosopher '+str(id)+' has eaten '+str(eat)+' times'
+        retire(left, right)
 
 @process
 def fork(left, right):
     while True:
         Alternation([
-
+                    
                 # philosopher left picks up fork
                 # philosopher left puts down fork
                 {left:"left()"},

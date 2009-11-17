@@ -77,9 +77,11 @@ class Process(mp.Process):
         except ChannelPoisonException, e:
             # look for channels and channel ends
             self.__check_poison(self.args)
+            self.__check_poison(self.kwargs.values())
         except ChannelRetireException, e:
             # look for channel ends
             self.__check_retire(self.args)
+            self.__check_retire(self.kwargs.values())
 
     def __check_poison(self, args):
         for arg in args:
@@ -88,8 +90,8 @@ class Process(mp.Process):
             elif types.ListType == type(arg):
                 self.__check_poison(arg)
             elif types.DictType == type(arg):
-                self.__check_poison(arg.keys)
-                self.__check_poison(arg.values)
+                self.__check_poison(arg.keys())
+                self.__check_poison(arg.values())
 
     def __check_retire(self, args):
         for arg in args:
@@ -102,8 +104,8 @@ class Process(mp.Process):
             elif types.ListType == type(arg):
                 self.__check_retire(arg)
             elif types.DictType == type(arg):
-                self.__check_retire(arg.keys)
-                self.__check_retire(arg.values)
+                self.__check_retire(arg.keys())
+                self.__check_retire(arg.values())
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
