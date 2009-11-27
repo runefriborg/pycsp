@@ -12,8 +12,10 @@ See LICENSE.txt for licensing details (MIT License).
 import sys
 try: from greenlet import greenlet
 except ImportError, e:
-    sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
-    raise ImportError(e)
+    try: from py.magic import greenlet
+    except ImportError, e: 
+        sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
+        raise ImportError(e)
 
 # Imports
 from scheduling import Io, io
