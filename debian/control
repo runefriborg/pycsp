@@ -1,0 +1,16 @@
+Source: pycsp
+Section: devel
+Priority: optional
+Maintainer: Simon Bognolo
+Standards-Version: 3.8.3
+Build-Depends: debhelper (>=7.0.0), cdbs (>= 0.4.49), python-dev, python-support
+
+Package: pycsp
+Architecture: all
+Homepage: http://code.google.com/p/pycsp/
+Depends: ${misc:Depends}, ${python:Depends}, python-codespeak-lib, python (>=2.6), python-support, pyro (>=3.8) 
+Description: The PyCSP library has been completely rewritten
+ There is no backwards compatibility with versions prior to 0.5.0.
+ For now please look at the examples for documentation 
+ on how to use the library. 
+
