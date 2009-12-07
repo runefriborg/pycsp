@@ -163,6 +163,7 @@ class Channel:
         return None #Here we should handle that a read was cancled...
 
     def post_read(self, req):
+        self.check_termination()
         self.readqueue.append(req)
         self.match()
 
@@ -170,6 +171,7 @@ class Channel:
         self.readqueue.remove(req)
         
     def post_write(self, req):
+        self.check_termination()
         self.writequeue.append(req)
         self.match()
 
