@@ -17,14 +17,17 @@ except ImportError, e:
         sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
         raise ImportError(e)
 
+#from pycsp.greenlets import *
 # Imports
-from scheduling import Io, io
-from guard import Skip, Timeout
-from alternation import choice, Alternation
-from channel import Channel, ChannelPoisonException, ChannelRetireException
-from channelend import retire, poison, IN, OUT
-from process import Process, process, Sequence, Parallel, Spawn
-version = (0,6,2, 'greenlets')
+from pycsp.greenlets.scheduling import io
+from simulation import Simulation, Io, io
+from pycsp.greenlets.guard import Skip, Timeout
+from pycsp.greenlets.alternation import choice, Alternation
+from pycsp.greenlets.channel import Channel, ChannelPoisonException, ChannelRetireException
+from pycsp.greenlets.channelend import retire, poison, IN, OUT
+from pycsp.greenlets.process import process, Sequence, Parallel, Spawn
+from sprocess import Process
+version = (0,6,2, 'simulation')
 
 def test_suite():
     import unittest
