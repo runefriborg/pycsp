@@ -25,8 +25,8 @@ from pycsp.greenlets.guard import Skip, Timeout
 from pycsp.greenlets.alternation import choice, Alternation
 from pycsp.greenlets.channel import Channel, ChannelPoisonException, ChannelRetireException
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
+from process import Process
 from pycsp.greenlets.process import process, Sequence, Parallel, Spawn
-from sprocess import Process
 version = (0,6,2, 'simulation')
 
 def test_suite():

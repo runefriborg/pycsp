@@ -6,7 +6,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from pycsp.greenlets.process import Process, process 
+from pycsp.greenlets.process import Process 
 from simulation import Simulation
 
 
@@ -18,7 +18,7 @@ class Process(Process):
     See process.__doc__
     """
     def __init__(self, fn, *args, **kwargs):
- 			gProcess.__init__(self,fn,args,kwargs)       
+ 			Process.__init__(self,fn,args,kwargs)       
 			self.s = Simulation()
 
     
