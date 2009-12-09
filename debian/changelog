@@ -1,5 +1,5 @@
-pycsp (0.6.2-0.2) unstable; urgency=low
+pycsp (0.6.2-0.3) unstable; urgency=low
 
-  * Initial release. NMU (Closes: #121)
+  * Initial release. NMU (Closes: #125)
 
  -- Simon Bognolo <bognolo@gmail.com>  Thu, 19 Nov 2009 15:17:33 +0100
