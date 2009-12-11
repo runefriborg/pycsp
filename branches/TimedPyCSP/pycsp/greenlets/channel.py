@@ -9,11 +9,7 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 from scheduling import Scheduler
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from header import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -44,6 +40,7 @@ class ChannelReq:
             recipient.result=SUCCESS
             self.process.notify(DONE)
             recipient.process.notify(DONE)
+            logging.debug("made a succesful offer with msg %s,%s"%(type(self.msg),self.msg))
             return True
         return False
 
@@ -103,18 +100,18 @@ class Channel:
         self.check_termination()
 
         p = self.s.current
-        
         # If anyone is on the writequeue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
-        for w in self.writequeue:
-            if w.process.state == ACTIVE:
-                msg = w.msg
-                w.result = SUCCESS
-                w.process.state = DONE
-                if p != w.process:
-                    self.s.next.append(w.process)
-                return msg        
+        #for w in self.writequeue:
+        #    if w.process.state == ACTIVE:
+        #        msg = w.msg
+        #        w.result = SUCCESS
+        #        print "channel 126, DONE"
+        #        w.process.state = DONE
+        #        if p != w.process:
+        #            self.s.next.append(w.process)
+        #        return msg        
 
         p.setstate(ACTIVE)
         req = ChannelReq(p)
@@ -123,7 +120,8 @@ class Channel:
         self.remove_read(req)
 
         if req.result==SUCCESS:
-            return req.msg
+          logging.debug("got success in channel %s"%req.msg)
+          return req.msg
         
         self.check_termination()
             
@@ -135,18 +133,17 @@ class Channel:
         self.check_termination()
 
         p = self.s.current
-        
         # If anyone is on the readqueue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
-        for r in self.readqueue:
-            if r.process.state == ACTIVE:
-                r.msg = msg
-                r.result = SUCCESS
-                r.process.state = DONE
-                if p != r.process:
-                    self.s.next.append(r.process)
-                return True
+        #for r in self.readqueue:
+        #    if r.process.state == ACTIVE:
+        #        r.msg = msg
+        #        r.result = SUCCESS
+        #        r.process.state = DONE
+        #        if p != r.process:
+        #            self.s.next.append(r.process)
+        #        return True
 
         p.setstate(ACTIVE)
         req = ChannelReq(p,msg=msg)
@@ -163,6 +160,7 @@ class Channel:
         return None #Here we should handle that a read was cancled...
 
     def post_read(self, req):
+        logging.debug("in post_read")
         self.check_termination()
         self.readqueue.append(req)
         self.match()
@@ -179,10 +177,13 @@ class Channel:
         self.writequeue.remove(req)
 
     def match(self):
+        logging.debug("in offer read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
         if self.readqueue and self.writequeue:
             for w in self.writequeue:
                 for r in self.readqueue:
+                    logging.debug("in loop")
                     if w.offer(r):
+                        logging.debug("Did an offer")
                         # Did an offer
                         # We can guarantee, that there will always be someone to call offer,
                         # since everything is run in a single thread. Thus we break the loop.
@@ -232,10 +233,8 @@ class Channel:
                 for p in self.readqueue[:]: # ATOMIC copy
                     p.retire()
 
-            
     def status(self):
         print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
-
 
 # Run tests
 if __name__ == '__main__':

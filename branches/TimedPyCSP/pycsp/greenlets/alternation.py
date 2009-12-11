@@ -9,12 +9,9 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import inspect
 import types
-from channel import *
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from channel import ChannelPoisonException, ChannelRetireException, ChannelReq 
+from scheduling import Scheduler
+from header import *
 
 # Decorators
 def choice(func):
@@ -143,13 +140,12 @@ class Alternation:
 
         # If noone have offered a channelrequest, we wait.
         self.s.current.wait()
-
         act=None
         poison=False
         retire=False
         for req in reqs.keys():
-            _, c, op = reqs[req]
-
+            t, c, op = reqs[req]
+            logging.debug("res is %s, o is %s"%(state[req.result],state[op]))
             if req.result==SUCCESS:
                 act=req
             elif req.result==POISON:
@@ -166,7 +162,7 @@ class Alternation:
             raise ChannelPoisonException()
         if retire:
             raise ChannelRetireException()
-
+        #print act
         idx, c, op = reqs[act]
         return (idx, act, c, op)
 

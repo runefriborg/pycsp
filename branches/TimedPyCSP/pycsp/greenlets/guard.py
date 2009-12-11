@@ -11,11 +11,8 @@ import threading
 from scheduling import Scheduler
 from channel import ChannelReq
 from process import Process
+from header import *
 
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
 
 # Classes
 class Guard():

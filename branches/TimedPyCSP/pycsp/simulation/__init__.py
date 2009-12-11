@@ -19,14 +19,17 @@ except ImportError, e:
 
 #from pycsp.greenlets import *
 # Imports
-from pycsp.greenlets.scheduling import io
-from simulation import Simulation, Io, io
-from pycsp.greenlets.guard import Skip, Timeout
-from pycsp.greenlets.alternation import choice, Alternation
-from pycsp.greenlets.channel import Channel, ChannelPoisonException, ChannelRetireException
+#from pycsp.greenlets.scheduling import io
+from pycsp.greenlets.guard import Skip
+from guard import Timeout
+from pycsp.greenlets.alternation import choice
+from alternation import Alternation
+from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
+from channel import Channel
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
-from process import Process
-from pycsp.greenlets.process import process, Sequence, Parallel, Spawn
+from process import process, Process, Parallel, Spawn
+from pycsp.greenlets.process import Sequence
+from simulation import Simulation, Io, io
 version = (0,6,2, 'simulation')
 
 def test_suite():
