@@ -10,12 +10,20 @@ See LICENSE.txt for licensing details (MIT License).
 from greenlet import greenlet
 import threading
 import time
-
+from header import *
 # Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+ACTIVE, DONE, POISON, RETIRE, READ, WRITE, FAIL, SUCCESS = range(8)
 
+state =  {
+  0 : "ACTIVE",
+  1 : "DONE",
+  2 : "POISON",
+  3 : "RETIRE",
+  4 : "READ",
+  5 : "WRITE",
+  6 : "FAIL",
+  7 : "SUCCESS"
+  }
 
 # Decorators
 def io(func):
@@ -53,7 +61,7 @@ def io(func):
         io_thread = Io(func, *args, **kwargs)
 
         if io_thread.p == None:
-            # We are not executed from a greenlet
+          # We are not executed from a greenlet
             # Run io code and quit
             return func(*args, **kwargs)
         
@@ -172,6 +180,7 @@ class Scheduler(object):
     # Called from io thread
     def io_unblock(self, p):
         self.cond.acquire()
+        logging.debug("scheduling kalling DONE")
         p.notify(DONE, force=True)
         self.blocking -= 1
         self.cond.notify()
@@ -191,6 +200,7 @@ class Scheduler(object):
     # Queues are new, next, timers and "blocking io counter"
     # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
     def main(self):
+        logging.debug("entering scheduling main")
         while True:
             if self.timers and self.timers[0][0] < time.time():
                 _,self.current = self.timers.pop(0)

@@ -12,11 +12,8 @@ import types
 from scheduling import Scheduler
 from channel import ChannelPoisonException, ChannelRetireException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+import traceback
+from header import *
 
 # Decorators
 def process(func):
@@ -31,7 +28,7 @@ def process(func):
     True
     """
     def _call(*args, **kwargs):
-        return Process(func, *args, **kwargs)
+      return Process(func, *args, **kwargs)
     return _call
 
 # Classes
@@ -59,7 +56,9 @@ class Process():
     # Reschedule, without putting this process on either the next[] or the blocking[] list.
     def wait(self):
         while self.state == ACTIVE:
+            logging.debug("waiting")
             self.s.getNext().greenlet.switch()
+        logging.debug("done waiting, state=%s"%state[self.state])
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):
@@ -161,6 +160,9 @@ class Process():
                     R[key] = self.__mul_channel_ends(args[key])
             return R
         return args
+
+    #def __repr__(self):
+    #  return "process: %s,%s"%(self.fn,self.s)
 
 
 def Parallel(*plist):
