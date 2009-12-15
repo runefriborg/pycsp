@@ -11,19 +11,7 @@ from greenlet import greenlet
 import threading
 import time
 from header import *
-# Constants
-ACTIVE, DONE, POISON, RETIRE, READ, WRITE, FAIL, SUCCESS = range(8)
-
-state =  {
-  0 : "ACTIVE",
-  1 : "DONE",
-  2 : "POISON",
-  3 : "RETIRE",
-  4 : "READ",
-  5 : "WRITE",
-  6 : "FAIL",
-  7 : "SUCCESS"
-  }
+import heapq
 
 # Decorators
 def io(func):
@@ -89,9 +77,11 @@ class Io(threading.Thread):
 
         self.s = Scheduler()
         self.p = self.s.current
+        logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
 
     def run(self):
         self.retval = self.fn(*self.args, **self.kwargs)
+        logging.debug(self.s)
         self.s.io_unblock(self.p)
 
 
@@ -142,16 +132,17 @@ class Scheduler(object):
     # Called by MainThread
     def timer_wait(self, p, seconds):
         new_time = seconds + time.time()
-
-        inserted = False
-        for i in xrange(len(self.timers)):
-            if new_time < self.timers[i][0]:
-                self.timers.insert(i,(new_time, p))
-                inserted = True
-                break
-        
-        if not inserted:
-            self.timers.append((new_time, p))
+        #heapify(self.timers)
+        heapq.heappush(self.timers,(new_time,p))
+        #inserted = False
+        #for i in xrange(len(self.timers)):
+        #    if new_time < self.timers[i][0]:
+        #        self.timers.insert(i,(new_time, p))
+        #        inserted = True
+        #        break
+        #
+        #if not inserted:
+        #    self.timers.append((new_time, p))
 
     # Called by MainThread
     def timer_cancel(self, p):
@@ -159,6 +150,7 @@ class Scheduler(object):
             if self.timers[i][1] == p:
                 self.timers.pop(i)
                 break
+        heapq.heapify(self.timers)
 
     # Called by threading.Timer()
     def timer_notify(self):
@@ -180,7 +172,6 @@ class Scheduler(object):
     # Called from io thread
     def io_unblock(self, p):
         self.cond.acquire()
-        logging.debug("scheduling kalling DONE")
         p.notify(DONE, force=True)
         self.blocking -= 1
         self.cond.notify()
@@ -200,10 +191,11 @@ class Scheduler(object):
     # Queues are new, next, timers and "blocking io counter"
     # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
     def main(self):
-        logging.debug("entering scheduling main")
+        logging.debug("entering main, current:%s"%self.current)
         while True:
             if self.timers and self.timers[0][0] < time.time():
-                _,self.current = self.timers.pop(0)
+                _,self.current = heapq.heappop(self.timers)
+                logging.debug("main:switching to timer %s"%self.current)
                 self.current.greenlet.switch()
             elif self.new:
                 if len(self.new) > 1000:
@@ -212,10 +204,12 @@ class Scheduler(object):
                 else:
                     # Pop from beginning to be more fair
                     self.current = self.new.pop(0)
+                logging.debug("main:switching to new %s"%self.current)
                 self.current.greenlet.switch()
             elif self.next:
                 # Pop from the beginning
                 self.current = self.next.pop(0)
+                logging.debug("main:switching to next %s"%self.current)
                 self.current.greenlet.switch()
 
             # We enter a critical region, since timer threads or blocking io threads,

@@ -103,15 +103,14 @@ class Channel:
         # If anyone is on the writequeue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
-        #for w in self.writequeue:
-        #    if w.process.state == ACTIVE:
-        #        msg = w.msg
-        #        w.result = SUCCESS
-        #        print "channel 126, DONE"
-        #        w.process.state = DONE
-        #        if p != w.process:
-        #            self.s.next.append(w.process)
-        #        return msg        
+        for w in self.writequeue:
+            if w.process.state == ACTIVE:
+                msg = w.msg
+                w.result = SUCCESS
+                w.process.state = DONE
+                if p != w.process:
+                    self.s.next.append(w.process)
+                return msg        
 
         p.setstate(ACTIVE)
         req = ChannelReq(p)
@@ -136,14 +135,14 @@ class Channel:
         # If anyone is on the readqueue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
-        #for r in self.readqueue:
-        #    if r.process.state == ACTIVE:
-        #        r.msg = msg
-        #        r.result = SUCCESS
-        #        r.process.state = DONE
-        #        if p != r.process:
-        #            self.s.next.append(r.process)
-        #        return True
+        for r in self.readqueue:
+            if r.process.state == ACTIVE:
+                r.msg = msg
+                r.result = SUCCESS
+                r.process.state = DONE
+                if p != r.process:
+                    self.s.next.append(r.process)
+                return True
 
         p.setstate(ACTIVE)
         req = ChannelReq(p,msg=msg)
