@@ -50,3 +50,21 @@ Check that pycsp can be imported and run a few examples.
 
 Go to [http://code.google.com/p/pycsp/downloads/list Downloads ], upload and
 set as Featured.
+
+== Create deb package for PPA ==
+Its required to have a debian folder.
+from trunk  compile the the source and put it in parent folder
+{{{
+python setup.py sdist --dist-dir=../
+}}}
+Rename the pycsp_'version'.tar.gz file in the parent folder to pycsp_'version'.orig.tar.gz
+
+From folder where the debian folder exist run:
+{{{
+debuild -i -I -S
+}}}
+This produces a changes file and it can now be uploaded to launchpad. 
+In the parent folder run
+{{{
+dput -f ppa:pycsp/ppa pycsp_'version'_source.changes 
+}}}
