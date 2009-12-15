@@ -35,10 +35,10 @@ version = (0,6,2, 'simulation')
 def test_suite():
     import unittest
     import doctest
-    import scheduling, guard, alternation, channel, channelend, process
+    import simulation, guard, alternation, channel, process
 
     suite = unittest.TestSuite()
-    for mod in scheduling, guard, alternation, channel, channelend, process:
+    for mod in simulation, guard, alternation, channel, process:
         suite.addTest(doctest.DocTestSuite(mod))
     suite.addTest(doctest.DocTestSuite())
     return suite

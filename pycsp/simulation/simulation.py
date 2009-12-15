@@ -1,49 +1,21 @@
 # Imports
+#import sys
 from greenlet import greenlet
 import threading
 import time
-from pycsp.greenlets.scheduling import Scheduler as greenletsScheduler, Io as greenletsIo
-
+import heapq
+from pycsp.greenlets.scheduling import Scheduler as greenletsScheduler, Io as greenletsIo, io as greenletsio
+from pycsp.greenlets.header import *
 # Decorators
 def io(func):
-    """
-    @io decorator for blocking io operations.
-    Execution is moved to seperate threads and the current greenlet is yielded.
-
-    >>> from __init__ import *
-
-    >>> @io
-    ... def sleep(n):
-    ...     import time
-    ...     time.sleep(n)
-
-    >>> @process
-    ... def P1():
-    ...     sleep(0.05)
-
-    Sleeping for 10 times 0.05 seconds, which equals roughly half a second
-    in the sequential case.
-    >>> time_start = time.time()
-    >>> Sequence([P1() for i in range(10)])
-    >>> diff = time.time() - time_start
-    >>> diff >= 0.5 and diff < 0.6
-    True
-
-    In parallel, it should be close to 0.05 seconds.
-    >>> time_start = time.time()
-    >>> Parallel([P1() for i in range(10)])
-    >>> diff = time.time() - time_start
-    >>> diff >= 0.05 and diff < 0.1
-    True
-    """
     def _call_io(*args, **kwargs):
         io_thread = Io(func, *args, **kwargs)
-
+        logging.debug("")
         if io_thread.p == None:
             # We are not executed from a greenlet
-            # Run io code and quit
+            # Run io code and quiti
+            logging.debug("warning run io and exit")
             return func(*args, **kwargs)
-        
         io_thread.s.io_block_prepare(io_thread.p)
         io_thread.start()
         io_thread.s.io_block_wait(io_thread.p)
@@ -54,16 +26,35 @@ def io(func):
 
 # Classes
 class Io(greenletsIo):
-    """ Io(fn, *args, **kwargs)
-    It is recommended to use the @io decorator, to create Io instances.
-    See io.__doc__
-    """
     def __init__(self, fn, *args, **kwargs):
       greenletsIo.__init__(self,fn,*args,**kwargs)
       self.s = Simulation()
+      self.p = self.s.current
+      logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
 
 class Simulation(greenletsScheduler):
+  """
+  Scheduler is a singleton class.
+  
+  It is optimized for fast switching and is not fair.
+  
+  >>> A = Simulation()
+  >>> B = Simulation()
+  >>> A == B
+  True
+  """
+   
   __instance = None  # the unique instance
+
+  def __new__(cls, *args, **kargs):
+    return cls.getInstance(cls, *args, **kargs)
+  
+  def __init__(self):
+    greenletsScheduler.__init__(self)
+    pass
+
+  def now(self):
+    return self._t 
 
   def getInstance(cls, *args, **kargs):
     '''Static method to have a reference to **THE UNIQUE** instance'''
@@ -81,6 +72,7 @@ class Simulation(greenletsScheduler):
       # Timer specific  value = (activation time, process)
       # On update we do a sort based on the activation time
       cls.__instance.timers = []
+
       # Io specific
       cls.__instance.cond = threading.Condition()
       cls.__instance.blocking = 0
@@ -88,27 +80,20 @@ class Simulation(greenletsScheduler):
       cls.__instance.endtime = 0
       cls.__instance._t = 0
       cls.__instance.stop = False
+
     return cls.__instance
-
   getInstance = classmethod(getInstance)
-
-  def __init__(self):
-    pass
-
-  def __new__(cls, *args, **kargs):
-    return cls.getInstance(cls, *args, **kargs)
-
-  def now(self):
-    return self._t 
 
   # Main loop
   # When all queues are empty all greenlets have been executed.
   # Queues are new, next, timers and "blocking io counter"
   # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
   def main(self):
+      logging.debug("entering main, current:%s"%self.current)
       while True:
           if self.timers and self.timers[0][0] < time.time():
-              _,self.current = self.timers.pop(0)
+              _,self.current = heapq.heappop(self.timers)
+              logging.debug("main:switching to timer %s"%self.current)
               self.current.greenlet.switch()
           elif self.new:
               if len(self.new) > 1000:
@@ -117,10 +102,12 @@ class Simulation(greenletsScheduler):
               else:
                   # Pop from beginning to be more fair
                   self.current = self.new.pop(0)
+              logging.debug("main:switching to new %s, self:%s"%(self.current.fn,self))
               self.current.greenlet.switch()
           elif self.next:
               # Pop from the beginning
               self.current = self.next.pop(0)
+              logging.debug("main:switching to next %s"%self.current)
               self.current.greenlet.switch()
 
           # We enter a critical region, since timer threads or blocking io threads,
@@ -151,3 +138,10 @@ class Simulation(greenletsScheduler):
                   return
           self.cond.release()
 
+
+
+io.__doc__ = greenletsio.__doc__
+# Run tests
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
