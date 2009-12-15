@@ -29,7 +29,9 @@ from channel import Channel
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
 from process import process, Process, Parallel, Spawn
 from pycsp.greenlets.process import Sequence
-from simulation import Simulation, Io, io
+from simulation import Simulation, Io, io, Now
+
+from showtree import *
 version = (0,6,2, 'simulation')
 
 def test_suite():

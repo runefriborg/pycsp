@@ -35,6 +35,7 @@ def io(func):
     >>> time_start = time.time()
     >>> Sequence([P1() for i in range(10)])
     >>> diff = time.time() - time_start
+    >>> logging.debug("diff:0.5 <=  %f < 0.6"%diff)
     >>> diff >= 0.5 and diff < 0.6
     True
 
@@ -42,6 +43,7 @@ def io(func):
     >>> time_start = time.time()
     >>> Parallel([P1() for i in range(10)])
     >>> diff = time.time() - time_start
+    >>> #logging.warning("diff:0.05 <=  %f < 0.6"%diff)
     >>> diff >= 0.05 and diff < 0.1
     True
     """
@@ -77,11 +79,10 @@ class Io(threading.Thread):
 
         self.s = Scheduler()
         self.p = self.s.current
-        logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
+        #logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
 
     def run(self):
         self.retval = self.fn(*self.args, **self.kwargs)
-        logging.debug(self.s)
         self.s.io_unblock(self.p)
 
 
@@ -131,21 +132,14 @@ class Scheduler(object):
 
     # Called by MainThread
     def timer_wait(self, p, seconds):
+        logging.debug("calling timer_wait")
         new_time = seconds + time.time()
         #heapify(self.timers)
         heapq.heappush(self.timers,(new_time,p))
-        #inserted = False
-        #for i in xrange(len(self.timers)):
-        #    if new_time < self.timers[i][0]:
-        #        self.timers.insert(i,(new_time, p))
-        #        inserted = True
-        #        break
-        #
-        #if not inserted:
-        #    self.timers.append((new_time, p))
 
     # Called by MainThread
     def timer_cancel(self, p):
+        logging.debug("timer_cancel")
         for i in xrange(len(self.timers)):
             if self.timers[i][1] == p:
                 self.timers.pop(i)
@@ -154,12 +148,14 @@ class Scheduler(object):
 
     # Called by threading.Timer()
     def timer_notify(self):
+        logging.debug("timer_notify")
         self.cond.acquire()
         self.cond.notify()
         self.cond.release()
 
     # Called from MainThread
     def io_block_prepare(self, p):
+        logging.debug("io_blockprepare")
         self.cond.acquire()
         self.blocking += 1
         p.setstate(ACTIVE)
@@ -167,10 +163,14 @@ class Scheduler(object):
         
     # Called from MainThread
     def io_block_wait(self, p):
+        logging.debug("io_block_wait process %s"%p)
+        logging.info(self)
         p.wait()
+        logging.debug("")
 
     # Called from io thread
     def io_unblock(self, p):
+        logging.debug("io_unblock")
         self.cond.acquire()
         p.notify(DONE, force=True)
         self.blocking -= 1

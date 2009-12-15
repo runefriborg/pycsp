@@ -13,6 +13,9 @@ import heapq
 import pycsp.greenlets.scheduling
 from pycsp.greenlets.header import *
 
+def Now():
+  return Simulation()._t 
+
 # Decorators
 def io(func):
     def _call_io(*args, **kwargs):
@@ -26,7 +29,7 @@ def io(func):
         io_thread.s.io_block_prepare(io_thread.p)
         io_thread.start()
         io_thread.s.io_block_wait(io_thread.p)
-
+        logging.debug("returning from io thread")
         # Return value from function, set by Io class.
         return io_thread.retval
     return _call_io
@@ -61,9 +64,6 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
     pycsp.greenlets.scheduling.Scheduler.__init__(self)
     pass
 
-  def now(self):
-    return self._t 
-
   def getInstance(cls, *args, **kargs):
     '''Static method to have a reference to **THE UNIQUE** instance'''
     if cls.__instance is None:
@@ -92,6 +92,13 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
     return cls.__instance
   getInstance = classmethod(getInstance)
 
+  # Called by MainThread
+  def timer_wait(self, p, seconds):
+    """using seconds as abitrary span of time """
+    new_time = seconds + Now()
+    logging.warning("calling timer_wait, time is %f, will wait until %f"%(Now(),new_time))
+    heapq.heappush(self.timers,(new_time,p))
+ 
   # Main loop
   # When all queues are empty all greenlets have been executed.
   # Queues are new, next, timers and "blocking io counter"
@@ -99,10 +106,15 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
   def main(self):
       logging.debug("entering main, current:%s"%self.current)
       while True:
-          if self.timers and self.timers[0][0] < time.time():
-              _,self.current = heapq.heappop(self.timers)
+          if self.timers:
+            time = heapq.heappop(self.timers)
+            assert time[0] >= Now()
+            if time[0]  == Now():
+              self.current = time[1] 
               logging.debug("main:switching to timer %s"%self.current)
               self.current.greenlet.switch()
+            else :
+               heapq.push(self.timers, time)
           elif self.new:
               if len(self.new) > 1000:
                   # Pop from end, if the new list might be large.
@@ -120,32 +132,31 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
 
           # We enter a critical region, since timer threads or blocking io threads,
           # might try to update the internal queues.
+          logging.debug("acquire cond")
           self.cond.acquire()
+          logging.debug("main: acquired cond. len of blocking=%d, next=%d,new=%d"%(self.blocking,len(self.next),len(self.new)))
           if not (self.next or self.new):
-              # Waiting on blocking processes or all processes have finished!
-              if self.timers:
-                  # Set timer to lowest activation time
-                  seconds = self.timers[0][0] - time.time()
-                  if seconds > 0:
-                      t = threading.Timer(seconds, self.timer_notify)
+            # Waiting on blocking processes
+            if self.blocking > 0:
+              # Now go to sleep
+              logging.debug("waiting for blocing processes to call notify")
+              self.cond.wait()
 
-                      # We don't worry about cancelling, since it makes no difference if timer_notify
-                      # is called one more time.
-                      t.start()
+          #If there exist only processes in timers we can increment
+          if  not (self.next or self.new or self.blocking): 
+            if self.timers:
+              # inc timer to lowest activation time
+              self._t = self.timers[0][0]
+              logging.debug("incrementing time to %f"%self._t)
+          
+            else:
+              # Execution finished!
+              self.cond.release()
+              logging.debug("exit")
+              return
 
-                      # Now go to sleep
-                      self.cond.wait()
-
-              elif self.blocking > 0:
-
-                  # Now go to sleep
-                  self.cond.wait()
-              else:
-                  # Execution finished!
-                  self.cond.release()
-                  return
           self.cond.release()
-
+          logging.debug("releases cond")
 
 
 io.__doc__ = pycsp.greenlets.io.__doc__
