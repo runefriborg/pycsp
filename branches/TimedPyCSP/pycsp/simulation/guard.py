@@ -8,16 +8,19 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 from simulation import Simulation
-from pycsp.greenlets.guard import Timeout as greenletsTimeout
+import pycsp.greenlets.guard 
 
-class Timeout(greenletsTimeout):
+class Timeout(pycsp.greenlets.Timeout):
     def __init__(self, seconds):
-        greenletsTimeout.__init__(self, seconds)
+        pycsp.greenlets.Timeout.__init__(self, seconds)
         self.s = Simulation()
         
         
 # Run tests
-Timeout.__doc__ = greenletsTimeout.__doc__
+Timeout.__doc__ = pycsp.greenlets.Timeout.__doc__
+def testsuite():
+  return
+testsuite.__doc__ = pycsp.greenlets.Skip.__doc__
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

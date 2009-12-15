@@ -1,11 +1,18 @@
 # Imports
-#import sys
-from greenlet import greenlet
+import sys
+try: from greenlet import greenlet
+except ImportError, e:
+    try: from py.magic import greenlet
+    except ImportError, e: 
+        sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
+        raise ImportError(e)
 import threading
 import time
 import heapq
-from pycsp.greenlets.scheduling import Scheduler as greenletsScheduler, Io as greenletsIo, io as greenletsio
+#from pycsp.greenlets.scheduling import Scheduler as greenletsScheduler, Io as greenletsIo, io as greenletsio
+import pycsp.greenlets.scheduling
 from pycsp.greenlets.header import *
+
 # Decorators
 def io(func):
     def _call_io(*args, **kwargs):
@@ -25,14 +32,15 @@ def io(func):
     return _call_io
 
 # Classes
-class Io(greenletsIo):
+class Io(pycsp.greenlets.Io):
     def __init__(self, fn, *args, **kwargs):
-      greenletsIo.__init__(self,fn,*args,**kwargs)
+      pycsp.greenlets.Io.__init__(self,fn,*args,**kwargs)
       self.s = Simulation()
       self.p = self.s.current
       logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
 
-class Simulation(greenletsScheduler):
+#print dir(pycsp.greenlets.scheduling)
+class Simulation(pycsp.greenlets.scheduling.Scheduler):
   """
   Scheduler is a singleton class.
   
@@ -50,7 +58,7 @@ class Simulation(greenletsScheduler):
     return cls.getInstance(cls, *args, **kargs)
   
   def __init__(self):
-    greenletsScheduler.__init__(self)
+    pycsp.greenlets.scheduling.Scheduler.__init__(self)
     pass
 
   def now(self):
@@ -140,7 +148,7 @@ class Simulation(greenletsScheduler):
 
 
 
-io.__doc__ = greenletsio.__doc__
+io.__doc__ = pycsp.greenlets.io.__doc__
 # Run tests
 if __name__ == '__main__':
     import doctest

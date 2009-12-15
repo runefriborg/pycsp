@@ -7,17 +7,25 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-from pycsp.greenlets import Alternation as greenletsAlternation
+import pycsp.greenlets.alternation
 from simulation import Simulation
 
-class Alternation(greenletsAlternation):
-
+class Alternation(pycsp.greenlets.Alternation):
   def __init__(self,guards):
-    greenletsAlternation.__init__(self,guards)
+    pycsp.greenlets.Alternation.__init__(self,guards)
     self.s = Simulation()
 
-Alternation.__doc__ = greenletsAlternation.__doc__
 # Run tests
+Alternation.__doc__ = pycsp.greenlets.Alternation.__doc__
+
+def testsuite():
+  return
+testsuite.__doc__ = pycsp.greenlets.choice.__doc__
+testsuite.__doc__ += '\n'  
+testsuite.__doc__ += pycsp.greenlets.Alternation.execute.__doc__
+testsuite.__doc__ += '\n'
+testsuite.__doc__ += pycsp.greenlets.Alternation.select.__doc__
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
