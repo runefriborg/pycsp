@@ -18,11 +18,11 @@ def choice(func):
     """
     Decorator for creating choice objets
     
+    >>> from __init__ import *
     >>> @choice
     ... def action(__channel_input=None):
     ...     print 'Hello'
 
-    >>> from guard import Skip
     >>> Alternation([{Skip():action()}]).execute()
     Hello
     """

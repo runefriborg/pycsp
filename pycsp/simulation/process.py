@@ -6,7 +6,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from pycsp.greenlets.process import process as greenletsprocess, Process as GreenletsProcess,Parallel as greenletsParallel, Spawn as greenletsSpawn
+import pycsp.greenlets.process
 from simulation import Simulation
 
 # Decorators
@@ -16,9 +16,9 @@ def process(func):
     return _call
 
 # Classes
-class Process(GreenletsProcess):
+class Process(pycsp.greenlets.Process):
     def __init__(self, fn, *args, **kwargs):
-      GreenletsProcess.__init__(self,fn,*args,**kwargs)
+      pycsp.greenlets.Process.__init__(self,fn,*args,**kwargs)
       self.s = Simulation()
 
 def Parallel(*plist):
@@ -45,10 +45,14 @@ def _parallel(plist, block = True):
     if block:
         s.join(processes)
 
+
 # Run tests
-process.__doc = greenletsprocess.__doc__
-Parallel.__doc__ = greenletsParallel.__doc__
-Spawn.__doc = greenletsSpawn.__doc__
+process.__doc = pycsp.greenlets.process.__doc__
+Parallel.__doc__ = pycsp.greenlets.Parallel.__doc__
+Spawn.__doc__ = pycsp.greenlets.Spawn.__doc__
+def test_suite():
+  return
+test_suite.__doc__ = pycsp.greenlets.Sequence.__doc__
 
 if __name__ == '__main__':
   import doctest
