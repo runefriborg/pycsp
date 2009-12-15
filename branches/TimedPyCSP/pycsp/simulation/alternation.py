@@ -15,3 +15,10 @@ class Alternation(greenletsAlternation):
   def __init__(self,guards):
     greenletsAlternation.__init__(self,guards)
     self.s = Simulation()
+
+Alternation.__doc__ = greenletsAlternation.__doc__
+# Run tests
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+    

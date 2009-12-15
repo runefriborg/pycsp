@@ -16,6 +16,7 @@ class Channel(gChannel):
         self.s = Simulation()
 
 # Run tests
+Channel.__doc__ = gChannel.__doc__
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
