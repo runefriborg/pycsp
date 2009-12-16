@@ -105,7 +105,10 @@ class Scheduler(object):
 
     def __init__(self):
         pass
-    
+ 
+    def decompose(self):
+      self.__Scheduler__instance = None
+
     def getInstance(cls, *args, **kargs):
         '''Static method to have a reference to **THE UNIQUE** instance'''
         if cls.__instance is None:

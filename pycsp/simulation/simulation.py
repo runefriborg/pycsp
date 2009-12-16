@@ -9,12 +9,18 @@ except ImportError, e:
 import threading
 import time
 import heapq
+from showtree import *
 #from pycsp.greenlets.scheduling import Scheduler as greenletsScheduler, Io as greenletsIo, io as greenletsio
 import pycsp.greenlets.scheduling
 from pycsp.greenlets.header import *
 
 def Now():
   return Simulation()._t 
+
+def Wait(seconds):
+  """Wrapper function for timer_wait. Will schedule the process for later activation and then switch active process. """
+  Simulation().timer_wait(Simulation().current, seconds)
+  Simulation().getNext().greenlet.switch()
 
 # Decorators
 def io(func):
@@ -42,7 +48,6 @@ class Io(pycsp.greenlets.Io):
       self.p = self.s.current
       logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
 
-#print dir(pycsp.greenlets.scheduling)
 class Simulation(pycsp.greenlets.scheduling.Scheduler):
   """
   Scheduler is a singleton class.
@@ -64,8 +69,13 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
     pycsp.greenlets.scheduling.Scheduler.__init__(self)
     pass
 
+  def decompose(self):
+    pycsp.greenlets.scheduling.Scheduler.decompose(self)
+    Simulation._Simulation__instance = None
+
   def getInstance(cls, *args, **kargs):
     '''Static method to have a reference to **THE UNIQUE** instance'''
+    logging.debug("getInstance, %s"%cls.__instance)
     if cls.__instance is None:
       # (Some exception may be thrown...)
       # # Initialize **the unique** instance
@@ -94,11 +104,12 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
 
   # Called by MainThread
   def timer_wait(self, p, seconds):
-    """using seconds as abitrary span of time """
+    """Using seconds as abitrary span of time. 
+       Will cause the process to sleep for the amount of time before resuming operation
+    """
     new_time = seconds + Now()
-    logging.warning("calling timer_wait, time is %f, will wait until %f"%(Now(),new_time))
     heapq.heappush(self.timers,(new_time,p))
- 
+
   # Main loop
   # When all queues are empty all greenlets have been executed.
   # Queues are new, next, timers and "blocking io counter"
@@ -106,15 +117,16 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
   def main(self):
       logging.debug("entering main, current:%s"%self.current)
       while True:
-          if self.timers:
-            time = heapq.heappop(self.timers)
-            assert time[0] >= Now()
-            if time[0]  == Now():
+          # By definition of the heap, the first element is always the smallest. 
+          if self.timers and self.timers[0][0] <= Now():
+            # We should not be able to have processes in timers with a launchtime in the past.
+            # Users can forces this to happen be defining a negative waittime. should we guard against it? 
+            assert self.timers[0][0] >= Now()
+            if self.timers[0][0] == Now():
+              time = heapq.heappop(self.timers)
               self.current = time[1] 
               logging.debug("main:switching to timer %s"%self.current)
               self.current.greenlet.switch()
-            else :
-               heapq.push(self.timers, time)
           elif self.new:
               if len(self.new) > 1000:
                   # Pop from end, if the new list might be large.
