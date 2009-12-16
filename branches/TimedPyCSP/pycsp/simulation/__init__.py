@@ -27,9 +27,9 @@ from alternation import Alternation
 from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
 from channel import Channel
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
-from process import process, Process, Parallel, Spawn
+from process import process, Process, Parallel, Spawn 
 from pycsp.greenlets.process import Sequence
-from simulation import Simulation, Io, io, Now
+from simulation import Simulation, Io, io, Now, Wait
 
 from showtree import *
 version = (0,6,2, 'simulation')
@@ -45,10 +45,27 @@ def test_suite():
     suite.addTest(doctest.DocTestSuite())
     return suite
 
+def simulation_suite():
+    import unittest
+    import simulationtest
+
+    suite = unittest.TestSuite()
+    for test in simulationtest:
+      suite.addTest(test)
+    return suite
+
 # Run tests
 if __name__ == '__main__':
     import unittest
+    import test_simulation
 
     suite = test_suite()
+    simulationsuite = unittest.TestLoader().loadTestsFromTestCase(test_simulation.SimulationTestCase)
+
+    alltests = unittest.TestSuite([suite,simulationsuite])
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+    runner.run(alltests)
+    #runner.run(simulationsuite)
+  
+    
+

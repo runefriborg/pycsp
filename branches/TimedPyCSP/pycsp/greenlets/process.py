@@ -50,6 +50,9 @@ class Process():
         self.s = Scheduler()
         self.executed = False
 
+    def __repr__(self):
+      return "%s%s"%(self.fn.func_name,self.args)
+      
     def setstate(self, new_state):
         self.state = new_state
 
