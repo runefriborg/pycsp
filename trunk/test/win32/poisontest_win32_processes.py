@@ -1,6 +1,6 @@
 """
-Copyright (c) 2009 John Markus Bjørndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>>
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
