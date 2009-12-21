@@ -26,11 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import inspect
 import types
 from channel import *
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from const import *
 
 # Decorators
 def choice(func):

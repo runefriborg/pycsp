@@ -30,11 +30,7 @@ import multiprocessing as mp
 import mem
 from configuration import *
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from const import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 

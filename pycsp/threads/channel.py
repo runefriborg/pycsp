@@ -25,11 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import threading
 from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from const import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 

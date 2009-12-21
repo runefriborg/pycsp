@@ -32,11 +32,7 @@ from alternation import *
 from channel import *
 from channelend import *
 from guard import *
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from const import *
 
 # Classes
 class PyroServerProcess(threading.Thread):
