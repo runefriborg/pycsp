@@ -162,23 +162,23 @@ class Alternation:
         retire=False
         for req in reqs.keys():
             _, c, op = reqs[req]
-
-            if req.result==SUCCESS:
-                act=req
-            elif req.result==POISON:
-                poison=True
-            elif req.result==RETIRE:
-                retire=True
-
             if op==READ:
                 c.remove_read(req)
             else:
                 c.remove_write(req)            
 
-        if poison:
-            raise ChannelPoisonException()
-        if retire:
-            raise ChannelRetireException()
+            if req.result==SUCCESS:
+                act=req
+            if req.result==POISON:
+                poison=True
+            if req.result==RETIRE:
+                retire=True
+
+        if not act:
+            if poison:
+                raise ChannelPoisonException()
+            if retire:
+                raise ChannelRetireException()
 
         idx, c, op = reqs[act]
         return (idx, act, c, op)
