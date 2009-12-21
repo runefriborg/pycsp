@@ -25,7 +25,7 @@ import time
 import random
 
 @choice
-def action(__channel_input=None):
+def action(channel_input=None):
     print '.',
 
 @process

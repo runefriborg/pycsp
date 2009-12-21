@@ -40,7 +40,7 @@ def choice(func):
     
     >>> from __init__ import *
     >>> @choice
-    ... def action(__channel_input=None):
+    ... def action(channel_input=None):
     ...     print 'Hello'
 
     >>> from guard import Skip
@@ -62,10 +62,10 @@ class Choice:
         self.args = args
         self.kwargs = kwargs
 
-    def invoke_on_input(self, __channel_input):
-        self.kwargs['__channel_input'] = __channel_input
+    def invoke_on_input(self, channel_input):
+        self.kwargs['channel_input'] = channel_input
         self.fn(*self.args, **self.kwargs)
-        del self.kwargs['__channel_input']
+        del self.kwargs['channel_input']
 
     def invoke_on_output(self):
         self.fn(*self.args, **self.kwargs)

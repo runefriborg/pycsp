@@ -38,7 +38,7 @@ def choice(func):
     Decorator for creating choice objets
     
     >>> @choice
-    ... def action(__channel_input=None):
+    ... def action(channel_input=None):
     ...     print 'Hello'
 
     >>> from guard import Skip
@@ -60,10 +60,10 @@ class Choice:
         self.args = args
         self.kwargs = kwargs
 
-    def invoke_on_input(self, __channel_input):
-        self.kwargs['__channel_input'] = __channel_input
+    def invoke_on_input(self, channel_input):
+        self.kwargs['channel_input'] = channel_input
         self.fn(*self.args, **self.kwargs)
-        del self.kwargs['__channel_input']
+        del self.kwargs['channel_input']
 
     def invoke_on_output(self):
         self.fn(*self.args, **self.kwargs)
@@ -92,8 +92,8 @@ class Alternation:
     ...     L = []
     ...
     ...     @choice
-    ...     def action(__channel_input):
-    ...         L.append(__channel_input)
+    ...     def action(channel_input):
+    ...         L.append(channel_input)
     ...
     ...     alt = Alternation([{cin1:action(), cin2:action()}])
     ...     for i in range(n):
@@ -233,8 +233,8 @@ class Alternation:
         ... def P2(cin1, cin2, n):
         ...     L1,L2 = [],[]
         ...     alt = Alternation([{
-        ...               cin1:"L1.append(__channel_input)",
-        ...               cin2:"L2.append(__channel_input)"
+        ...               cin1:"L1.append(channel_input)",
+        ...               cin2:"L2.append(channel_input)"
         ...           }])
         ...     for i in range(n):
         ...         alt.execute()
@@ -265,7 +265,7 @@ class Alternation:
                     if op==WRITE:
                         action()
                     else:
-                        action(__channel_input=msg)
+                        action(channel_input=msg)
 
             # Compiling and executing string
             elif type(action) == types.StringType:
@@ -277,7 +277,7 @@ class Alternation:
                 f_globals = processframe.f_globals
                 f_locals = processframe.f_locals
                 if op==READ:
-                    f_locals.update({'__channel_input':msg})
+                    f_locals.update({'channel_input':msg})
 
                 # Execute action
                 exec(code, f_globals, f_locals)
