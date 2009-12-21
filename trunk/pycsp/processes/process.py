@@ -31,11 +31,7 @@ import sys
 
 from channel import ChannelPoisonException, ChannelRetireException, Channel, ShmManager
 from channelend import ChannelEndRead, ChannelEndWrite
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from const import *
 
 # Decorators
 def process(func):
