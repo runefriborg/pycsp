@@ -1,3 +1,11 @@
+0.6.2 - ??
+----------
+* Fixed a poor design choice. The naming __channel_input can have difficult side-effects
+  in Python, thus __channel_input is renamed to channel_input. Sorry for the inconvenience.
+* Removed the Channel.status method.
+* Fixed bug in propagation of poison / retire.
+
+
 0.6.1 - 0.6.2
 ----------
 * Changed the reserved variable name for reading channel inputs from ChannelInput
