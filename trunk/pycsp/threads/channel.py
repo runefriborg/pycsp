@@ -170,7 +170,7 @@ class Channel:
         self.check_termination()
 
         print 'We should not get here in read!!!', req.status.state
-        return None #Here we should handle that a read was cancled...
+        return None
 
     
     def _write(self, msg):
@@ -184,7 +184,7 @@ class Channel:
         self.check_termination()
 
         print 'We should not get here in write!!!', req.status
-        return #Here we should handle that a read was cancled...
+        return
 
     def post_read(self, req):
         self.check_termination()
