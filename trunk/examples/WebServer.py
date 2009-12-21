@@ -98,8 +98,8 @@ def Sleep(id, register):
 def Dispatcher(register, inc):
     services = {}
 
-    def dispatch(__channel_input):
-        (GET, result) = __channel_input
+    def dispatch(channel_input):
+        (GET, result) = channel_input
 
         print 'Dispather got:',GET,result
 
@@ -118,8 +118,8 @@ def Dispatcher(register, inc):
         else:
             result("Service '"+str(service_id)+"' not found!<br>")
         
-    def add_service(__channel_input):
-        (id, request) = __channel_input
+    def add_service(channel_input):
+        (id, request) = channel_input
         if services.has_key(id):
             services[id].append(request)
         else:

@@ -24,7 +24,7 @@ import time
 import random
 
 @choice
-def action(id, __channel_input=None):
+def action(id, channel_input=None):
     print id,
 
 @process

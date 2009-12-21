@@ -409,8 +409,8 @@ class Alternation:
     >>> L = []
 
     >>> @choice 
-    ... def action(__channel_input):
-    ...     L.append(__channel_input)
+    ... def action(channel_input):
+    ...     L.append(channel_input)
 
     >>> @process
     ... def P1(cout, n=5):
@@ -520,8 +520,8 @@ class Alternation:
         >>> @process
         ... def P2(cin1, cin2, n):
         ...     alt = Alternation([{
-        ...               cin1:"L1.append(__channel_input)",
-        ...               cin2:"L2.append(__channel_input)"
+        ...               cin1:"L1.append(channel_input)",
+        ...               cin2:"L2.append(channel_input)"
         ...           }])
         ...     for i in range(n):
         ...         alt.execute()
@@ -553,7 +553,7 @@ class Alternation:
                     if op==WRITE:
                         action()
                     else:
-                        action(__channel_input=msg)
+                        action(channel_input=msg)
 
             # Compiling and executing string
             elif type(action) == types.StringType:
@@ -565,7 +565,7 @@ class Alternation:
                 f_globals = processframe.f_globals
                 f_locals = processframe.f_locals
                 if op==READ:
-                    f_locals.update({'__channel_input':msg})
+                    f_locals.update({'channel_input':msg})
 
                 # Execute action
                 exec(code, f_globals, f_locals)
