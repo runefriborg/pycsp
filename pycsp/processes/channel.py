@@ -533,9 +533,6 @@ class Channel:
                     self.manager.ChannelReq_retire(req_id)
         self.lock.release()        
             
-    def status(self):
-        print 'Reads:',len(self.syncData.readqueue), 'Writes:',len(self.syncData.writequeue)
-
 
 # Run tests
 if __name__ == '__main__':
