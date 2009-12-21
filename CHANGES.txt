@@ -1,5 +1,6 @@
 0.6.2 - ??
 ----------
+* Fixed (threads) bug in Alternation, where a poison or retire could overwrite a committed match.
 * Fixed a poor design choice. The naming __channel_input can have difficult side-effects
   in Python, thus __channel_input is renamed to channel_input. Sorry for the inconvenience.
 * Removed the Channel.status method.
