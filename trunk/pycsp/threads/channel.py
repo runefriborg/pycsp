@@ -266,9 +266,6 @@ class Channel:
                     p.retire()
         self.lock.release()        
 
-    def status(self):
-        print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
-
 
 # Run tests
 if __name__ == '__main__':

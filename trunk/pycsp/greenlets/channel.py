@@ -248,10 +248,6 @@ class Channel:
                 for p in self.readqueue[:]: # ATOMIC copy
                     p.retire()
 
-            
-    def status(self):
-        print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
-
 
 # Run tests
 if __name__ == '__main__':
