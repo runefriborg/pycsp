@@ -170,6 +170,7 @@ class Alternation:
         self.manager.ReqStatus_wait(req_status_id)
 
         act=None
+        msg=None
         poison=False
         retire=False
 
@@ -183,9 +184,18 @@ class Alternation:
             req = self.manager.ChannelReqDataPool.get(req_id)
             if req.result==SUCCESS:
                 act=req_id
-            elif req.result==POISON:
+                
+                if op==READ:
+                    # Read msg
+                    msg = pickle.loads(self.manager.MemoryHandler.read_and_free(req.mem_id))
+            else:
+                # Free unused memory
+                if op==WRITE:
+                    self.manager.MemoryHandler.free(req.mem_id)
+
+            if req.result==POISON:
                 poison=True
-            elif req.result==RETIRE:
+            if req.result==RETIRE:
                 retire=True
 
         if poison or retire:
@@ -202,10 +212,6 @@ class Alternation:
 
         # Read selected guard
         idx, c, op = reqs[act]
-
-        # Read msg
-        req = self.manager.ChannelReqDataPool.get(act)
-        msg = pickle.loads(self.manager.MemoryHandler.read_and_free(req.mem_id))
 
         # Clean up
         self.manager.ReqStatusDataPool.retire(req_status_id)
