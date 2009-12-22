@@ -36,8 +36,7 @@ def IN(channel):
     >>> isinstance(IN(C), ChannelEndRead)
     True
     """
-    channel.join_reader()
-    return ChannelEndRead(channel)
+    return channel.reader()
 
 def OUT(channel):
     """ Join as writer
@@ -46,8 +45,7 @@ def OUT(channel):
     >>> isinstance(OUT(C), ChannelEndWrite)
     True
     """
-    channel.join_writer()
-    return ChannelEndWrite(channel)
+    return channel.writer()
 
 def retire(*list_of_channelEnds):
     """ Retire reader or writer, to do auto-poisoning
