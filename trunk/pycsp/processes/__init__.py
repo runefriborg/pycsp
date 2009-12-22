@@ -35,19 +35,22 @@ except ImportError, e:
 from configuration import *
 from guard import Skip, Timeout
 from alternation import choice, Alternation
-from channel import Channel, ChannelPoisonException, ChannelRetireException
+from channel import ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn
+
+# Buffered channel will fallback to the default Channel, if not buffered.
+from buffer import BufferedChannel as Channel
 
 version = (0,6,2, 'processes')
 
 def test_suite():
     import unittest
     import doctest
-    import configuration, mem, guard, alternation, channel, channelend, process
+    import configuration, mem, guard, alternation, channel, channelend, process, buffer
 
     suite = unittest.TestSuite()
-    for mod in configuration, mem, guard, alternation, channel, channelend, process:
+    for mod in configuration, mem, guard, alternation, channel, channelend, process, buffer:
         suite.addTest(doctest.DocTestSuite(mod))
     suite.addTest(doctest.DocTestSuite())
     return suite

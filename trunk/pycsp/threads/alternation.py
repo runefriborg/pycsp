@@ -162,20 +162,17 @@ class Alternation:
                     op=READ
                 reqs[req]=(idx, c, op)
                 idx += 1
-        except ChannelPoisonException, e:
-            act, poison, retire = self.__result(reqs)
-            if not act:
-                raise e
-        except ChannelRetireException, e:
+        except (ChannelPoisonException, ChannelRetireException) as e:
             act, poison, retire = self.__result(reqs)
             if not act:
                 raise e
 
         # If noone have offered a channelrequest, we wait.
-        req_status.cond.acquire()
-        if req_status.state==ACTIVE:
-            req_status.cond.wait()
-        req_status.cond.release()
+        if not act:
+            req_status.cond.acquire()
+            if req_status.state==ACTIVE:
+                req_status.cond.wait()
+            req_status.cond.release()
 
         if not act:
             act, poison, retire = self.__result(reqs)
