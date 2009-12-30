@@ -3,13 +3,29 @@ Channel module
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
-See LICENSE.txt for licensing details (MIT License). 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+  
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.  THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 """
 
 # Imports
 from scheduling import Scheduler
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
-from header import *
+from const import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -89,6 +105,7 @@ class Channel:
         self.isretired = False
 
         self.s = Scheduler()
+        #logging.warning("init greenletsChannel %s"%self.s)
         
     def check_termination(self):        
         if self.ispoisoned:
@@ -119,7 +136,7 @@ class Channel:
         self.remove_read(req)
 
         if req.result==SUCCESS:
-          logging.debug("got success in channel %s"%req.msg)
+          #logging.debug("got success in channel %s"%req.msg)
           return req.msg
         
         self.check_termination()
@@ -132,6 +149,7 @@ class Channel:
         self.check_termination()
 
         p = self.s.current
+        #logging.warning("\n\n\nself.s %s, \nprocess is %s"%(self.s,p))
         # If anyone is on the readqueue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
@@ -143,7 +161,6 @@ class Channel:
                 if p != r.process:
                     self.s.next.append(r.process)
                 return True
-
         p.setstate(ACTIVE)
         req = ChannelReq(p,msg=msg)
         self.post_write(req)
@@ -231,9 +248,6 @@ class Channel:
                 self.isretired = True
                 for p in self.readqueue[:]: # ATOMIC copy
                     p.retire()
-
-    def status(self):
-        print 'Reads:',len(self.readqueue), 'Writes:',len(self.writequeue)
 
 # Run tests
 if __name__ == '__main__':

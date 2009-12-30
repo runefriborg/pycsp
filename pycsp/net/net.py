@@ -3,7 +3,23 @@ Channel module
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
-See LICENSE.txt for licensing details (MIT License). 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+  
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.  THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
@@ -16,11 +32,7 @@ from alternation import *
 from channel import *
 from channelend import *
 from guard import *
-
-# Constants
-ACTIVE, DONE, POISON, RETIRE = range(4)
-READ, WRITE = range(2)
-FAIL, SUCCESS = range(2)
+from const import *
 
 # Classes
 class PyroServerProcess(threading.Thread):
@@ -393,8 +405,8 @@ class Alternation:
     >>> L = []
 
     >>> @choice 
-    ... def action(__channel_input):
-    ...     L.append(__channel_input)
+    ... def action(channel_input):
+    ...     L.append(channel_input)
 
     >>> @process
     ... def P1(cout, n=5):
@@ -504,8 +516,8 @@ class Alternation:
         >>> @process
         ... def P2(cin1, cin2, n):
         ...     alt = Alternation([{
-        ...               cin1:"L1.append(__channel_input)",
-        ...               cin2:"L2.append(__channel_input)"
+        ...               cin1:"L1.append(channel_input)",
+        ...               cin2:"L2.append(channel_input)"
         ...           }])
         ...     for i in range(n):
         ...         alt.execute()
@@ -537,7 +549,7 @@ class Alternation:
                     if op==WRITE:
                         action()
                     else:
-                        action(__channel_input=msg)
+                        action(channel_input=msg)
 
             # Compiling and executing string
             elif type(action) == types.StringType:
@@ -549,7 +561,7 @@ class Alternation:
                 f_globals = processframe.f_globals
                 f_locals = processframe.f_locals
                 if op==READ:
-                    f_locals.update({'__channel_input':msg})
+                    f_locals.update({'channel_input':msg})
 
                 # Execute action
                 exec(code, f_globals, f_locals)

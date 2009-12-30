@@ -12,7 +12,7 @@ import heapq
 from showtree import *
 #from pycsp.greenlets.scheduling import Scheduler as greenletsScheduler, Io as greenletsIo, io as greenletsio
 import pycsp.greenlets.scheduling
-from pycsp.greenlets.header import *
+from pycsp.greenlets.const import *
 
 def Now():
   return Simulation()._t 
