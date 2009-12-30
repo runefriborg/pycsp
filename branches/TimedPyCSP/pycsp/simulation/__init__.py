@@ -25,12 +25,17 @@ from guard import Timeout
 from pycsp.greenlets.alternation import choice
 from alternation import Alternation
 from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
-from channel import Channel
+#from channel import Channel
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
 from process import process, Process, Parallel, Spawn 
 from pycsp.greenlets.process import Sequence
-from simulation import Simulation, Io, io, Now, Wait
 
+# Buffered channel will fallback to the default Channel, if not buffered.
+from buffer import BufferedChannel as Channel
+
+
+from simulation import Simulation, Io, io, Now, Wait
+from collection import Buffer
 from showtree import *
 version = (0,6,2, 'simulation')
 
@@ -64,7 +69,8 @@ if __name__ == '__main__':
 
     alltests = unittest.TestSuite([suite,simulationsuite])
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(alltests)
+    runner.run(suite)
+    #runner.run(alltests)
     #runner.run(simulationsuite)
   
     

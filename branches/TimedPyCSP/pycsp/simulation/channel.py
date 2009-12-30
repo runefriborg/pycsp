@@ -7,26 +7,27 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-import pycsp.greenlets.channel
+from pycsp.greenlets.channel import Channel as greenletsChannel
 from simulation import Simulation
+from pycsp.greenlets.const import *
 
-class Channel(pycsp.greenlets.Channel):
+class Channel(greenletsChannel):
     def __init__(self, name=None):
-        pycsp.greenlets.Channel.__init__(self,name)
+        greenletsChannel.__init__(self,name)
         self.s = Simulation()
 
 # Run tests
-Channel.__doc__ = pycsp.greenlets.Channel.__doc__
+Channel.__doc__ = greenletsChannel.__doc__
 def testsuite():
   return
 from pycsp.greenlets.channelend import *
-testsuite.__doc__ = pycsp.greenlets.IN.__doc__
+testsuite.__doc__ = IN.__doc__
 testsuite.__doc__ += '\n'  
-testsuite.__doc__ += pycsp.greenlets.OUT.__doc__
+testsuite.__doc__ += OUT.__doc__
 testsuite.__doc__ += '\n'  
-testsuite.__doc__ += pycsp.greenlets.retire.__doc__
+testsuite.__doc__ += retire.__doc__
 testsuite.__doc__ += '\n'  
-testsuite.__doc__ += pycsp.greenlets.poison.__doc__
+testsuite.__doc__ += poison.__doc__
 
 if __name__ == '__main__':
     import doctest

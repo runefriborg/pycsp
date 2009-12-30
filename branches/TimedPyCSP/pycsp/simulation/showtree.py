@@ -21,10 +21,10 @@ def show_tree(tree, total_width=36, fill=' ',offset=0):
         else:
             row = 0
         if row != last_row:
-            output.write('\n')
+            output.write('\n'+' '*offset)
         columns = 2**row
         col_width = int(math.floor((total_width * 1.0) / columns))
-        output.write(' '*offset+str(n).center(col_width, fill))
+        output.write(str(n).center(col_width, fill))
         last_row = row
     print output.getvalue()
     print ' '*offset,'-' * total_width

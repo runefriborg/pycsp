@@ -1,3 +1,24 @@
+"""
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+  
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.  THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 from common import *
 import time
 import random
@@ -41,11 +62,11 @@ def par_reader_timeout_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
 
 @process
 def par_reader_skip_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:"print 'From cin1 got', __channel_input",
-                        cin2:"print 'From cin2 got', __channel_input"},
+    alt = Alternation([{cin1:"print 'From cin1 got', channel_input",
+                        cin2:"print 'From cin2 got', channel_input"},
                        {Skip():"print 'Skip'"},
-                       {cin3:"print 'From cin3 got', __channel_input",
-                        cin4:"print 'From cin4 got', __channel_input"}])
+                       {cin3:"print 'From cin3 got', channel_input",
+                        cin4:"print 'From cin4 got', channel_input"}])
     for i in range(cnt*4):
         if sleeper: sleeper()
         alt.execute()
@@ -53,10 +74,10 @@ def par_reader_skip_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
 
 @process
 def par_reader_timeout_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:"print 'From cin1 got', __channel_input",
-                        cin2:"print 'From cin2 got', __channel_input"},
-                       {cin3:"print 'From cin3 got', __channel_input",
-                        cin4:"print 'From cin4 got', __channel_input"},
+    alt = Alternation([{cin1:"print 'From cin1 got', channel_input",
+                        cin2:"print 'From cin2 got', channel_input"},
+                       {cin3:"print 'From cin3 got', channel_input",
+                        cin4:"print 'From cin4 got', channel_input"},
                        {Timeout(seconds=0.1):"print 'Timeout(seconds=0.1)'"}])
     for i in range(cnt*4):
         if sleeper: sleeper()
