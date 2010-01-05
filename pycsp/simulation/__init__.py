@@ -35,7 +35,7 @@ from buffer import BufferedChannel as Channel
 from recording import Monitor 
 
 from simulation import Simulation, Io, io, Now, Wait
-from collection import Buffer
+#from collection import Buffer
 from showtree import *
 version = (0,6,2, 'simulation')
 
