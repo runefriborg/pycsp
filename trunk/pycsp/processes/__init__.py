@@ -31,6 +31,10 @@ except ImportError, e:
     sys.stderr.write("PyCSP.processes requires multiprocessing support, \nwhich is available from Python 2.6+.\n\n")
     raise ImportError(e)
 
+# Set current implementation
+import os
+os.environ['PYCSP'] = 'PROCESSES'
+
 # Imports
 from configuration import *
 from guard import Skip, Timeout
