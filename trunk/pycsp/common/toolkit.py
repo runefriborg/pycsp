@@ -44,7 +44,7 @@ def which(cmd):
     return stdout.strip()
 
 
-@process
+@pycsp.process
 def file_r(cout, file, retire_on_eof=True, sep="\n"):
     if types.StringType == type(file):
         file = open(file, 'r')
@@ -66,10 +66,10 @@ def file_r(cout, file, retire_on_eof=True, sep="\n"):
 
         file.close()
         if retire_on_eof:
-            retire(cout)
+            pycsp.retire(cout)
 
 
-@process
+@pycsp.process
 def file_w(cin, file):
     if types.StringType == type(file):
         file = open(file, 'w')
@@ -87,17 +87,17 @@ def file_w(cin, file):
             file.close()
 
 
-@process
+@pycsp.process
 def runner(cin):
     while True:
         command, stdinChEnd, stdoutChEnd, stderrChEnd = cin()
 
-        Sequence(
+        pycsp.Sequence(
             execute(command, stdinChEnd, stdoutChEnd, stderrChEnd)
             )
 
         
-@process
+@pycsp.process
 def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
 
         return
@@ -112,12 +112,12 @@ def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
                              stdout=stdout,
                              stderr=stderr)
             
-        @choice
+        @pycsp.choice
         def handle_stdin(channel_input, stdin):
             stdin.write(channel_input)
             stdin.flush()
 
-        @choice
+        @pycsp.choice
         def forwarder(channel_input, cout):
             cout(channel_input)
         
@@ -127,33 +127,32 @@ def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
             altList.append((stdinChEnd, handle_stdin(stdin=P.stdin)))
 
         if stdoutChEnd:
-            C1 = Channel()
+            C1 = pycsp.Channel()
             C1in = C1.reader()
             Spawn(file_r(C1.writer(), P.stdout))
             altList.append((C1in, forwarder(cout=stdoutChEnd)))
 
         if stderrChEnd:
-            C2 = Channel()
+            C2 = pycsp.Channel()
             C2in = C2.reader()
             Spawn(file_r(C2.writer(), P.stderr))
             altList.append((C2in, forwarder(cout=stderrChEnd)))
 
         if altList:
-            alt = Alternation(altList)
+            alt = pycsp.Alternation(altList)
 
             try:
                 while True:
                     alt.execute()
 
-            except ChannelRetireException:
+            except pycsp.ChannelRetireException:
                 # stdout has reached eof
                 if stdoutChEnd:
-                    retire(C1in)
+                    pycsp.retire(C1in)
                 if stderrChEnd:
-                    retire(C2in)
+                    pycsp.retire(C2in)
 
         else:
             
             P.wait()
 
-print runner(+Channel()) 
