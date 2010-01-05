@@ -32,7 +32,7 @@ from pycsp.greenlets.process import Sequence
 
 # Buffered channel will fallback to the default Channel, if not buffered.
 from buffer import BufferedChannel as Channel
-
+from recording import Monitor 
 
 from simulation import Simulation, Io, io, Now, Wait
 from collection import Buffer

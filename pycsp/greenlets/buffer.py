@@ -29,6 +29,7 @@ from channelend import retire, poison
 from process import Process, Spawn
 from const import *
 from collections import deque
+from recording import Monitor
 import uuid
 
 class BufferedChannel(object):
