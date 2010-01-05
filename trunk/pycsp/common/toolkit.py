@@ -100,8 +100,6 @@ def runner(cin):
 @pycsp.process
 def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
 
-        return
-
         stdin, stdout, stderr = [None]*3
         if stdinChEnd: stdin = subprocess.PIPE
         if stdoutChEnd: stdout = subprocess.PIPE
@@ -129,13 +127,13 @@ def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
         if stdoutChEnd:
             C1 = pycsp.Channel()
             C1in = C1.reader()
-            Spawn(file_r(C1.writer(), P.stdout))
+            pycsp.Spawn(file_r(C1.writer(), P.stdout))
             altList.append((C1in, forwarder(cout=stdoutChEnd)))
 
         if stderrChEnd:
             C2 = pycsp.Channel()
             C2in = C2.reader()
-            Spawn(file_r(C2.writer(), P.stderr))
+            pycsp.Spawn(file_r(C2.writer(), P.stderr))
             altList.append((C2in, forwarder(cout=stderrChEnd)))
 
         if altList:
