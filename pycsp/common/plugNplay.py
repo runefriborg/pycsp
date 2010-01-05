@@ -36,6 +36,14 @@ else:
     import pycsp.threads as pycsp
 
 @pycsp.process
+def Identity(cin, cout):
+    """Copies its input stream to its output stream, adding a one-place buffer
+    to the stream."""
+    while True:
+        t = cin()
+        cout(t)
+
+@pycsp.process
 def Prefix(cin, cout, prefix=None):
     t = prefix
     while True:
@@ -79,3 +87,13 @@ def Pairs(cin, cout):
         Tail(+pB, -pC)
     )
 
+@pycsp.process
+def SkipProcess():
+    pass
+
+@pycsp.process
+def Mux2(cin1, cin2, cout):
+    alt = pycsp.Alternation([{cin1:None, cin2:None}])
+    while True:
+        guard, msg = alt.select()
+        cout(msg)
