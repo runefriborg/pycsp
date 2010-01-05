@@ -32,8 +32,9 @@ from pycsp.greenlets.process import Sequence
 
 # Buffered channel will fallback to the default Channel, if not buffered.
 from buffer import BufferedChannel as Channel
-from recording import Monitor 
 
+from recording import Monitor 
+from SimPlot import *
 from simulation import Simulation, Io, io, Now, Wait
 #from collection import Buffer
 from showtree import *
@@ -69,8 +70,8 @@ if __name__ == '__main__':
 
     alltests = unittest.TestSuite([suite,simulationsuite])
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
-    #runner.run(alltests)
+    #runner.run(suite)
+    runner.run(alltests)
     #runner.run(simulationsuite)
   
     

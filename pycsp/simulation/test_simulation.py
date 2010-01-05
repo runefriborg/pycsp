@@ -54,7 +54,7 @@ class SimulationTestCase(unittest.TestCase):
         while len(buffer)>0:
           t = buffer[0]
           Alternation([
-            {cREADER:"buffer.append(__channel_input)"},
+            {cREADER:"buffer.append(channel_input)"},
             {(cWRITER,t):"buffer.popleft()"}
           ]).execute()
           if max_len<len(buffer):
@@ -93,7 +93,7 @@ class SimulationTestCase(unittest.TestCase):
         @choice
         #Using the normal __channel_input results in a Type error
         def append(*args,**kwargs):
-          L.append(kwargs["__channel_input"])
+          L.append(kwargs["channel_input"])
      
         alt = Alternation([{cin1:append(), cin2:append()}])
         for i in range(n):
@@ -106,29 +106,34 @@ class SimulationTestCase(unittest.TestCase):
     C1, C2 = Channel(), Channel()
     Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
 
+    def test_buffer(self):
+        @io
+        def sleep_random():
+            time.sleep(random.random()/10)
 
-  def test_buffered_channels2(self):
-    @process
-    def Printer(cREADER,number):
-      #calls simulations Wait to sleep for one timeunit
-      Wait(2)
-      for n in range(number):
-        self.assertEqual(n,cREADER())
-
-    @process 
-    def Generator(cWriter,number):
-      import random
-      for n in range(number):
-        cWriter(n)
-
-
-    buffer_channel1 = Channel()
-    buffer_channel2 = Channel()
-    number = 1000
-    Parallel(Generator(-buffer_channel1,number),
-             Printer(+buffer_channel2,number),
-             Buffer(+buffer_channel1,-buffer_channel2))
-
-
+        @io
+        def sleep_one():
+            time.sleep(0.01)
+        
+        @process
+        def reader(cin, id, cnt, sleeper):
+          while True:
+              if sleeper: sleeper()
+              got= cin()
+              print '.',
+            
+        @process
+        def writer(cout, id, cnt, sleeper):
+            for i in range(cnt):
+                if sleeper: sleeper()
+                cout((id, i))
+            retire(cout)
 
 
+        read_monitor = Monitor()
+        ch2=Channel(buffer=5, mon=read_monitor)
+        cnt = 10
+        Parallel(reader(IN(c2),0,cnt, sleep_random), 
+                 writer(OUT(c2),0,cnt, sleep_one))
+        debug.WARNING(read_monitor.timeVariance())
+        read_monitor.getHistogram()
