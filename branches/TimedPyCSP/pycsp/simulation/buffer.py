@@ -31,7 +31,7 @@ from process import Process, Spawn
 from pycsp.greenlets.const import *
 import sys, traceback
 import pycsp.simulation.channel
-
+from simulation import Now
 from collections import deque
 import uuid
 

@@ -35,8 +35,10 @@ elif (mod == 'greenlets'):
     from pycsp.greenlets import *
 elif (mod == 'net'):
     from pycsp.net import *    
+elif (mod == 'simulation'):
+    from pycsp.simulation import *
 else:
-    print "python",sys.argv[0],"[ threads | processes | greenlets | net ]"
+    print "python",sys.argv[0],"[ threads | processes | greenlets | net | simulation ]"
     from pycsp import *
 
 print 'Using version', version

@@ -1,3 +1,68 @@
+from simulation import Now
+from pycsp.greenlets.const import *
+
+class Histogram(list):
+    """ A histogram gathering and sampling class"""
+
+    def __init__(self, name = '', low = 0.0, high = 100.0, nbins = 10):
+        list.__init__(self)
+        self.name  = name
+        self.low   = float(low)
+        self.high  = float(high)
+        self.nbins = nbins
+        self.binsize = (self.high - self.low) / nbins
+        self._nrObs = 0
+        self._sum = 0
+        self[:] = [[low + (i - 1) * self.binsize, 0] for i in range(self.nbins + 2)]
+       
+    def addIn(self, y):
+        """ add a value into the correct bin"""
+        self._nrObs += 1
+        self._sum += y
+        b = int((y - self.low + self.binsize) / self.binsize)
+        if b < 0: b = 0
+        if b > self.nbins + 1: b = self.nbins + 1
+        assert 0 <= b <=self.nbins + 1, 'Histogram.addIn: b out of range: %s'%b
+        self[b][1] += 1
+        
+    def __str__(self):
+        histo = self
+        ylab = 'value'
+        nrObs = self._nrObs
+        width = len(str(nrObs))
+        res = []
+        res.append(' < Histogram %s:'%self.name)
+        res.append('\nNumber of observations: %s'%nrObs)
+        if nrObs:
+            su = self._sum
+            cum = histo[0][1]
+            fmt = '%s'
+            line = '\n%s <= %s < %s: %s (cum: %s/%s%s)'\
+                 %(fmt, '%s', fmt, '%s', '%s', '%5.1f', '%s')
+            line1 = '\n%s%s < %s: %s (cum: %s/%s%s)'\
+                 %('%s', '%s', fmt, '%s', '%s', '%5.1f', '%s')
+            l1width = len(('%s <= '%fmt)%histo[1][0])
+            res.append(line1\
+                       %(' ' * l1width, ylab, histo[1][0], str(histo[0][1]).rjust(width),\
+                         str(cum).rjust(width),(float(cum) / nrObs) * 100, '%')
+                      )
+            for i in range(1, len(histo) - 1):
+                cum += histo[i][1]
+                res.append(line\
+                       %(histo[i][0], ylab, histo[i + 1][0], str(histo[i][1]).rjust(width),\
+                         str(cum).rjust(width),(float(cum) / nrObs) * 100, '%')
+                          )
+            cum += histo[-1][1]
+            linen = '\n%s <= %s %s : %s (cum: %s/%s%s)'\
+                  %(fmt, '%s', '%s', '%s', '%s', '%5.1f', '%s')
+            lnwidth = len(('<%s'%fmt)%histo[1][0])
+            res.append(linen\
+                       %(histo[-1][0], ylab, ' ' * lnwidth, str(histo[-1][1]).rjust(width),\
+                       str(cum).rjust(width),(float(cum) / nrObs) * 100, '%')
+                       )
+        res.append('\n > ')
+        return ' '.join(res)
+
 
 class Monitor(list):
     """ Monitored variables
@@ -9,15 +74,12 @@ class Monitor(list):
     unique name for use in debugging and in tracing and ylab and tlab
     strings for labelling graphs.
     """
-    def __init__(self, name = 'a_Monitor', ylab = 'y', tlab = 't', sim = None):
+    def __init__(self, name = 'a_Monitor', ylab = 'y', tlab = 't'):
         list.__init__(self)
-        if not sim: sim = Globals.sim # Use global simulation if sim is None
-        self.sim = sim
         self.startTime = 0.0
         self.name = name
         self.ylab = ylab
         self.tlab = tlab
-        self.sim.allMonitors.append(self)
         
     def setHistogram(self, name = '', low = 0.0, high = 100.0, nbins = 10):
         """Sets histogram parameters.
@@ -30,7 +92,7 @@ class Monitor(list):
 
     def observe(self, y,t = None):
         """record y and t"""
-        if t is  None: t = self.sim.now()
+        if t is  None: t = Now()
         self.append([t, y])
 
     def tally(self, y):
@@ -44,7 +106,7 @@ class Monitor(list):
     def reset(self, t = None):
         """reset the sums and counts for the monitored variable """
         self[:] = []
-        if t is None: t = self.sim.now()
+        if t is None: t = Now()
         self.startTime = t
         
     def tseries(self):
@@ -94,7 +156,7 @@ class Monitor(list):
             print 'SimPy: No observations for timeAverage'
             return None
 
-        if t is None: t = self.sim.now()
+        if t is None: t = Now()
         sum = 0.0
         tlast = self[0][0]
         ylast = self[0][1]
@@ -120,7 +182,7 @@ class Monitor(list):
         if N  == 0:
             print 'SimPy: No observations for timeVariance'
             return None
-        if t is None: t = self.sim.now()
+        if t is None: t = Now()
         sm = 0.0
         ssq = 0.0
         tlast = self[0][0]
