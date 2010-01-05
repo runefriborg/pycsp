@@ -19,43 +19,14 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from common import *
+from pycsp_import import *
+from pycsp.common.plugNplay import *
 
-@process
-def Prefix(cin, cout, prefix):
-    cout(prefix)
-    while True:
-        cout(cin())
+# We are using plugNplay processes
+#  Prefix
+#  Pairs
+#  Delta2
 
-@process
-def Delta2(cin, cout1, cout2):
-    while True:
-        msg = cin()
-        Alternation([{
-            (cout1,msg):'cout2(msg)',
-            (cout2,msg):'cout1(msg)'
-            }]).execute()
-
-@process
-def Plus(cin1, cin2, cout):
-    while True:
-        cout(cin1() + cin2())
-
-@process
-def Tail(cin, cout):
-    dispose = cin()
-    while True:
-        cout(cin())
-
-@process
-def Pairs(cin, cout):
-    pA, pB, pC = Channel('pA'), Channel('pB'), Channel('pC')
-    Parallel(
-        Delta2(cin, -pA, -pB),
-        Plus(+pA, +pC, cout),
-        Tail(+pB, -pC)
-    )
-    
 @process
 def Printer(cin, limit):
     for i in xrange(limit):

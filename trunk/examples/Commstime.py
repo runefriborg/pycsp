@@ -21,7 +21,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from common import *
+from pycsp_import import *
 import time
 
 @process
@@ -37,7 +37,6 @@ def Delta2(cin, cout1, cout2):
         t = cin()
         cout1(t)
         cout2(t)
-
 
 @process
 def Successor(cin, cout):

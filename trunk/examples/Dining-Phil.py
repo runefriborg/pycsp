@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Import pycsp.[sys.argv[1]]
-from common import *
+from pycsp_import import *
 
 # Based on the exercise q7.occ from the source distribution of kroc-1.4
 # 
