@@ -33,6 +33,9 @@ except ImportError, e:
     sys.stderr.write("PyCSP.net requires Pyro, the latest version is\navailable from http://pyro.sourceforge.net/.\n\n")
     raise ImportError(e)
 
+# Set current implementation
+import os
+os.environ['PYCSP'] = 'NET'
 
 # Imports
 from configuration import *

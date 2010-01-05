@@ -24,6 +24,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+# Set current implementation
+import os
+os.environ['PYCSP'] = 'THREADS'
+
 # Imports
 from guard import Skip, Timeout
 from alternation import choice, Alternation

@@ -33,6 +33,10 @@ except ImportError, e:
         sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
         raise ImportError(e)
 
+# Set current implementation
+import os
+os.environ['PYCSP'] = 'GREENLETS'
+
 # Imports
 from scheduling import Io, io
 from guard import Skip, Timeout
