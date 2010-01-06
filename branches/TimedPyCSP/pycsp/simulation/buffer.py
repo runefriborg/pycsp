@@ -43,10 +43,6 @@ class BufferedChannel(object):
         else:
             if kargs.has_key('buffer'):
                 del kargs['buffer']
-            #logging.warning("init parent channel")
-            #ch = pycsp.simulation.channel.Channel()
-            #logging.warning("ch = %s"%ch)
-            #logging.warning(dir(Channel))
             return Channel(*args, **kargs)
 
     def __init__(self, name=None, buffer=0,mon=None):
@@ -84,12 +80,14 @@ class BufferedChannel(object):
         poisoned = False
         retired = False
         while True:
+            logging.debug("rerun")
             try:
                 # Handling poison / retire
                 if (poisoned or retired):
                     if len(queue):
                         try:
                             cout(queue.popleft())
+                            logging.debug("removed msg from queue, len:%d"%len(queue))
                             if self.mon:
                                 self.monitor.observe(len(queue),t=Now()) 
 
@@ -110,6 +108,7 @@ class BufferedChannel(object):
                 # Queue empty
                 elif not len(queue):
                     queue.append(cin())
+                    logging.debug("added msg to queue, len:%d"%len(queue))
                     if self.mon:
                         self.monitor.observe(len(queue),t=Now()) 
 
@@ -121,13 +120,16 @@ class BufferedChannel(object):
                             ]).select()
                     if g == cin:
                         queue.append(msg)
+                        logging.debug("added msg to queue, len:%d"%len(queue))
                     else:
                         queue.popleft()
+                        logging.debug("removed msg to queue, len:%d"%len(queue))
                     if self.mon:
                          self.monitor.observe(len(queue),t=Now()) 
                 # Queue full
                 else:
                     cout(queue.popleft())
+                    logging.debug("removed msg to queue, len:%d"%len(queue))
                     if self.mon:
                          self.monitor.observe(len(queue),t=Now()) 
             except ChannelPoisonException, e:

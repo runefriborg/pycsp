@@ -17,11 +17,8 @@ except ImportError, e:
         sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
         raise ImportError(e)
 
-#from pycsp.greenlets import *
 # Imports
-#from pycsp.greenlets.scheduling import io
-from pycsp.greenlets.guard import Skip
-from guard import Timeout
+from guard import Timeout, Skip
 from pycsp.greenlets.alternation import choice
 from alternation import Alternation
 from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
@@ -33,8 +30,11 @@ from pycsp.greenlets.process import Sequence
 # Buffered channel will fallback to the default Channel, if not buffered.
 from buffer import BufferedChannel as Channel
 
+#from SimPy
 from recording import Monitor 
 from SimPlot import *
+
+
 from simulation import Simulation, Io, io, Now, Wait
 #from collection import Buffer
 from showtree import *

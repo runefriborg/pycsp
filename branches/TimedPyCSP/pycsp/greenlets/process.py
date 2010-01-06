@@ -66,9 +66,9 @@ class Process():
         self.s = Scheduler()
         self.executed = False
 
-    def __repr__(self):
-      #return "%s%s"%(self.fn.func_name,self.args)
-      return "%s"%self.fn
+    #def __repr__(self):
+    #return "%s%s"%(self.fn.func_name,self.args)
+    #  return "%s"%self.fn
       
     def setstate(self, new_state):
         self.state = new_state
@@ -82,8 +82,9 @@ class Process():
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):
+        logging.debug("%s,%s,%s, current: %s, self:%s"%(self.state,new_state,force,self.s.current,self))
         self.state = new_state
-
+    
         # Only activate, if we are activating someone other than ourselves
         # or we force an activation, which happens when an Io thread finishes, while
         # the calling process is still current process.
