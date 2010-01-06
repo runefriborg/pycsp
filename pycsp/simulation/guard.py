@@ -9,36 +9,44 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 from simulation import Simulation
 import pycsp.greenlets.guard 
+from process import Process
+from pycsp.greenlets.const import *
 
+class Skip(pycsp.greenlets.Skip):
+    # Start process
+    def process(self):
+        p = Process(self.empty)
+        p.start()
+        p.setstate(ACTIVE)
+        return p
+ 
 class Timeout(pycsp.greenlets.Timeout):
-  """
-  Timeout spawns a timer thread, when posted. If removed
-  before timeout, then the timer thread is cancelled.
-  
-  >>> from __init__ import *
-  >>> import time
+    def __init__(self, seconds):
+        pycsp.greenlets.Timeout.__init__(self, seconds)
+        self.s = Simulation()
 
-  >>> @process 
-  ... def P():
-  ...     C = Channel()
-  ...     Cin = IN(C)
-  ...     time_start = Now()
-  ...     (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
-  ...     time_passed = Now() - time_start
-  ...     print time_passed >= 0.5
-  ...     print time_passed < 0.6
-  ...     print isinstance(g, Timeout) and msg == None
-  
-  >>> Parallel(P())
-  True
-  True
-  True
-  """   
+    def post_read(self, reader):
+        self.posted = (READ, reader)
 
-  def __init__(self, seconds):
-    pycsp.greenlets.Timeout.__init__(self, seconds)
-    self.s = Simulation()
-        
+        # Start process
+        self.p = Process(self.expire)
+        self.p.start()
+        self.p.setstate(ACTIVE)
+
+        # Put process on the scheduler timer queue
+        self.s.timer_wait(self.p, self.seconds)
+
+    def post_write(self, writer):
+        self.posted = (WRITE, writer)
+
+        # Start process
+        self.p = Process(self.expire)
+        self.p.start()
+        self.p.setstate(ACTIVE)
+
+        # Put process on the scheduler timer queue
+        self.s.timer_wait(self.p, self.seconds)
+     
         
 # Run tests
 def testsuite():

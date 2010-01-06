@@ -75,7 +75,7 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
 
   def getInstance(cls, *args, **kargs):
     '''Static method to have a reference to **THE UNIQUE** instance'''
-    logging.debug("getInstance, %s"%cls.__instance)
+    #logging.debug("getInstance, %s"%cls.__instance)
     if cls.__instance is None:
       # (Some exception may be thrown...)
       # # Initialize **the unique** instance

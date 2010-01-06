@@ -267,6 +267,12 @@ class Scheduler(object):
         if self.greenlet == greenlet.getcurrent():
             # Called from main greenlet
             self.main()
+            print 'Next', Scheduler().next
+            
+            for p in processes:
+                if not p.executed:
+                    raise Exception("Deadlock!!!")
+
         else:
             # Called from child greenlet
             for p in processes:
