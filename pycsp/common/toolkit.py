@@ -98,7 +98,7 @@ def runner(cin):
 
         
 @pycsp.process
-def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
+def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None, retire_on_eof=True):
 
         stdin, stdout, stderr = [None]*3
         if stdinChEnd: stdin = subprocess.PIPE
@@ -142,7 +142,7 @@ def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
             try:
                 while True:
                     alt.execute()
-
+                
             except pycsp.ChannelRetireException:
                 # stdout has reached eof
                 if stdoutChEnd:
@@ -150,6 +150,12 @@ def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None):
                 if stderrChEnd:
                     pycsp.retire(C2in)
 
+                if retire_on_eof:
+                    if stdoutChEnd:
+                        pycsp.retire(stdoutChEnd)
+                    if stderrChEnd:
+                        pycsp.retire(stderrChEnd)
+                    
         else:
             
             P.wait()
