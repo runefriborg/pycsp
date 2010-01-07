@@ -24,8 +24,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
+import random, time
 from channelend import ChannelRetireException
 from const import *
+
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -109,7 +111,7 @@ class ChannelReq:
 
 
 
-class RealChannel():
+class RealChannel:
     """
     RealChannel is the Channel object that handles synchronization
     at the channel server daemon.
@@ -123,9 +125,8 @@ class RealChannel():
         self.writers=0
 
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            self.name = str(uuid.uuid1())
+            # Create unique name
+            self.name = str(random.random())+str(time.time())
         else:
             self.name=name
 

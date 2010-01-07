@@ -24,18 +24,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
+import random, time
 from channel import ChannelReq, ReqStatus
-import uuid
 from const import *
 
 # Classes
-class Guard():
+class Guard:
     """
     The empty interface of a guard.
     """
 
     def __init__(self):
-        self.id = str(uuid.uuid1())
+        # Create unique id
+        self.id = str(random.random())+str(time.time())
 
     def post_read(self, req):
         pass

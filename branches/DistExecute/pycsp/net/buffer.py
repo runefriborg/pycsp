@@ -29,7 +29,7 @@ from channelend import retire, poison
 from process import Process, Spawn
 
 from collections import deque
-import uuid
+import time, random
 
 class BufferedChannel(object):
 
@@ -43,9 +43,8 @@ class BufferedChannel(object):
 
     def __init__(self, name=None, buffer=0):
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            name = str(uuid.uuid1())
+            # Create unique name
+            name = str(random.random())+str(time.time())
 
         self.__inChan = Channel(name=name+'inChan')
         self.__outChan = Channel(name=name+'outChan')

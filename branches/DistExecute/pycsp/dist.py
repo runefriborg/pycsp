@@ -78,11 +78,11 @@ class Process():
         try:
             # Store the returned value from the process
             self.fn(*self.args, **self.kwargs)
-        except ChannelPoisonException, e:
+        except ChannelPoisonException:
             # look for channels and channel ends
             for ch in [x for x in self.args if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite) or isinstance(x, Channel)]:
                 ch.poison()
-        except ChannelRetireException, e:
+        except ChannelRetireException:
             # look for channel ends
             for ch_end in [x for x in self.args if isinstance(x, ChannelEndRead) or isinstance(x, ChannelEndWrite)]:
                 # Ignore if try to retire an already retired channel end.
