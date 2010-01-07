@@ -96,7 +96,7 @@ def poison(*list_of_channelEnds):
         channelEnd.poison()
 
 # Classes
-class ChannelEndWrite():
+class ChannelEndWrite:
     def __init__(self, channel):
         self.channel = channel
 
@@ -126,7 +126,7 @@ class ChannelEndWrite():
             return "<ChannelEndWrite wrapping %s named %s>" % (self.channel, self.channel.name)
 
 
-class ChannelEndRead():
+class ChannelEndRead:
     def __init__(self, channel):
         self.channel = channel
 
