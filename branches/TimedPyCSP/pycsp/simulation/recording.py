@@ -94,7 +94,7 @@ class Monitor(list):
         """record y and t"""
         if t is  None: t = Now()
         self.append([t, y])
-        logging.warning("y:%d,time:%d"%(y,t))
+        logging.debug("y:%d,time:%d"%(y,t))
 
     def tally(self, y):
         """ deprecated: tally for backward compatibility"""

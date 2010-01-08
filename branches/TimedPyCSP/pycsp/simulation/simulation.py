@@ -18,9 +18,14 @@ def Now():
   return Simulation()._t 
 
 def Wait(seconds):
-  """Wrapper function for timer_wait. Will schedule the process for later activation and then switch active process. """
-  Simulation().timer_wait(Simulation().current, seconds)
-  Simulation().getNext().greenlet.switch()
+    """Wrapper function for timer_wait. Will schedule the process for later activation and then switch active process. """
+    logging.debug("calling wait")
+    Simulation().timer_wait(Simulation().current, seconds)
+    t = Now()+seconds
+    while Now()<t:
+        p = Simulation().getNext() 
+        logging.debug("Wait swicthing from %s to %s"%(Simulation().current, p))
+        p.greenlet.switch()
 
 # Decorators
 def io(func):
@@ -109,7 +114,9 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
     """
     new_time = seconds + Now()
     heapq.heappush(self.timers,(new_time,p))
-
+    logging.debug("timer_wait: timers:%s"%self.timers)
+    #print "pushing:"
+    #show_tree(self.timers)
   # Main loop
   # When all queues are empty all greenlets have been executed.
   # Queues are new, next, timers and "blocking io counter"
@@ -117,6 +124,7 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
   def main(self):
       logging.debug("entering main, current:%s"%self.current)
       while True:
+          #print "main, timers", self.timers,", self.new:",self.new,", self.next:",self.next
           # By definition of the heap, the first element is always the smallest. 
           if self.timers and self.timers[0][0] <= Now():
             # We should not be able to have processes in timers with a launchtime in the past.
@@ -124,8 +132,10 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
             assert self.timers[0][0] >= Now()
             if self.timers[0][0] == Now():
               time = heapq.heappop(self.timers)
+              #print "pop:"
+              #show_tree(self.timers)
               self.current = time[1] 
-              logging.debug("main:switching to timer %s"%self.current)
+              logging.debug("main:switching to process in timer queue %s"%self.current)
               self.current.greenlet.switch()
           elif self.new:
               if len(self.new) > 1000:
@@ -151,21 +161,20 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
             # Waiting on blocking processes
             if self.blocking > 0:
               # Now go to sleep
-              logging.debug("waiting for blocing processes to call notify")
+              logging.debug("waiting for blocking processes to call notify")
               self.cond.wait()
 
-          #If there exist only processes in timers we can increment
-          if  not (self.next or self.new or self.blocking): 
-            if self.timers:
-              # inc timer to lowest activation time
-              self._t = self.timers[0][0]
-              logging.debug("incrementing time to %f"%self._t)
-          
-            else:
-              # Execution finished!
-              self.cond.release()
-              logging.debug("exit")
-              return
+            #If there exist only processes in timers we can increment
+            elif  not (self.next or self.new or self.blocking>0): 
+                if self.timers:
+                    # inc timer to lowest activation time
+                    self._t = self.timers[0][0]
+                    logging.debug("incrementing time to %f"%self._t)
+                else:
+                    # Execution finished!
+                    self.cond.release()
+                    logging.debug("exit")
+                    return
 
           self.cond.release()
           logging.debug("releases cond")
