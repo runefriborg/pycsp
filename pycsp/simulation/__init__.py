@@ -64,15 +64,19 @@ def simulation_suite():
 if __name__ == '__main__':
     import unittest
     import test_simulation
+    import test_io
 
     suite = test_suite()
     simulationsuite = unittest.TestLoader().loadTestsFromTestCase(test_simulation.SimulationTestCase)
+    iosuite =  unittest.TestLoader().loadTestsFromTestCase(test_io.TestCase)
 
-    alltests = unittest.TestSuite([suite,simulationsuite])
+
+    alltests = unittest.TestSuite([suite,simulationsuite,iosuite])
     runner = unittest.TextTestRunner(verbosity=2)
     #runner.run(suite)
-    runner.run(alltests)
     #runner.run(simulationsuite)
+    runner.run(iosuite)
+    #runner.run(alltests)
   
     
 
