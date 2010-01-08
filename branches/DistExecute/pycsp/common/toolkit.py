@@ -26,6 +26,8 @@ import os
 if os.environ.has_key('PYCSP'):
     if os.environ['PYCSP'] == 'PROCESSES':
         import pycsp.processes as pycsp
+    elif os.environ['PYCSP'] == 'DIST':
+        import pycsp.dist as pycsp
     elif os.environ['PYCSP'] == 'GREENLETS':
         import pycsp.greenlets as pycsp
     elif os.environ['PYCSP'] == 'NET':
