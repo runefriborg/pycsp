@@ -7,6 +7,10 @@ import types
 import sys
 import cPickle as pickle
 
+# Set current implementation
+import os
+os.environ['PYCSP'] = 'DIST'
+
 def Init(secretKey):
     Setup(secretKey=secretKey)
     if 'run_from_daemon' in sys.argv:
@@ -38,7 +42,7 @@ Spawn.__doc__ = spawn_doc
 
 
 
-class Process():
+class Process:
     """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
 

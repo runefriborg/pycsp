@@ -43,7 +43,7 @@ from net import Alternation
 from alternation import choice
 from guard import Skip, Timeout
 from channel import ChannelPoisonException, ChannelRetireException
-from channelend import retire, poison, IN, OUT
+from channelend import retire, poison, IN, OUT, ChannelEndRead, ChannelEndWrite
 from process import io, Process, process, Sequence, Parallel, Spawn
 
 # Buffered channel will fallback to the default Channel, if not buffered.
