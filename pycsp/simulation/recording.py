@@ -221,7 +221,8 @@ class Monitor(list):
             raise FatalSimerror('histogramTable: call setHistogram first'\
                                 ' for Monitor %s'%self.name)            
         ylab = self.ylab
-        nrObs = self.count()
+        nrObs = self.__len__()
+
         width = len(str(nrObs))
         res = []
         res.append('\nHistogram for %s:'%histo.name)
