@@ -31,7 +31,7 @@ from pycsp.greenlets.process import Sequence
 from buffer import BufferedChannel as Channel
 
 #from SimPy
-from recording import Monitor 
+from recording import Monitor, SimList 
 from SimPlot import *
 
 
