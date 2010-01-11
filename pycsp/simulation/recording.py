@@ -1,6 +1,25 @@
 from simulation import Now
 from pycsp.greenlets.const import *
 
+class SimList(list):
+    def __init__(self,Monitored=False):
+        list.__init__(self)
+        self.monitored = Monitored
+        if self.monitored: 
+            self.monitor = Monitor()
+
+    def append(self,x):
+        list.append(self,x)
+        if self.monitored: self.monitor.observe(len(self))
+
+    def remove(self, x):
+        list.remove(self,x)
+        if self.monitored: self.monitor.observe(len(self))
+
+    def pop(self,x):
+        list.pop(self,x)
+        if self.monitored: self.monitor.observe(len(self))
+
 class Histogram(list):
     """ A histogram gathering and sampling class"""
 
