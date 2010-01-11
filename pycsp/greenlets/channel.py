@@ -136,7 +136,7 @@ class Channel:
         self.remove_read(req)
 
         if req.result==SUCCESS:
-          logging.debug("got success in channel read: %s"%req.msg)
+          logging.debug("got success in channel read")
           return req.msg
         
         self.check_termination()
@@ -168,7 +168,7 @@ class Channel:
         self.remove_write(req)
 
         if req.result==SUCCESS:
-            logging.debug("got succes in channel, wrote:"%msg)
+            logging.debug("got succes in channel, write")
             return True
     
         self.check_termination()

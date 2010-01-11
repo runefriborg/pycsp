@@ -17,6 +17,7 @@ logging.basicConfig(level=logging.WARNING,
 #console_logger.setFormatter(logging.Formatter(SYSLOG_FORMAT))logging.StreamHandler('/dev/stdout')
 
 state =  {
+  None: "None",
   0 : "ACTIVE",
   1 : "DONE",
   2 : "POISON",

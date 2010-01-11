@@ -66,10 +66,12 @@ class Process():
         self.s = Scheduler()
         self.executed = False
 
-    #def __repr__(self):
-    #return "%s%s"%(self.fn.func_name,self.args)
-    #  return "%s"%self.fn
-      
+    def __repr__(self):
+        return "%s%s <state: %s, executed:%s>"%(self.fn, self.args, state[self.state], self.executed)
+    
+    #def __str__(self):
+    #    return "%s%s "%(self.fn.func_name,self.args)
+
     def setstate(self, new_state):
         self.state = new_state
 
@@ -82,7 +84,7 @@ class Process():
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):
-        logging.debug("%s,%s,%s, current: %s, self:%s"%(self.state,new_state,force,self.s.current,self))
+        logging.debug("notify: from state  %s to %s. force %s. current process in scheduler: %s. self:%s"%(state[self.state],state[new_state],force,self.s.current,self))
         self.state = new_state
     
         # Only activate, if we are activating someone other than ourselves
