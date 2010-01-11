@@ -96,9 +96,10 @@ class Io(threading.Thread):
 
         self.s = Scheduler()
         self.p = self.s.current
-        #logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
+        logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
 
     def run(self):
+        logging.debug("Io run, s:%s"%self.s)
         self.retval = self.fn(*self.args, **self.kwargs)
         self.s.io_unblock(self.p)
 
@@ -122,7 +123,9 @@ class Scheduler(object):
 
     def __init__(self):
         pass
- 
+
+    def __str__(self):
+        return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tnew:\t%s \n\tnext:\t%s \n\ttimers:\t%s "%(self,self.current, self.blocking,self.new,self.next,self.timers)
     def decompose(self):
       self.__Scheduler__instance = None
 
@@ -184,9 +187,8 @@ class Scheduler(object):
     # Called from MainThread
     def io_block_wait(self, p):
         logging.debug("io_block_wait process %s"%p)
-        logging.info(self)
         p.wait()
-        logging.debug("")
+        logging.debug("io_block_wait done waiting")
 
     # Called from io thread
     def io_unblock(self, p):
@@ -267,11 +269,10 @@ class Scheduler(object):
         if self.greenlet == greenlet.getcurrent():
             # Called from main greenlet
             self.main()
-            print 'Next', Scheduler().next
             
             for p in processes:
                 if not p.executed:
-                    raise Exception("Deadlock!!!")
+                    raise Exception("Deadlock!!!\n\tHave you correctly closed all procceses?")
 
         else:
             # Called from child greenlet
@@ -289,19 +290,24 @@ class Scheduler(object):
             # All new greenlets must be started from the scheduler, to have the
             # scheduler as parent greenlet.
             # Switch to main loop
+            logging.debug("getNext returns scheduler")
             return self
         elif self.next:
             # Quick choice
+            #print "choosing a next",self.next
+            logging.debug("getNext returns from next")
             self.current = self.next.pop(0)
             return self.current
         else:
             # Some processes are blocking or all have been executed.
             # Switch to main loop.
+            logging.debug("getNext returns scheduler because some is blocking or are in timers")
             return self
 
 
     def activate(self, process):
-        self.next.append(process)
+      logging.debug("activate: %s"%process)
+      self.next.append(process)
 
 
 # Run tests

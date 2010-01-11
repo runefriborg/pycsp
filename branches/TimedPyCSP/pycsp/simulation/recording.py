@@ -96,14 +96,6 @@ class Monitor(list):
         self.append([t, y])
         logging.debug("y:%d,time:%d"%(y,t))
 
-    def tally(self, y):
-        """ deprecated: tally for backward compatibility"""
-        self.observe(y, 0)
-                   
-    def accum(self, y,t = None):
-        """ deprecated:  accum for backward compatibility"""
-        self.observe(y, t)
-
     def reset(self, t = None):
         """reset the sums and counts for the monitored variable """
         self[:] = []
@@ -118,10 +110,6 @@ class Monitor(list):
         """ the series of measured values"""
         return list(zip(*self)[1])
 
-    def count(self):
-        """ deprecated: the number of observations made """
-        return self.__len__()
-        
     def total(self):
         """ the sum of the y"""
         if self.__len__() == 0:  return 0
