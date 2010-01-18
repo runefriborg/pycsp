@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import types
 import threading
+import time, random, platform
 from channel import ChannelPoisonException, ChannelRetireException
 from net import Channel
 from channelend import ChannelEndRead, ChannelEndWrite
@@ -71,6 +72,10 @@ class Process(threading.Thread):
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
+
+        # Create unique id
+        self.id = platform.node()+':'+str(random.random())+':'+str(time.time())
+
     def run(self):
         try:
             # Store the returned value from the process
@@ -84,29 +89,36 @@ class Process(threading.Thread):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
 
+
     def __check_poison(self, args):
         for arg in args:
-            if isinstance(arg, ChannelEndRead) or isinstance(arg, ChannelEndWrite) or isinstance(arg, Channel):
-                arg.poison()
-            elif types.ListType == type(arg):
-                self.__check_poison(arg)
-            elif types.DictType == type(arg):
-                self.__check_poison(arg.keys())
-                self.__check_poison(arg.values())
+            try:
+                if types.ListType == type(arg) or types.TupleType == type(arg):
+                    self.__check_poison(arg)
+                elif types.DictType == type(arg):
+                    self.__check_poison(arg.keys())
+                    self.__check_poison(arg.values())
+                elif type(arg.poison) == types.UnboundMethodType:
+                    arg.poison()
+            except AttributeError:
+                pass
 
     def __check_retire(self, args):
         for arg in args:
-            if isinstance(arg, ChannelEndRead) or isinstance(arg, ChannelEndWrite):
-                # Ignore if try to retire an already retired channel end.
-                try:
-                    arg.retire()
-                except ChannelRetireException:
-                    pass
-            elif types.ListType == type(arg):
-                self.__check_retire(arg)
-            elif types.DictType == type(arg):
-                self.__check_retire(arg.keys())
-                self.__check_retire(arg.values())
+            try:
+                if types.ListType == type(arg) or types.TupleType == type(arg):
+                    self.__check_retire(arg)
+                elif types.DictType == type(arg):
+                    self.__check_retire(arg.keys())
+                    self.__check_retire(arg.values())
+                elif type(arg.retire) == types.UnboundMethodType:
+                    # Ignore if try to retire an already retired channel end.
+                    try:
+                        arg.retire()
+                    except ChannelRetireException:
+                        pass
+            except AttributeError:
+                pass
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
@@ -245,6 +257,11 @@ def Sequence(*plist):
         # Call Run directly instead of start() and join() 
         p.run()
 
+def current_process_id():
+    t = threading.current_thread()
+    if t.name == 'MainThread':
+        return platform.node()+':main'
+    return t.id
 
 # Run tests
 if __name__ == '__main__':
