@@ -19,6 +19,10 @@
 
     Parallel(plugNplay.Prefix(cin, cout, prefix=1))
 
+* Added current_process_id() function for debugging purposes. It returns the unique id of the pycsp process executing current_process_id().
+* Changed matching of channels in function parameter lists, when propagating retire and poison.
+
+
 0.6.1 - 0.6.2
 ----------
 * Changed the reserved variable name for reading channel inputs from ChannelInput

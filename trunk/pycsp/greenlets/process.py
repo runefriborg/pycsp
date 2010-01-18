@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 from greenlet import greenlet
+import time, random
 import types
 from scheduling import Scheduler
 from channel import ChannelPoisonException, ChannelRetireException, Channel
@@ -56,6 +57,9 @@ class Process():
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
+
+        # Create unique id
+        self.id = str(random.random())+str(time.time())
 
         # Greenlet specific
         self.greenlet = None
@@ -110,27 +114,33 @@ class Process():
 
     def __check_poison(self, args):
         for arg in args:
-            if isinstance(arg, ChannelEndRead) or isinstance(arg, ChannelEndWrite) or isinstance(arg, Channel):
-                arg.poison()
-            elif types.ListType == type(arg):
-                self.__check_poison(arg)
-            elif types.DictType == type(arg):
-                self.__check_poison(arg.keys())
-                self.__check_poison(arg.values())
+            try:
+                if types.ListType == type(arg) or types.TupleType == type(arg):
+                    self.__check_poison(arg)
+                elif types.DictType == type(arg):
+                    self.__check_poison(arg.keys())
+                    self.__check_poison(arg.values())
+                elif type(arg.poison) == types.UnboundMethodType:
+                    arg.poison()
+            except AttributeError:
+                pass
 
     def __check_retire(self, args):
         for arg in args:
-            if isinstance(arg, ChannelEndRead) or isinstance(arg, ChannelEndWrite):
-                # Ignore if try to retire an already retired channel end.
-                try:
-                    arg.retire()
-                except ChannelRetireException:
-                    pass
-            elif types.ListType == type(arg):
-                self.__check_retire(arg)
-            elif types.DictType == type(arg):
-                self.__check_retire(arg.keys())
-                self.__check_retire(arg.values())
+            try:
+                if types.ListType == type(arg) or types.TupleType == type(arg):
+                    self.__check_retire(arg)
+                elif types.DictType == type(arg):
+                    self.__check_retire(arg.keys())
+                    self.__check_retire(arg.values())
+                elif type(arg.retire) == types.UnboundMethodType:
+                    # Ignore if try to retire an already retired channel end.
+                    try:
+                        arg.retire()
+                    except ChannelRetireException:
+                        pass
+            except AttributeError:
+                pass
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
@@ -274,10 +284,17 @@ def Sequence(*plist):
         else:
             processes.append(p)
 
-    for p in processes:
-        # Call Run directly instead of start() and join() 
-        p.run()
+    # Wrap processes to be able to schedule greenlets.
+    def WrapP():
+        for p in processes:
+            # Call Run directly instead of start() and join() 
+            p.run()
+    Parallel(Process(WrapP))
 
+def current_process_id():
+    s = Scheduler()
+    g = s.current
+    return g.id
 
 # Run tests
 if __name__ == '__main__':
