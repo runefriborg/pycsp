@@ -124,6 +124,15 @@ class Alternation:
 
         self.manager = ShmManager()
 
+        # Default is to go one up in stackframe.
+        self.execute_frame = -1
+
+    def set_execute_frame(self, steps):
+        if steps > 0:
+            self.execute_frame = -1*steps
+        else:
+            self.execute_frame = steps
+
     def choose(self):
         req_status_id = self.manager.ReqStatusDataPool.new()
         self.manager.ReqStatus_reset(req_status_id)
@@ -272,7 +281,11 @@ class Alternation:
             # Compiling and executing string
             elif type(action) == types.StringType:
                 # Fetch process frame and namespace
-                processframe= inspect.currentframe().f_back
+                processframe= inspect.currentframe()
+                steps = self.execute_frame
+                while (steps < 0):
+                    processframe = processframe.f_back
+                    steps += 1
                 
                 # Compile source provided in a string.
                 code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
@@ -288,6 +301,8 @@ class Alternation:
                 pass
             else:
                 raise Exception('Failed executing action: '+str(action))
+
+        return (c, msg)
 
     def select(self):
         """
