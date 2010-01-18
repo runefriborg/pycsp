@@ -450,6 +450,9 @@ class Alternation:
         #   input guard: (channel end, action) 
         #   output guard: (channel end, msg, action)
 
+        # Default is to go one up in stackframe.
+        self.execute_frame = -1
+
         # Replace channel end objects with channel name
         reduced_guards = []
         for g in self.guards:
@@ -488,6 +491,12 @@ class Alternation:
                     # Connection refused. Try again
                     server.adapter.rebindURI()
 
+
+    def set_execute_frame(self, steps):
+        if steps > 0:
+            self.execute_frame = -1*steps
+        else:
+            self.execute_frame = steps
 
     def choose(self):
         server = Pyro.core.getProxyForURI(self.URI)
@@ -528,7 +537,7 @@ class Alternation:
         >>> len(L1), len(L2)
         (10, 5)
         """
-        (idx, _, msg, op) = self.choose()
+        (idx, c, msg, op) = self.choose()
         if self.guards[idx]:
             action = self.guards[idx][-1]
 
@@ -554,7 +563,11 @@ class Alternation:
             # Compiling and executing string
             elif type(action) == types.StringType:
                 # Fetch process frame and namespace
-                processframe= inspect.currentframe().f_back
+                processframe= inspect.currentframe()
+                steps = self.execute_frame
+                while (steps < 0):
+                    processframe = processframe.f_back
+                    steps += 1
                 
                 # Compile source provided in a string.
                 code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
@@ -570,7 +583,11 @@ class Alternation:
                 pass
             else:
                 raise Exception('Failed executing action: '+str(action))
+    
+        # Lookup real guard
+        c = self.guards[idx][0]
 
+        return (c, msg)
 
     def select(self):
         """

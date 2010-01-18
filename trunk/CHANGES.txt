@@ -1,4 +1,4 @@
-0.6.2 - 0.7
+0.6.2 - 0.7.0
 ----------
 * Added buffered channels to all versions.
   Usage:  A = Channel(buffer=<N>) # where <N> is the wanted buffer size.
@@ -19,9 +19,10 @@
 
     Parallel(plugNplay.Prefix(cin, cout, prefix=1))
 
-* Added current_process_id() function for debugging purposes. It returns the unique id of the pycsp process executing current_process_id().
+* Added current_process_id() function for debugging purposes. It returns the unique id of the
+  pycsp process executing current_process_id().
 * Changed matching of channels in function parameter lists, when propagating retire and poison.
-
+* Changed Alternation.execute to also return (guard, msg) just as Alternation.select.
 
 0.6.1 - 0.6.2
 ----------
