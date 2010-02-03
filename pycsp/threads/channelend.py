@@ -35,6 +35,7 @@ def IN(channel):
     >>> isinstance(IN(C), ChannelEndRead)
     True
     """
+    print 'Warning: IN() are deprecated and will be removed'
     return channel.reader()
 
 def OUT(channel):
@@ -44,6 +45,7 @@ def OUT(channel):
     >>> isinstance(OUT(C), ChannelEndWrite)
     True
     """
+    print 'Warning: OUT() are deprecated and will be removed'
     return channel.writer()
 
 def retire(*list_of_channelEnds):
