@@ -167,7 +167,7 @@ class Process(mp.Process):
                     R[key.channel.writer()] = args[key]
                 elif isinstance(args[key], ChannelEndRead):
                     R[key] = args[key].channel.reader() 
-                elif isinstance(args[key], ChannelEndWriter):
+                elif isinstance(args[key], ChannelEndWrite):
                     R[key] = args[key].channel.writer() 
                 elif args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
                     R[key] = self.__mul_channel_ends(args[key])
