@@ -26,6 +26,8 @@ import socket
 import time
 import sys
 
+TraceInit()
+
 if sys.platform == 'win32' and (version[3] == 'processes'):
     print 'This example creates nested processes and channels, which is not supported in win32, when using processes implementation'
     sys.exit(0)

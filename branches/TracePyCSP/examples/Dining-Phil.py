@@ -29,8 +29,11 @@ from pycsp.common.trace import *
 # This is an example, showing how to do the equivalent in python using PyCSP
 #
 
+TraceInit()
+
 @process
 def philosopher(id, left, right, down, up):
+    TraceMsg(id)
     try:
         eat = 0
         while True:
@@ -116,3 +119,5 @@ def secure_college(steps):
     
 
 Sequence(secure_college(1000))
+
+TraceQuit()

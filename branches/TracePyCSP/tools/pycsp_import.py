@@ -1,6 +1,6 @@
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -19,47 +19,29 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from pycsp_import import *
-from pycsp.common.trace import *
+import sys
+sys.path.append("..")
 
-TraceInit()
+if len(sys.argv) > 1:
+    mod = sys.argv[1]
+else:
+    mod = ''
 
-@process
-def producer(cout, cnt):
-    for i in range(2,cnt):
-        cout(i)
-    poison(cout)
-    
-@process
-def worker(cin, cout):
-    try:
-        ccout=None
-        my_prime=cin()
-        cout(my_prime)
-        child_channel=Channel()
-        ccout=-child_channel
-        Spawn(worker(+child_channel, cout))
-        while True:
-            new_prime=cin()
-            if new_prime%my_prime:
-                ccout(new_prime)
-    except ChannelPoisonException:
-        if ccout:
-            poison(ccout)
-        else:
-            poison(cout)
+if (mod == 'threads'):
+    from pycsp.threads import *
+elif (mod == 'processes'):
+    from pycsp.processes import *
+elif (mod == 'greenlets'):
+    from pycsp.greenlets import *
+elif (mod == 'net'):
+    from pycsp.net import *
+else:
+    print "python",sys.argv[0],"[ threads | processes | greenlets | net ]"
+    from pycsp.threads import *
 
-@process
-def printer(cin):
-    while True:
-        print cin()
+print 'Using version', version
 
+if sys.platform == 'win32' and (version[3] == 'processes'):
+    print 'The examples are not compatible with PyCSP.processes and win32.'
+    sys.exit(0)
 
-first=Channel()
-outc=Channel()
-
-Parallel(producer(-first,30),
-         worker(+first, -outc),
-         printer(+outc))
-
-TraceQuit()

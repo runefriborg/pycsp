@@ -60,6 +60,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
 
 # Detect current PYCSP version and import as pycsp
+PYCSP = 'THREADS'
 if os.environ.has_key('PYCSP'):
     if os.environ['PYCSP'] == 'PROCESSES':
         PYCSP = 'PROCESSES'
@@ -91,14 +92,13 @@ def Convert2Str(cin, cout):
     while True:
         cout(str(cin()) + '\n')
 
-@pycsp.process
-def sendTraceP(cout, msg):
-    cout(msg)
-    pycsp.retire(cout)
-
 def sendTrace(msg):
-    pycsp.Parallel(sendTraceP(C[0].writer(), msg))
-
+    cout = C[0].writer()
+    if PYCSP == 'GREENLETS':
+        pycsp.Parallel(pycsp.Process(cout,msg))
+    else:
+        cout(msg)
+    pycsp.retire(cout)
 
 def TraceInit(file=None):
     """  TraceInit(<filename or file object>)
@@ -186,6 +186,7 @@ def Parallel(*plist):
     sendTrace(val)
 
 def Sequence(*plist):
+    print 'Warning: Tracing is not correct for Sequence constructs'
     process_id = pycsp.current_process_id()
     val = {'processes':[], 'process_id':process_id}
     for p in plist:

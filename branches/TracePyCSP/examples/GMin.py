@@ -1,23 +1,23 @@
-"""
-Stochastic Minimum Search
-
-"""
 from pycsp_import import *
-from pycsp import *
-import pylab
+from pycsp.common.trace import *
+
+import math, random
+
+TraceInit()
 
 @process
-def gmin(fin,chout):
+def gmin(chin,chout, max_loops=500):
+  f=chin()
+  print "F is "+ f
   delta=0.01
   try:
-    f = fin()
-    while True:
-      x,y=pylab.random(),pylab.random()
+    for loop in xrange(max_loops):
+      x,y=random.random(),random.random()
       min=eval(f)
       change=min+10
-      i = 0
-      while change<>min and i<10000:
-        min=pylab.minimum(change,min)
+      while change<>min:
+        if change < min:
+          min = change
         x+=delta
         if not eval(f)<min: x-=delta
         x-=delta
@@ -27,55 +27,58 @@ def gmin(fin,chout):
         y-=delta
         if not eval(f)<min: y+=delta
         change=eval(f)
-      if change == min:
-        chout(min)
-      g, msg = Alternation([
-          {fin:None},
-          {Skip():None}
-          ]).select()
-      if g == fin:
-        print "Updated f to %s" % (f)
-        f = msg
-
+      chout(min)
+    poison(chin, chout)
   except:
     pass
 
-
 @process 
-def master(kbd, scr, workers_i, workers_o):
-  log = []
+def master(filter, workers_o, workers_i, n, f):
+  for i in range(n):
+    workers_o(f)
+
   while True:
+    filter(workers_i())
+
+  if False:
     Alternation([{
-                 kbd:"workers_o(__channel_input)",
-                 workers_i:"""
-log.append(__channel_input)
-log.sort()
-scr(log[0])
-"""
+                 kbd:None,
+                 workers_i:'filter(__channel_input)'
                  }]).execute()
 
-@process
-def userin(kbd):
-  while True:
-    str_input = raw_input('CMD >')
-    if str_input.strip() == 'f':
-      kbd(raw_input('Enter new f:'))
-    elif str_input.strip() == 'q':
-      poison(kbd)
+
 
 @process
 def userout(scr):
   while True:
     print scr()
 
-kbd, scr, updatef, workers = Channel(), Channel(), Channel(), Channel()
-N=10
+@process
+def filter_minimum(cin, cout):
+  res=cin()
+  cout(res)
+  while True:
+    cand=cin()
+    if cand<res:
+      res=cand
+      cout(res)
+  
 
-#f= 'x**2+y**2-pylab.cos(18*x)-pylab.cos(18*y)+2'
 
-Parallel(userin(OUT(kbd)),
-         userout(IN(scr)),
-         master(IN(kbd), OUT(scr), IN(workers), OUT(updatef)),
-         [gmin(IN(updatef), OUT(workers)) for i in range(N)]
+kbd=Channel()
+scr=Channel()
+filter = Channel()
+to_worker=Channel()
+from_worker=Channel()
+N=5
+
+Parallel(userout(IN(scr)),
+         filter_minimum(IN(filter), OUT(scr)),
+         master(OUT(filter), OUT(to_worker), IN(from_worker), N, f='x**2+y**2-math.cos(18*x)-math.cos(18*y)+2'),
+         [gmin(IN(to_worker), OUT(from_worker)) for i in range(N)]
         )
 
+#print gmin('x**2+y**2-pylab.cos(18*x)-pylab.cos(18*y)+2')
+
+
+TraceQuit()

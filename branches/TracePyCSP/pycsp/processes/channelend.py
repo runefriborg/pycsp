@@ -173,6 +173,12 @@ class ChannelEndWrite(ChannelEnd):
         else:
             return "<ChannelEndWrite wrapping %s named %s>" % (self.channel, self.channel.name)
 
+    def isWriter(self):
+        return True
+
+    def isReader(self):
+        return False
+
 
 class ChannelEndRead(ChannelEnd):
     def __init__(self, channel):
@@ -194,6 +200,12 @@ class ChannelEndRead(ChannelEnd):
             return "<ChannelEndRead wrapping %s>" % self.channel
         else:
             return "<ChannelEndRead wrapping %s named %s>" % (self.channel, self.channel.name)
+
+    def isWriter(self):
+        return False
+
+    def isReader(self):
+        return True
 
 # Run tests
 if __name__ == '__main__':

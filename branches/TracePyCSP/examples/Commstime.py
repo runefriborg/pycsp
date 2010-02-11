@@ -25,6 +25,8 @@ from pycsp_import import *
 from pycsp.common.trace import *
 import time
 
+TraceInit()
+
 @process
 def Prefix(cin, cout, prefixItem=None):
     t = prefixItem
@@ -36,6 +38,7 @@ def Prefix(cin, cout, prefixItem=None):
 def Delta2(cin, cout1, cout2):
     while True:
         t = cin()
+        TraceMsg(t)
         cout1(t)
         cout2(t)
 
@@ -56,7 +59,7 @@ def Consumer(cin):
     cin()
     t1 = ts()
     for i in range(N):
-        cin()
+        TraceMsg(cin())
     t2 = ts()
     dt = t2-t1
     tchan = dt / (4 * N)
@@ -83,3 +86,4 @@ for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
 
+TraceQuit()

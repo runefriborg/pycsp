@@ -162,20 +162,67 @@ class TracedChannel():
         self.reading = {}
         self.writing = {}
 
-    def update(self, process_id, _type):
+        self.diamond_location = None
+
+    def update_diamond_location(self):
+
+        if self.diamond_location == None:
+            parent_count = {}
+            for a in self.reading:
+                parent, p = a
+                if parent_count.has_key(parent):
+                    parent_count[parent] += 1
+                else:
+                    parent_count[parent] = 1
+
+            for b in self.writing:
+                parent, p = b
+                if parent_count.has_key(parent):
+                    parent_count[parent] += 1
+                else:
+                    parent_count[parent] = 1
+            
+            max = (0,0)
+            for parent, count in parent_count.items():
+                if count > max[1]:
+                    max = (parent, count)
+
+            if max != (0,0):
+                self.diamond_location = max[0]
+            
+
+    def update(self, parent_process_id, process_id, _type):
         
+        # Reset
+        self.diamon_location = None
+
         update_data = self.writing 
         if _type == READ:
             update_data = self.reading
 
-        if update_data.has_key(process_id):
-            update_data[process_id] += 1
+        key = (parent_process_id, process_id)
+        if update_data.has_key(key):
+            update_data[key] += 1
         else:
-            update_data[process_id] = 1
+            update_data[key] = 1
             
         # Set active
-        if int(update_data[process_id]) == update_data[process_id]:
-             update_data[process_id] += 0.5
+        if int(update_data[key]) == update_data[key]:
+             update_data[key] += 0.5
+
+    def try_insert_diamond(self, parent_process_id):
+
+        if len(self.reading) == 1 and len(self.writing) == 1:
+            return None
+        elif len(self.reading) >= 1 and len(self.writing) >= 1:
+            
+            # Update
+            self.update_diamond_location()
+        
+            if parent_process_id == self.diamond_location:
+                return self.dot_id + " [label=\"\", shape=diamond, width=0.2, height=0.2];"
+            else:
+                return None
 
     def to_dot(self):
         
@@ -192,42 +239,9 @@ class TracedChannel():
                 self.reading[cin_id] -= 0.5
                 active = ",color=blue"            
 
-            return [DOT_ID(cout_id) + " -> " + DOT_ID(cin_id) + " [weight="+str(self.writing[cout_id])+""+active+"];"]
-        elif False and len(self.reading) == 1 and len(self.writing) > 1:
-            cin_id = self.reading.keys()[0]
-            contents = []
-
-            head = ", samehead=\"head"+str(random.random())+"\""
-            for cout_id in self.writing:
-                
-                # test active
-                active = ""
-                if int(self.writing[cout_id]) != self.writing[cout_id]:
-                    self.writing[cout_id] -= 0.5
-                    active = ",color=blue"
-
-                contents.append(DOT_ID(cout_id) + " -> " + DOT_ID(cin_id) + " [weight="+str(self.writing[cout_id])+""+active+head+"];")
-            return contents
-
-        elif False and len(self.reading) > 1 and len(self.writing) == 1:
-            cout_id = self.writing.keys()[0]
-            contents = []
-
-            tail = ", sametail=\"tail"+str(random.random())+"\""
-            for cin_id in self.reading:
-
-                # test active
-                active = ""
-                if int(self.reading[cin_id]) != self.reading[cin_id]:
-                    self.reading[cin_id] -= 0.5
-                    active = ",color=blue"
-
-                contents.append(DOT_ID(cout_id) + " -> " + DOT_ID(cin_id) + " [weight="+str(self.reading[cin_id])+""+active+tail+"];") 
-            return contents
-
+            return [DOT_ID(cout_id[1]) + " -> " + DOT_ID(cin_id[1]) + " [weight="+str(self.writing[cout_id])+""+active+"];"]
         elif len(self.reading) >= 1 and len(self.writing) >= 1:
             contents = []
-            contents.append(self.dot_id + " [label=\"\", shape=diamond, width=0.2, height=0.2];")
             for cout_id in self.writing:
                 
                 # test active
@@ -236,7 +250,7 @@ class TracedChannel():
                     self.writing[cout_id] -= 0.5
                     active = ",color=blue"
 
-                contents.append(DOT_ID(cout_id) + " -> " + self.dot_id + " [weight="+str(self.writing[cout_id])+""+active+"];")
+                contents.append(DOT_ID(cout_id[1]) + " -> " + self.dot_id + " [weight="+str(self.writing[cout_id])+""+active+"];")
 
             for cin_id in self.reading:
 
@@ -246,7 +260,7 @@ class TracedChannel():
                     self.reading[cin_id] -= 0.5
                     active = ",color=blue"
 
-                contents.append(self.dot_id + " -> " + DOT_ID(cin_id) + " [weight="+str(self.reading[cin_id])+""+active+"];") 
+                contents.append(self.dot_id + " -> " + DOT_ID(cin_id[1]) + " [weight="+str(self.reading[cin_id])+""+active+"];") 
 
             return contents
         else:
@@ -296,6 +310,12 @@ class TracedProcess():
             contents.append("\t"*(l+1) + DOT_ID(self.id)+" [width=0.3, height=0.3, style=invis, label=\"\"];")
             for p in self.processes:
                 contents.extend(p.to_dot(l+1))
+
+                for chan in p.channels:
+                    diamond_node = chan.try_insert_diamond(self.id)
+                    if diamond_node != None:
+                        contents.append(diamond_node)
+
             contents.append("\t"*l + "}")
         
             return contents
@@ -469,13 +489,14 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                         trace_channels[trace['chan_name']] = TracedChannel(trace['chan_name'])                    
 
                     chan = trace_channels[trace['chan_name']]
-                    
-                    if trace['type'] == 'BlockOnRead':
-                        chan.update(trace['process_id'], READ) 
-                    else:
-                        chan.update(trace['process_id'], WRITE) 
+                    p = trace_processes[trace['process_id']]
 
-                    trace_processes[trace['process_id']].talking_to(chan)
+                    if trace['type'] == 'BlockOnRead':
+                        chan.update(p.parent.id, p.id, READ) 
+                    else:
+                        chan.update(p.parent.id, p.id, WRITE) 
+
+                    p.talking_to(chan)
 
                     send_objects((trace_processes, trace_channels, 3))     
                 elif (trace['type'] == 'DoneRead' or
@@ -508,9 +529,10 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                             trace_channels[guard['chan_name']] = TracedChannel(guard['chan_name'])
 
                         chan = trace_channels[guard['chan_name']]
-                    
-                        chan.update(trace['process_id'], _type)
-                        trace_processes[trace['process_id']].talking_to(chan)
+                        p = trace_processes[trace['process_id']]
+
+                        chan.update(p.parent.id, p.id, _type)
+                        p.talking_to(chan)
 
                     send_objects((trace_processes, trace_channels, 3))     
             
