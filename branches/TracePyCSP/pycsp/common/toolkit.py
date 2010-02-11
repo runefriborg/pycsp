@@ -35,6 +35,9 @@ if os.environ.has_key('PYCSP'):
 else:
     import pycsp.threads as pycsp
 
+if os.environ.has_key('PYCSP_TRACE'):
+    from pycsp.common import trace as pycsp
+
 import subprocess
 import types
 

@@ -57,7 +57,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-import os
+import os, sys
 
 # Detect current PYCSP version and import as pycsp
 PYCSP = 'THREADS'
@@ -100,13 +100,26 @@ def sendTrace(msg):
         cout(msg)
     pycsp.retire(cout)
 
-def TraceInit(file=None):
-    """  TraceInit(<filename or file object>)
+
+        
+def TraceInit(file=None, stdout=False):
+    """  TraceInit(<filename or file object>, <trace stdout>)
     Spawn the collecting trace process.
     Only run once, otherwise multiple trace files is created.
 
     This function must be called before tracing.
     """
+
+    class PipeHandler:
+        def __init__(self, wrapped_pipe):
+            self.wrapped_pipe = wrapped_pipe
+        def write(self, s):
+            sendTrace({'type':'Output', 'msg':s})
+            self.wrapped_pipe.write(s)
+
+    if stdout:
+        sys.stdout = PipeHandler(sys.stdout)
+    
     if file == None:
         file = 'pycsp_trace.log'
 

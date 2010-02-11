@@ -1,7 +1,7 @@
 from pycsp_import import *
 from pycsp.common.trace import *
 
-TraceInit('trace.out')
+TraceInit()
 
 @process
 def source(chan_out):

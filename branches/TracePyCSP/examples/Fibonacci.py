@@ -25,7 +25,7 @@ from pycsp.common.plugNplay import *
 
 import sys
 
-TraceInit()
+TraceInit(stdout=True)
 
 # We are using plugNplay processes
 #  Prefix
@@ -35,7 +35,6 @@ TraceInit()
 @process
 def Printer(cin, limit):
     for i in xrange(limit):
-        TraceMsg('printing ' + str(i))
         print cin(),
     poison(cin)
 

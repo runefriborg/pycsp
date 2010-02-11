@@ -37,8 +37,10 @@ import wx
 import subprocess, time, random
 import cStringIO
 from pycsp_import import *
+#from pycsp.common.trace import *
 from pycsp.common import toolkit
 
+#TraceInit('tracer.trace')
 
 DOT = toolkit.which('dot')
 
@@ -66,110 +68,137 @@ class MainFrame(wx.Frame):
         menu.Append(wx.ID_EXIT, "E&xit\tAlt-X", "Exit!")
 
         # bind the menu event to an event handler
-        self.Bind(wx.EVT_MENU, self.OnTimeToClose, id=wx.ID_EXIT)
+        self.Bind(wx.EVT_MENU, self.Shutdown, id=wx.ID_EXIT)
 
         # and put the menu on the menubar
         menuBar.Append(menu, "&File")
         self.SetMenuBar(menuBar)
-
         self.CreateStatusBar()
         
 
         # Now create the Panel to put the other controls on.
         panel = wx.Panel(self)
 
-        # and a few controls
-        text = wx.StaticText(panel, -1, "Hello World!")
-        text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
-        text.SetSize(text.GetBestSize())
-        btn = wx.Button(panel, -1, "Close")
-        funbtn = wx.Button(panel, -1, "Just for fun...")
+        topSizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        self.stateBtnPlay = 'pause'
+        self.btnPlay = wx.Button(panel, wx.ID_NEW, "Play Trace", (215,48), (100,30))
+        self.Bind(wx.EVT_BUTTON, self.OnPlayTrace, self.btnPlay)
+
+        self.delay = wx.Slider(
+            panel, 1000, 25, 1, 1000, (30, 60), (200, -1), 
+            wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS 
+            )
         
-#        self.MsgWindow = wx.TextCtrl(self, wx.ID_ANY,
-#                                     "Look Here for output from events\n",
-#                                     style = (wx.TE_MULTILINE |
-#                                              wx.TE_READONLY |
-#                                              wx.SUNKEN_BORDER)
-#                                     )
-
-        self.ImagePanel = wx.Window(panel, -1,
-                                    style=wx.SUNKEN_BORDER)
-        self.ImagePanel.SetBackgroundColour(wx.WHITE)
-        self.ImagePanel.Bind(wx.EVT_PAINT, self.onPaintEvent)
+        self.btnStep = wx.Button(panel, wx.ID_OK, "Step Trace", (215,48), (100,30))
+        self.Bind(wx.EVT_BUTTON, self.OnStepTrace, self.btnStep)
 
         # bind the button events to handlers
-        self.Bind(wx.EVT_BUTTON, self.OnTimeToClose, btn)
-        self.Bind(wx.EVT_BUTTON, self.OnFunButton, funbtn)
+        topSizer.Add(self.btnPlay, 1, wx.ALL | wx.EXPAND, 1)
+        topSizer.Add(self.delay, 1 , wx.EXPAND | wx.ALL, 1)  
+        topSizer.Add(self.btnStep, 1 , wx.EXPAND | wx.ALL, 1)
+        
 
         # Use a sizer to layout the controls, stacked vertically and with
         # a 10 pixel border around each
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(text, 0, wx.ALL, 1)
-        sizer.Add(btn, 0, wx.ALL, 10)
-        sizer.Add(funbtn, 0, wx.ALL, 10)
+        sizer.Add(topSizer)
 
-        #sizer.Add(self.MsgWindow, 0, wx.EXPAND | wx.ALL, 5)
-        sizer.Add(self.ImagePanel, 1, wx.EXPAND | wx.ALL, 5)
+        # Create ImagePanel
+        self.ImagePanel = wx.Window(panel, -1,
+                                    style=wx.SUNKEN_BORDER)
+        self.ImagePanel.SetBackgroundColour(wx.WHITE)
+        self.ImagePanel.Bind(wx.EVT_PAINT, self.OnPaintEvent)
+
+        sizer.Add(self.ImagePanel, 5, wx.EXPAND | wx.ALL, 5)
+
+        # Create MsgWindow
+        self.MsgWindow = wx.TextCtrl(panel, wx.ID_ANY,
+                                     "Look Here for output\n",
+                                     style = (wx.TE_MULTILINE |
+                                              wx.TE_READONLY |
+                                              wx.SUNKEN_BORDER)
+                                     )
+        sizer.Add(self.MsgWindow, 1, wx.EXPAND | wx.ALL, 5)
         
+        # Set auto layout
         panel.SetAutoLayout(True)
         panel.SetSizer(sizer)
 
-        wx.CallLater(1, self.updateScreenSize)
+        wx.CallLater(1, self.UpdateScreenSize)
 
         self.get_image = +IMAGE_FILE_CHAN
         self.setup_dotfile = -DOTFILE_SETUP_CHAN
         self.setup_dotcmd = -DOTCMD_SETUP_CHAN        
-        self.onUpdate()
+        self.OnUpdate()
                 
-    def onPaintEvent(self, event):
+    def OnPaintEvent(self, event):
         """ Respond to a request to redraw the contents of our drawing panel.
         """
-        self.updateScreenSize()
-
+        self.UpdateScreenSize()
     
-
     def Log(self, text):
         self.MsgWindow.AppendText(text)
-        if not text[-1] == "\n":
-            self.MsgWindow.AppendText("\n")
 
+    def UpdateScreenSize(self):
+        try:
+            self.setup_dotfile(('size',self.ImagePanel.GetSize()))        
+        except ChannelPoisonException:
+            return
 
-    def updateScreenSize(self):
-        self.setup_dotfile(('size',self.ImagePanel.GetSize()))        
-    
-    def onUpdate(self):
+    def OnStepTrace(self, event):
+        pass
+
+    def OnPlayTrace(self, event):
+        if self.stateBtnPlay == 'pause':
+            self.stateBtnPlay = 'play'
+            self.btnPlay.SetLabel('Pause Trace')
+            self.btnStep.Enabled = False
+
+            #self.onPlayTrace2()
+        else:
+            self.stateBtnPlay = 'pause'
+            self.btnPlay.SetLabel('Play Trace')
+            self.btnStep.Enabled = True
+
+    def OnUpdate(self):
         
-        g, img = Alternation([(self.get_image, None), (Skip(), None)]).select()
+        # Try to fetch new image
+        try:
+            g, update = Alternation([(self.get_image, None), (Skip(), None)]).select()
+        except ChannelPoisonException:
+            return
+
+        # Got image
         if g == self.get_image:
-        
+            
+            img, trace_output = update
+
+            # Print traced stdout
+            if trace_output:
+                self.Log("".join(trace_output))
+
+            # Convert image
             stream = cStringIO.StringIO(img)
             bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
 
+            # Draw converted image
             dc = wx.PaintDC(self.ImagePanel)
             dc.Clear()
             dc.BeginDrawing()
-
             x, y = 0, 0
             w, h = self.ImagePanel.GetClientSize()
             dc.DrawBitmap(bmp, x + (w - bmp.GetWidth()) / 2,
                           y + (h - bmp.GetHeight()) / 2, True)
             dc.EndDrawing()
 
-        wx.CallLater(10, self.onUpdate)
+        # Setup 10 ms. delay to handle GUI
+        wx.CallLater(self.delay.Value, self.OnUpdate)
 
-    def OnTimeToClose(self, evt):
-        """Event handler for the button click."""
-        print "See ya later!"
-
+    def Shutdown(self, evt):
+        """Event handler for shutting down."""
         poison(self.get_image)
         self.Close()
-
-    def OnFunButton(self, evt):
-        """Event handler for the button click."""
-        print "Having fun yet?"
-
-
         
 
 class MainApp(wx.App):
@@ -353,14 +382,15 @@ class TracedProcess():
 
 @process
 def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
+    trace_output = []
     trace_processes = {}
     trace_channels = {}
 
     size = (6,6)
 
     while True:
-        send_objects((trace_processes, trace_channels))
-        (trace_processes, trace_channels, CHANGE_LEVEL) = get_objects()        
+        send_objects((trace_processes, trace_channels, trace_output))
+        (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects()        
         if CHANGE_LEVEL > 1:
             
             next = False
@@ -378,13 +408,14 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
 
                 new_dot_file_2 = "\n}"
 
-                g, cmd = Alternation([{
-                            (send_dotfile, new_dot_file_1 + "\n".join(contents) + new_dot_file_2):None,
-                            get_setup:None
-                            }]).select()
+                g, cmd = Alternation([
+                            (send_dotfile, (new_dot_file_1 + "\n".join(contents) + new_dot_file_2, trace_output), None),
+                            (get_setup, None)
+                            ]).select()
 
                 if (g == send_dotfile):
                     next = True
+                    trace_output = []
 
                 elif (g == get_setup):                    
                     if cmd[0] == 'size':
@@ -395,15 +426,15 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
 @process
 def RunDotParser(get_dotfile, send_image, get_setup):
     while True:
-        dotfile = get_dotfile()
+        dotfile, trace_output = get_dotfile()
         while (dotfile != None):
             p = subprocess.Popen((DOT, '-Tpng'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             pngfile, _ = p.communicate(dotfile)
 
-            g, cmd = Alternation([{
-                    (send_image,pngfile):None,
-                    get_setup:None
-                    }]).select()
+            g, cmd = Alternation([
+                    (send_image,(pngfile, trace_output), None),
+                    (get_setup,None)
+                    ]).select()
             if g == send_image:            
                 dotfile = None
 
@@ -430,18 +461,20 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
             #print trace
 
-            if False:
-                pass
-            else:
-                if trace['type'] == 'Msg':
-                    (trace_processes, trace_channels) = get_objects()
+            (trace_processes, trace_channels, trace_output) = get_objects()
+
+            try:
+                CHANGE_LEVEL = 0
+                if trace['type'] == 'Output':
+                    trace_output.append(trace['msg'])
+                    CHANGE_LEVEL = 1
+
+                elif trace['type'] == 'Msg':
                     p = trace_processes[trace['process_id']]
                     p.state_msg = 'msg:'+trace['msg']
-                    send_objects((trace_processes, trace_channels, 2 ))
-
+                    
+                    CHANGE_LEVEL = 2
                 elif trace['type'] == 'BlockOnParallel':
-                    (trace_processes, trace_channels) = get_objects()
-
                     if not trace_processes.has_key(trace['process_id']):
                         # Main process
                         p = TracedProcess(trace['process_id'], '__main__')
@@ -458,11 +491,8 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
                     parent.state = STATE_BLOCKED
                     parent.state_msg = 'Parallel'
-                    send_objects((trace_processes, trace_channels, 3 ))
-
+                    CHANGE_LEVEL = 3
                 elif trace['type'] == 'BlockOnSequence':
-                    (trace_processes, trace_channels) = get_objects()
-
                     if not trace_processes.has_key(trace['process_id']):
                         # Main process
                         p = TracedProcess(trace['process_id'], '__main__')
@@ -479,11 +509,8 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
                     parent.state = STATE_BLOCKED
                     parent.state_msg = 'Sequence'
-                    send_objects((trace_processes, trace_channels, 3))
-
+                    CHANGE_LEVEL = 3
                 elif trace['type'] == 'Spawn':
-                    (trace_processes, trace_channels) = get_objects()
-
                     if not trace_processes.has_key(trace['process_id']):
                         # Main process
                         p = TracedProcess(trace['process_id'], '__main__')
@@ -498,10 +525,8 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                         parent.processes.append(p)
                         p.parent = parent
 
-                    send_objects((trace_processes, trace_channels, 3))
-
+                    CHANGE_LEVEL = 3
                 elif trace['type'] == 'QuitProcess':
-                    (trace_processes, trace_channels) = get_objects()
                     proc = trace_processes.pop(trace['process_id'])
 
                     proc.silence()
@@ -509,28 +534,23 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     if proc.parent != None:                        
                         proc.parent.processes.remove(proc)
                     
-                    send_objects((trace_processes, trace_channels, 3))
-                    
+                    CHANGE_LEVEL = 3
                 elif trace['type'] == 'DoneParallel':
-                    (trace_processes, trace_channels) = get_objects()
                     parent = trace_processes[trace['process_id']]
 
                     parent.state = STATE_RUNNING
                     parent.state_msg = ''
 
-                    send_objects((trace_processes, trace_channels, 2))
-
+                    CHANGE_LEVEL = 2
                 elif trace['type'] == 'DoneSequence':
-                    (trace_processes, trace_channels) = get_objects()
                     parent = trace_processes[trace['process_id']]
 
                     parent.state = STATE_RUNNING
                     parent.state_msg = ''
 
-                    send_objects((trace_processes, trace_channels, 2))                            
+                    CHANGE_LEVEL = 2
                 elif (trace['type'] == 'BlockOnRead' or 
                       trace['type'] == 'BlockOnWrite'):
-                    (trace_processes, trace_channels) = get_objects()
                     trace_processes[trace['process_id']].state = STATE_BLOCKED
 
                     if not trace_channels.has_key(trace['chan_name']):
@@ -546,22 +566,17 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
                     p.talking_to(chan)
 
-                    send_objects((trace_processes, trace_channels, 3))     
+                    CHANGE_LEVEL = 3   
                 elif (trace['type'] == 'DoneRead' or
                       trace['type'] == 'DoneWrite'):
-                    (trace_processes, trace_channels) = get_objects()
                     trace_processes[trace['process_id']].state = STATE_RUNNING
-                    send_objects((trace_processes, trace_channels, 2))     
-
+                    CHANGE_LEVEL = 2
                 elif (trace['type'] == 'BlockOnAlternation.execute' or
                       trace['type'] == 'BlockOnAlternation.select'):
-                    (trace_processes, trace_channels) = get_objects()
                     trace_processes[trace['process_id']].state = STATE_BLOCKED
-                    send_objects((trace_processes, trace_channels, 2))
-
+                    CHANGE_LEVEL = 2
                 elif (trace['type'] == 'DoneAlternation.execute' or
                       trace['type'] == 'DoneAlternation.select'):
-                    (trace_processes, trace_channels) = get_objects()
                     trace_processes[trace['process_id']].state = STATE_RUNNING
                     guard = trace['guard']
 
@@ -582,8 +597,10 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                         chan.update(p.parent.id, p.id, _type)
                         p.talking_to(chan)
 
-                    send_objects((trace_processes, trace_channels, 3))     
-            
+                    CHANGE_LEVEL = 3
+            except Exception, e:
+                print 'KeyError', e
+            send_objects((trace_processes, trace_channels, trace_output, CHANGE_LEVEL ))
 
 
 if len(sys.argv) > 1:

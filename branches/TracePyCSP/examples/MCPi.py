@@ -23,7 +23,7 @@ from pycsp_import import *
 from pycsp.common.trace import *
 from random import random
 
-TraceInit()
+TraceInit(stdout=True)
 
 @process
 def producer(job_out, bagsize, bags):
