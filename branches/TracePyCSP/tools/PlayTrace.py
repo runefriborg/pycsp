@@ -39,6 +39,7 @@ import cStringIO
 from pycsp_import import *
 from pycsp.common import toolkit
 
+
 DOT = toolkit.which('dot')
 
 STATE_INIT, STATE_BLOCKED, STATE_RUNNING = range(3)
@@ -62,7 +63,7 @@ class MainFrame(wx.Frame):
         # add an item to the menu, using \tKeyName automatically
         # creates an accelerator, the third param is some help text
         # that will show up in the statusbar
-        menu.Append(wx.ID_EXIT, "E&xit\tAlt-X", "Exit this simple sample")
+        menu.Append(wx.ID_EXIT, "E&xit\tAlt-X", "Exit!")
 
         # bind the menu event to an event handler
         self.Bind(wx.EVT_MENU, self.OnTimeToClose, id=wx.ID_EXIT)
@@ -85,13 +86,17 @@ class MainFrame(wx.Frame):
         funbtn = wx.Button(panel, -1, "Just for fun...")
 
         
-        self.MsgWindow = wx.TextCtrl(self, wx.ID_ANY,
-                                     "Look Here for output from events\n",
-                                     style = (wx.TE_MULTILINE |
-                                              wx.TE_READONLY |
-                                              wx.SUNKEN_BORDER)
-                                     )
+#        self.MsgWindow = wx.TextCtrl(self, wx.ID_ANY,
+#                                     "Look Here for output from events\n",
+#                                     style = (wx.TE_MULTILINE |
+#                                              wx.TE_READONLY |
+#                                              wx.SUNKEN_BORDER)
+#                                     )
 
+        self.ImagePanel = wx.Window(panel, -1,
+                                    style=wx.SUNKEN_BORDER)
+        self.ImagePanel.SetBackgroundColour(wx.WHITE)
+        self.ImagePanel.Bind(wx.EVT_PAINT, self.onPaintEvent)
 
         # bind the button events to handlers
         self.Bind(wx.EVT_BUTTON, self.OnTimeToClose, btn)
@@ -100,24 +105,39 @@ class MainFrame(wx.Frame):
         # Use a sizer to layout the controls, stacked vertically and with
         # a 10 pixel border around each
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(text, 0, wx.ALL, 10)
+        sizer.Add(text, 0, wx.ALL, 1)
         sizer.Add(btn, 0, wx.ALL, 10)
         sizer.Add(funbtn, 0, wx.ALL, 10)
 
-        sizer.Add(self.MsgWindow, 2, wx.EXPAND | wx.ALL, 5)
-
+        #sizer.Add(self.MsgWindow, 0, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(self.ImagePanel, 1, wx.EXPAND | wx.ALL, 5)
+        
+        panel.SetAutoLayout(True)
         panel.SetSizer(sizer)
-        panel.Layout()
 
-        self.bitmap = None
+        wx.CallLater(1, self.updateScreenSize)
+
         self.get_image = +IMAGE_FILE_CHAN
+        self.setup_dotfile = -DOTFILE_SETUP_CHAN
+        self.setup_dotcmd = -DOTCMD_SETUP_CHAN        
         self.onUpdate()
+                
+    def onPaintEvent(self, event):
+        """ Respond to a request to redraw the contents of our drawing panel.
+        """
+        self.updateScreenSize()
+
+    
 
     def Log(self, text):
         self.MsgWindow.AppendText(text)
         if not text[-1] == "\n":
             self.MsgWindow.AppendText("\n")
 
+
+    def updateScreenSize(self):
+        self.setup_dotfile(('size',self.ImagePanel.GetSize()))        
+    
     def onUpdate(self):
         
         g, img = Alternation([(self.get_image, None), (Skip(), None)]).select()
@@ -126,17 +146,23 @@ class MainFrame(wx.Frame):
             stream = cStringIO.StringIO(img)
             bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
 
-            if self.bitmap == None:
-                self.bitmap = wx.StaticBitmap(self, -1, bmp, (15, 45), (bmp.GetWidth(), bmp.GetHeight()))
-            else:
-                self.bitmap.SetBitmap(bmp)
+            dc = wx.PaintDC(self.ImagePanel)
+            dc.Clear()
+            dc.BeginDrawing()
 
+            x, y = 0, 0
+            w, h = self.ImagePanel.GetClientSize()
+            dc.DrawBitmap(bmp, x + (w - bmp.GetWidth()) / 2,
+                          y + (h - bmp.GetHeight()) / 2, True)
+            dc.EndDrawing()
 
-        wx.CallLater(200, self.onUpdate)
+        wx.CallLater(10, self.onUpdate)
 
     def OnTimeToClose(self, evt):
         """Event handler for the button click."""
         print "See ya later!"
+
+        poison(self.get_image)
         self.Close()
 
     def OnFunButton(self, evt):
@@ -326,44 +352,66 @@ class TracedProcess():
                 return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\"white\"];"]
 
 @process
-def GenerateDotFiles(get_objects, send_objects, send_dotfile):
+def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
     trace_processes = {}
     trace_channels = {}
 
+    size = (6,6)
+
     while True:
         send_objects((trace_processes, trace_channels))
-        (trace_processes, trace_channels, CHANGE_LEVEL) = get_objects()
-
+        (trace_processes, trace_channels, CHANGE_LEVEL) = get_objects()        
         if CHANGE_LEVEL > 1:
-            new_dot_file_1 = """
-digraph G {
-size="6,6";
-"""
-            contents = []
+            
+            next = False
+            while (not next):
 
-            if trace_processes.has_key('__main__'):
-                contents.extend(trace_processes['__main__'].to_dot())
+                new_dot_file_1 = "digraph G {\nsize=\""+str(size[0])+","+str(size[1])+"\";\n"
 
-            for chan in trace_channels.values():
-                contents.extend(chan.to_dot())
+                contents = []
 
-            new_dot_file_2 = """
-    }"""
+                if trace_processes.has_key('__main__'):
+                    contents.extend(trace_processes['__main__'].to_dot())
 
-            send_dotfile(new_dot_file_1 + "\n".join(contents) +new_dot_file_2)
-        
+                for chan in trace_channels.values():
+                    contents.extend(chan.to_dot())
+
+                new_dot_file_2 = "\n}"
+
+                g, cmd = Alternation([{
+                            (send_dotfile, new_dot_file_1 + "\n".join(contents) + new_dot_file_2):None,
+                            get_setup:None
+                            }]).select()
+
+                if (g == send_dotfile):
+                    next = True
+
+                elif (g == get_setup):                    
+                    if cmd[0] == 'size':
+                        size = (int(cmd[1][0] / 96), int(cmd[1][1] / 96))
+                
+                    
 
 @process
-def RunDotParser(get_dotfile, send_image):
+def RunDotParser(get_dotfile, send_image, get_setup):
     while True:
         dotfile = get_dotfile()
+        while (dotfile != None):
+            p = subprocess.Popen((DOT, '-Tpng'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            pngfile, _ = p.communicate(dotfile)
 
-        p = subprocess.Popen((DOT, '-Tpng'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        pngfile, _ = p.communicate(dotfile)
+            g, cmd = Alternation([{
+                    (send_image,pngfile):None,
+                    get_setup:None
+                    }]).select()
+            if g == send_image:            
+                dotfile = None
 
-        #time.sleep(5)
-        send_image(pngfile)
-        #print dotfile
+            elif g == get_setup:
+                if cmd[0] == 'zoom':
+                    pass
+                    
+            
         
         
 
@@ -542,18 +590,18 @@ if len(sys.argv) > 1:
     TRACE_FILE = sys.argv[1]
     DOT_FILE_CHAN = Channel('Dot')
     IMAGE_FILE_CHAN = Channel('Image')
+    DOTFILE_SETUP_CHAN = Channel('DotFileSetup')
+    DOTCMD_SETUP_CHAN = Channel('DotCmdSetup')    
     TRACE_FILE_CHAN = Channel('TraceFile')
     TRACE_OBJECTS_CHAN = Channel('TraceObjects')
 
     Spawn(
         toolkit.file_r(-TRACE_FILE_CHAN, TRACE_FILE),
         UpdateTrace(+TRACE_FILE_CHAN, +TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN),
-        GenerateDotFiles(+TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN, -DOT_FILE_CHAN),
-        RunDotParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN)
+        GenerateDotFiles(+TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN, -DOT_FILE_CHAN, +DOTFILE_SETUP_CHAN),
+        RunDotParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN, +DOTCMD_SETUP_CHAN)
         )
     
-    #Parallel(TestDraw(+TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN))
-
     app = MainApp(redirect=False)
     app.MainLoop()
 
