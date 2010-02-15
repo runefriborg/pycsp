@@ -68,7 +68,11 @@ class MainFrame(wx.Frame):
         menu.Append(wx.ID_EXIT, "E&xit\tAlt-X", "Exit!")
 
         # bind the menu event to an event handler
-        self.Bind(wx.EVT_MENU, self.Shutdown, id=wx.ID_EXIT)
+        self.Bind(wx.EVT_MENU, self.Shutdown, id=wx.ID_EXIT)        
+
+        id = wx.NewId()
+        menu.Append(id, "Export sequence to folder")
+        self.Bind(wx.EVT_MENU, self.ExportToFolder, id=id)
 
         # and put the menu on the menubar
         menuBar.Append(menu, "&File")
@@ -110,6 +114,8 @@ class MainFrame(wx.Frame):
 
         self.Z = 1.0
         self.follow = ''
+        self.export = ''
+        self.frame_index = 0
 
         # bind the button events to handlers
         border = 4
@@ -183,7 +189,7 @@ class MainFrame(wx.Frame):
         ids, labels = self.get_node_data()
 
         dlg = wx.SingleChoiceDialog(
-                self, 'Select Process', 'The Caption',
+                self, 'Choose Process', 'Follow',
                 labels,
                 wx.CHOICEDLG_STYLE
                 )
@@ -293,9 +299,39 @@ class MainFrame(wx.Frame):
                           y + (h - bmp.GetHeight()) / 2, True)
             dc.EndDrawing()
 
+            if self.export != '':
+                file_template = 'img00000000'
+                str_index = str(self.frame_index)
+                f = open(self.export + '/' + file_template[:-1*(len(str_index))]+str_index+'.gif', 'w')
+                f.write(img)
+                f.close()
+            self.frame_index += 1
+
         if self.stateBtnPlay == 'play':
             # Setup N ms. delay to handle GUI
             wx.CallLater(self.delay.Value, self.OnUpdate)
+
+    def ExportToFolder(self, event=None):
+        dlg = wx.DirDialog(None, "Choose a directory:",
+                           style=wx.DD_DEFAULT_STYLE
+                           #| wx.DD_DIR_MUST_EXIST
+                           #| wx.DD_CHANGE_DIR
+                           )
+
+        if dlg.ShowModal() == wx.ID_OK:
+            self.export = dlg.GetPath()
+        else:
+            self.export = ''
+            
+        dlg.Destroy()
+
+        print """TIP:              
+              To convert the exported gifs into an animated movie
+              use ImageMagick convert cmd.
+
+              Example:
+                convert -dispose previous -page 500x500  -delay 20 -loop 0   img*.gif   animate.gif
+              """
 
     def Shutdown(self, evt):
         """Event handler for shutting down."""
@@ -545,19 +581,19 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
                     
 
 @process
-def RunDot2pngParser(get_dotfile, send_image, get_setup):
+def RunDot2gifParser(get_dotfile, send_image, get_setup):
     zoom_param = ''
     while True:
         dotfile, trace_output = get_dotfile()        
         while (dotfile != None):
             if zoom_param != '':
-                p = subprocess.Popen((DOT, '-Tpng', zoom_param), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                p = subprocess.Popen((DOT, '-Tgif', zoom_param), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             else:
-                p = subprocess.Popen((DOT, '-Tpng'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            pngfile, _ = p.communicate(dotfile)
+                p = subprocess.Popen((DOT, '-Tgif'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            giffile, _ = p.communicate(dotfile)
 
             g, cmd = Alternation([
-                    (send_image,(dotfile, pngfile, trace_output), None),
+                    (send_image,(dotfile, giffile, trace_output), None),
                     (get_setup,None)
                     ]).select()
             if g == send_image: 
@@ -754,7 +790,7 @@ if len(sys.argv) > 1:
         toolkit.file_r(-TRACE_FILE_CHAN, TRACE_FILE),
         UpdateTrace(+TRACE_FILE_CHAN, +TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN),
         GenerateDotFiles(+TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN, -DOT_FILE_CHAN, +DOTGEN_SETUP_CHAN, -NODE_DATA_CHAN),
-        RunDot2pngParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN, +DOTCMD_SETUP_CHAN),
+        RunDot2gifParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN, +DOTCMD_SETUP_CHAN),
         RunDot2fileParser(+DOT2_FILE_CHAN)
         )
     

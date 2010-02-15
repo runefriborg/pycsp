@@ -1,0 +1,761 @@
+{'chan_name': 'A', 'type': 'Channel'}
+{'chan_name': 'B', 'type': 'Channel'}
+{'chan_name': 'C', 'type': 'Channel'}
+{'chan_name': 'D', 'type': 'Channel'}
+{'chan_name': '0.2825885800811266245119.38', 'type': 'Channel'}
+{'chan_name': 'B', 'type': 'ChannelEndRead'}
+{'chan_name': 'A', 'type': 'ChannelEndWrite'}
+{'chan_name': 'C', 'type': 'ChannelEndRead'}
+{'chan_name': 'B', 'type': 'ChannelEndWrite'}
+{'chan_name': 'D', 'type': 'ChannelEndRead'}
+{'chan_name': 'C', 'type': 'ChannelEndWrite'}
+{'chan_name': 'A', 'type': 'ChannelEndRead'}
+{'chan_name': 'D', 'type': 'ChannelEndWrite'}
+{'chan_name': '0.2825885800811266245119.38', 'type': 'ChannelEndWrite'}
+{'chan_name': '0.2825885800811266245119.38', 'type': 'ChannelEndRead'}
+{'processes': [{'func_name': 'Prefix', 'process_id': '0.9375977256811266245119.38'}, {'func_name': 'Prefix', 'process_id': '0.3297032923271266245119.38'}, {'func_name': 'Pairs', 'process_id': '0.570741591221266245119.38'}, {'func_name': 'Delta2', 'process_id': '0.3438532870091266245119.38'}, {'func_name': 'Printer', 'process_id': '0.3973744555381266245119.38'}], 'process_id': '__main__', 'type': 'BlockOnParallel'}
+{'func_name': 'Prefix', 'process_id': '0.9375977256811266245119.38', 'type': 'StartProcess'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 0}
+{'func_name': 'Prefix', 'process_id': '0.3297032923271266245119.38', 'type': 'StartProcess'}
+{'func_name': 'Pairs', 'process_id': '0.570741591221266245119.38', 'type': 'StartProcess'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 0}
+{'func_name': 'Delta2', 'process_id': '0.3438532870091266245119.38', 'type': 'StartProcess'}
+{'func_name': 'Printer', 'process_id': '0.3973744555381266245119.38', 'type': 'StartProcess'}
+{'chan_name': 'pA', 'type': 'Channel'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 0}
+{'chan_name': 'pB', 'type': 'Channel'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 0}
+{'chan_name': 'pC', 'type': 'Channel'}
+{'chan_name': 'pA', 'type': 'ChannelEndWrite'}
+{'chan_name': 'pB', 'type': 'ChannelEndWrite'}
+{'chan_name': 'pA', 'type': 'ChannelEndRead'}
+{'chan_name': 'pC', 'type': 'ChannelEndRead'}
+{'chan_name': 'pB', 'type': 'ChannelEndRead'}
+{'chan_name': 'pC', 'type': 'ChannelEndWrite'}
+{'processes': [{'func_name': 'Delta2', 'process_id': '0.9109819954711266245119.4'}, {'func_name': 'Plus', 'process_id': '0.5960902940311266245119.4'}, {'func_name': 'Tail', 'process_id': '0.939540665921266245119.4'}], 'process_id': '0.570741591221266245119.38', 'type': 'BlockOnParallel'}
+{'func_name': 'Delta2', 'process_id': '0.9109819954711266245119.4', 'type': 'StartProcess'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 0}
+{'func_name': 'Plus', 'process_id': '0.5960902940311266245119.4', 'type': 'StartProcess'}
+{'func_name': 'Tail', 'process_id': '0.939540665921266245119.4', 'type': 'StartProcess'}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 0}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 0}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pB', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 0}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pB', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'pA', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 0}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 1}
+{'msg': '0', 'type': 'Output'}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 0}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 0}
+{'msg': '1', 'type': 'Output'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 1}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 2}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 1}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 2}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 1}
+{'msg': '1', 'type': 'Output'}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 2}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 3}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 3}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 4}
+{'msg': '2', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 3}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 4}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 4}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 5}
+{'msg': '3', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 4}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 5}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 5}
+{'msg': ' ', 'type': 'Output'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': '5', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 5}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 6}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 6}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': '8', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 6}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 7}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 7}
+{'msg': ' ', 'type': 'Output'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': '13', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 8}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 8}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 8}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': '21', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 8}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 9}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 4}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 10}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 9}
+{'msg': '34', 'type': 'Output'}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 9}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 10}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 10}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 10}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': '55', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 10}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 10}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 11}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 11}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 5}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'msg': '89', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 10}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 10}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 10}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 11}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 11}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 12}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 12}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 12}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 12}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 12}
+{'msg': '144', 'type': 'Output'}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 11}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 11}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 12}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 12}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 13}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 13}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 13}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 13}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 14}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'msg': '233', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 12}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 12}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 12}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 13}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 13}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 14}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 14}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 14}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 15}
+{'msg': '377', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 13}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 14}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 14}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 15}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 15}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': ' ', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 16}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': '610', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 14}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 14}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 14}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 15}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 16}
+{'guards': [{'chan_name': 'D', 'type': 'WriteGuard'}, {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneWrite', 'id': 10}
+{'guards': [{'chan_name': 'pA', 'type': 'WriteGuard'}, {'chan_name': 'pB', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': 'D', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'msg': '987', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 16}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 17}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 17}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': '1597', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 17}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 18}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 18}
+{'msg': ' ', 'type': 'Output'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'msg': '2584', 'type': 'Output'}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 18}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 19}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 19}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 19}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 19}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.3973744555381266245119.38', 'chan_name': '0.2825885800811266245119.38', 'type': 'DoneRead', 'id': 19}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'D', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'DoneRead', 'id': 19}
+{'msg': ' ', 'type': 'Output'}
+{'guard': {'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, 'process_id': '0.3438532870091266245119.38', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'pB', 'type': 'WriteGuard'}, {'chan_name': 'pA', 'type': 'WriteGuard'}], 'process_id': '0.9109819954711266245119.4', 'type': 'Alternation'}
+{'msg': '4181', 'type': 'Output'}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.9109819954711266245119.4', 'type': 'BlockOnAlternation.execute'}
+{'func_name': 'Printer', 'process_id': '0.3973744555381266245119.38', 'type': 'QuitProcess'}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'DoneRead', 'id': 19}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pC', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.939540665921266245119.4', 'chan_name': 'pB', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'C', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pA', 'type': 'DoneRead', 'id': 19}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'pA', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'BlockOnWrite', 'id': 19}
+{'process_id': '0.5960902940311266245119.4', 'chan_name': 'pC', 'type': 'BlockOnRead', 'id': 19}
+{'guard': {'chan_name': 'pB', 'type': 'WriteGuard'}, 'process_id': '0.9109819954711266245119.4', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'B', 'type': 'DoneWrite', 'id': 19}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'DoneRead', 'id': 19}
+{'process_id': '0.9109819954711266245119.4', 'chan_name': 'D', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.3297032923271266245119.38', 'chan_name': 'C', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'BlockOnWrite', 'id': 20}
+{'process_id': '0.3438532870091266245119.38', 'chan_name': 'A', 'type': 'DoneRead', 'id': 20}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'A', 'type': 'DoneWrite', 'id': 20}
+{'guards': [{'chan_name': '0.2825885800811266245119.38', 'type': 'WriteGuard'}, {'chan_name': 'D', 'type': 'WriteGuard'}], 'process_id': '0.3438532870091266245119.38', 'type': 'Alternation'}
+{'process_id': '0.9375977256811266245119.38', 'chan_name': 'B', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.3438532870091266245119.38', 'type': 'BlockOnAlternation.execute'}
+{'processes': [{'func_name': 'Delta2', 'process_id': '0.9109819954711266245119.4'}, {'func_name': 'Plus', 'process_id': '0.5960902940311266245119.4'}, {'func_name': 'Tail', 'process_id': '0.939540665921266245119.4'}], 'process_id': '0.570741591221266245119.38', 'type': 'DoneParallel'}
+{'func_name': 'Pairs', 'process_id': '0.570741591221266245119.38', 'type': 'QuitProcess'}
+{'processes': [{'func_name': 'Prefix', 'process_id': '0.9375977256811266245119.38'}, {'func_name': 'Prefix', 'process_id': '0.3297032923271266245119.38'}, {'func_name': 'Pairs', 'process_id': '0.570741591221266245119.38'}, {'func_name': 'Delta2', 'process_id': '0.3438532870091266245119.38'}, {'func_name': 'Printer', 'process_id': '0.3973744555381266245119.38'}], 'process_id': '__main__', 'type': 'DoneParallel'}
+{'type': 'TraceQuit'}
