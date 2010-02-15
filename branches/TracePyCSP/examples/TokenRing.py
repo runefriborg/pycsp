@@ -23,6 +23,9 @@ import sys
 from pycsp_import import *
 from pycsp.common.trace import *
 
+
+TraceInit()
+
 elements = 64
 
 @process

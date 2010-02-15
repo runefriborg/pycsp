@@ -271,7 +271,7 @@ def Sequence(*plist):
 def current_process_id():
     p = mp.current_process()
     if p.name == 'MainProcess':
-        return 'main'
+        return '__main__'
     return p.id
 
 # Run tests

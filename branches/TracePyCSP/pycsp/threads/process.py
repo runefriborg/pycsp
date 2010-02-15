@@ -246,7 +246,7 @@ def Sequence(*plist):
 def current_process_id():
     t = threading.current_thread()
     if t.name == 'MainThread':
-        return 'main'
+        return '__main__'
     return t.id
 
 # Run tests

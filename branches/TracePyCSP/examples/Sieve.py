@@ -42,6 +42,7 @@ def worker(cin, cout):
         while True:
             new_prime=cin()
             if new_prime%my_prime:
+                TraceMsg(new_prime)
                 ccout(new_prime)
     except ChannelPoisonException:
         if ccout:

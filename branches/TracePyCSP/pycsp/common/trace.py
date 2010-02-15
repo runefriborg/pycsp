@@ -65,16 +65,21 @@ if os.environ.has_key('PYCSP'):
     if os.environ['PYCSP'] == 'PROCESSES':
         PYCSP = 'PROCESSES'
         import pycsp.processes as pycsp
+        from pycsp.processes import *
     elif os.environ['PYCSP'] == 'GREENLETS':
         PYCSP = 'GREENLETS'
         import pycsp.greenlets as pycsp
+        from pycsp.greenlets import *
     elif os.environ['PYCSP'] == 'NET':
         PYCSP = 'NET'
         import pycsp.net as pycsp
+        from pycsp.net import *
     elif os.environ['PYCSP'] == 'THREADS':
         import pycsp.threads as pycsp
+        from pycsp.threads import *
 else:
     import pycsp.threads as pycsp
+    from pycsp.threads import *
 
 # Import toolkit process for writing to a file.
 from pycsp.common import toolkit as pycsp_toolkit
@@ -163,12 +168,6 @@ def TraceMsg(s):
 # intend to trace.
 
 from pycsp.threads.const import *
-
-ChannelPoisonException = pycsp.ChannelPoisonException
-ChannelRetireException = pycsp.ChannelRetireException
-Timeout = pycsp.Timeout
-Skip = pycsp.Skip
-
 
 def process(func):
     def _call(*args, **kwargs):

@@ -79,59 +79,151 @@ class MainFrame(wx.Frame):
         # Now create the Panel to put the other controls on.
         panel = wx.Panel(self)
 
-        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        leftSizer = wx.BoxSizer(wx.VERTICAL)
 
         self.stateBtnPlay = 'pause'
-        self.btnPlay = wx.Button(panel, wx.ID_NEW, "Play Trace", (215,48), (100,30))
+        self.btnPlay = wx.Button(panel, wx.ID_NEW, "Play")
         self.Bind(wx.EVT_BUTTON, self.OnPlayTrace, self.btnPlay)
 
         self.delay = wx.Slider(
-            panel, 1000, 25, 1, 1000, (30, 60), (200, -1), 
+            panel, 1000, 25, 1, 1000, (-1,-1), (100, -1), 
             wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS 
             )
         
-        self.btnStep = wx.Button(panel, wx.ID_OK, "Step Trace", (215,48), (100,30))
+        self.btnStep = wx.Button(panel, wx.ID_FORWARD, 'Step')
         self.Bind(wx.EVT_BUTTON, self.OnStepTrace, self.btnStep)
 
-        # bind the button events to handlers
-        topSizer.Add(self.btnPlay, 1, wx.ALL | wx.EXPAND, 1)
-        topSizer.Add(self.delay, 1 , wx.EXPAND | wx.ALL, 1)  
-        topSizer.Add(self.btnStep, 1 , wx.EXPAND | wx.ALL, 1)
-        
+        self.btnSave = wx.Button(panel, wx.ID_SAVEAS)
+        self.Bind(wx.EVT_BUTTON, self.OnPsFile, self.btnSave)
 
-        # Use a sizer to layout the controls, stacked vertically and with
-        # a 10 pixel border around each
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(topSizer)
+        self.btnZoomIn = wx.Button(panel, wx.ID_ZOOM_IN)
+        self.Bind(wx.EVT_BUTTON, self.OnZoomIn, self.btnZoomIn)
+
+        self.btnZoomOut = wx.Button(panel, wx.ID_ZOOM_OUT)
+        self.Bind(wx.EVT_BUTTON, self.OnZoomOut, self.btnZoomOut)
+
+        self.btnFollow = wx.Button(panel, wx.ID_ANY, 'Follow')
+        self.Bind(wx.EVT_BUTTON, self.OnFollow, self.btnFollow)
+
+        self.btnZoomFit = wx.Button(panel, wx.ID_ZOOM_FIT)
+        self.Bind(wx.EVT_BUTTON, self.OnZoomFit, self.btnZoomFit)
+
+        self.Z = 1.0
+        self.follow = ''
+
+        # bind the button events to handlers
+        border = 4
+        leftSizer.Add(self.btnPlay, 1, wx.ALL | wx.EXPAND, border)
+        leftSizer.Add(self.delay, 0 , wx.LEFT, 10)  
+        leftSizer.Add(self.btnStep, 1 , wx.EXPAND | wx.ALL, border)
+        leftSizer.Add(self.btnSave, 1 , wx.EXPAND | wx.ALL, border)
+        leftSizer.Add(self.btnZoomIn, 1 , wx.EXPAND | wx.ALL, border)
+        leftSizer.Add(self.btnZoomOut, 1 , wx.EXPAND | wx.ALL, border)
+        leftSizer.Add(self.btnFollow, 1 , wx.EXPAND | wx.ALL, border)
+        leftSizer.Add(self.btnZoomFit, 1 , wx.EXPAND | wx.ALL, border)
+
+
+        
+        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        topSizer.Add(leftSizer, 0)
 
         # Create ImagePanel
         self.ImagePanel = wx.Window(panel, -1,
                                     style=wx.SUNKEN_BORDER)
         self.ImagePanel.SetBackgroundColour(wx.WHITE)
         self.ImagePanel.Bind(wx.EVT_PAINT, self.OnPaintEvent)
+        self.ImagePanel.Bind(wx.EVT_LEFT_DOWN, self.OnMouseEvent)
 
-        sizer.Add(self.ImagePanel, 5, wx.EXPAND | wx.ALL, 5)
+        topSizer.Add(self.ImagePanel, 1, wx.EXPAND | wx.ALL, 5)
+
+        # Use a sizer to layout the controls, stacked vertically and with
+        # a 10 pixel border around each
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(topSizer, 1, wx.EXPAND)
 
         # Create MsgWindow
         self.MsgWindow = wx.TextCtrl(panel, wx.ID_ANY,
                                      "Look Here for output\n",
+                                     size = (-1,100),
                                      style = (wx.TE_MULTILINE |
                                               wx.TE_READONLY |
                                               wx.SUNKEN_BORDER)
                                      )
-        sizer.Add(self.MsgWindow, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(self.MsgWindow, 0, wx.EXPAND | wx.ALL, 5)
         
         # Set auto layout
         panel.SetAutoLayout(True)
         panel.SetSizer(sizer)
 
+        self.current_dot_file = None
         wx.CallLater(1, self.UpdateScreenSize)
+        
 
         self.get_image = +IMAGE_FILE_CHAN
-        self.setup_dotfile = -DOTFILE_SETUP_CHAN
-        self.setup_dotcmd = -DOTCMD_SETUP_CHAN        
+        self.setup_dotgen = -DOTGEN_SETUP_CHAN
+        self.setup_dotcmd = -DOTCMD_SETUP_CHAN
+        self.create_file = -DOT2_FILE_CHAN
+        self.get_node_data = +NODE_DATA_CHAN
+
         self.OnUpdate()
-                
+
+
+    def OnZoomIn(self, event=None):        
+        self.Z = self.Z * 2
+        self.UpdateZoom()
+
+    def OnZoomOut(self, event=None):
+        self.Z = self.Z * .5
+        self.UpdateZoom()
+
+    def OnFollow(self, event=None):
+
+        self.setup_dotgen(['request_node_list'])
+        ids, labels = self.get_node_data()
+
+        dlg = wx.SingleChoiceDialog(
+                self, 'Select Process', 'The Caption',
+                labels,
+                wx.CHOICEDLG_STYLE
+                )
+
+        if dlg.ShowModal() == wx.ID_OK:
+            self.follow = ids[dlg.GetSelection()]
+        else:
+            self.follow = ''
+
+        dlg.Destroy()
+
+        self.UpdateZoom()
+
+    def OnZoomFit(self, event=None):
+        self.follow = ''
+        self.Z = 1
+        self.UpdateZoom()
+
+
+    def OnPsFile(self, event=None):
+        if self.current_dot_file != None:
+            wildcard = "Postscript (*.ps)|*.ps|"     \
+                "All files (*.*)|*.*"
+            dlg = wx.FileDialog(
+                self, message="Save file as ...", defaultDir=os.getcwd(), 
+                defaultFile="", wildcard=wildcard, style=wx.SAVE
+                )
+            dlg.SetFilterIndex(2)
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
+                if path[-3:] != '.ps':
+                    path = path + '.ps'
+
+                self.create_file((self.current_dot_file, {'filetype':'ps', 'filename':path}))
+            dlg.Destroy()
+
+    def OnMouseEvent(self, event):
+        pass
+            
+
     def OnPaintEvent(self, event):
         """ Respond to a request to redraw the contents of our drawing panel.
         """
@@ -140,22 +232,31 @@ class MainFrame(wx.Frame):
     def Log(self, text):
         self.MsgWindow.AppendText(text)
 
+    def UpdateZoom(self):
+        try:
+            w, h = self.ImagePanel.GetSize()
+            zoom = ('zoom',(w,h,self.Z, self.follow))
+            self.setup_dotcmd(zoom)
+        except ChannelPoisonException:
+            return
+        
     def UpdateScreenSize(self):
         try:
-            self.setup_dotfile(('size',self.ImagePanel.GetSize()))        
+            self.setup_dotgen(('size',self.ImagePanel.GetSize()))        
         except ChannelPoisonException:
             return
 
     def OnStepTrace(self, event):
-        pass
+        self.OnUpdate()
 
     def OnPlayTrace(self, event):
         if self.stateBtnPlay == 'pause':
             self.stateBtnPlay = 'play'
-            self.btnPlay.SetLabel('Pause Trace')
+            self.btnPlay.SetLabel('Pause')
             self.btnStep.Enabled = False
 
-            #self.onPlayTrace2()
+            self.OnUpdate()
+
         else:
             self.stateBtnPlay = 'pause'
             self.btnPlay.SetLabel('Play Trace')
@@ -172,7 +273,7 @@ class MainFrame(wx.Frame):
         # Got image
         if g == self.get_image:
             
-            img, trace_output = update
+            self.current_dot_file, img, trace_output = update
 
             # Print traced stdout
             if trace_output:
@@ -192,12 +293,13 @@ class MainFrame(wx.Frame):
                           y + (h - bmp.GetHeight()) / 2, True)
             dc.EndDrawing()
 
-        # Setup 10 ms. delay to handle GUI
-        wx.CallLater(self.delay.Value, self.OnUpdate)
+        if self.stateBtnPlay == 'play':
+            # Setup N ms. delay to handle GUI
+            wx.CallLater(self.delay.Value, self.OnUpdate)
 
     def Shutdown(self, evt):
         """Event handler for shutting down."""
-        poison(self.get_image)
+        poison(self.get_image, self.create_file)
         self.Close()
         
 
@@ -348,6 +450,16 @@ class TracedProcess():
         self.channels = []
             
 
+    def get_id_n_label(self):
+        msg = ""
+        if self.state_msg != "":
+            msg = " ("+self.state_msg+")"
+
+        if self.processes:
+            return ('cluster_'+DOT_ID(self.id), '['+str(len(self.processes))+'] '+self.func_name+msg)
+        else:
+            return (DOT_ID(self.id), self.func_name+msg)
+
     def to_dot(self, l=1):
         msg = ""
         if self.state_msg != "":
@@ -381,7 +493,7 @@ class TracedProcess():
                 return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\"white\"];"]
 
 @process
-def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
+def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_node_data):
     trace_output = []
     trace_processes = {}
     trace_channels = {}
@@ -390,7 +502,7 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
 
     while True:
         send_objects((trace_processes, trace_channels, trace_output))
-        (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects()        
+        (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects()   
         if CHANGE_LEVEL > 1:
             
             next = False
@@ -410,7 +522,7 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
 
                 g, cmd = Alternation([
                             (send_dotfile, (new_dot_file_1 + "\n".join(contents) + new_dot_file_2, trace_output), None),
-                            (get_setup, None)
+                            (get_setup, None)                            
                             ]).select()
 
                 if (g == send_dotfile):
@@ -420,30 +532,54 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup):
                 elif (g == get_setup):                    
                     if cmd[0] == 'size':
                         size = (int(cmd[1][0] / 96), int(cmd[1][1] / 96))
+                    elif cmd[0] == 'request_node_list':
+                        # Generate node list
+                        ids = []
+                        labels = []
+                        for p in trace_processes.values():
+                            id, label = p.get_id_n_label()
+                            ids.append(id)
+                            labels.append(label)
+                        send_node_data((ids,labels))
                 
                     
 
 @process
-def RunDotParser(get_dotfile, send_image, get_setup):
+def RunDot2pngParser(get_dotfile, send_image, get_setup):
+    zoom_param = ''
     while True:
-        dotfile, trace_output = get_dotfile()
+        dotfile, trace_output = get_dotfile()        
         while (dotfile != None):
-            p = subprocess.Popen((DOT, '-Tpng'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            if zoom_param != '':
+                p = subprocess.Popen((DOT, '-Tpng', zoom_param), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            else:
+                p = subprocess.Popen((DOT, '-Tpng'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             pngfile, _ = p.communicate(dotfile)
 
             g, cmd = Alternation([
-                    (send_image,(pngfile, trace_output), None),
+                    (send_image,(dotfile, pngfile, trace_output), None),
                     (get_setup,None)
                     ]).select()
-            if g == send_image:            
+            if g == send_image: 
                 dotfile = None
 
             elif g == get_setup:
                 if cmd[0] == 'zoom':
-                    pass
-                    
-            
-        
+                    z = cmd[1]
+                    if z[2] == 1 and z[3] == '':
+                        zoom_param = ''
+                    else:
+                        zoom_param = '-Gviewport='+str(z[0])+','+str(z[1])+','+str(z[2])+',\''+z[3]+'\''
+                            
+@process
+def RunDot2fileParser(get_dotfile_and_setup):
+    while True:
+        dotfile, setup = get_dotfile_and_setup()
+
+        print dotfile
+
+        p = subprocess.Popen((DOT, '-T' + setup['filetype'], '-o' + setup['filename']), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        p.communicate(dotfile)
         
 
 @process
@@ -606,17 +742,20 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 if len(sys.argv) > 1:
     TRACE_FILE = sys.argv[1]
     DOT_FILE_CHAN = Channel('Dot')
+    DOT2_FILE_CHAN = Channel('Dot2file')
     IMAGE_FILE_CHAN = Channel('Image')
-    DOTFILE_SETUP_CHAN = Channel('DotFileSetup')
+    DOTGEN_SETUP_CHAN = Channel('DotGenSetup')
     DOTCMD_SETUP_CHAN = Channel('DotCmdSetup')    
     TRACE_FILE_CHAN = Channel('TraceFile')
     TRACE_OBJECTS_CHAN = Channel('TraceObjects')
+    NODE_DATA_CHAN = Channel('NodeData')
 
     Spawn(
         toolkit.file_r(-TRACE_FILE_CHAN, TRACE_FILE),
         UpdateTrace(+TRACE_FILE_CHAN, +TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN),
-        GenerateDotFiles(+TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN, -DOT_FILE_CHAN, +DOTFILE_SETUP_CHAN),
-        RunDotParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN, +DOTCMD_SETUP_CHAN)
+        GenerateDotFiles(+TRACE_OBJECTS_CHAN, -TRACE_OBJECTS_CHAN, -DOT_FILE_CHAN, +DOTGEN_SETUP_CHAN, -NODE_DATA_CHAN),
+        RunDot2pngParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN, +DOTCMD_SETUP_CHAN),
+        RunDot2fileParser(+DOT2_FILE_CHAN)
         )
     
     app = MainApp(redirect=False)
