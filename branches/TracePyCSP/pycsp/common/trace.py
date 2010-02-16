@@ -174,8 +174,10 @@ def process(func):
         def wrapfunc(*wrap_args, **wrap_kwargs):
             process_id = pycsp.current_process_id()
             sendTrace({'type':'StartProcess', 'func_name':func.func_name, 'process_id':process_id})
-            func(*wrap_args, **wrap_kwargs)
-            sendTrace({'type':'QuitProcess', 'func_name':func.func_name, 'process_id':process_id})
+            try:
+                func(*wrap_args, **wrap_kwargs)
+            finally:
+                sendTrace({'type':'QuitProcess', 'func_name':func.func_name, 'process_id':process_id})
         wrapfunc.func_name = func.func_name
         t = pycsp.Process(wrapfunc, *args, **kwargs)
         return t

@@ -87,8 +87,8 @@ THEMES = [
      'FontColor':'white',
      'FrameColor':'gray'
      }
-
     ]
+
 def DOT_ID(id):
     new_id = id.translate(None, ". <>")
     return "node_"+new_id
@@ -362,27 +362,29 @@ class MainFrame(wx.Frame):
             if trace_output:
                 self.Log("".join(trace_output))
 
-            # Convert image
-            stream = cStringIO.StringIO(img)
-            bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
+            if True:
+                # Convert image
+                stream = cStringIO.StringIO(img)
+                bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
 
-            # Draw converted image
-            dc = wx.PaintDC(self.ImagePanel)
-            dc.Clear()
-            dc.BeginDrawing()
-            x, y = 0, 0
-            w, h = self.ImagePanel.GetClientSize()
-            dc.DrawBitmap(bmp, x + (w - bmp.GetWidth()) / 2,
-                          y + (h - bmp.GetHeight()) / 2, True)
-            dc.EndDrawing()
+                # Draw converted image
+                dc = wx.PaintDC(self.ImagePanel)
+                dc.Clear()
+                dc.BeginDrawing()
+                x, y = 0, 0
+                w, h = self.ImagePanel.GetClientSize()
+                dc.DrawBitmap(bmp, x + (w - bmp.GetWidth()) / 2,
+                              y + (h - bmp.GetHeight()) / 2, True)
+                dc.EndDrawing()
 
-            if self.export != '':
-                file_template = 'img00000000'
-                str_index = str(self.frame_index)
-                f = open(self.export + '/' + file_template[:-1*(len(str_index))]+str_index+'.gif', 'w')
-                f.write(img)
-                f.close()
-            self.frame_index += 1
+                if self.export != '':
+                    file_template = 'img00000000'
+                    str_index = str(self.frame_index)
+                    f = open(self.export + '/' + file_template[:-1*(len(str_index))]+str_index+'.gif', 'w')
+                    f.write(img)
+                    f.close()
+                self.frame_index += 1
+
 
         if self.stateBtnPlay == 'play':
             # Setup N ms. delay to handle GUI
@@ -463,6 +465,9 @@ class TracedChannel():
 
     def update(self, parent_process_id, process_id, _type):
         
+        # reset location.
+        self.diamond_location = None
+
         update_data = self.writing 
         if _type == READ:
             update_data = self.reading
@@ -560,12 +565,24 @@ class TracedProcess():
         if not chan in self.channels:
             self.channels.append(chan)
             
+    def cleanup(self):
+        # Return list of all process ids cleaned up
+        self.silence()
+        ids = [p.id for p in self.processes]
+        for p in self.processes:
+            ids.extend(p.cleanup())
+        return ids
+
     def silence(self):
         for chan in self.channels:
-            if chan.reading.has_key(self.id):
-                chan.reading.pop(self.id)
-            if chan.writing.has_key(self.id):
-                chan.writing.pop(self.id)
+            poplist = [key for key in chan.reading if key[1] == self.id]
+            for key in poplist:
+                chan.reading.pop(key)
+
+            poplist = [key for key in chan.writing if key[1] == self.id]
+            for key in poplist:
+                chan.writing.pop(key)
+
         self.channels = []
             
 
@@ -684,7 +701,10 @@ def RunDot2gifParser(get_dotfile, send_image, get_setup):
                 p = subprocess.Popen((DOT, '-Tgif', zoom_param), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             else:
                 p = subprocess.Popen((DOT, '-Tgif'), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            giffile, _ = p.communicate(dotfile)
+            giffile, stderr = p.communicate(dotfile)
+            
+            if stderr:
+                sys.stderr.write(stderr)
 
             g, cmd = Alternation([
                     (send_image,(dotfile, giffile, trace_output), None),
@@ -737,7 +757,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
                 elif trace['type'] == 'Msg':
                     p = trace_processes[trace['process_id']]
-                    p.state_msg = 'msg:'+trace['msg']
+                    p.state_msg = trace['msg']
                     
                     CHANGE_LEVEL = 2
                 elif trace['type'] == 'BlockOnParallel':
@@ -795,9 +815,11 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                 elif trace['type'] == 'QuitProcess':
                     proc = trace_processes.pop(trace['process_id'])
 
-                    proc.silence()
+                    for id in proc.cleanup():
+                        if trace_processes.has_key(id):
+                            trace_processes.pop(id)
 
-                    if proc.parent != None:                        
+                    if proc.parent != None:
                         proc.parent.processes.remove(proc)
                     
                     CHANGE_LEVEL = 3
@@ -817,62 +839,66 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     CHANGE_LEVEL = 2
                 elif (trace['type'] == 'BlockOnRead' or 
                       trace['type'] == 'BlockOnWrite'):
-                    trace_processes[trace['process_id']].state = STATE_BLOCKED
+                    if trace_processes.has_key(trace['process_id']):
+                        trace_processes[trace['process_id']].state = STATE_BLOCKED
 
-                    if not trace_channels.has_key(trace['chan_name']):
-                        trace_channels[trace['chan_name']] = TracedChannel(trace['chan_name'])                    
+                        if not trace_channels.has_key(trace['chan_name']):
+                            trace_channels[trace['chan_name']] = TracedChannel(trace['chan_name'])                    
 
-                    chan = trace_channels[trace['chan_name']]
-                    p = trace_processes[trace['process_id']]
-                    if p.parent == None:
-                        parent_id = None
-                    else:
-                        parent_id = p.parent.id
-
-                    if trace['type'] == 'BlockOnRead':
-                        chan.update(parent_id, p.id, READ) 
-                    else:
-                        chan.update(parent_id, p.id, WRITE) 
-
-                    p.talking_to(chan)
-
-                    CHANGE_LEVEL = 3   
-                elif (trace['type'] == 'DoneRead' or
-                      trace['type'] == 'DoneWrite'):
-                    trace_processes[trace['process_id']].state = STATE_RUNNING
-                    CHANGE_LEVEL = 2
-                elif (trace['type'] == 'BlockOnAlternation.execute' or
-                      trace['type'] == 'BlockOnAlternation.select'):
-                    trace_processes[trace['process_id']].state = STATE_BLOCKED
-                    CHANGE_LEVEL = 2
-                elif (trace['type'] == 'DoneAlternation.execute' or
-                      trace['type'] == 'DoneAlternation.select'):
-                    trace_processes[trace['process_id']].state = STATE_RUNNING
-                    guard = trace['guard']
-
-                    _type = None
-                    if guard['type'] == 'ReadGuard':
-                        _type = READ
-                    elif guard['type'] == 'WriteGuard':
-                        _type = WRITE
-
-                    if _type != None:
-
-                        if not trace_channels.has_key(guard['chan_name']):
-                            trace_channels[guard['chan_name']] = TracedChannel(guard['chan_name'])
-
-                        chan = trace_channels[guard['chan_name']]
+                        chan = trace_channels[trace['chan_name']]
                         p = trace_processes[trace['process_id']]
-
                         if p.parent == None:
                             parent_id = None
                         else:
                             parent_id = p.parent.id
 
-                        chan.update(parent_id, p.id, _type)
+                        if trace['type'] == 'BlockOnRead':
+                            chan.update(parent_id, p.id, READ) 
+                        else:
+                            chan.update(parent_id, p.id, WRITE) 
+
                         p.talking_to(chan)
 
-                    CHANGE_LEVEL = 3
+                        CHANGE_LEVEL = 3   
+                elif (trace['type'] == 'DoneRead' or
+                      trace['type'] == 'DoneWrite'):
+                    if trace_processes.has_key(trace['process_id']):
+                        trace_processes[trace['process_id']].state = STATE_RUNNING
+                        CHANGE_LEVEL = 2
+                elif (trace['type'] == 'BlockOnAlternation.execute' or
+                      trace['type'] == 'BlockOnAlternation.select'):
+                    if trace_processes.has_key(trace['process_id']):
+                        trace_processes[trace['process_id']].state = STATE_BLOCKED
+                        CHANGE_LEVEL = 2
+                elif (trace['type'] == 'DoneAlternation.execute' or
+                      trace['type'] == 'DoneAlternation.select'):
+                    if trace_processes.has_key(trace['process_id']):
+                        trace_processes[trace['process_id']].state = STATE_RUNNING
+                        guard = trace['guard']
+
+                        _type = None
+                        if guard['type'] == 'ReadGuard':
+                            _type = READ
+                        elif guard['type'] == 'WriteGuard':
+                            _type = WRITE
+
+                        if _type != None:
+
+                            if not trace_channels.has_key(guard['chan_name']):
+                                trace_channels[guard['chan_name']] = TracedChannel(guard['chan_name'])
+
+                            chan = trace_channels[guard['chan_name']]
+                            p = trace_processes[trace['process_id']]
+
+                            if p.parent == None:
+                                parent_id = None
+                            else:
+                                parent_id = p.parent.id
+
+                            chan.update(parent_id, p.id, _type)
+                            p.talking_to(chan)
+
+                        CHANGE_LEVEL = 3
             except Exception, e:
                 print 'KeyError', e
             send_objects((trace_processes, trace_channels, trace_output, CHANGE_LEVEL ))
@@ -897,9 +923,17 @@ if len(sys.argv) > 1:
         RunDot2gifParser(+DOT_FILE_CHAN, -IMAGE_FILE_CHAN, +DOTCMD_SETUP_CHAN),
         RunDot2fileParser(+DOT2_FILE_CHAN)
         )
+
+    # Disable logging to avoid false error message
+    # GIF: data stream seems to be truncated
+    wx.Log.EnableLogging(False)
     
+    # Create and hand over control to wxPython app
     app = MainApp(redirect=False)
     app.MainLoop()
+
+    # If app is closed hard, then we poison anyway
+    poison(IMAGE_FILE_CHAN, DOT2_FILE_CHAN)
 
 else:
     print __doc__

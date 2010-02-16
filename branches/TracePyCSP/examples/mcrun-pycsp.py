@@ -13,8 +13,9 @@ Options:
 
 from pycsp_import import *
 from pycsp.common.trace import *
-from pycsp import threads as pycsplocal
 
+from pycsp import threads as pycsplocal
+ 
 
 
 import sys, types
@@ -81,13 +82,15 @@ def runner(cin):
     while True:
         command, stdinChEnd, stdoutChEnd, stderrChEnd = cin()
 
-        Sequence(
+        Parallel(
             execute(command, stdinChEnd, stdoutChEnd, stderrChEnd)
             )
 
         
 @process
 def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None, retire_on_eof=True):
+
+        TraceMsg(command[0])
 
         stdin, stdout, stderr = [None]*3
         if stdinChEnd: stdin = subprocess.PIPE
@@ -172,7 +175,7 @@ def mcstas(instr_in, c_out, screenC):
 
         cmd=(MCSTAS, '-t', '-o', c_file, instr_file)
         #screenC(str(cmd))
-        Sequence(
+        Parallel(
             execute(cmd, stdoutChEnd=screenC, retire_on_eof=False)
             )
 
@@ -187,7 +190,7 @@ def compile(exec_out, c_in, screenC):
 
         cmd=(GCC, '-g' ,'-lm', '-O2', '-o', exec_file, c_file)
         #screenC(str(cmd))
-        Sequence(
+        Parallel(
             execute(cmd, stdoutChEnd=screenC, retire_on_eof=False)
             )
 
@@ -245,7 +248,7 @@ def simulate(job_in, result_out, screenC, exec_file):
              '--dir=' + data_dir] + params)
              
         screenC(str(cmd))
-        Sequence(
+        Parallel(
             execute(cmd, stdoutChEnd=screenC, retire_on_eof=False)
             )
 
@@ -262,13 +265,13 @@ def merge(result_in, exec_file=''):
              '--merge', '--force', '--dir=' + merged_dir, data_dir)
 
         #print cmd
-        Sequence(
+        Parallel(
             execute(cmd)
             )
         
 
 @process
-def setup(instr_out, exec_in, screen_chan, params):
+def orchestrate_network(instr_out, exec_in, screen_chan, params):
 
     if '--help' in params or len(params) < 2:
         print __doc__
@@ -365,7 +368,7 @@ C = [Channel() for i in range(5)]
 
 Parallel(
     screen(  +C[0]),
-    setup(   -C[1], +C[2], C[0], sys.argv[1:]),
+    orchestrate_network(   -C[1], +C[2], C[0], sys.argv[1:]),
     mcstas(  +C[1], -C[4], -C[0]),
     compile( -C[2], +C[4], -C[0])
     )
