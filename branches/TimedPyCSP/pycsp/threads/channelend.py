@@ -35,6 +35,7 @@ def IN(channel):
     >>> isinstance(IN(C), ChannelEndRead)
     True
     """
+    print 'Warning: IN() are deprecated and will be removed'
     return channel.reader()
 
 def OUT(channel):
@@ -44,6 +45,7 @@ def OUT(channel):
     >>> isinstance(OUT(C), ChannelEndWrite)
     True
     """
+    print 'Warning: OUT() are deprecated and will be removed'
     return channel.writer()
 
 def retire(*list_of_channelEnds):
@@ -96,7 +98,7 @@ def poison(*list_of_channelEnds):
         channelEnd.poison()
 
 # Classes
-class ChannelEndWrite():
+class ChannelEndWrite:
     def __init__(self, channel):
         self.channel = channel
 
@@ -126,7 +128,7 @@ class ChannelEndWrite():
             return "<ChannelEndWrite wrapping %s named %s>" % (self.channel, self.channel.name)
 
 
-class ChannelEndRead():
+class ChannelEndRead:
     def __init__(self, channel):
         self.channel = channel
 

@@ -1,7 +1,7 @@
-0.6.2 - ??
+0.6.2 - 0.7.0
 ----------
 * Added buffered channels to all versions.
-  Use:  A = Channel(buffer=<N>) # where <N> is the wanted buffer size.
+  Usage:  A = Channel(buffer=<N>) # where <N> is the wanted buffer size.
   The Channel is implemented in buffer.py as a process maintaining a list of
   buffered elements.
 * Fixed (threads) bug in Alternation, where a poison or retire could overwrite a committed match.
@@ -9,7 +9,20 @@
   in Python, thus __channel_input is renamed to channel_input. Sorry for the inconvenience.
 * Removed the Channel.status method.
 * Fixed bug in propagation of poison / retire.
+* Fixed Python 2.4 support for threads implementation.
+* Added pycsp.common package that contains plugNplay processes and other general process
+  templates.
+  Usage:
 
+    from pycsp.threads import *
+    from pycsp.common import plugNplay
+
+    Parallel(plugNplay.Prefix(cin, cout, prefix=1))
+
+* Added current_process_id() function for debugging purposes. It returns the unique id of the
+  pycsp process executing current_process_id().
+* Changed matching of channels in function parameter lists, when propagating retire and poison.
+* Changed Alternation.execute to also return (guard, msg) just as Alternation.select.
 
 0.6.1 - 0.6.2
 ----------
