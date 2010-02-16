@@ -49,6 +49,7 @@ def io(func):
 
     Sleeping for 10 times 0.05 seconds, which equals roughly half a second
     in the sequential case.
+    >>> import time
     >>> time_start = time.time()
     >>> Sequence([P1() for i in range(10)])
     >>> diff = time.time() - time_start
@@ -272,7 +273,7 @@ class Scheduler(object):
             
             for p in processes:
                 if not p.executed:
-                    raise Exception("Deadlock!!!\n\tHave you correctly closed all procceses?")
+                    raise Exception("Deadlock!!! - Have you correctly closed all procceses?")
 
         else:
             # Called from child greenlet
@@ -301,7 +302,7 @@ class Scheduler(object):
         else:
             # Some processes are blocking or all have been executed.
             # Switch to main loop.
-            logging.debug("getNext returns scheduler because some is blocking or are in timers")
+            logging.debug("getNext returns scheduler because some is blocking or are in timers sched:%s",self)
             return self
 
 

@@ -9,10 +9,13 @@ class SimulationTestCase(unittest.TestCase):
         return
 
     def test_decompose(self):
-        self.assertEqual(0,Now())
-        Wait(5)
-        Simulation().decompose()
-        self.assertEqual(0,Now())
+        @process
+        def P():
+            self.assertEqual(0,Now())
+            Wait(5)
+            Simulation().decompose()
+            self.assertEqual(0,Now())
+        Parallel(P())
 
     def test_timers1(self):
         @process
@@ -114,7 +117,7 @@ class SimulationTestCase(unittest.TestCase):
         def pr2():
             return
 
-        Parallel(pr())
+        Parallel(pr(),pr2())
 
 
     def test_alternation(self):

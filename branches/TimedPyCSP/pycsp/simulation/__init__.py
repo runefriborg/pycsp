@@ -71,12 +71,12 @@ if __name__ == '__main__':
     iosuite =  unittest.TestLoader().loadTestsFromTestCase(test_io.TestCase)
 
 
-    alltests = unittest.TestSuite([suite,simulationsuite,iosuite])
+    allsuites = unittest.TestSuite([suite,simulationsuite,iosuite])
     runner = unittest.TextTestRunner(verbosity=2)
     #runner.run(suite)
     #runner.run(simulationsuite)
-    runner.run(iosuite)
-    #runner.run(alltests)
+    #runner.run(iosuite)
+    runner.run(allsuites)
   
     
 
