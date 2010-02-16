@@ -34,19 +34,61 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import wx
-import subprocess, time, random
+import subprocess, time, random, sys
 import cStringIO
-from pycsp_import import *
+
+sys.path.append("..")
+
+from pycsp.threads import *
 #from pycsp.common.trace import *
 from pycsp.common import toolkit
 
-#TraceInit('tracer.trace')
+#TraceInit('PlayTrace.trace')
 
 DOT = toolkit.which('dot')
 
 STATE_INIT, STATE_BLOCKED, STATE_RUNNING = range(3)
 READ, WRITE = range(2)
 
+THEMES = [
+    {'Name':'Default',
+     'Channel':'black',
+     'Channel.active':'blue',
+     'Cluster.blocking':'gray',
+     'Cluster.active':'white',
+     'Process.blocking':'gray',
+     'Process.active':'white',
+     'Background':wx.WHITE,
+     'Background2':'white',
+     'FontColor':'black',
+     'FrameColor':'black'
+     },
+    {'Name':'Black and White',
+     'Channel':'black',
+     'Channel.active':'black',
+     'Cluster.blocking':'white',
+     'Cluster.active':'white',
+     'Process.blocking':'white',
+     'Process.active':'white',
+     'Background':wx.WHITE,
+     'Background2':'white',
+     'FontColor':'black',
+     'FrameColor':'black'
+     },
+    {'Name':'Gray on Black',
+     'Channel':'"#333333"',
+     'Channel.active':'white',
+     'Cluster.blocking':'black',
+     'Cluster.active':'black',
+     'Process.blocking':'gray',
+     'Process.active':'white',
+     'Background':wx.BLACK,
+     'Background2':'black',
+     'FontColor':'white',
+     'FrameColor':'gray'
+     }
+
+    ]
 def DOT_ID(id):
     new_id = id.translate(None, ". <>")
     return "node_"+new_id
@@ -112,10 +154,15 @@ class MainFrame(wx.Frame):
         self.btnZoomFit = wx.Button(panel, wx.ID_ZOOM_FIT)
         self.Bind(wx.EVT_BUTTON, self.OnZoomFit, self.btnZoomFit)
 
+        self.btnTheme = wx.Button(panel, wx.ID_ANY, 'Set Theme')
+        self.Bind(wx.EVT_BUTTON, self.OnTheme, self.btnTheme)
+
         self.Z = 1.0
         self.follow = ''
         self.export = ''
         self.frame_index = 0
+        self.current_theme = 0
+        wx.CallLater(1, self.UpdateTheme)
 
         # bind the button events to handlers
         border = 4
@@ -127,8 +174,7 @@ class MainFrame(wx.Frame):
         leftSizer.Add(self.btnZoomOut, 1 , wx.EXPAND | wx.ALL, border)
         leftSizer.Add(self.btnFollow, 1 , wx.EXPAND | wx.ALL, border)
         leftSizer.Add(self.btnZoomFit, 1 , wx.EXPAND | wx.ALL, border)
-
-
+        leftSizer.Add(self.btnTheme, 1 , wx.EXPAND | wx.ALL, border)
         
         topSizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -137,7 +183,7 @@ class MainFrame(wx.Frame):
         # Create ImagePanel
         self.ImagePanel = wx.Window(panel, -1,
                                     style=wx.SUNKEN_BORDER)
-        self.ImagePanel.SetBackgroundColour(wx.WHITE)
+        self.ImagePanel.SetBackgroundColour(THEMES[self.current_theme]['Background'])
         self.ImagePanel.Bind(wx.EVT_PAINT, self.OnPaintEvent)
         self.ImagePanel.Bind(wx.EVT_LEFT_DOWN, self.OnMouseEvent)
 
@@ -203,6 +249,30 @@ class MainFrame(wx.Frame):
 
         self.UpdateZoom()
 
+    def OnTheme(self, event=None):
+
+        self.setup_dotgen(['request_node_list'])
+        ids, labels = self.get_node_data()
+
+        names = []
+        for theme in THEMES:
+            names.append(theme['Name'])
+
+        dlg = wx.SingleChoiceDialog(
+                self, 'Choose Theme', 'Themes',
+                names,
+                wx.CHOICEDLG_STYLE
+                )
+
+        if dlg.ShowModal() == wx.ID_OK:            
+            self.current_theme = dlg.GetSelection()
+        else:
+            self.current_theme = 0
+
+        dlg.Destroy()
+
+        self.UpdateTheme()
+
     def OnZoomFit(self, event=None):
         self.follow = ''
         self.Z = 1
@@ -246,9 +316,16 @@ class MainFrame(wx.Frame):
         except ChannelPoisonException:
             return
         
+    def UpdateTheme(self):
+        try:
+            self.ImagePanel.SetBackgroundColour(THEMES[self.current_theme]['Background'])
+            self.setup_dotgen(('theme', self.current_theme))
+        except ChannelPoisonException:
+            return
+
     def UpdateScreenSize(self):
         try:
-            self.setup_dotgen(('size',self.ImagePanel.GetSize()))        
+            self.setup_dotgen(('size',self.ImagePanel.GetSize()))
         except ChannelPoisonException:
             return
 
@@ -386,9 +463,6 @@ class TracedChannel():
 
     def update(self, parent_process_id, process_id, _type):
         
-        # Reset
-        self.diamon_location = None
-
         update_data = self.writing 
         if _type == READ:
             update_data = self.reading
@@ -417,43 +491,52 @@ class TracedChannel():
             else:
                 return None
 
-    def to_dot(self):
+    def to_dot(self, theme):
         
         if len(self.reading) == 1 and len(self.writing) == 1:
             cin_id = self.reading.keys()[0]
             cout_id = self.writing.keys()[0]
 
             # test active
-            active = ""
+            color = ""
             if int(self.writing[cout_id]) != self.writing[cout_id]:
                 self.writing[cout_id] -= 0.5
-                active = ",color=blue"
+                color = ",color="+theme['Channel.active']
             if int(self.reading[cin_id]) != self.reading[cin_id]:
                 self.reading[cin_id] -= 0.5
-                active = ",color=blue"            
+                color = ",color="+theme['Channel.active']
 
-            return [DOT_ID(cout_id[1]) + " -> " + DOT_ID(cin_id[1]) + " [weight="+str(self.writing[cout_id])+""+active+"];"]
+            if color == "":
+                color = ",color="+theme['Channel']
+
+            return [DOT_ID(cout_id[1]) + " -> " + DOT_ID(cin_id[1]) + " [weight="+str(self.writing[cout_id])+""+color+"];"]
         elif len(self.reading) >= 1 and len(self.writing) >= 1:
             contents = []
             for cout_id in self.writing:
                 
                 # test active
-                active = ""
+                color = ""
                 if int(self.writing[cout_id]) != self.writing[cout_id]:
                     self.writing[cout_id] -= 0.5
-                    active = ",color=blue"
+                    color = ",color="+theme['Channel.active']
 
-                contents.append(DOT_ID(cout_id[1]) + " -> " + self.dot_id + " [weight="+str(self.writing[cout_id])+""+active+"];")
+                if color == "":
+                    color = ",color="+theme['Channel']
+
+                contents.append(DOT_ID(cout_id[1]) + " -> " + self.dot_id + " [weight="+str(self.writing[cout_id])+""+color+"];")
 
             for cin_id in self.reading:
 
                 # test active
-                active = ""
+                color = ""
                 if int(self.reading[cin_id]) != self.reading[cin_id]:
                     self.reading[cin_id] -= 0.5
-                    active = ",color=blue"
+                    color = ",color="+theme['Channel.active']
 
-                contents.append(self.dot_id + " -> " + DOT_ID(cin_id[1]) + " [weight="+str(self.reading[cin_id])+""+active+"];") 
+                if color == "":
+                    color = ",color="+theme['Channel']
+
+                contents.append(self.dot_id + " -> " + DOT_ID(cin_id[1]) + " [weight="+str(self.reading[cin_id])+""+color+"];") 
 
             return contents
         else:
@@ -496,7 +579,7 @@ class TracedProcess():
         else:
             return (DOT_ID(self.id), self.func_name+msg)
 
-    def to_dot(self, l=1):
+    def to_dot(self, theme, l=1):
         msg = ""
         if self.state_msg != "":
             msg = " ("+self.state_msg+")"
@@ -507,12 +590,12 @@ class TracedProcess():
             contents.append("\t"*(l+1) + "label=\""+self.func_name+msg+"\";")
             contents.append("\t"*(l+1) + "style=filled;")
             if self.state == STATE_BLOCKED:                
-                contents.append("\t"*(l+1) + "fillcolor=\"gray\";")
+                contents.append("\t"*(l+1) + "fillcolor=\""+theme['Cluster.blocking']+"\";")
             else:
-                contents.append("\t"*(l+1) + "fillcolor=\"white\";")
+                contents.append("\t"*(l+1) + "fillcolor=\""+theme['Cluster.active']+"\";")
             contents.append("\t"*(l+1) + DOT_ID(self.id)+" [width=0.3, height=0.3, style=invis, label=\"\"];")
             for p in self.processes:
-                contents.extend(p.to_dot(l+1))
+                contents.extend(p.to_dot(theme, l+1))
 
                 for chan in p.channels:
                     diamond_node = chan.try_insert_diamond(self.id)
@@ -524,59 +607,70 @@ class TracedProcess():
             return contents
         else:
             if self.state == STATE_BLOCKED:
-                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\"gray\"];"]
+                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\""+theme['Process.blocking']+"\"];"]
             else:
-                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\"white\"];"]
+                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\""+theme['Process.active']+"\"];"]
 
 @process
 def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_node_data):
     trace_output = []
     trace_processes = {}
     trace_channels = {}
+    
+    theme = [THEMES[0]]
+    size = [(6,6)]
 
-    size = (6,6)
+    @choice
+    def update_setup(channel_input):
+        cmd = channel_input
+        if cmd[0] == 'size':
+            size[0] = (int(cmd[1][0] / 96), int(cmd[1][1] / 96))
+        elif cmd[0] == 'theme':
+            theme[0] = THEMES[cmd[1]]
+        elif cmd[0] == 'request_node_list':
+            # Generate node list
+            ids = []
+            labels = []
+            for p in trace_processes.values():
+                id, label = p.get_id_n_label()
+                ids.append(id)
+                labels.append(label)
+            send_node_data((ids,labels))
 
     while True:
-        send_objects((trace_processes, trace_channels, trace_output))
-        (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects()   
+        g = None
+        while (g != send_objects):
+            (g, msg) = Alternation([
+                    (send_objects, (trace_processes, trace_channels, trace_output), None),
+                    (get_setup, update_setup())
+                    ]).execute()
+        (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects() 
+  
         if CHANGE_LEVEL > 1:
             
             next = False
             while (not next):
 
-                new_dot_file_1 = "digraph G {\nsize=\""+str(size[0])+","+str(size[1])+"\";\n"
+                new_dot_file_1 = "digraph G {\nsize=\""+str(size[0][0])+","+str(size[0][1])+"\";\nbgcolor=\""+theme[0]['Background2']+"\";\nfontcolor=\""+theme[0]['FontColor']+"\";\ncolor=\""+theme[0]['FrameColor']+"\";\n"
 
                 contents = []
 
                 if trace_processes.has_key('__main__'):
-                    contents.extend(trace_processes['__main__'].to_dot())
+                    contents.extend(trace_processes['__main__'].to_dot(theme=theme[0]))
 
                 for chan in trace_channels.values():
-                    contents.extend(chan.to_dot())
+                    contents.extend(chan.to_dot(theme=theme[0]))
 
                 new_dot_file_2 = "\n}"
 
                 g, cmd = Alternation([
                             (send_dotfile, (new_dot_file_1 + "\n".join(contents) + new_dot_file_2, trace_output), None),
-                            (get_setup, None)                            
-                            ]).select()
+                            (get_setup, update_setup()) 
+                            ]).execute()
 
                 if (g == send_dotfile):
                     next = True
                     trace_output = []
-
-                elif (g == get_setup):                    
-                    if cmd[0] == 'size':
-                        size = (int(cmd[1][0] / 96), int(cmd[1][1] / 96))
-                    elif cmd[0] == 'request_node_list':
-                        # Generate node list
-                        ids = []
-                        labels = []
-                        for p in trace_processes.values():
-                            id, label = p.get_id_n_label()
-                            ids.append(id)
-                            labels.append(label)
-                        send_node_data((ids,labels))
                 
                     
 
@@ -730,11 +824,15 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
                     chan = trace_channels[trace['chan_name']]
                     p = trace_processes[trace['process_id']]
+                    if p.parent == None:
+                        parent_id = None
+                    else:
+                        parent_id = p.parent.id
 
                     if trace['type'] == 'BlockOnRead':
-                        chan.update(p.parent.id, p.id, READ) 
+                        chan.update(parent_id, p.id, READ) 
                     else:
-                        chan.update(p.parent.id, p.id, WRITE) 
+                        chan.update(parent_id, p.id, WRITE) 
 
                     p.talking_to(chan)
 
@@ -766,7 +864,12 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                         chan = trace_channels[guard['chan_name']]
                         p = trace_processes[trace['process_id']]
 
-                        chan.update(p.parent.id, p.id, _type)
+                        if p.parent == None:
+                            parent_id = None
+                        else:
+                            parent_id = p.parent.id
+
+                        chan.update(parent_id, p.id, _type)
                         p.talking_to(chan)
 
                     CHANGE_LEVEL = 3
@@ -777,6 +880,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
 if len(sys.argv) > 1:
     TRACE_FILE = sys.argv[1]
+
     DOT_FILE_CHAN = Channel('Dot')
     DOT2_FILE_CHAN = Channel('Dot2file')
     IMAGE_FILE_CHAN = Channel('Image')

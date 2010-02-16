@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from common import *
 from pycsp.common.trace import *
 
+
 import time
 import random
 
@@ -112,6 +113,7 @@ def autotest():
                 Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':
+    TraceInit(stdout=True)
     autotest()
     TraceQuit()
 

@@ -68,7 +68,7 @@ def filter_minimum(cin, cout):
 kbd=Channel()
 scr=Channel()
 filter = Channel()
-to_worker=Channel()
+to_worker=Channel('to_worker')
 from_worker=Channel()
 N=5
 
