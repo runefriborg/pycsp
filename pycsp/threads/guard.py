@@ -28,7 +28,7 @@ from channel import ChannelReq, ReqStatus
 from const import *
 
 # Classes
-class Guard():
+class Guard:
     """
     The empty interface of a guard.
     """

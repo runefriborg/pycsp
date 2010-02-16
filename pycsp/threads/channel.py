@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
+import time, random
 from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
 from const import *
 
@@ -138,9 +139,8 @@ class Channel:
         self.writers=0
 
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            self.name = str(uuid.uuid1())
+            # Create unique name
+            self.name = str(random.random())+str(time.time())
         else:
             self.name=name
 
