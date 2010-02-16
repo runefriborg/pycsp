@@ -19,13 +19,15 @@ def Now():
 
 def Wait(seconds):
     """Wrapper function for timer_wait. Will schedule the process for later activation and then switch active process. """
-    logging.debug("calling wait")
+    logging.debug("%s calling Wait()"%Simulation().current)
     Simulation().timer_wait(Simulation().current, seconds)
     t = Now()+seconds
+    p = Simulation().getNext() 
+    p.greenlet.switch()
     while Now()<t:
-        p = Simulation().getNext() 
-        logging.debug("Wait swicthing from %s to %s"%(Simulation().current, p))
-        p.greenlet.switch()
+      p = Simulation().getNext() 
+      logging.warning("Wait did not wait correct.Now:%d, should wait until: %d ,swicthing from %s to %s"%(Now(),t,Simulation().current, p))
+      p.greenlet.switch()
 
 # Decorators
 def io(func):
@@ -58,7 +60,7 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
   Scheduler is a singleton class.
   
   It is optimized for fast switching and is not fair.
-  
+
   >>> A = Simulation()
   >>> B = Simulation()
   >>> A == B
@@ -122,9 +124,9 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
   # Queues are new, next, timers and "blocking io counter"
   # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
   def main(self):
-      logging.debug("entering main, current:%s"%self.current)
       while True:
-          #print "main, timers", self.timers,", self.new:",self.new,", self.next:",self.next
+          logging.debug("entering main, current:%s"%self.current)
+                #print "main, timers", self.timers,", self.new:",self.new,", self.next:",self.next
           # By definition of the heap, the first element is always the smallest. 
           if self.timers and self.timers[0][0] <= Now():
             # We should not be able to have processes in timers with a launchtime in the past.
@@ -165,7 +167,7 @@ class Simulation(pycsp.greenlets.scheduling.Scheduler):
               self.cond.wait()
 
             #If there exist only processes in timers we can increment
-            elif  not (self.next or self.new or self.blocking>0): 
+            elif  not (self.next or self.new or self.blocking): 
                 if self.timers:
                     # inc timer to lowest activation time
                     self._t = self.timers[0][0]
