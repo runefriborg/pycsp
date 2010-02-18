@@ -59,7 +59,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import os, sys
 
-# Detect current PYCSP version and import as pycsp
+# Detect current PYCSP version and import
+# Default import is pycsp.threads
+
 PYCSP = 'THREADS'
 if os.environ.has_key('PYCSP'):
     if os.environ['PYCSP'] == 'PROCESSES':
@@ -104,7 +106,6 @@ def sendTrace(msg):
     else:
         cout(msg)
     pycsp.retire(cout)
-
 
         
 def TraceInit(file=None, stdout=False):
@@ -154,18 +155,17 @@ def TraceMsg(s):
     """
     sendTrace({'type':'Msg', 'process_id':pycsp.current_process_id(), 'msg':str(s)})
 
-# Construct an identical pycsp API that uses the imported pycsp
-# behind the scenes. Thus all functions can be wrapped with 
-# trace actions. Tracing is done by writing to the C[0] channel
-# through sendTrace(msg).
 
-# When used, we require the user to import
-#   from pycsp.<implementation> import *
-# before importing
-#   from pycsp.common.trace import *
-#
-# This means that we only need to overwrite the API, which we 
-# intend to trace.
+# Overwriting all necessary functions / classes to add tracing. Tracing
+# is done by writing to the C[0] channel through sendTrace(msg). A
+# trace msg is a python dictionary with the 'type' hash key defining the
+# trace type.
+# 
+# The following trace types are performed: Channel, ChannelEndRead, StartProcess,
+#   QuitProcess, BlockOnParallel, DoneParallel, BlockOnSequence, DoneSequence,
+#   Spawn, Poison, BlockOnWrite, DoneWrite, BlockOnRead, DoneRead, Alternation,
+#   BlockOnAlternation.select, DoneAlternation.select, BlockOnAlternation.execute,
+#   DoneAlternation.execute
 
 from pycsp.threads.const import *
 

@@ -1,1 +1,1 @@
-__all__ = ['toolkit', 'plugNplay']
+__all__ = ['toolkit', 'plugNplay', 'trace']
