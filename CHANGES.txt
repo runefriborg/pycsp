@@ -1,5 +1,26 @@
 0.6.2 - 0.7.0
 ----------
+* Added a wrapper for Alternation to simplify usage. It consists of
+  the following constructs AltSelect, InputGuard, OutputGuard,
+  SkipGuard and TimeoutGuard:
+
+  AltSelect examples:
+           AltSelect(
+                   InputGuard(register, action=add_service()),
+                   InputGuard(inc, action=dispatch())
+                   )
+
+           AltSelect(
+                   OutputGuard(left, msg=True, action="right(True)"),
+                   OutputGuard(right, msg=True, action="left(True)")
+                   )
+
+           ch, msg = AltSelect(
+                   InputGuard(workerIn),
+                   OutputGuard(workerOut, jobs[-1]),
+                   SkipGuard()
+                   )
+
 * Added buffered channels to all versions.
   Usage:  A = Channel(buffer=<N>) # where <N> is the wanted buffer size.
   The Channel is implemented in buffer.py as a process maintaining a list of

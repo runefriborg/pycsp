@@ -21,6 +21,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from const import *
 
 # Exceptions
 class ChannelRetireException(Exception): 
@@ -101,6 +102,7 @@ def poison(*list_of_channelEnds):
 class ChannelEndWrite:
     def __init__(self, channel):
         self.channel = channel
+        self.op = WRITE
 
         # Prevention against multiple retires
         self.isretired = False
@@ -131,6 +133,7 @@ class ChannelEndWrite:
 class ChannelEndRead:
     def __init__(self, channel):
         self.channel = channel
+        self.op = READ
 
         # Prevention against multiple retires
         self.isretired = False
@@ -155,7 +158,6 @@ class ChannelEndRead:
             return "<ChannelEndRead wrapping %s>" % self.channel
         else:
             return "<ChannelEndRead wrapping %s named %s>" % (self.channel, self.channel.name)
-
 
 # Run tests
 if __name__ == '__main__':

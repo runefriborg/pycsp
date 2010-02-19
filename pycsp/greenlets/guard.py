@@ -47,7 +47,7 @@ class Guard():
         pass
 
 
-class Skip(Guard):
+class SkipGuard(Guard):
     """
     Skip will try to accept a read or a write, the moment it is posted.
     
@@ -63,6 +63,8 @@ class Skip(Guard):
     >>> Parallel(P())
     True
     """
+    def __init__(self, action=None):
+        self.g = (self, action)
 
     def empty(self):
         pass
@@ -83,7 +85,7 @@ class Skip(Guard):
         writer.offer(ChannelReq(self.process()))
 
 
-class Timeout(Guard):
+class TimeoutGuard(Guard):
     """
     Timeout spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
@@ -107,12 +109,14 @@ class Timeout(Guard):
     True
     True
     """
-
-    def __init__(self, seconds):
+    def __init__(self, seconds, action=None):
         self.seconds = seconds
+
         self.posted = (None, None)
         self.s = Scheduler()
         self.p = None
+
+        self.g = (self, action)
 
     # Timer expired, offer an active Channel Request
     def expire(self):
@@ -150,6 +154,9 @@ class Timeout(Guard):
     def remove_write(self, req):
         self.s.timer_cancel(self.p)
 
+# Backwards compatibility
+Skip = SkipGuard
+Timeout = TimeoutGuard
 
 # Run tests
 if __name__ == '__main__':

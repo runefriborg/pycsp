@@ -21,6 +21,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from const import *
 
 # Exceptions
 class ChannelRetireException(Exception): 
@@ -100,6 +101,7 @@ class ChannelEndWrite():
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False
+        self.op = WRITE
 
     def __call__(self, msg):
         if self.isretired:
@@ -125,6 +127,7 @@ class ChannelEndRead():
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False
+        self.op = READ
 
     def __call__(self):
         if self.isretired:
