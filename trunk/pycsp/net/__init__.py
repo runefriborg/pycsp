@@ -39,9 +39,9 @@ os.environ['PYCSP'] = 'NET'
 
 # Imports
 from configuration import *
-from net import Alternation
+from net import Alternation, AltSelect, InputGuard, OutputGuard
 from alternation import choice
-from guard import Skip, Timeout
+from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from channel import ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id

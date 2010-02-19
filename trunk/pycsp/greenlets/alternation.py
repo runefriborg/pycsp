@@ -303,6 +303,34 @@ class Alternation:
         return (c, req.msg)
 
 
+class InputGuard:
+    def __init__(self, ch_end, action=None):
+        if ch_end.op == READ:
+            self.g = (ch_end, action)
+        else:
+            raise Exception('InputGuard requires an input ch_end')
+
+class OutputGuard:
+    def __init__(self, ch_end, msg, action=None):
+        if ch_end.op == WRITE:
+            self.g = (ch_end, msg, action)
+        else:
+            raise Exception('OutputGuard requires an output ch_end')
+
+def AltSelect(*guards):
+    L = []
+    # Build guard list
+    for item in guards:
+        try:
+            L.append(item.g)
+        except AttributeError:
+            raise Exception('Cannot use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
+
+    a = Alternation(L)
+    a.set_execute_frame(-2)
+    return a.execute()
+
+
 # Run tests
 if __name__ == '__main__':
     import doctest

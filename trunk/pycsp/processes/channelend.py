@@ -22,6 +22,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+from const import *
+
 # Exceptions
 class ChannelRetireException(Exception): 
     def __init__(self):
@@ -156,6 +158,7 @@ class ChannelEndWrite(ChannelEnd):
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False
+        self.op = WRITE
 
     def __call__(self, val):
         if self.isretired:
@@ -178,6 +181,7 @@ class ChannelEndRead(ChannelEnd):
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False
+        self.op = READ
 
     def __call__(self):
         if self.isretired:

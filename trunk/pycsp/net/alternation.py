@@ -138,8 +138,6 @@ class RealAlternation:
         idx, c, op = reqs[act]
         return (idx, act, c, op)
 
-
-
 # Run tests
 if __name__ == '__main__':
     import doctest

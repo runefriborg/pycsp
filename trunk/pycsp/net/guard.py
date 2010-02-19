@@ -50,7 +50,7 @@ class Guard():
         pass
 
 
-class Skip(Guard):
+class SkipGuard(Guard):
     """
     Skip will try to accept a read or a write, the moment it is posted.
     
@@ -63,6 +63,8 @@ class Skip(Guard):
     >>> isinstance(g, Skip) and msg == None
     True
     """
+    def __init__(self, action=None):
+        self.g = (self, action)
 
     # Offer instantly
     def post_read(self, reader):
@@ -73,7 +75,7 @@ class Skip(Guard):
         writer.offer(ChannelReq(ReqStatus()))
 
 
-class Timeout(Guard):
+class TimeoutGuard(Guard):
     """
     Timeout spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
@@ -97,11 +99,11 @@ class Timeout(Guard):
     >>> isinstance(g, Timeout) and msg == None
     True
     """
-
-    def __init__(self, seconds):
+    def __init__(self, seconds, action=None):
         Guard.__init__(self)
         self.seconds = seconds
         self.posted = (None, None)
+        self.g = (self, action)
 
     # Timer expired, offer an active Channel Request
     def expire(self):
@@ -131,6 +133,9 @@ class Timeout(Guard):
         del self.timer
         self.posted = (None, None)
 
+# Backwards compatibility
+Skip = SkipGuard
+Timeout = TimeoutGuard
 
 # Run tests
 if __name__ == '__main__':
