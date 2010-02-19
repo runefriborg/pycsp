@@ -35,20 +35,21 @@ def philosopher(id, left, right, down, up):
             # get permission to sit down
             down(True)
 
-            # pick up the forks
-            Parallel(
-                Process(left, True),
-                Process(right, True)
-                )
 
+            # pick up the forks (left and right)
+            AltSelect(
+                    OutputGuard(left, msg=True, action="right(True)"),
+                    OutputGuard(right, msg=True, action="left(True)")
+                    )
+                    
             # eat
             eat += 1
 
-            # put down the forks
-            Parallel(
-                Process(left, True),
-                Process(right, True)
-                )
+            # put down the forks (left and right)
+            AltSelect(
+                    OutputGuard(left, msg=True, action="right(True)"),
+                    OutputGuard(right, msg=True, action="left(True)")
+                    )
 
             # notify security you have finished
             up(True)
@@ -60,17 +61,15 @@ def philosopher(id, left, right, down, up):
 
 def fork(left, right):
     while True:
-        Alternation([
-
-                # philosopher left picks up fork
-                # philosopher left puts down fork
-                {left:"left()"},
-
-                # philosopher right picks up fork
-                # philosopher right puts down fork                
-                {right:"right()"}
-
-                ]).execute()
+        AltSelect(
+            # philosopher left picks up fork
+            # philosopher left puts down fork
+            InputGuard(left, "left()"),
+            
+            # philosopher right picks up fork
+            # philosopher right puts down fork                
+            InputGuard(right, "right()")
+            )
 
 def security(steps, down, up):
     max = 4
@@ -82,14 +81,14 @@ def security(steps, down, up):
                         
             for i in range(5):
                 # philosopher wanting to sit down
-                guards.append({down[i]:"n_sat_down[0] += 1"})
+                guards.append(InputGuard(down[i], action="n_sat_down[0] += 1"))
 
         for i in range(5):
             # philosopher wanting to stand up
             # always allow this
-            guards.append({up[i]:"n_sat_down[0] -= 1"})
+            guards.append(InputGuard(up[i], action="n_sat_down[0] -= 1"))
 
-        Alternation(guards).execute()
+        AltSelect(*guards)
 
     retire(*down)
     retire(*up)
@@ -102,9 +101,9 @@ def secure_college(steps):
     down = map(Channel, down)
 
     Parallel(
-        Process(security, steps, map(IN,down), map(IN,up)),
-        [Process(philosopher, i, OUT(left[i]), OUT(right[i]), OUT(down[i]), OUT(up[i])) for i in range(5)],
-        [Process(fork, IN(left[i]), IN(right[(i+1) % 5])) for i in range(5)]
+        Process(security, steps, [d.reader() for d in down] , [u.reader() for u in up]),
+        [Process(philosopher, i, left[i].writer(), right[i].writer(), down[i].writer(), up[i].writer()) for i in range(5)],
+        [Process(fork, left[i].reader(), right[(i+1) % 5].reader()) for i in range(5)]
         )
     
 

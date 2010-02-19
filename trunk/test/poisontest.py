@@ -19,8 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from common import *
-import random
+from pycsp_import import *
 import time
 import random
 
@@ -43,16 +42,26 @@ def writer(cout, id, cnt, sleeper):
     poison(cout)
 
 @process
-def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
+def par_reader(cin1,cin2,cin3,cin4, sleeper):
     while True:
         if sleeper: sleeper()
-        Alternation([{cin1:action(), cin2:action(), cin3:action(), cin4:action()}]).execute()
+        AltSelect(
+            InputGuard(cin1, action()),
+            InputGuard(cin2, action()),
+            InputGuard(cin3, action()),
+            InputGuard(cin4, action())
+            )
 
 @process
 def par_writer(cout1,cout2,cout3,cout4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
-        Alternation([{(cout1, i):None, (cout2,i):None, (cout3,i):None, (cout4,i):None}]).execute()
+        AltSelect(
+            OutputGuard(cout1, i),
+            OutputGuard(cout2, i),
+            OutputGuard(cout3, i),
+            OutputGuard(cout4, i)
+            )
 
     poison(cout1, cout2, cout3, cout4)
 
@@ -66,7 +75,7 @@ def sleep_random():
 
 def One2One_Test(read_sleeper, write_sleeper):
     c1=Channel('C1')
-    Parallel(reader(IN(c1),0, read_sleeper), writer(OUT(c1),1,10, write_sleeper))
+    Parallel(reader(+c1,0, read_sleeper), writer(-c1,1,10, write_sleeper))
     print
     
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
@@ -77,21 +86,21 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(par_reader(IN(c1),IN(c2),IN(c3),IN(c4),cnt, read_sleeper),
-             writer(OUT(c1),0,cnt, write_sleeper),
-             writer(OUT(c2),1,cnt, write_sleeper),
-             writer(OUT(c3),2,cnt, write_sleeper),
-             writer(OUT(c4),3,cnt, write_sleeper))
+    Parallel(par_reader(c1.reader(),c2.reader(),c3.reader(),c4.reader(), read_sleeper),
+             writer(c1.writer(),0,cnt, write_sleeper),
+             writer(c2.writer(),1,cnt, write_sleeper),
+             writer(c3.writer(),2,cnt, write_sleeper),
+             writer(c4.writer(),3,cnt, write_sleeper))
     print
 
 def Any2Any_Test(read_sleeper, write_sleeper):
     c1=Channel('C1')
     cnt = 10
 
-    Parallel(reader(IN(c1),0, read_sleeper), writer(OUT(c1),0,cnt, write_sleeper),
-             reader(IN(c1),1, read_sleeper), writer(OUT(c1),1,cnt, write_sleeper),
-             reader(IN(c1),2, read_sleeper), writer(OUT(c1),2,cnt, write_sleeper),
-             reader(IN(c1),3, read_sleeper), writer(OUT(c1),3,cnt, write_sleeper))
+    Parallel(reader(+c1,0, read_sleeper), writer(-c1,0,cnt, write_sleeper),
+             reader(+c1,1, read_sleeper), writer(-c1,1,cnt, write_sleeper),
+             reader(+c1,2, read_sleeper), writer(-c1,2,cnt, write_sleeper),
+             reader(+c1,3, read_sleeper), writer(-c1,3,cnt, write_sleeper))
     
 def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
     c1=Channel('C1')
@@ -100,11 +109,10 @@ def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
     c4=Channel('C4')
 
     cnt = 10
-    
-    Parallel(par_writer(OUT(c1),OUT(c2),OUT(c3),OUT(c4),cnt, write_sleeper),
-             par_writer(OUT(c1),OUT(c2),OUT(c3),OUT(c4),cnt, write_sleeper),
-             par_reader(IN(c1),IN(c2),IN(c3),IN(c4),cnt, read_sleeper),
-             par_reader(IN(c1),IN(c2),IN(c3),IN(c4),cnt, read_sleeper))
+    Parallel(par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
+             par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
+             par_reader(+c1, +c2, +c3, +c4, read_sleeper),
+             par_reader(+c1, +c2, +c3, +c4, read_sleeper))
     print
 
     

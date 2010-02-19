@@ -34,8 +34,8 @@ def worker(cin, cout):
         my_prime=cin()
         cout(my_prime)
         child_channel=Channel()
-        ccout=OUT(child_channel)
-        Spawn(worker(IN(child_channel), cout))
+        ccout=child_channel.writer()
+        Spawn(worker(child_channel.reader(), cout))
         while True:
             new_prime=cin()
             if new_prime%my_prime:
@@ -55,6 +55,6 @@ def printer(cin):
 first=Channel()
 outc=Channel()
 
-Parallel(producer(OUT(first),2000),
-         worker(IN(first), OUT(outc)),
-         printer(IN(outc)))
+Parallel(producer(first.writer(),2000),
+         worker(first.reader(), outc.writer()),
+         printer(outc.reader()))

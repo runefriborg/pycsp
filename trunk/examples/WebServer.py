@@ -31,8 +31,8 @@ if sys.platform == 'win32' and (version[3] == 'processes'):
 @process
 def HelloWorld(register):
     request_channel = Channel('HelloWorld'+str(id))
-    cin = IN(request_channel)
-    register(('/hello.html', OUT(request_channel)))
+    cin = +request_channel
+    register(('/hello.html', -request_channel))
     while True:
         (request_string, cout) = cin()
         cout("Hello at " + time.strftime("%H:%M:%S", time.localtime()))
@@ -40,8 +40,8 @@ def HelloWorld(register):
 @process
 def Time(register):
     request_chan = Channel('Time-'+str(id))
-    cin = IN(request_chan)
-    register(('/time.html', OUT(request_chan)))
+    cin = +request_chan
+    register(('/time.html', -request_chan))
 
     while True:
         (request_string, cout) = cin()
@@ -50,9 +50,9 @@ def Time(register):
 @process
 def Index(id, register):
     request_chan = Channel('Index-'+str(id))
-    cin = IN(request_chan)
-    register(('/index.html', OUT(request_chan)))
-    register(('/', OUT(request_chan)))
+    cin = +request_chan
+    register(('/index.html', -request_chan))
+    register(('/', -request_chan))
 
     while True:
         (request_string, cout) = cin()
@@ -69,8 +69,8 @@ def time_sleep(s):
 @process
 def Sleep(id, register):
     request_chan = Channel('Sleep-'+str(id))
-    cin = IN(request_chan)
-    register(('/sleep.html', OUT(request_chan)))
+    cin = +request_chan
+    register(('/sleep.html', -request_chan))
 
     while True:
         (request_string, cout) = cin()
@@ -110,11 +110,10 @@ def Dispatcher(register, inc):
 
         # Dispatch to service by Alternating on output ends.
         if services.has_key(service_id):
-            request_alternation = {}
+            guards = []
             for req in services[service_id]:
-                request_alternation[(req,(GET, result))] = None
-            Alternation([request_alternation]).select()
-
+                guards.append( OutputGuard(req, msg=(GET, result)) )
+            AltSelect(*guards)
         else:
             result("Service '"+str(service_id)+"' not found!<br>")
         
@@ -127,11 +126,11 @@ def Dispatcher(register, inc):
 
     try:
         while True:
-            Alternation([{
-                    register:add_service,
-                    inc:dispatch
-                  }]).execute()
-
+            AltSelect(
+                    InputGuard(register, action=add_service),
+                    InputGuard(inc, action=dispatch)
+                    )
+                
     except ChannelPoisonException:
         poison(register, inc)
         poison(*services.values())
@@ -141,8 +140,8 @@ def HTTPsocket(sock, dispatchChan):
     answer='HTTP/1.0 200 OK\nServer: BaseHTTP/0.2 Python/2.2\nDate: Tue, 18 Feb 2003 17:15:49 GMT\nContent-Type: text/html\nServer: myHandler\n\n'
 
     item = Channel()
-    itemOut = OUT(item)
-    itemIn = IN(item)
+    itemOut = -item
+    itemIn = +item
 
     conn, addr=sock
     req=conn.recv(256)
@@ -173,16 +172,16 @@ def entry(request):
     
     while True:
         s = serversocket_accept(serversocket)
-        Spawn(HTTPsocket(s, OUT(request)))
+        Spawn(HTTPsocket(s, -request))
 
 
 register=Channel('Register Service')
 request=Channel('Request Service')
 
 Parallel(entry(request),
-         Dispatcher(IN(register), IN(request)),
-         [Time(OUT(register)) for i in range(2)],
-         [Sleep(i, OUT(register)) for i in range(50)],
-         [Index(i, OUT(register)) for i in range(2)],
-         HelloWorld(OUT(register)))
+         Dispatcher(+register, +request),
+         [Time(-register) for i in range(2)],
+         [Sleep(i, -register) for i in range(50)],
+         [Index(i, -register) for i in range(2)],
+         HelloWorld(-register))
 

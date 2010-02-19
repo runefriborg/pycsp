@@ -1,6 +1,6 @@
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -34,14 +34,14 @@ elif (mod == 'processes'):
 elif (mod == 'greenlets'):
     from pycsp.greenlets import *
 elif (mod == 'net'):
-    from pycsp.net import *    
+    from pycsp.net import *
 else:
     print "python",sys.argv[0],"[ threads | processes | greenlets | net ]"
-    from pycsp import *
+    from pycsp.threads import *
 
 print 'Using version', version
 
 if sys.platform == 'win32' and (version[3] == 'processes'):
-    print 'These tests are not compatible with PyCSP.processes and win32.'
+    print 'The examples are not compatible with PyCSP.processes and win32.'
     sys.exit(0)
 

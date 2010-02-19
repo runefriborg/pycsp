@@ -34,6 +34,7 @@ def worker(job_in, result_out):
        sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
        result_out((4.0*sum)/cnt)  #Forward result
 
+
 @process
 def consumer(result_in):
    cnt=0; sum=result_in()    #Get first result
@@ -48,7 +49,8 @@ def consumer(result_in):
 jobs=Channel()
 results=Channel()
 
+
 Parallel(
-   producer(OUT(jobs),10000, 1000),
-   10 * worker(IN(jobs),OUT(results)),
-   consumer(IN(results)))
+   producer( jobs.writer() , 10000, 1000),
+   10 * worker( jobs.reader() ,results.writer()),
+   consumer(results.reader()))
