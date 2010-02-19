@@ -126,7 +126,7 @@ class Process(threading.Thread):
     def __rmul__(self, multiplier):
         return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
-    # Copy lists and dictionaries
+    # Copy lists
     def __mul_channel_ends(self, args):
         if types.ListType == type(args) or types.TupleType == type(args):
             R = []
@@ -238,15 +238,35 @@ def Sequence(*plist):
                 processes.append(q)
         else:
             processes.append(p)
+    
+    # For every process we simulate a new process_id. When executing
+    # in Main thread/process we set the new id in a global variable.
 
-    for p in processes:
-        # Call Run directly instead of start() and join() 
-        p.run()
+    t = threading.current_thread()
+    if t.name == 'MainThread':
+        global MAINTHREAD_ID
+        for p in processes:
+            MAINTHREAD_ID = p.id
+
+            # Call Run directly instead of start() and join() 
+            p.run()
+        del MAINTHREAD_ID
+    else:
+        t_original_id = t.id
+        for p in processes:
+            t.id = p.id
+
+            # Call Run directly instead of start() and join() 
+            p.run()
+        t.id = t_original_id
 
 def current_process_id():
     t = threading.current_thread()
     if t.name == 'MainThread':
-        return '__main__'
+        try:
+            return MAINTHREAD_ID        
+        except NameError:            
+            return '__main__'
     return t.id
 
 # Run tests

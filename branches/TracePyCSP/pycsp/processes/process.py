@@ -140,38 +140,27 @@ class Process(mp.Process):
     def __rmul__(self, multiplier):
         return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
-    # Copy lists and dictionaries
+    # Copy lists
     def __mul_channel_ends(self, args):
         if types.ListType == type(args) or types.TupleType == type(args):
             R = []
             for item in args:
-                if isinstance(item, ChannelEndRead):
-                    R.append(item.channel.reader())
-                elif isinstance(item, ChannelEndWrite):
-                    R.append(item.channel.writer())
-                elif item == types.ListType or item == types.DictType or item == types.TupleType:
-                    R.append(self.__mul_channel_ends(item))
-                else:
-                    R.append(item)
+                try:                    
+                    if type(item.isReader) == types.UnboundMethodType and item.isReader():
+                        R.append(item.channel.reader())
+                    elif type(item.isWriter) == types.UnboundMethodType and item.isWriter():
+                        R.append(item.channel.writer())
+                except AttributeError:
+                    if item == types.ListType or item == types.DictType or item == types.TupleType:
+                        R.append(self.__mul_channel_ends(item))
+                    else:
+                        R.append(item)
+
             if types.TupleType == type(args):
                 return tuple(R)
             else:
                 return R
-            
-        elif types.DictType == type(args):
-            R = {}
-            for key in args:
-                if isinstance(key, ChannelEndRead):
-                    R[key.channel.reader()] = args[key]
-                elif isinstance(key, ChannelEndWrite):
-                    R[key.channel.writer()] = args[key]
-                elif isinstance(args[key], ChannelEndRead):
-                    R[key] = args[key].channel.reader() 
-                elif isinstance(args[key], ChannelEndWrite):
-                    R[key] = args[key].channel.writer() 
-                elif args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
-                    R[key] = self.__mul_channel_ends(args[key])
-            return R
+
         return args
 
 
@@ -264,14 +253,34 @@ def Sequence(*plist):
         else:
             processes.append(p)
 
-    for p in processes:
-        # Call Run directly instead of start() and join() 
-        p.run()
+    # For every process we simulate a new process_id. When executing
+    # in Main thread/process we set the new id in a global variable.
+
+    _p = mp.current_process()
+    if _p.name == 'MainProcess':
+        global MAINTHREAD_ID
+        for p in processes:
+            MAINTHREAD_ID = p.id
+
+            # Call Run directly instead of start() and join() 
+            p.run()
+        del MAINTHREAD_ID
+    else:
+        _p_original_id = _p.id
+        for p in processes:
+            _p.id = p.id
+
+            # Call Run directly instead of start() and join() 
+            p.run()
+        _p.id = _p_original_id
 
 def current_process_id():
     p = mp.current_process()
     if p.name == 'MainProcess':
-        return '__main__'
+        try:
+            return MAINTHREAD_ID        
+        except NameError:            
+            return '__main__'
     return p.id
 
 # Run tests

@@ -200,7 +200,6 @@ def Parallel(*plist):
     sendTrace(val)
 
 def Sequence(*plist):
-    print 'Warning: Tracing is not correct for Sequence constructs'
     process_id = pycsp.current_process_id()
     val = {'processes':[], 'process_id':process_id}
     for p in plist:
