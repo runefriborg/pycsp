@@ -77,10 +77,10 @@ def CommsTimeBM():
     d = Channel("d")
 
     print "Running commstime test"
-    Parallel(Prefix(IN(c), OUT(a), prefixItem = 0),  # initiator
-             Delta2(IN(a), OUT(b), OUT(d)),         # forwarding to two
-             Successor(IN(b), OUT(c)),               # feeding back to prefix
-             Consumer(IN(d)))                         # timing process
+    Parallel(Prefix(c.reader(), a.writer(), prefixItem = 0),  # initiator
+             Delta2(a.reader(), b.writer(), d.writer()),         # forwarding to two
+             Successor(b.reader(), c.writer()),               # feeding back to prefix
+             Consumer(d.reader()))                         # timing process
 
 N_BM = 10
 for i in range(N_BM):

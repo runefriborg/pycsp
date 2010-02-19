@@ -75,10 +75,10 @@ def ring(args):
 	for i in range(elements - 1):
 		next = Channel()
 		chanlist.append(next)
-		Spawn(element(IN(this), OUT(next)))
+		Spawn(element(this.reader(), next.writer()))
 		this = next
 	
-	Parallel(root(cycles, tokens, IN(this), OUT(head)))
+	Parallel(root(cycles, tokens, this.reader(), head.writer()))
 
 if __name__ == "__main__":
 	ring(sys.argv[2:])

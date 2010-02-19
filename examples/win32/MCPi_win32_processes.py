@@ -51,7 +51,7 @@ if __name__ == '__main__':
     workers=[]
 
     for i in range(4):
-        workers.append(Process(worker, IN(jobs),OUT(results)))
-    Parallel(Process(producer, OUT(jobs),10000, 1000),
+        workers.append(Process(worker, jobs.reader(), results.writer()))
+    Parallel(Process(producer, jobs.writer(),10000, 1000),
              workers,
-             Process(consumer,IN(results)))
+             Process(consumer, results.reader()))

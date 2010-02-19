@@ -19,7 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from common import *
+from pycsp_import import *
 import time
 import random
 
@@ -44,44 +44,64 @@ def writer(cout, id, cnt, sleeper):
 
 @process
 def par_reader_skip_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:'', cin2:''},{Skip():''},{cin3:'', cin4:''}])
     for i in range(cnt*4):
         if sleeper: sleeper()
-        c,msg = alt.select()
+
+        c, msg = AltSelect(
+            InputGuard(cin1),
+            InputGuard(cin2),
+            SkipGuard(),
+            InputGuard(cin3),
+            InputGuard(cin4)
+            )
+
         print 'From ',c ,'got',msg
     retire(cin1, cin2, cin3, cin4)
 
 @process
 def par_reader_timeout_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:'', cin2:''},{cin3:'', cin4:''},{Timeout(0.1):''}])
     for i in range(cnt*4):
         if sleeper: sleeper()
-        c,msg = alt.select()
+
+        c, msg = AltSelect(
+            InputGuard(cin1),
+            InputGuard(cin2),
+            InputGuard(cin3),
+            InputGuard(cin4),
+            TimeoutGuard(seconds=0.1)
+            )
+
         print 'From ',c ,'got',msg
     retire(cin1, cin2, cin3, cin4)
 
 @process
 def par_reader_skip_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:"print 'From cin1 got', channel_input",
-                        cin2:"print 'From cin2 got', channel_input"},
-                       {Skip():"print 'Skip'"},
-                       {cin3:"print 'From cin3 got', channel_input",
-                        cin4:"print 'From cin4 got', channel_input"}])
     for i in range(cnt*4):
         if sleeper: sleeper()
-        alt.execute()
+
+        AltSelect(
+            InputGuard(cin1, action="print 'From cin1 got', channel_input"),
+            InputGuard(cin2, action="print 'From cin2 got', channel_input"),
+            SkipGuard(action="print 'SkipGuard()'"),
+            InputGuard(cin3, action="print 'From cin3 got', channel_input"),
+            InputGuard(cin4, action="print 'From cin4 got', channel_input")
+            )
+
     retire(cin1, cin2, cin3, cin4)
 
 @process
 def par_reader_timeout_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
-    alt = Alternation([{cin1:"print 'From cin1 got', channel_input",
-                        cin2:"print 'From cin2 got', channel_input"},
-                       {cin3:"print 'From cin3 got', channel_input",
-                        cin4:"print 'From cin4 got', channel_input"},
-                       {Timeout(seconds=0.1):"print 'Timeout(seconds=0.1)'"}])
     for i in range(cnt*4):
         if sleeper: sleeper()
-        alt.execute()
+
+        AltSelect(
+            InputGuard(cin1, action="print 'From cin1 got', channel_input"),
+            InputGuard(cin2, action="print 'From cin2 got', channel_input"),
+            InputGuard(cin3, action="print 'From cin3 got', channel_input"),
+            InputGuard(cin4, action="print 'From cin4 got', channel_input"),
+            TimeoutGuard(seconds=0.1, action="print 'TimeoutGuard(seconds=0.1)'")
+            )
+
     retire(cin1, cin2, cin3, cin4)
 
 
@@ -93,11 +113,11 @@ def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(par_reader(IN(c1),IN(c2),IN(c3),IN(c4),cnt, read_sleeper),
-             writer(OUT(c1),0,cnt, write_sleeper),
-             writer(OUT(c2),1,cnt, write_sleeper),
-             writer(OUT(c3),2,cnt, write_sleeper),
-             writer(OUT(c4),3,cnt, write_sleeper))
+    Parallel(par_reader(c1.reader(),c2.reader(),c3.reader(),c4.reader(),cnt, read_sleeper),
+             writer(c1.writer(),0,cnt, write_sleeper),
+             writer(c2.writer(),1,cnt, write_sleeper),
+             writer(c3.writer(),2,cnt, write_sleeper),
+             writer(c4.writer(),3,cnt, write_sleeper))
 
 
 def Any2Any_Alting_Test(par_reader, read_sleeper, write_sleeper):
@@ -108,23 +128,23 @@ def Any2Any_Alting_Test(par_reader, read_sleeper, write_sleeper):
 
     cnt = 40
     
-    Parallel(par_reader(IN(c1),IN(c2),IN(c3),IN(c4),cnt, read_sleeper),
-             writer(OUT(c1),0,cnt, write_sleeper),
-             writer(OUT(c1),1,cnt, write_sleeper),
-             writer(OUT(c1),2,cnt, write_sleeper),
-             writer(OUT(c1),3,cnt, write_sleeper),
-             writer(OUT(c2),4,cnt, write_sleeper),
-             writer(OUT(c2),5,cnt, write_sleeper),
-             writer(OUT(c2),6,cnt, write_sleeper),
-             writer(OUT(c2),7,cnt, write_sleeper),
-             writer(OUT(c3),8,cnt, write_sleeper),
-             writer(OUT(c3),9,cnt, write_sleeper),
-             writer(OUT(c3),10,cnt, write_sleeper),
-             writer(OUT(c3),11,cnt, write_sleeper),
-             writer(OUT(c4),12,cnt, write_sleeper),
-             writer(OUT(c4),13,cnt, write_sleeper),
-             writer(OUT(c4),14,cnt, write_sleeper),
-             writer(OUT(c4),15,cnt, write_sleeper))
+    Parallel(par_reader(+c1,+c2,+c3,+c4,cnt, read_sleeper),
+             writer(-c1,0,cnt, write_sleeper),
+             writer(-c1,1,cnt, write_sleeper),
+             writer(-c1,2,cnt, write_sleeper),
+             writer(-c1,3,cnt, write_sleeper),
+             writer(-c2,4,cnt, write_sleeper),
+             writer(-c2,5,cnt, write_sleeper),
+             writer(-c2,6,cnt, write_sleeper),
+             writer(-c2,7,cnt, write_sleeper),
+             writer(-c3,8,cnt, write_sleeper),
+             writer(-c3,9,cnt, write_sleeper),
+             writer(-c3,10,cnt, write_sleeper),
+             writer(-c3,11,cnt, write_sleeper),
+             writer(-c4,12,cnt, write_sleeper),
+             writer(-c4,13,cnt, write_sleeper),
+             writer(-c4,14,cnt, write_sleeper),
+             writer(-c4,15,cnt, write_sleeper))
 
 
 if __name__ == '__main__':

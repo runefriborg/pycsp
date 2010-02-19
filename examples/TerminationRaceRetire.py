@@ -34,5 +34,5 @@ def sink(chan_in):
         sys.stdout.write(chan_in())
 
 chan = Channel()
-Parallel([source(OUT(chan)) for i in range(5)],
-          [sink(IN(chan))    for i in range(5)])
+Parallel(source(chan.writer()) * 5,
+         sink(chan.reader())   * 5)
