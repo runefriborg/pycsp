@@ -33,12 +33,12 @@ def choice(func):
     """
     Decorator for creating choice objets
     
+    >>> from __init__ import *
     >>> @choice
     ... def action(channel_input=None):
     ...     print 'Hello'
 
-    >>> from guard import Skip
-    >>> Alternation([{Skip():action()}]).execute()
+    >>> _,_ = AltSelect(SkipGuard(action=action()))
     Hello
     """
     # __choice_fn func_name used to identify function in Alternation.execute
@@ -96,7 +96,7 @@ class Alternation:
     ...         alt.execute()
                 
     >>> C1, C2 = Channel(), Channel()
-    >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+    >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
 
     >>> len(L)
     10
@@ -221,7 +221,7 @@ class Alternation:
         ...         alt.execute()
 
         >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
+        >>> Parallel(P1(C1.writer(),n=10), P1(C2.writer(),n=5), P2(C1.reader(), C2.reader(), n=15))
 
         >>> len(L1), len(L2)
         (10, 5)
@@ -301,7 +301,7 @@ class Alternation:
         ...             L2.append(msg)
 
         >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+        >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
 
         >>> len(L1), len(L2)
         (5, 5)

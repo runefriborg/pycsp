@@ -33,14 +33,6 @@ from const import *
 def choice(func):
     """
     Decorator for creating choice objets
-    
-    >>> @choice
-    ... def action(channel_input=None):
-    ...     print 'Hello'
-
-    >>> from guard import Skip
-    >>> Alternation([{Skip():action()}]).execute()
-    Hello
     """
     # __choice_fn func_name used to identify function in Alternation.execute
     def __choice_fn(*args, **kwargs):
@@ -76,35 +68,6 @@ class Alternation:
     even the empty choice with an alternation execution or a choice where
     the results are simply ignored, still performs the guarded input or
     output.
-
-    >>> from __init__ import *
-
-    >>> L = []
-
-    >>> @choice 
-    ... def action(channel_input):
-    ...     L.append(channel_input)
-
-    >>> @process
-    ... def P1(cout, n=5):
-    ...     for i in range(n):
-    ...         cout(i)
-    
-    >>> @process
-    ... def P2(cin1, cin2, n=10):
-    ...     alt = Alternation([{cin1:action(), cin2:action()}])
-    ...     for i in range(n):
-    ...         alt.execute()
-                
-    >>> C1, C2 = Channel(), Channel()
-    >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
-
-    >>> len(L)
-    10
-
-    >>> L.sort()
-    >>> L
-    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
     """
     def __init__(self, guards):
         # Preserve tuple entries and convert dictionary entries to tuple entries
@@ -195,29 +158,6 @@ class Alternation:
     def execute(self):
         """
         Selects the guard and executes the attached action. Action is a function or python code passed in a string.
-
-        >>> from __init__ import *
-        >>> L1,L2 = [],[]
-
-        >>> @process
-        ... def P1(cout, n):
-        ...     for i in range(n):
-        ...         cout(i)
-
-        >>> @process
-        ... def P2(cin1, cin2, n):
-        ...     alt = Alternation([{
-        ...               cin1:"L1.append(channel_input)",
-        ...               cin2:"L2.append(channel_input)"
-        ...           }])
-        ...     for i in range(n):
-        ...         alt.execute()
-
-        >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
-
-        >>> len(L1), len(L2)
-        (10, 5)
         """
         idx, req, c, op = self.choose()
         if self.guards[idx]:
@@ -271,33 +211,6 @@ class Alternation:
     def select(self):
         """
         Selects the guard.
-
-        >>> from __init__ import *
-        >>> L1,L2 = [],[]
-
-        >>> @process
-        ... def P1(cout, n=5):
-        ...     for i in range(n):
-        ...         cout(i)
-
-        >>> @process
-        ... def P2(cin1, cin2, n=10):
-        ...     alt = Alternation([{
-        ...               cin1:None,
-        ...               cin2:None
-        ...           }])
-        ...     for i in range(n):
-        ...         (g, msg) = alt.select()
-        ...         if g == cin1:
-        ...             L1.append(msg)
-        ...         if g == cin2:
-        ...             L2.append(msg)
-
-        >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
-
-        >>> len(L1), len(L2)
-        (5, 5)
         """
         idx, req, c, op = self.choose()
         return (c, req.msg)

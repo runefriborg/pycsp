@@ -42,17 +42,15 @@ Modules
 ...     pass
 
 >>> c = Channel('B')
->>> cin = IN(c)
->>> alt = Alternation([{cin:"print ChannelInput", Skip():"print 42", Timeout(1):None}])
->>> alt.select() # doctest:+ELLIPSIS
-(<threads.guard.Skip instance at 0x...>, None)
-
->>> alt.execute()
+>>> cin = c.reader()
+>>> selected, msg = AltSelect( InputGuard(cin, action="print ChannelInput"), SkipGuard(action="print 42"), TimeoutGuard(seconds=1) )
 42
 
->>> cout = OUT(c)
->>> alt = Alternation([{(cout, 'MSG_DATA'):"print 'sent'", Timeout(0.01):"print 'abort'"}])
->>> alt.execute()
+>>> print selected # doctest:+ELLIPSIS
+<threads.guard.SkipGuard instance at 0x...>
+
+>>> cout = c.writer()
+>>> _,_ = AltSelect( OutputGuard(cout, 'MSG_DATA', "print 'sent'"), TimeoutGuard(0.01, "print 'abort'") )
 abort
 
 >>> retire(cout)
@@ -79,11 +77,11 @@ A writer process
 
 1-to-1 channel example
 >>> c = Channel('A')
->>> Parallel(reader(IN(c)), writer(OUT(c), 10))
+>>> Parallel(reader(c.reader()), writer(c.writer(), 10))
 
 any-to-any channel example
 >>> c = Channel('A')
->>> Parallel(reader(IN(c)), writer(OUT(c), 10),reader(IN(c)), writer(OUT(c), 10))
+>>> Parallel(reader(c.reader()), writer(c.writer(), 10),reader(c.reader()), writer(c.writer(), 10))
 """
 
 # Import threads version

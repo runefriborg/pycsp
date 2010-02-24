@@ -43,9 +43,9 @@ class BufferedChannel(object):
     ...         cout('Hello World')
 
     >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
+    >>> Spawn(P1(C.writer()))
     
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> cin()
     'Hello World'
 
@@ -54,7 +54,7 @@ class BufferedChannel(object):
     Buffered channels are semantically equivalent with a chain
     of forwarding processes.
     >>> B = Channel(buffer=5)
-    >>> cout = OUT(B)
+    >>> cout = B.writer()
     >>> for i in range(5):
     ...     cout(i)
 
@@ -67,7 +67,7 @@ class BufferedChannel(object):
     ...         L.append(cin())
 
     >>> L = []
-    >>> Parallel(sink(IN(B), L))
+    >>> Parallel(sink(B.reader(), L))
     >>> L
     [0, 1, 2, 3, 4]
     """
