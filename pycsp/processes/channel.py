@@ -234,22 +234,6 @@ class ShmManager(object):
 
 class Channel:
     """ Channel class. Blocking communication
-    
-    >>> from __init__ import *
-
-    >>> @process
-    ... def P1(cout):
-    ...     while True:
-    ...         cout('Hello World')
-
-    >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
-    
-    >>> cin = IN(C)
-    >>> cin()
-    'Hello World'
-
-    >>> retire(cin)
     """
 
     def __init__(self, name=None):

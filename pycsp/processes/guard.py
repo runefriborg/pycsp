@@ -31,9 +31,6 @@ from const import *
 class Guard():
     """
     The standard interface of a guard.
-    
-    >>> Guard() # doctest:+ELLIPSIS
-    <...guard.Guard instance at 0x...>
     """
 
     def offer_write(self, reader_id):
@@ -68,15 +65,6 @@ class Guard():
 class SkipGuard(Guard):
     """
     Skip will try to accept a read or a write, the moment it is posted.
-    
-    >>> from __init__ import *
-
-    >>> C = Channel()
-    >>> Cin = IN(C)
-    >>> (g, msg) = Alternation([{Skip():None}, {Cin:None}]).select()
-
-    >>> isinstance(g, Skip) and msg == None
-    True
     """
     def __init__(self, action=None):
         self.g = (self, action)
@@ -94,25 +82,6 @@ class TimeoutGuard(Guard):
     """
     Timeout spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
-    
-    >>> from __init__ import *
-    >>> import time
-
-    >>> C = Channel()
-    >>> Cin = IN(C)
-
-    >>> time_start = time.time()
-    >>> (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
-    >>> time_passed = time.time() - time_start
-
-    >>> time_passed >= 0.5
-    True
-    
-    >>> time_passed < 0.6
-    True
-    
-    >>> isinstance(g, Timeout) and msg == None
-    True
     """
     def __init__(self, seconds, action=None):
         self.seconds = seconds

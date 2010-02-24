@@ -33,15 +33,6 @@ from const import *
 def choice(func):
     """
     Decorator for creating choice objets
-    
-    >>> from __init__ import *
-    >>> @choice
-    ... def action(channel_input=None):
-    ...     print 'Hello'
-
-    >>> from guard import Skip
-    >>> Alternation([{Skip():action()}]).execute()
-    Hello
     """
     # __choice_fn func_name used to identify function in Alternation.execute
     def __choice_fn(*args, **kwargs):

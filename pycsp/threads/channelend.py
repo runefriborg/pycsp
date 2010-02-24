@@ -31,20 +31,12 @@ class ChannelRetireException(Exception):
 # Functions
 def IN(channel):
     """ Join as reader
-    >>> from __init__ import *
-    >>> C = Channel()
-    >>> isinstance(IN(C), ChannelEndRead)
-    True
     """
     print 'Warning: IN() are deprecated and will be removed'
     return channel.reader()
 
 def OUT(channel):
     """ Join as writer
-    >>> from __init__ import *
-    >>> C = Channel()
-    >>> isinstance(OUT(C), ChannelEndWrite)
-    True
     """
     print 'Warning: OUT() are deprecated and will be removed'
     return channel.writer()
@@ -55,7 +47,7 @@ def retire(*list_of_channelEnds):
     
     >>> from __init__ import *
     >>> C = Channel()
-    >>> cout1, cout2 = OUT(C), OUT(C)
+    >>> cout1, cout2 = C.writer(), C.writer()
     >>> retire(cout1)
 
     >>> Spawn(Process(cout2, 'ok'))
@@ -66,7 +58,7 @@ def retire(*list_of_channelEnds):
     ...     True
     True
 
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> retire(cin)
     """    
     for channelEnd in list_of_channelEnds:
@@ -85,13 +77,13 @@ def poison(*list_of_channelEnds):
     ...         done(42)
 
     >>> C1, C2 = Channel(), Channel()
-    >>> Spawn(P1(IN(C1), OUT(C2)))
-    >>> cout = OUT(C1)
+    >>> Spawn(P1(C1.reader(), C2.writer()))
+    >>> cout = C1.writer()
     >>> cout('Test')
 
     >>> poison(cout)
     
-    >>> cin = IN(C2)
+    >>> cin = C2.reader()
     >>> cin()
     42
     """

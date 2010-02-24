@@ -50,18 +50,6 @@ class Guard():
 class SkipGuard(Guard):
     """
     Skip will try to accept a read or a write, the moment it is posted.
-    
-    >>> from __init__ import *
-
-    >>> @process 
-    ... def P():
-    ...     C = Channel()
-    ...     Cin = IN(C)
-    ...     (g, msg) = Alternation([{Skip():None}, {Cin:None}]).select()
-    ...     print isinstance(g, Skip) and msg == None
-
-    >>> Parallel(P())
-    True
     """
     def __init__(self, action=None):
         self.g = (self, action)
@@ -89,25 +77,6 @@ class TimeoutGuard(Guard):
     """
     Timeout spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
-    
-    >>> from __init__ import *
-    >>> import time
-
-    >>> @process 
-    ... def P():
-    ...     C = Channel()
-    ...     Cin = IN(C)
-    ...     time_start = time.time()
-    ...     (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
-    ...     time_passed = time.time() - time_start
-    ...     print time_passed >= 0.5
-    ...     print time_passed < 0.6
-    ...     print isinstance(g, Timeout) and msg == None
-    
-    >>> Parallel(P())
-    True
-    True
-    True
     """
     def __init__(self, seconds, action=None):
         self.seconds = seconds

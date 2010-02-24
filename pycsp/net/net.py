@@ -259,22 +259,6 @@ class PyroClientManager(object):
 
 class Channel:
     """ Channel class with Pyro support. Blocking communication
-    
-    >>> from __init__ import *
-
-    >>> @process
-    ... def P1(cout):
-    ...     while True:
-    ...         cout('Hello World')
-
-    >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
-    
-    >>> cin = IN(C)
-    >>> cin()
-    'Hello World'
-
-    >>> retire(cin)
     """
     def __init__(self, name=None):
         self.URI = PyroClientManager().URI
@@ -399,35 +383,6 @@ class Alternation:
     even the empty choice with an alternation execution or a choice where
     the results are simply ignored, still performs the guarded input or
     output.
-
-    >>> from __init__ import *
-
-    >>> L = []
-
-    >>> @choice 
-    ... def action(channel_input):
-    ...     L.append(channel_input)
-
-    >>> @process
-    ... def P1(cout, n=5):
-    ...     for i in range(n):
-    ...         cout(i)
-    
-    >>> @process
-    ... def P2(cin1, cin2, n=10):
-    ...     alt = Alternation([{cin1:action(), cin2:action()}])
-    ...     for i in range(n):
-    ...         alt.execute()
-                
-    >>> C1, C2 = Channel(), Channel()
-    >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
-
-    >>> len(L)
-    10
-
-    >>> L.sort()
-    >>> L
-    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
     """
     def __init__(self, guards):
         self.id = None
@@ -465,6 +420,7 @@ class Alternation:
                 op = READ
                 
             if isinstance(c, Guard):
+                c.g = None
                 reduced_guards.append((c, op, msg))
             else:
                 reduced_guards.append((c.channel.name, op, msg))
@@ -513,29 +469,6 @@ class Alternation:
     def execute(self):
         """
         Selects the guard and executes the attached action. Action is a function or python code passed in a string.
-
-        >>> from __init__ import *
-        >>> L1,L2 = [],[]
-
-        >>> @process
-        ... def P1(cout, n):
-        ...     for i in range(n):
-        ...         cout(i)
-
-        >>> @process
-        ... def P2(cin1, cin2, n):
-        ...     alt = Alternation([{
-        ...               cin1:"L1.append(channel_input)",
-        ...               cin2:"L2.append(channel_input)"
-        ...           }])
-        ...     for i in range(n):
-        ...         alt.execute()
-
-        >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
-
-        >>> len(L1), len(L2)
-        (10, 5)
         """
         (idx, c, msg, op) = self.choose()
         if self.guards[idx]:
@@ -592,33 +525,6 @@ class Alternation:
     def select(self):
         """
         Selects the guard.
-
-        >>> from __init__ import *
-        >>> L1,L2 = [],[]
-
-        >>> @process
-        ... def P1(cout, n=5):
-        ...     for i in range(n):
-        ...         cout(i)
-
-        >>> @process
-        ... def P2(cin1, cin2, n=10):
-        ...     alt = Alternation([{
-        ...               cin1:None,
-        ...               cin2:None
-        ...           }])
-        ...     for i in range(n):
-        ...         (g, msg) = alt.select()
-        ...         if g == cin1:
-        ...             L1.append(msg)
-        ...         if g == cin2:
-        ...             L2.append(msg)
-
-        >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
-
-        >>> len(L1), len(L2)
-        (5, 5)
         """
 
         idx, c, msg, op = self.choose()

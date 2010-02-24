@@ -31,67 +31,23 @@ class ChannelRetireException(Exception):
 # Functions
 def IN(channel):
     """ Join as reader
-    >>> from __init__ import *
-    >>> C = Channel()
-    >>> isinstance(IN(C), ChannelEndRead)
-    True
     """
     return channel.reader()
 
 def OUT(channel):
     """ Join as writer
-    >>> from __init__ import *
-    >>> C = Channel()
-    >>> isinstance(OUT(C), ChannelEndWrite)
-    True
     """
     return channel.writer()
 
 def retire(*list_of_channelEnds):
     """ Retire reader or writer, to do auto-poisoning
     When all readers or writer of a channel have retired. The channel is retired.
-    
-    >>> from __init__ import *
-    >>> C = Channel()
-    >>> cout1, cout2 = OUT(C), OUT(C)
-    >>> retire(cout1)
-
-    >>> Spawn(Process(cout2, 'ok'))
-
-    >>> try:
-    ...     cout1('fail')
-    ... except ChannelRetireException:
-    ...     True
-    True
-
-    >>> retire(cout2)    
     """    
     for channelEnd in list_of_channelEnds:
         channelEnd.retire()
 
 def poison(*list_of_channelEnds):
     """ Poison channel
-    >>> from __init__ import *
-
-    >>> @process
-    ... def P1(cin, done):
-    ...     try:
-    ...         while True:
-    ...             cin()
-    ...     except ChannelPoisonException:
-    ...         done(42)
-
-    >>> C1, C2 = Channel(), Channel()
-    >>> Spawn(P1(IN(C1), OUT(C2)))
-    >>> cout = OUT(C1)
-    >>> cout('Test')
-    'Test'
-
-    >>> poison(cout)
-    
-    >>> cin = IN(C2)
-    >>> cin()
-    42
     """
     for channelEnd in list_of_channelEnds:
         channelEnd.poison()

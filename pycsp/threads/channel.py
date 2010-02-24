@@ -122,9 +122,9 @@ class Channel:
     ...         cout('Hello World')
 
     >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
+    >>> Spawn(P1(C.writer()))
     
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> cin()
     'Hello World'
 

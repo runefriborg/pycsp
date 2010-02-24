@@ -47,13 +47,13 @@ class Guard:
 
 class SkipGuard(Guard):
     """
-    Skip will try to accept a read or a write, the moment it is posted.
+    SkipGuard will try to accept a read or a write, the moment it is posted.
     
     >>> from __init__ import *
 
     >>> C = Channel()
-    >>> Cin = IN(C)
-    >>> (g, msg) = Alternation([{Skip():None}, {Cin:None}]).select()
+    >>> Cin = C.reader()
+    >>> (g, msg) = AltSelect( SkipGuard(), InputGuard(Cin) )
 
     >>> isinstance(g, Skip) and msg == None
     True
@@ -72,17 +72,17 @@ class SkipGuard(Guard):
 
 class TimeoutGuard(Guard):
     """
-    Timeout spawns a timer thread, when posted. If removed
+    TimeoutGuard spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
     
     >>> from __init__ import *
     >>> import time
 
     >>> C = Channel()
-    >>> Cin = IN(C)
+    >>> Cin = C.reader()
 
     >>> time_start = time.time()
-    >>> (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
+    >>> (g, msg) = AltSelect( TimeoutGuard(seconds=0.5), InputGuard(Cin) )
     >>> time_passed = time.time() - time_start
 
     >>> time_passed >= 0.5

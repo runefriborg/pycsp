@@ -176,8 +176,8 @@ def Parallel(*plist):
     ...         cin()
     
     >>> C = [Channel() for i in range(10)]
-    >>> Cin = map(IN, C)
-    >>> Cout = map(OUT, C)
+    >>> Cin = [chan.reader() for chan in C]
+    >>> Cout = [chan.writer() for chan in C]
     
     >>> Parallel([P1(Cout[i], i) for i in range(10)],[P2(Cin[i]) for i in range(10)])
     """
@@ -193,10 +193,10 @@ def Spawn(*plist):
     ...         cout(id)
     
     >>> C = Channel()
-    >>> Spawn([P1(OUT(C), i) for i in range(10)])
+    >>> Spawn([P1(C.writer(), i) for i in range(10)])
     
     >>> L = []
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> for i in range(100):
     ...    L.append(cin())
     
@@ -232,10 +232,10 @@ def Sequence(*plist):
     ...     Sequence([Process(cout,i) for i in range(10)])
     
     >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
+    >>> Spawn(P1(C.writer()))
     
     >>> L = []
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> for i in range(10):
     ...    L.append(cin())
     
