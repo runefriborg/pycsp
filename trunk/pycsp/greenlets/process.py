@@ -91,19 +91,19 @@ class Process():
 
     # Main process execution
     def run(self):
+        self.executed = False
         try:
-            # Store the returned value from the process
-            self.executed = False
             self.fn(*self.args, **self.kwargs)
-            self.executed = True
-        except ChannelPoisonException, e:
+        except ChannelPoisonException:
             # look for channels and channel ends
             self.__check_poison(self.args)
             self.__check_poison(self.kwargs.values())
-        except ChannelRetireException, e:
+        except ChannelRetireException:
             # look for channel ends
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
+        self.executed = True
+            
 
     def __check_poison(self, args):
         for arg in args:
@@ -219,11 +219,8 @@ def Sequence(*plist):
             processes.append(p)
 
     # Wrap processes to be able to schedule greenlets.
-    def WrapP():
-        for p in processes:
-            # Call Run directly instead of start() and join() 
-            p.run()
-    Parallel(Process(WrapP))
+    for p in processes:
+        Parallel(p)
 
 def current_process_id():
     s = Scheduler()
