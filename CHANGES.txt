@@ -1,5 +1,7 @@
 0.6.2 - 0.7.0
 ----------
+* Added a raised Exception('Deadlock') when all processes are blocked on
+  channel communication. Only pycsp.greenlets has this deadlock detection.
 * Added a wrapper for Alternation to simplify usage. It consists of
   the following constructs AltSelect, InputGuard, OutputGuard,
   SkipGuard and TimeoutGuard:
