@@ -46,7 +46,7 @@ from process import io, Process, process, Sequence, Parallel, Spawn, current_pro
 # Buffered channel will fallback to the default Channel, if not buffered.
 from buffer import BufferedChannel as Channel
 
-version = (0,6,2, 'processes')
+version = (0,7,0, 'processes')
 
 def test_suite():
     import unittest

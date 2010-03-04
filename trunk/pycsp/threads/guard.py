@@ -53,7 +53,7 @@ class SkipGuard(Guard):
 
     >>> C = Channel()
     >>> Cin = C.reader()
-    >>> (g, msg) = AltSelect( SkipGuard(), InputGuard(Cin) )
+    >>> (g, msg) = AltSelect(InputGuard(Cin),  SkipGuard() )
 
     >>> isinstance(g, Skip) and msg == None
     True
@@ -82,7 +82,7 @@ class TimeoutGuard(Guard):
     >>> Cin = C.reader()
 
     >>> time_start = time.time()
-    >>> (g, msg) = AltSelect( TimeoutGuard(seconds=0.5), InputGuard(Cin) )
+    >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
     >>> time_passed = time.time() - time_start
 
     >>> time_passed >= 0.5

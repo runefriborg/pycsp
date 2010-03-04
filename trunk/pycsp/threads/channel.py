@@ -223,10 +223,27 @@ class Channel:
         return self.writer()
 
     def reader(self):
+        """
+        Join as reader
+        
+        >>> C = Channel()
+        >>> cin = C.reader()
+        >>> isinstance(cin, ChannelEndRead)
+        True
+        """
         self.join_reader()
         return ChannelEndRead(self)
 
     def writer(self):
+        """
+        Join as writer
+        
+        >>> C = Channel()
+        >>> cout = C.writer()
+        >>> isinstance(cout, ChannelEndWrite)
+        True
+        """
+
         self.join_writer()
         return ChannelEndWrite(self)
 
