@@ -1,4 +1,5 @@
-#summary Documentation for all components in PyCSP
+#summary Documentation for all components in PyCSP ver. 0.7.0
+
 
 = Overview =
 
@@ -41,8 +42,8 @@
 
 {{{
     >>> C = [Channel() for i in range(10)]
-    >>> Cin = map(IN, C)
-    >>> Cout = map(OUT, C)
+    >>> Cin = [chan.reader() for chan in C]
+    >>> Cout = [chan.writer() for chan in C]
 }}}
 
 {{{
@@ -61,12 +62,12 @@
 
 {{{
     >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
+    >>> Spawn(P1(C.writer()))
 }}}
 
 {{{
     >>> L = []
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> for i in range(10):
     ...    L.append(cin())
 }}}
@@ -88,12 +89,12 @@
 
 {{{
     >>> C = Channel()
-    >>> Spawn([P1(OUT(C), i) for i in range(10)])
+    >>> Spawn([P1(C.writer(), i) for i in range(10)])
 }}}
 
 {{{
     >>> L = []
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> for i in range(100):
     ...    L.append(cin())
 }}}
@@ -119,8 +120,8 @@
 
 {{{
     >>> C1, C2 = Channel(), Channel()
-    >>> Spawn(P1(IN(C1), OUT(C2)))
-    >>> cout = OUT(C1)
+    >>> Spawn(P1(C1.reader(), C2.writer()))
+    >>> cout = C1.writer()
     >>> cout('Test')
 }}}
 
@@ -129,7 +130,7 @@
 }}}
 
 {{{
-    >>> cin = IN(C2)
+    >>> cin = C2.reader()
     >>> cin()
     42
 }}}
@@ -140,7 +141,7 @@
 
 {{{
     >>> C = Channel()
-    >>> cout1, cout2 = OUT(C), OUT(C)
+    >>> cout1, cout2 = C.writer(), C.writer()
     >>> retire(cout1)
 }}}
 
@@ -157,7 +158,7 @@
 }}}
 
 {{{
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> retire(cin)
 }}}
 
@@ -175,11 +176,11 @@
 
 {{{
     >>> C = Channel()
-    >>> Spawn(P1(OUT(C)))
+    >>> Spawn(P1(C.writer()))
 }}}
 
 {{{
-    >>> cin = IN(C)
+    >>> cin = C.reader()
     >>> cin()
     'Hello World'
 }}}
@@ -192,7 +193,7 @@
     of forwarding processes.
 {{{
     >>> B = Channel(buffer=5)
-    >>> cout = OUT(B)
+    >>> cout = B.writer()
     >>> for i in range(5):
     ...     cout(i)
 }}}
@@ -211,38 +212,87 @@
 
 {{{
     >>> L = []
-    >>> Parallel(sink(IN(B), L))
+    >>> Parallel(sink(B.reader(), L))
     >>> L
     [0, 1, 2, 3, 4]
 }}}
 
 === Joining to Read ===
- Join as reader
+
+        Join as reader
+
 {{{
-    >>> C = Channel()
-    >>> isinstance(IN(C), ChannelEndRead)
-    True
+        >>> C = Channel()
+        >>> cin = C.reader()
+        >>> isinstance(cin, ChannelEndRead)
+        True
 }}}
 
 === Joining to Write ===
- Join as writer
+
+        Join as writer
+
 {{{
-    >>> C = Channel()
-    >>> isinstance(OUT(C), ChannelEndWrite)
-    True
+        >>> C = Channel()
+        >>> cout = C.writer()
+        >>> isinstance(cout, ChannelEndWrite)
+        True
 }}}
 
 == External Choice / Choosing a Channel ==
 
-    Alternation supports input and output guards. Guards are ChannelEnd
-    or Guard objects.
+    AltSelect is a wrapper to Alternation with a much more intuitive
+    interface. 
+    It performs a prioritized choice from a list of guard objects and
+    returns a tuple with the selected channel end and the read msg if
+    there is one, otherwise None.
 
-    Note that alternation always performs the guard that was chosen,
-    i.e. channel input or output is executed within the alternation so
-    even the empty choice with an alternation execution or a choice where
+
+{{{
+    >>> C = Channel()
+    >>> cin = C.reader()
+}}}
+
+{{{
+    >>> ch_end, msg = AltSelect(InputGuard(cin), SkipGuard())
+}}}
+
+{{{
+    >>> if ch_end == cin:
+    ...     print msg
+    ... else:
+    ...     print msg == None
+    True
+}}}
+
+
+    AltSelect supports skip, timeout, input and output guards.
+
+{{{
+    >>> @choice 
+    ... def callback(type, channel_input = None):
+    ...    print type, channel_input
+}}}
+
+{{{
+    >>> A, B = Channel('A'), Channel('B')
+    >>> cin, cout = A.reader(), B.writer()
+    >>> g1 = InputGuard(cin, action=callback('input'))
+    >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
+    >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
+}}}
+
+{{{
+    >>> _ = AltSelect(g1, g2, g3)
+    timeout None
+}}}
+
+
+    Note that AltSelect always performs the guard that was chosen,
+    i.e. channel input or output is executed within the AltSelect so
+    even the empty choice with an AltSelect or where
     the results are simply ignored, still performs the guarded input or
     output.
-
 
 {{{
     >>> L = []
@@ -264,14 +314,13 @@
 {{{
     >>> @process
     ... def P2(cin1, cin2, n=10):
-    ...     alt = Alternation([{cin1:action(), cin2:action()}])
     ...     for i in range(n):
-    ...         alt.execute()
+    ...         _ = AltSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
 }}}
 
 {{{
     >>> C1, C2 = Channel(), Channel()
-    >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
+    >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
 }}}
 
 {{{
@@ -285,82 +334,6 @@
     [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
 }}}
 
-=== Alternation(...).select() ===
-
-        Selects the guard.
-
-{{{
-        >>> L1,L2 = [],[]
-}}}
-
-{{{
-        >>> @process
-        ... def P1(cout, n=5):
-        ...     for i in range(n):
-        ...         cout(i)
-}}}
-
-{{{
-        >>> @process
-        ... def P2(cin1, cin2, n=10):
-        ...     alt = Alternation([{
-        ...               cin1:None,
-        ...               cin2:None
-        ...           }])
-        ...     for i in range(n):
-        ...         (g, msg) = alt.select()
-        ...         if g == cin1:
-        ...             L1.append(msg)
-        ...         if g == cin2:
-        ...             L2.append(msg)
-}}}
-
-{{{
-        >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1)), P1(OUT(C2)), P2(IN(C1), IN(C2)))
-}}}
-
-{{{
-        >>> len(L1), len(L2)
-        (5, 5)
-}}}
-
-=== Alternation(...).execute() ===
-
-        Selects the guard and executes the attached action. Action is a function or python code passed in a string.
-
-{{{
-        >>> L1,L2 = [],[]
-}}}
-
-{{{
-        >>> @process
-        ... def P1(cout, n):
-        ...     for i in range(n):
-        ...         cout(i)
-}}}
-
-{{{
-        >>> @process
-        ... def P2(cin1, cin2, n):
-        ...     alt = Alternation([{
-        ...               cin1:"L1.append(channel_input)",
-        ...               cin2:"L2.append(channel_input)"
-        ...           }])
-        ...     for i in range(n):
-        ...         alt.execute()
-}}}
-
-{{{
-        >>> C1, C2 = Channel(), Channel()
-        >>> Parallel(P1(OUT(C1),n=10), P1(OUT(C2),n=5), P2(IN(C1), IN(C2), n=15))
-}}}
-
-{{{
-        >>> len(L1), len(L2)
-        (10, 5)
-}}}
-
 === @choice ===
 
     Decorator for creating choice objets
@@ -372,21 +345,101 @@
 }}}
 
 {{{
-    >>> from guard import Skip
-    >>> Alternation([{Skip():action()}]).execute()
+    >>> _,_ = AltSelect(SkipGuard(action=action()))
     Hello
 }}}
 
 == Guards ==
-=== Skip ===
+=== InputGuard ===
 
-    Skip will try to accept a read or a write, the moment it is posted.
+    InputGuard wraps an input ch_end for use with AltSelect.
 
 
 {{{
     >>> C = Channel()
-    >>> Cin = IN(C)
-    >>> (g, msg) = Alternation([{Skip():None}, {Cin:None}]).select()
+    >>> cin, cout = C.reader(), C.writer()
+}}}
+
+{{{
+    >>> @process
+    ... def P1(cout):
+    ...     for i in range(3): cout(i)
+}}}
+
+{{{
+    >>> Spawn (P1(cout))
+}}}
+
+{{{
+    >>> ch_end, msg = AltSelect( InputGuard(cin) )
+    >>> ch_end, msg = AltSelect( InputGuard(cin, action="print channel_input") )
+    1
+}}}
+{{{
+    >>> ch_end, msg = AltSelect( InputGuard(cin, action=lambda channel_input: Spawn(Process(cout, channel_input))) )
+}}}
+
+{{{
+    >>> @choice
+    ... def Action(val1, val2, channel_input=None):
+    ...     print channel_input
+}}}
+
+{{{
+    >>> ch_end, msg = AltSelect( InputGuard(cin, action=Action('going into val1', 'going into val2')) )
+    2
+}}}
+
+=== OutputGuard ===
+
+    OutputGuard wraps an output ch_end for use with AltSelect.
+
+
+{{{
+    >>> C = Channel()
+    >>> cin, cout = C.reader(), C.writer()
+}}}
+
+{{{
+    >>> @process
+    ... def P1(cin):
+    ...     for i in range(5): cin()
+}}}
+
+{{{
+    >>> Spawn (P1(cin))
+}}}
+
+{{{
+    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=0) )
+    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=1, action="print 'done'") )
+    done
+}}}
+
+{{{
+    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=2, action=lambda: Spawn(Process(cout, 3))) )
+}}}
+
+{{{
+    >>> @choice
+    ... def Action(val1, val2):
+    ...     print 'sent'
+}}}
+
+{{{
+    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=4, action=Action('going into val1', 'going into val2')) )
+    sent
+}}}
+
+=== SkipGuard ===
+
+    SkipGuard will try to accept a read or a write, the moment it is posted.
+
+
+{{{
+    >>> C = Channel()
+    >>> Cin = C.reader()
+    >>> (g, msg) = AltSelect(InputGuard(Cin),  SkipGuard() )
 }}}
 
 {{{
@@ -394,9 +447,9 @@
     True
 }}}
 
-=== Timeout ===
+=== TimeoutGuard ===
 
-    Timeout spawns a timer thread, when posted. If removed
+    TimeoutGuard spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
 
 {{{
@@ -405,12 +458,12 @@
 
 {{{
     >>> C = Channel()
-    >>> Cin = IN(C)
+    >>> Cin = C.reader()
 }}}
 
 {{{
     >>> time_start = time.time()
-    >>> (g, msg) = Alternation([{Timeout(seconds=0.5):None}, {Cin:None}]).select()
+    >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
     >>> time_passed = time.time() - time_start
 }}}
 
