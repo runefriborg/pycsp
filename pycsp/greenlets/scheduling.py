@@ -254,13 +254,15 @@ class Scheduler(object):
         if self.greenlet == greenlet.getcurrent():
             # Called from main greenlet
             self.main()
+            for p in processes:
+                if not p.executed:
+                    raise Exception('Deadlock')
         else:
             # Called from child greenlet
             for p in processes:
                 while not p.executed:
-                    # p, not executed yet, switch to any waiting greenlet
+                    # p, not executed yet, switch to any waiting greenlet                    
                     self.getNext().greenlet.switch()
-
 
 
     # Get next greenlet available for scheduling
