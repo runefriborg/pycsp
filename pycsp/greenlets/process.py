@@ -223,27 +223,6 @@ def Parallel(*plist):
 
 def Spawn(*plist):
     """ Spawn(P1, [P2, .. ,PN])
-    >>> from __init__ import *
-    
-    >>> @process
-    ... def WrapP():
-    ...     @process
-    ...     def P1(cout, id):
-    ...         for i in range(10):
-    ...             cout(id)
-    ...     
-    ...     C = Channel()
-    ...     Spawn([P1(OUT(C), i) for i in range(10)])
-    ...     
-    ...     L = []
-    ...     cin = IN(C)
-    ...     for i in range(100):
-    ...        L.append(cin())
-    ...     
-    ...     print len(L)
-
-    >>> Parallel(WrapP())
-    100
     """
     _parallel(plist, False)
 
@@ -268,27 +247,6 @@ def _parallel(plist, block = True):
        
 def Sequence(*plist):
     """ Sequence(P1, [P2, .. ,PN])
-    The Sequence construct returns when all given processes exit.
-    >>> from __init__ import *
-
-    >>> @process
-    ... def WrapP():
-    ...     @process
-    ...     def P1(cout):
-    ...         Sequence([Process(cout,i) for i in range(10)])
-    ...     
-    ...     C = Channel()
-    ...     Spawn(P1(OUT(C)))
-    ...     
-    ...     L = []
-    ...     cin = IN(C)
-    ...     for i in range(10):
-    ...        L.append(cin())
-    ...     
-    ...     print L
-    
-    >>> Parallel(WrapP())
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     """
     processes=[]
     for p in plist:
@@ -302,6 +260,7 @@ def Sequence(*plist):
     def WrapP():
         for p in processes:
             # Call Run directly instead of start() and join() 
+            logging.debug("Running proces: %s",p)
             p.run()
     Parallel(Process(WrapP))
 
