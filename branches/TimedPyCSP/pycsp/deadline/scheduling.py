@@ -23,12 +23,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
-from greenlet import greenlet
+try: from greenlet import greenlet
+except ImportError, e:
+    try: from py.magic import greenlet
+    except ImportError, e: 
+        sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
+        raise ImportError(e)
 import threading
 import time
-from header import *
 import heapq
-from const import *
+import pycsp.greenlets.scheduling
+from pycsp.greenlets.const import *
+
+def Now():
+  return time.time() 
+
+def Wait(seconds):
+    """Wrapper function for timer_wait. Will schedule the process for later activation and then switch active process. """
+    logging.debug("%s calling Wait()"%RT_Scheduler().current)
+    RT_Scheduler().timer_wait(RT_Scheduler().current, seconds)
+    t = Now()+seconds
+    p = RT_Scheduler().getNext() 
+    p.greenlet.switch()
+    while Now()<t:
+      p = RT_Scheduler().getNext() 
+      logging.warning("Wait did not wait correct.Now:%d, should wait until: %d ,swicthing from %s to %s"%(Now(),t,Simulation().current, p))
+      p.greenlet.switch()
 
 # Decorators
 def io(func):
@@ -61,7 +81,7 @@ def io(func):
     >>> time_start = time.time()
     >>> Parallel([P1() for i in range(10)])
     >>> diff = time.time() - time_start
-    >>> logging.warning("diff:0.05 <=  %f < 0.6"%diff)
+    >>> #logging.warning("diff:0.05 <=  %f < 0.6"%diff)
     >>> diff >= 0.05 and diff < 0.1
     True
     """
@@ -83,36 +103,30 @@ def io(func):
 
 
 # Classes
-class Io(threading.Thread):
+class Io(pycsp.greenlets.Io):
     """ Io(fn, *args, **kwargs)
     It is recommended to use the @io decorator, to create Io instances.
     See io.__doc__
     """
     def __init__(self, fn, *args, **kwargs):
-        threading.Thread.__init__(self)
+        pycsp.greenlets.Io.__init__(self,fn,*args,**kwargs)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
         self.retval = None
 
-        self.s = Scheduler()
+        self.s = RT_Scheduler()
         self.p = self.s.current
-        logging.debug("init Io, current: %s,self: %s"%(self.s.current,self.s))
+        logging.debug("init Io, current: %s,\nself: %s"%(self.s.current,self.s))
 
-    def run(self):
-        logging.debug("Io run, s:%s"%self.s)
-        self.retval = self.fn(*self.args, **self.kwargs)
-        self.s.io_unblock(self.p)
-
-
-class Scheduler(object):
+class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
     """
     Scheduler is a singleton class.
     
     It is optimized for fast switching and is not fair.
    
-    >>> A = Scheduler()
-    >>> B = Scheduler()
+    >>> A = RT_Scheduler()
+    >>> B = RT_Scheduler()
     >>> A == B
     True
     """
@@ -123,10 +137,15 @@ class Scheduler(object):
         return cls.getInstance(cls, *args, **kargs)
 
     def __init__(self):
+        pycsp.greenlets.scheduling.Scheduler.__init__(self)
         pass
 
+    def decompose(self):
+        pycsp.greenlets.scheduling.Scheduler.decompose(self)
+        RT_Scheduler.__Scheduler__instance = None
+
     def __str__(self):
-        return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tnew:\t%s \n\tnext:\t%s \n\ttimers:\t%s "%(self,self.current, self.blocking,self.new,self.next,self.timers)
+        return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tnew:\t%s\n\ttimers:\t%s\n\tnext:\t%s "%(self,self.current, self.blocking,self.new,self.timers,self.next)
     def decompose(self):
       self.__Scheduler__instance = None
 
@@ -154,60 +173,6 @@ class Scheduler(object):
         return cls.__instance
     getInstance = classmethod(getInstance)
 
-    # Called by MainThread
-    def timer_wait(self, p, seconds):
-        logging.debug("calling timer_wait")
-        new_time = seconds + time.time()
-        #heapify(self.timers)
-        heapq.heappush(self.timers,(new_time,p))
-
-    # Called by MainThread
-    def timer_cancel(self, p):
-        logging.debug("timer_cancel")
-        for i in xrange(len(self.timers)):
-            if self.timers[i][1] == p:
-                self.timers.pop(i)
-                break
-        heapq.heapify(self.timers)
-
-    # Called by threading.Timer()
-    def timer_notify(self):
-        logging.debug("timer_notify")
-        self.cond.acquire()
-        self.cond.notify()
-        self.cond.release()
-
-    # Called from MainThread
-    def io_block_prepare(self, p):
-        logging.debug("io_blockprepare")
-        self.cond.acquire()
-        self.blocking += 1
-        p.setstate(ACTIVE)
-        self.cond.release()
-        
-    # Called from MainThread
-    def io_block_wait(self, p):
-        logging.debug("io_block_wait process %s"%p)
-        p.wait()
-        logging.debug("io_block_wait done waiting")
-
-    # Called from io thread
-    def io_unblock(self, p):
-        logging.debug("io_unblock\n self: %s",self)
-        self.cond.acquire()
-        p.notify(DONE, force=True)
-        self.blocking -= 1
-        self.cond.notify()
-        self.cond.release()
-        
-    # Add a list of processes onto the new list.
-    def addBulk(self, processes):
-        logging.debug("Adding Bulk of processes")
-        # We reverse the list of added processes, if the total amount of new processes exceeds 1000.
-        if len(self.new) + len(processes) > 1000:
-            processes.reverse()
-            
-        self.new.extend(processes)
 
     # Main loop
     # When all queues are empty all greenlets have been executed.
@@ -217,9 +182,8 @@ class Scheduler(object):
         logging.debug("entering main, current:%s"%self.current)
         while True:
             if self.timers and self.timers[0][0] < time.time():
-                _,self.current = heapq.heappop(self.timers)
-                logging.debug("main:switching to timer %s"%self.current)
-                self.current.greenlet.switch()
+                _,process = heapq.heappop(self.timers)
+                self.activate(process)
             elif self.new:
                 if len(self.new) > 1000:
                     # Pop from end, if the new list might be large.
@@ -231,18 +195,21 @@ class Scheduler(object):
                 self.current.greenlet.switch()
             elif self.next:
                 # Pop from the beginning
-                self.current = self.next.pop(0)
+                _,self.current = heapq.heappop(self.next)
                 logging.debug("main:switching to next %s"%self.current)
                 self.current.greenlet.switch()
 
             # We enter a critical region, since timer threads or blocking io threads,
             # might try to update the internal queues.
+            logging.debug("Aquire lock")
             self.cond.acquire()
+            logging.debug("Aquired")
             if not (self.next or self.new):
                 # Waiting on blocking processes or all processes have finished!
                 if self.timers:
                     # Set timer to lowest activation time
-                    seconds = self.timers[0][0] - time.time()
+                    seconds = self.timers[0][0] - Now()
+                    #logging.Debug("will wait for %d seconds",seconds)
                     if seconds > 0:
                         t = threading.Timer(seconds, self.timer_notify)
 
@@ -254,9 +221,10 @@ class Scheduler(object):
                         self.cond.wait()
 
                 elif self.blocking > 0:
-
+                    logging.debug("blocking processes, will sleep")
                     # Now go to sleep
                     self.cond.wait()
+                    logging.debug("done sleeping")
                 else:
                     # Execution finished!
                     self.cond.release()
@@ -297,10 +265,10 @@ class Scheduler(object):
             # Quick choice
             #print "choosing a next",self.next
             logging.debug("getNext returns from next")
-            self.current = self.next.pop(0)
+            _,self.current = heapq.heappop(self.next)
             return self.current
         else:
-            # Some processes are blocking or all have been executed.
+            # Some processes are blocking, are in timers or all have been executed.
             # Switch to main loop.
             logging.debug("getNext returns scheduler because some is blocking or are in timers sched:%s",self)
             return self
@@ -308,7 +276,8 @@ class Scheduler(object):
 
     def activate(self, process):
       logging.debug("activate: %s"%process)
-      self.next.append(process)
+      heapq.heappush(self.next,(process.internal_priority,process))
+      #self.next.append(process)
 
 
 # Run tests

@@ -10,9 +10,9 @@ logging.basicConfig(level=logging.DEBUG,
     format=' %(levelname)s:%(filename)s:%(lineno)d: %(message)s'
   )
 
-#h1 = logging.StreamHandler(sys.stdout)
-#rootLogger = logging.getLogger()
-#rootLogger.addHandler(h1)
+h1 = logging.StreamHandler(sys.stdout)
+rootLogger = logging.getLogger()
+rootLogger.addHandler(h1)
 
 #console_logger.setFormatter(logging.Formatter(SYSLOG_FORMAT))logging.StreamHandler('/dev/stdout')
 
