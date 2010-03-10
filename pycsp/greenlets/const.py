@@ -6,7 +6,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 import logging, sys
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.WARNING,
     format=' %(levelname)s:%(filename)s:%(lineno)d: %(message)s'
   )
 

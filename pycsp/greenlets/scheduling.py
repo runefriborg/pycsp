@@ -26,7 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from greenlet import greenlet
 import threading
 import time
-from header import *
 import heapq
 from const import *
 

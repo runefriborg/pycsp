@@ -23,15 +23,15 @@ os.environ['PYCSP'] = 'DEADLINE'
 
 # Imports
 #from pycsp.greenlets.scheduling import Io, io
-from scheduling import Io, io
+from scheduling import Io, io, Now, Wait, DeadlineException
 from guard import Timeout, Skip
 from pycsp.greenlets.alternation import choice
 from alternation import Alternation
 from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
 #from channel import Channel
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
-from process import process, Process, Parallel, Spawn 
-from pycsp.greenlets.process import Sequence, current_process_id
+from process import process, Process, Parallel, Spawn, current_process_id, Set_deadline
+from pycsp.greenlets.process import Sequence
 
 # Buffered channel will fallback to the default Channel, if not buffered.
 from buffer import BufferedChannel as Channel
@@ -46,8 +46,8 @@ def test_suite():
     import scheduling, guard, alternation, channel, process
 
     suite = unittest.TestSuite()
-    #for mod in scheduling,channel,process, guard, alternation:
-    suite.addTest(doctest.DocTestSuite(alternation))
+    for mod in scheduling,channel,process, guard, alternation:
+        suite.addTest(doctest.DocTestSuite(mod))
     suite.addTest(doctest.DocTestSuite())
     return suite
 
