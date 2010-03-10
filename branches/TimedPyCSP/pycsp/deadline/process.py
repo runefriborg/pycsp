@@ -8,7 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 import pycsp.greenlets.process
 from scheduling import RT_Scheduler
-
+from pycsp.greenlets.const import *
 # Decorators
 def process(func):
     def _call(*args, **kwargs):
@@ -18,13 +18,26 @@ def process(func):
 # Classes
 class Process(pycsp.greenlets.Process):
     def __init__(self, fn, *args, **kwargs):
-      pycsp.greenlets.Process.__init__(self,fn,*args,**kwargs)
-      self.s = RT_Scheduler()
-      self.optional_priotity = 0
-      self.inherit_priotity = 0      
-      self.has_deadline = False
-      self.deadline = None
-      self.internal_priority = 0
+        pycsp.greenlets.Process.__init__(self,fn,*args,**kwargs)
+        self.s = RT_Scheduler()
+        self.optional_priotity = 0
+        self.inherit_priotity = 0      
+        self.deadline = None
+        self.internal_priority = 0
+        self.has_priority = False
+
+    def __repr__(self):
+        return "%s%s\n\tstate:\t\t\t%s\n\texecuted:\t\t%s\n\toptional_priotity:\t%s\n\thas_priority:\t\t%s"%(
+        self.fn, self.args, state[self.state], self.executed,self.optional_priotity,self.has_priority)
+    
+    
+    # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+    def __mul__(self, multiplier):
+        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+
+    # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+    def __rmul__(self, multiplier):
+        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
 def Parallel(*plist):
     _parallel(plist, True)
@@ -50,6 +63,16 @@ def _parallel(plist, block = True):
     if block:
         s.join(processes)
 
+def current_process_id():
+    s = RT_Scheduler()
+    g = s.current
+    return g.id
+
+
+def Set_deadline(value):
+    RT_Scheduler().current.deadline = value
+    RT_Scheduler().current.priority = value
+    RT_Scheduler().current.has_priority = True
 
 # Run tests
 process.__doc = pycsp.greenlets.process.__doc__

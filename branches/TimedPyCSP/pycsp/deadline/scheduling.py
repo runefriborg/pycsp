@@ -35,6 +35,11 @@ import heapq
 import pycsp.greenlets.scheduling
 from pycsp.greenlets.const import *
 
+class DeadlineException(Exception): 
+    def __init__(self):
+        pass
+
+
 def Now():
   return time.time() 
 
@@ -145,7 +150,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
         RT_Scheduler.__Scheduler__instance = None
 
     def __str__(self):
-        return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tnew:\t%s\n\ttimers:\t%s\n\tnext:\t%s "%(self,self.current, self.blocking,self.new,self.timers,self.next)
+        return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tno_priority:\t%s\n\ttimers:\t%s\n\tnext:\t%s "%(self,self.current, self.blocking,self.no_priority,self.timers,self.next)
     def decompose(self):
       self.__Scheduler__instance = None
 
@@ -157,7 +162,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
             cls.__instance = object.__new__(cls)
 
             # Initialize members for scheduler
-            cls.__instance.new = []
+            cls.__instance.no_priority = []
             cls.__instance.next = []
             cls.__instance.current = None
             cls.__instance.greenlet = greenlet.getcurrent()
@@ -173,6 +178,18 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
         return cls.__instance
     getInstance = classmethod(getInstance)
 
+    # Add a list of processes onto the new list.
+    def addBulk(self, processes):
+        logging.debug("Adding Bulk of processes:%s",processes)
+        for process in processes:
+            self.activate(process)
+
+    def activate(self, process):
+        logging.debug("Proces: %s",process)
+        if process.has_priority:
+            heapq.heappush(self.next,(process.internal_priority,process))
+        else:
+            self.no_priority.append(process)
 
     # Main loop
     # When all queues are empty all greenlets have been executed.
@@ -184,27 +201,28 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
             if self.timers and self.timers[0][0] < time.time():
                 _,process = heapq.heappop(self.timers)
                 self.activate(process)
-            elif self.new:
-                if len(self.new) > 1000:
-                    # Pop from end, if the new list might be large.
-                    self.current = self.new.pop(-1)
-                else:
-                    # Pop from beginning to be more fair
-                    self.current = self.new.pop(0)
-                logging.debug("main:switching to new %s"%self.current)
-                self.current.greenlet.switch()
             elif self.next:
                 # Pop from the beginning
                 _,self.current = heapq.heappop(self.next)
                 logging.debug("main:switching to next %s"%self.current)
+                if self.current.deadline<Now():
+                    self.current.greenlet.throw(DeadlineException)
                 self.current.greenlet.switch()
-
+            elif self.no_priority:
+                if len(self.no_priority) > 1000:
+                    # Pop from end, if the new list might be large.
+                    self.current = self.no_priority.pop(-1)
+                else:
+                    # Pop from beginning to be more fair
+                    self.current = self.no_priority.pop(0)
+                logging.debug("main:switching to new %s"%self.current)
+                self.current.greenlet.switch()
             # We enter a critical region, since timer threads or blocking io threads,
             # might try to update the internal queues.
             logging.debug("Aquire lock")
             self.cond.acquire()
             logging.debug("Aquired")
-            if not (self.next or self.new):
+            if not (self.next or self.no_priority):
                 # Waiting on blocking processes or all processes have finished!
                 if self.timers:
                     # Set timer to lowest activation time
@@ -254,7 +272,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
     # Get next greenlet available for scheduling
     def getNext(self):
-        if self.new:
+        if self.no_priority:
             # Returning scheduler, to avoid exceeding the recursion limit.
             # All new greenlets must be started from the scheduler, to have the
             # scheduler as parent greenlet.
@@ -272,13 +290,6 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
             # Switch to main loop.
             logging.debug("getNext returns scheduler because some is blocking or are in timers sched:%s",self)
             return self
-
-
-    def activate(self, process):
-      logging.debug("activate: %s"%process)
-      heapq.heappush(self.next,(process.internal_priority,process))
-      #self.next.append(process)
-
 
 # Run tests
 if __name__ == '__main__':

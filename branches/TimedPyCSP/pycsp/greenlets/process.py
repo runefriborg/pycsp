@@ -71,7 +71,7 @@ class Process():
         self.executed = False
 
     def __repr__(self):
-        return "%s%s <state: %s, executed:%s>"%(self.fn, self.args, state[self.state], self.executed)
+        return "ARG OLD: %s%s <state: %s, executed:%s>"%(self.fn, self.args, state[self.state], self.executed)
     
     #def __str__(self):
     #    return "%s%s "%(self.fn.func_name,self.args)

@@ -126,7 +126,7 @@ class Channel:
         #        w.result = SUCCESS
         #        w.process.state = DONE
         #        if p != w.process:
-        #            self.s.next.append(w.process)
+        #            self.s.activate(w.process)
         #        return msg        
 
         p.setstate(ACTIVE)
@@ -159,7 +159,7 @@ class Channel:
         #        r.result = SUCCESS
         #        r.process.state = DONE
         #        if p != r.process:
-        #            self.s.next.append(r.process)
+        #            self.s.activate(r.process)
         #        return True
         p.setstate(ACTIVE)
         req = ChannelReq(p,msg=msg)
