@@ -91,7 +91,10 @@ from pycsp.common import toolkit as pycsp_toolkit
 os.environ['PYCSP_TRACE'] = 'YES'
 
 # Setup gather system
-C = [pycsp.Channel('_a'), pycsp.Channel('_b')]
+if PYCSP == 'NET':
+    C = [None, None]
+else:
+    C = [pycsp.Channel('TraceChan_A'), pycsp.Channel('TraceChan_B')]
 
 @pycsp.process
 def Convert2Str(cin, cout):
@@ -118,6 +121,11 @@ def TraceInit(file=None, stdout=False):
     This function must be called before tracing.
     """
 
+    if PYCSP == 'NET':
+        global C, _TraceQuit
+        C = [pycsp.Channel('TraceChan_A'), pycsp.Channel('TraceChan_B')]
+        _TraceQuit = C[0].writer().retire
+
     class PipeHandler:
         def __init__(self, wrapped_pipe):
             self.wrapped_pipe = wrapped_pipe
@@ -133,11 +141,16 @@ def TraceInit(file=None, stdout=False):
     if file == None:
         file = 'pycsp_trace.log'
 
+
     pycsp.Spawn(Convert2Str(C[0].reader(), C[1].writer()),
                 pycsp_toolkit.file_w(C[1].reader(), file)) 
 
 
-_TraceQuit = C[0].writer().retire
+if PYCSP == 'NET':
+    _TraceQuit = None
+else:
+    _TraceQuit = C[0].writer().retire
+
 def TraceQuit():
     """ TraceQuit()
     Shutdown collecting trace process, by retiring the
@@ -345,6 +358,7 @@ class Alternation:
 class Channel:
     def __init__(self, *args, **kwargs):
         self.wrapped = pycsp.Channel(*args, **kwargs)
+        self.name = self.wrapped.name
         sendTrace({'type':'Channel', 'chan_name':self.wrapped.name})
 
     def poison(self):

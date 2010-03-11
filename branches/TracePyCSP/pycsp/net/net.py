@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
-import uuid
 import Pyro.naming, Pyro.core
 
 from configuration import *
@@ -83,7 +82,7 @@ class PyroServerManager(Pyro.core.ObjBase):
 
     def Alternation(self, reduced_guards):
         self.lock.acquire()
-        id = str(uuid.uuid1())
+        id = str(random.random())+str(time.time())
 
         # Swap channel names for channels, preserve guards
         new_guards = []

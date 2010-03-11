@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import types
 import threading
-import time, random, platform
+import time, random
 from channel import ChannelPoisonException, ChannelRetireException
 from net import Channel
 from channelend import ChannelEndRead, ChannelEndWrite
@@ -74,7 +74,7 @@ class Process(threading.Thread):
         self.kwargs = kwargs
 
         # Create unique id
-        self.id = platform.node()+':'+str(random.random())+':'+str(time.time())
+        self.id = str(random.random())+str(time.time())
 
     def run(self):
         try:
@@ -260,7 +260,7 @@ def Sequence(*plist):
 def current_process_id():
     t = threading.current_thread()
     if t.name == 'MainThread':
-        return platform.node()+':__main__'
+        return '__main__' + str(random.random())+str(time.time())
     return t.id
 
 # Run tests

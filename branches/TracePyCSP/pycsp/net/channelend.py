@@ -101,6 +101,10 @@ class ChannelEndWrite():
         self.channel = channel
         self.isretired = False
 
+        # For compatibility with common.trace
+        self.post_write = None
+        self.remove_write = None
+
     def __call__(self, msg):
         if self.isretired:
             raise ChannelRetireException()
@@ -130,6 +134,10 @@ class ChannelEndRead():
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False
+
+        # For compatibility with common.trace
+        self.post_read = None
+        self.remove_read = None
 
     def __call__(self):
         if self.isretired:
