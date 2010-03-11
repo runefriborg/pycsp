@@ -34,17 +34,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import wx
-import subprocess, time, random, sys
+import subprocess, time, random, sys, os
 import cStringIO
 
-sys.path.append("..")
-
-from pycsp.threads import *
-#from pycsp.common.trace import *
-from pycsp.common import toolkit
-
-#TraceInit('PlayTrace.trace')
-
+try:
+    from pycsp.threads import *
+    from pycsp.common import toolkit
+except ImportError:
+    # Try import from parent directory relative to PlayTrace.py
+    sys.path = [os.path.dirname(os.path.dirname(os.path.realpath(__file__)))] + sys.path
+    from pycsp.threads import *
+    from pycsp.common import toolkit
+    
 DOT = toolkit.which('dot')
 
 STATE_INIT, STATE_BLOCKED, STATE_RUNNING = range(3)
@@ -839,6 +840,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     CHANGE_LEVEL = 2
                 elif (trace['type'] == 'BlockOnRead' or 
                       trace['type'] == 'BlockOnWrite'):
+                    
                     if trace_processes.has_key(trace['process_id']):
                         trace_processes[trace['process_id']].state = STATE_BLOCKED
 

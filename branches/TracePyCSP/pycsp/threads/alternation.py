@@ -175,6 +175,7 @@ class Alternation:
             act, poison, retire = self.__result(reqs)
             if not act:
                 raise ChannelPoisonException
+
         except ChannelRetireException:
             act, poison, retire = self.__result(reqs)
             if not act:

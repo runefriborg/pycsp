@@ -242,8 +242,16 @@ def Sequence(*plist):
     # For every process we simulate a new process_id. When executing
     # in Main thread/process we set the new id in a global variable.
 
-    t = threading.current_thread()
-    if t.name == 'MainThread':
+    try:
+        # compatible with Python 2.6+
+        t = threading.current_thread()
+        name = t.name
+    except AttributeError:
+        # compatible with Python 2.5- 
+        t = threading.currentThread()
+        name = t.getName()
+
+    if name == 'MainThread':
         global MAINTHREAD_ID
         for p in processes:
             MAINTHREAD_ID = p.id
@@ -260,9 +268,19 @@ def Sequence(*plist):
             p.run()
         t.id = t_original_id
 
+
 def current_process_id():
-    t = threading.current_thread()
-    if t.name == 'MainThread':
+    
+    try:
+        # compatible with Python 2.6+
+        t = threading.current_thread()
+        name = t.name
+    except AttributeError:
+        # compatible with Python 2.5- 
+        t = threading.currentThread()
+        name = t.getName()
+
+    if name == 'MainThread':
         try:
             return MAINTHREAD_ID        
         except NameError:            

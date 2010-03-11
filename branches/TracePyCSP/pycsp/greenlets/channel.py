@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 from scheduling import Scheduler
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
+import time, random
 from const import *
 
 # Exceptions
@@ -87,11 +88,10 @@ class Channel:
     def __init__(self, name=None):
 
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            name = str(uuid.uuid1())
-
-        self.name=name
+            # Create unique name
+            self.name = str(random.random())+str(time.time())
+        else:
+            self.name=name
 
         self.readqueue = []
         self.writequeue = []

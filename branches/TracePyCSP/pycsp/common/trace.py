@@ -90,7 +90,6 @@ from pycsp.common import toolkit as pycsp_toolkit
 # Set trace mode
 os.environ['PYCSP_TRACE'] = 'YES'
 
-
 # Setup gather system
 C = [pycsp.Channel('_a'), pycsp.Channel('_b')]
 
@@ -102,7 +101,10 @@ def Convert2Str(cin, cout):
 def sendTrace(msg):
     cout = C[0].writer()
     if PYCSP == 'GREENLETS':
+        tjek =  current_process_id()
         pycsp.Parallel(pycsp.Process(cout,msg))
+        if current_process_id() != tjek:
+            print 'ERROR'
     else:
         cout(msg)
     pycsp.retire(cout)
@@ -122,6 +124,8 @@ def TraceInit(file=None, stdout=False):
         def write(self, s):
             sendTrace({'type':'Output', 'msg':s})
             self.wrapped_pipe.write(s)
+        def flush(self):
+            self.wrapped_pipe.flush()
 
     if stdout:
         sys.stdout = PipeHandler(sys.stdout)
@@ -236,13 +240,21 @@ class ChannelEndReadTrace:
 
         self.post_read = self.wrapped.post_read
         self.remove_read = self.wrapped.remove_read
-        self.poison = self.wrapped.poison
-        self.retire = self.wrapped.retire
         self.__repr__ = self.wrapped.__repr__
         self.isWriter = self.wrapped.isWriter
         self.isReader = self.wrapped.isReader
 
         self.count = 0
+
+    def retire(self): 
+        process_id = pycsp.current_process_id()
+        sendTrace({'type':'Retire', 'id':self.count, 'chan_name':self.wrapped.channel.name, 'process_id':process_id})
+        self.wrapped.retire()       
+
+    def poison(self): 
+        process_id = pycsp.current_process_id()
+        sendTrace({'type':'Poison', 'id':self.count, 'chan_name':self.wrapped.channel.name, 'process_id':process_id})
+        self.wrapped.poison()       
 
     def __call__(self):
         process_id = pycsp.current_process_id()
@@ -261,13 +273,20 @@ class ChannelEndWriteTrace:
 
         self.post_write = self.wrapped.post_write
         self.remove_write = self.wrapped.remove_write
-        self.poison = self.wrapped.poison
-        self.retire = self.wrapped.retire
         self.__repr__ = self.wrapped.__repr__
         self.isWriter = self.wrapped.isWriter
         self.isReader = self.wrapped.isReader
-
         self.count = 0
+
+    def retire(self): 
+        process_id = pycsp.current_process_id()
+        sendTrace({'type':'Retire', 'id':self.count, 'chan_name':self.wrapped.channel.name, 'process_id':process_id})
+        self.wrapped.retire()       
+
+    def poison(self): 
+        process_id = pycsp.current_process_id()
+        sendTrace({'type':'Poison', 'id':self.count, 'chan_name':self.wrapped.channel.name, 'process_id':process_id})
+        self.wrapped.poison()       
 
     def __call__(self, msg):
         process_id = pycsp.current_process_id()
