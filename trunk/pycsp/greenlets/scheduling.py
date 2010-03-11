@@ -251,6 +251,8 @@ class Scheduler(object):
     # Join is called from _parallel and will block the greenlet until
     # greenlet processes has been executed.
     def join(self, processes):
+        save_current = self.current
+
         if self.greenlet == greenlet.getcurrent():
             # Called from main greenlet
             self.main()
@@ -264,6 +266,8 @@ class Scheduler(object):
                     # p, not executed yet, switch to any waiting greenlet                    
                     self.getNext().greenlet.switch()
 
+        # Restore current
+        self.current = save_current
 
     # Get next greenlet available for scheduling
     def getNext(self):
