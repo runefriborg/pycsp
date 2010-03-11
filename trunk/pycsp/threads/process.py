@@ -255,8 +255,13 @@ def Sequence(*plist):
         p.run()
 
 def current_process_id():
-    t = threading.current_thread()
-    if t.name == 'MainThread':
+    try:
+        t = threading.current_thread()
+        name = t.name
+    except AttributeError:
+        t = threading.currentThread()
+        name = t.getName()
+    if name == 'MainThread':
         return 'main'
     return t.id
 
