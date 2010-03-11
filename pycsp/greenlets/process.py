@@ -219,8 +219,11 @@ def Sequence(*plist):
             processes.append(p)
 
     # Wrap processes to be able to schedule greenlets.
-    for p in processes:
-        Parallel(p)
+    def WrapP():
+        for p in processes:
+            # Call Run directly instead of start() and join() 
+            p.run()
+    Parallel(Process(WrapP))
 
 def current_process_id():
     s = Scheduler()
