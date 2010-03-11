@@ -35,8 +35,8 @@ if sys.platform == 'win32' and (version[3] == 'processes'):
 @process
 def HelloWorld(register):
     request_channel = Channel()
-    cin = IN(request_channel)
-    register(('/hello.html', OUT(request_channel)))
+    cin = request_channel.reader()
+    register(('/hello.html', request_channel.writer()))
     while True:
         (request_string, cout) = cin()
         cout("Hello at " + time.strftime("%H:%M:%S", time.localtime()))
@@ -44,8 +44,8 @@ def HelloWorld(register):
 @process
 def Time(register):
     request_chan = Channel()
-    cin = IN(request_chan)
-    register(('/time.html', OUT(request_chan)))
+    cin = request_chan.reader()
+    register(('/time.html', request_chan.writer()))
 
     while True:
         (request_string, cout) = cin()
@@ -54,9 +54,9 @@ def Time(register):
 @process
 def Index(id, register):
     request_chan = Channel('Index-'+str(id))
-    cin = IN(request_chan)
-    register(('/index.html', OUT(request_chan)))
-    register(('/', OUT(request_chan)))
+    cin = request_chan.reader()
+    register(('/index.html', request_chan.writer()))
+    register(('/', request_chan.writer()))
 
     while True:
         (request_string, cout) = cin()
@@ -73,8 +73,8 @@ def time_sleep(s):
 @process
 def Sleep(id, register):
     request_chan = Channel('Sleep-'+str(id))
-    cin = IN(request_chan)
-    register(('/sleep.html', OUT(request_chan)))
+    cin = request_chan.reader()
+    register(('/sleep.html', request_chan.writer()))
 
     while True:
         (request_string, cout) = cin()
@@ -145,8 +145,8 @@ def HTTPsocket(sock, dispatchChan):
     answer='HTTP/1.0 200 OK\nServer: BaseHTTP/0.2 Python/2.2\nDate: Tue, 18 Feb 2003 17:15:49 GMT\nContent-Type: text/html\nServer: myHandler\n\n'
 
     item = Channel()
-    itemOut = OUT(item)
-    itemIn = IN(item)
+    itemOut = item.writer()
+    itemIn = item.reader()
 
     conn, addr=sock
     req=conn.recv(256)
@@ -177,16 +177,16 @@ def entry(request):
     
     while True:
         s = serversocket_accept(serversocket)
-        Spawn(HTTPsocket(s, OUT(request)))
+        Spawn(HTTPsocket(s, request.writer()))
 
 
 register=Channel('Register Service')
 request=Channel('Request Service')
 
 Parallel(entry(request),
-         Dispatcher(IN(register), IN(request)),
-         [Time(OUT(register)) for i in range(2)],
-         [Sleep(i, OUT(register)) for i in range(5)],
-         [Index(i, OUT(register)) for i in range(2)],
-         HelloWorld(OUT(register)))
+         Dispatcher(register.reader(), request.reader()),
+         [Time(register.writer()) for i in range(2)],
+         [Sleep(i, register.writer()) for i in range(5)],
+         [Index(i, register.writer()) for i in range(2)],
+         HelloWorld(register.writer()))
 

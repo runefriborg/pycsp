@@ -19,12 +19,14 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from pycsp_import import *
+import sys
+sys.path.append("../..")
+
+from pycsp.threads import *
 from pycsp.common.trace import *
 
 import socket
 import time
-import sys
 from numpy import *
 from ctypes import *
 import png
@@ -272,7 +274,7 @@ def serversocket_accept(serversocket):
 @process
 def entry(request):
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(('', 8081))
+    serversocket.bind(('', int(sys.argv[1])))
     serversocket.listen(1)
     
     while True:

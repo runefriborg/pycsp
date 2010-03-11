@@ -11,11 +11,8 @@ def source(chan_out):
     
 @process
 def sink(chan_in):
-    TraceMsg('sink init')
     while True:
         sys.stdout.write(chan_in())
-
-    TraceMsg('sink terminating')
 
 chan = Channel()
 Parallel(
