@@ -233,7 +233,7 @@ class ShmManager(object):
                 s_cond.release()
                 r_cond.release()
 
-class Channel:
+class Channel(object):
     """ Channel class. Blocking communication
     
     >>> from __init__ import *
@@ -252,8 +252,15 @@ class Channel:
 
     >>> retire(cin)
     """
+    def __new__(cls, *args, **kargs):
+        if kargs.has_key('buffer') and kargs['buffer'] > 0:
+            import pycsp.common.buffer                      
+            chan = pycsp.common.buffer.BufferedChannel(*args, **kargs)
+            return chan
+        else:
+            return object.__new__(cls)
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, buffer=0):
 
         if name == None:
             # Create unique name

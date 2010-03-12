@@ -39,15 +39,12 @@ os.environ['PYCSP'] = 'NET'
 
 # Imports
 from configuration import *
-from net import Alternation
+from net import Channel, Alternation
 from alternation import choice
 from guard import Skip, Timeout
 from channel import ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id
-
-# Buffered channel will fallback to the default Channel, if not buffered.
-from buffer import BufferedChannel as Channel
 
 version = (0,6,2, 'net')
 

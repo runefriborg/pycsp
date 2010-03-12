@@ -1,5 +1,9 @@
 """
-Add buffering to Channel module
+BufferedChannel implementation.
+
+Automatically instantiated if buffer argument is used.
+
+A = Channel(buffer=10)
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
@@ -22,20 +26,40 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-# Imports
-from alternation import Alternation
-from channel import Channel, ChannelPoisonException, ChannelRetireException
-from channelend import retire, poison
-from process import Process, Spawn
+
+import os, sys
+
+# Detect current PYCSP version and import
+# Default import is pycsp.threads
+
+PYCSP = 'THREADS'
+if os.environ.has_key('PYCSP'):
+    if os.environ['PYCSP'] == 'PROCESSES':
+        PYCSP = 'PROCESSES'
+        import pycsp.processes as pycsp
+    elif os.environ['PYCSP'] == 'GREENLETS':
+        PYCSP = 'GREENLETS'
+        import pycsp.greenlets as pycsp
+    elif os.environ['PYCSP'] == 'NET':
+        PYCSP = 'NET'
+        import pycsp.net as pycsp
+    elif os.environ['PYCSP'] == 'THREADS':
+        import pycsp.threads as pycsp
+else:
+    import pycsp.threads as pycsp
+
+if os.environ.has_key('PYCSP_TRACE'):
+    from pycsp.common import trace as pycsp
 
 from collections import deque
 import time, random
 
-class BufferedChannel(object):
+
+class BufferedChannel:
     """ Channel class.
     Blocking or buffered communication.
     
-    >>> from __init__ import *
+    >>> from pycsp import *
 
     >>> @process
     ... def P1(cout):
@@ -71,25 +95,15 @@ class BufferedChannel(object):
     >>> L
     [0, 1, 2, 3, 4]
     """
-
-    def __new__(cls, *args, **kargs):
-        if kargs.has_key('buffer') and kargs['buffer'] > 0:
-            return object.__new__(cls)
-        else:
-            if kargs.has_key('buffer'):
-                del kargs['buffer']
-            return Channel(*args, **kargs)
-
-    def __init__(self, name=None, buffer=0):
+    def __init__(self, name=None, buffer=1):
         if name == None:
             # Create unique name
             name = str(random.random())+str(time.time())
 
         self.name = name
-        self.__inChan = Channel(name=name+'inChan')
-        self.__outChan = Channel(name=name+'outChan')
-        self.__bufferProcess = Process(self.__proc,
-                                       self.__inChan.reader(),
+        self.__inChan = pycsp.Channel(name=name+'inChan')
+        self.__outChan = pycsp.Channel(name=name+'outChan')
+        self.__bufferProcess = self.Buffer(self.__inChan.reader(),
                                        self.__outChan.writer(),
                                        N=buffer)
 
@@ -97,8 +111,13 @@ class BufferedChannel(object):
         self.reader = self.__outChan.reader
         self.writer = self.__inChan.writer
 
-        # Start buffer process
-        Spawn(self.__bufferProcess)
+        # Set buffer process as deamon to allow kill if mother process
+        # exists.
+        #if PYCSP == 'THREADS' or PYCSP == 'PROCESSES':
+        #    self.__bufferProcess.daemon = True
+
+        # Start buffer process        
+        pycsp.Spawn(self.__bufferProcess)
 
     def __pos__(self):
         return self.reader()
@@ -106,12 +125,16 @@ class BufferedChannel(object):
     def __neg__(self):
         return self.writer()
     
-    def __proc(self, cin, cout, N):
+    @pycsp.process
+    def Buffer(self, cin, cout, N):
         queue = deque()
         poisoned = False
         retired = False
         while True:
             try:
+                if os.environ.has_key('PYCSP_TRACE'):
+                    pycsp.TraceMsg(len(queue))
+
                 # Handling poison / retire
                 if (poisoned or retired):
                     if len(queue):
@@ -119,15 +142,15 @@ class BufferedChannel(object):
                             cout(queue.popleft())
                         except:
                             if poisoned:
-                                poison(cin, cout)
+                                pycsp.poison(cin, cout)
                             if retired:
-                                retire(cin, cout)
+                                pycsp.retire(cin, cout)
                     else:
                         try:
                             if poisoned:
-                                poison(cin, cout)
+                                pycsp.poison(cin, cout)
                             if retired:
-                                retire(cin, cout)
+                                pycsp.retire(cin, cout)
                         except:
                             pass
                         return # quit
@@ -136,7 +159,7 @@ class BufferedChannel(object):
                     queue.append(cin())
                 # Queue not full and not empty
                 elif len(queue) < N:
-                    g, msg = Alternation([
+                    g, msg = pycsp.Alternation([
                             (cout, queue[0], None),
                             (cin, None)
                             ]).select()
@@ -147,9 +170,9 @@ class BufferedChannel(object):
                 # Queue full
                 else:
                     cout(queue.popleft())
-            except ChannelPoisonException, e:
+            except pycsp.ChannelPoisonException, e:
                 poisoned = True
-            except ChannelRetireException, e:
+            except pycsp.ChannelRetireException, e:
                 retired = True
 
 # Run tests

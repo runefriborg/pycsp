@@ -31,12 +31,9 @@ os.environ['PYCSP'] = 'THREADS'
 # Imports
 from guard import Skip, Timeout
 from alternation import choice, Alternation
-from channel import ChannelPoisonException, ChannelRetireException
+from channel import Channel, ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id
-
-# Buffered channel will fallback to the default Channel, if not buffered.
-from buffer import BufferedChannel as Channel
 
 version = (0,6,2, 'threads')
 
