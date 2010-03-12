@@ -113,8 +113,8 @@ class BufferedChannel:
 
         # Set buffer process as deamon to allow kill if mother process
         # exists.
-        #if PYCSP == 'THREADS' or PYCSP == 'PROCESSES':
-        #    self.__bufferProcess.daemon = True
+        if PYCSP != 'GREENLETS':
+            self.__bufferProcess.daemon = True
 
         # Start buffer process        
         pycsp.Spawn(self.__bufferProcess)
