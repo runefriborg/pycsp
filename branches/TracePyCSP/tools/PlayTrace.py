@@ -37,6 +37,7 @@ import wx
 import subprocess, time, random, sys, os
 import cStringIO
 
+# Import installed pycsp or try to import pycsp from parent dir.
 try:
     from pycsp.threads import *
     from pycsp.common import toolkit
@@ -46,6 +47,7 @@ except ImportError:
     from pycsp.threads import *
     from pycsp.common import toolkit
     
+# Get dot
 DOT = toolkit.which('dot')
 
 STATE_INIT, STATE_BLOCKED, STATE_RUNNING = range(3)
@@ -94,10 +96,12 @@ def DOT_ID(id):
     new_id = id.translate(None, ". <>")
     return "node_"+new_id
 
+
+
 class MainFrame(wx.Frame):
     def __init__(self, parent, title, pos):
         wx.Frame.__init__(self, parent, -1, title,
-                          pos, size=(700, 700))
+                          pos, size=(1024, 720))
 
         # Create the menubar
         menuBar = wx.MenuBar()
@@ -123,11 +127,11 @@ class MainFrame(wx.Frame):
         self.CreateStatusBar()
         
 
-        # Now create the Panel to put the other controls on.
+        # Main panel that contains all elements
         panel = wx.Panel(self)
 
-        leftSizer = wx.BoxSizer(wx.VERTICAL)
 
+        # Creating controls for left bar
         self.stateBtnPlay = 'pause'
         self.btnPlay = wx.Button(panel, wx.ID_NEW, "Play")
         self.Bind(wx.EVT_BUTTON, self.OnPlayTrace, self.btnPlay)
@@ -158,15 +162,20 @@ class MainFrame(wx.Frame):
         self.btnTheme = wx.Button(panel, wx.ID_ANY, 'Set Theme')
         self.Bind(wx.EVT_BUTTON, self.OnTheme, self.btnTheme)
 
+
+        # Initiating control values
         self.Z = 1.0
         self.follow = ''
         self.export = ''
-        self.frame_index = 0
         self.current_theme = 0
+        
+        # Send update theme message to CSP network
         wx.CallLater(1, self.UpdateTheme)
 
-        # bind the button events to handlers
+
+        # Setup left bar with controls
         border = 4
+        leftSizer = wx.BoxSizer(wx.VERTICAL)
         leftSizer.Add(self.btnPlay, 1, wx.ALL | wx.EXPAND, border)
         leftSizer.Add(self.delay, 0 , wx.LEFT, 10)  
         leftSizer.Add(self.btnStep, 1 , wx.EXPAND | wx.ALL, border)
@@ -177,25 +186,48 @@ class MainFrame(wx.Frame):
         leftSizer.Add(self.btnZoomFit, 1 , wx.EXPAND | wx.ALL, border)
         leftSizer.Add(self.btnTheme, 1 , wx.EXPAND | wx.ALL, border)
         
-        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        # Create controls for top bar
+        self.txtFrame = wx.TextCtrl(panel, wx.ID_ANY, "0", size=(70,20), style=wx.TE_RIGHT)
+        self.txtFrame.Disable()
 
-        topSizer.Add(leftSizer, 0)
+        self.btnSkip10 = wx.Button(panel, wx.ID_ANY, 'Skip 10')
+        self.Bind(wx.EVT_BUTTON, self.Skip10, self.btnSkip10)
+        self.btnSkip100 = wx.Button(panel, wx.ID_ANY, 'Skip 100')
+        self.Bind(wx.EVT_BUTTON, self.Skip100, self.btnSkip100)
+        self.btnSkip1000 = wx.Button(panel, wx.ID_ANY, 'Skip 1000')
+        self.Bind(wx.EVT_BUTTON, self.Skip1000, self.btnSkip1000)        
 
-        # Create ImagePanel
+        # Setup buttons
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(self.txtFrame, 0, wx.ALL, 5)
+        buttonSizer.Add(self.btnSkip10, 0, wx.ALL, 5)
+        buttonSizer.Add(self.btnSkip100, 0, wx.ALL, 5)
+        buttonSizer.Add(self.btnSkip1000, 0, wx.ALL, 5)
+
+        # Create ImagePanel for trace visualization
         self.ImagePanel = wx.Window(panel, -1,
                                     style=wx.SUNKEN_BORDER)
         self.ImagePanel.SetBackgroundColour(THEMES[self.current_theme]['Background'])
         self.ImagePanel.Bind(wx.EVT_PAINT, self.OnPaintEvent)
-        self.ImagePanel.Bind(wx.EVT_LEFT_DOWN, self.OnMouseEvent)
+        self.ImagePanel.Bind(wx.EVT_LEFT_DOWN, self.OnMouseEvent)        
+        
+        # Setup right bar with buttons and ImagePanel
+        rightSizer = wx.BoxSizer(wx.VERTICAL)
+        rightSizer.Add(buttonSizer, 0)
+        rightSizer.Add(self.ImagePanel, 1, wx.EXPAND | wx.ALL, 0)
 
-        topSizer.Add(self.ImagePanel, 1, wx.EXPAND | wx.ALL, 5)
+        # Put left and right bar together
+        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        topSizer.Add(leftSizer, 0)
+        topSizer.Add(rightSizer, 1, wx.EXPAND | wx.ALL, 0)
+
 
         # Use a sizer to layout the controls, stacked vertically and with
         # a 10 pixel border around each
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(topSizer, 1, wx.EXPAND)
 
-        # Create MsgWindow
+        # Create MsgWindow control
         self.MsgWindow = wx.TextCtrl(panel, wx.ID_ANY,
                                      "Look Here for output\n",
                                      size = (-1,100),
@@ -203,25 +235,27 @@ class MainFrame(wx.Frame):
                                               wx.TE_READONLY |
                                               wx.SUNKEN_BORDER)
                                      )
+
+        # Add below left and right bar.
         sizer.Add(self.MsgWindow, 0, wx.EXPAND | wx.ALL, 5)
         
         # Set auto layout
         panel.SetAutoLayout(True)
         panel.SetSizer(sizer)
 
+        # Update trace visualization with screen size
         self.current_dot_file = None
         wx.CallLater(1, self.UpdateScreenSize)
         
-
+        # Request channel ends
         self.get_image = +IMAGE_FILE_CHAN
         self.setup_dotgen = -DOTGEN_SETUP_CHAN
         self.setup_dotcmd = -DOTCMD_SETUP_CHAN
         self.create_file = -DOT2_FILE_CHAN
         self.get_node_data = +NODE_DATA_CHAN
 
-        self.OnUpdate()
 
-
+    
     def OnZoomIn(self, event=None):        
         self.Z = self.Z * 2
         self.UpdateZoom()
@@ -297,6 +331,32 @@ class MainFrame(wx.Frame):
                 self.create_file((self.current_dot_file, {'filetype':'ps', 'filename':path}))
             dlg.Destroy()
 
+    def Skip10(self, event=None):
+        self.Skip(10)
+
+    def Skip100(self, event=None):
+        self.Skip(100)
+
+    def Skip1000(self, event=None):
+        self.Skip(1000)
+
+    def Skip(self, frames=10):
+        try:
+
+            if self.stateBtnPlay == 'pause':
+                frames -= 3
+
+            self.setup_dotgen(('skip_frames', frames))            
+
+            # Update three buffered steps
+            if self.stateBtnPlay == 'pause':
+                self.OnStepTrace()
+                self.OnStepTrace()
+                self.OnStepTrace()
+
+        except ChannelPoisonException:
+            return
+
     def OnMouseEvent(self, event):
         pass
             
@@ -330,7 +390,7 @@ class MainFrame(wx.Frame):
         except ChannelPoisonException:
             return
 
-    def OnStepTrace(self, event):
+    def OnStepTrace(self, event=None):
         self.OnUpdate()
 
     def OnPlayTrace(self, event):
@@ -350,14 +410,14 @@ class MainFrame(wx.Frame):
         
         # Try to fetch new image
         try:
-            g, update = Alternation([(self.get_image, None), (Skip(), None)]).select()
+            g, update = Alternation([(self.get_image, None), (Timeout(seconds=1.0), None)]).select()
         except ChannelPoisonException:
             return
 
         # Got image
         if g == self.get_image:
             
-            self.current_dot_file, img, trace_output = update
+            self.current_dot_file, img, trace_output, frame_index = update
 
             # Print traced stdout
             if trace_output:
@@ -378,13 +438,15 @@ class MainFrame(wx.Frame):
                               y + (h - bmp.GetHeight()) / 2, True)
                 dc.EndDrawing()
 
+                str_index_tpl = '00000000'
+                str_index_real = str(frame_index)
+                str_index = str_index_tpl[:-1*(len(str_index_real))]+str_index_real
+                self.txtFrame.SetValue(str_index)
+
                 if self.export != '':
-                    file_template = 'img00000000'
-                    str_index = str(self.frame_index)
-                    f = open(self.export + '/' + file_template[:-1*(len(str_index))]+str_index+'.gif', 'w')
+                    f = open(self.export + '/' + 'img'+str_index+'.gif', 'w')
                     f.write(img)
                     f.close()
-                self.frame_index += 1
 
 
         if self.stateBtnPlay == 'play':
@@ -637,6 +699,7 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
     
     theme = [THEMES[0]]
     size = [(6,6)]
+    skip_frames = [0]
 
     @choice
     def update_setup(channel_input):
@@ -654,6 +717,10 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
                 ids.append(id)
                 labels.append(label)
             send_node_data((ids,labels))
+        elif cmd[0] == 'skip_frames':
+            skip_frames[0] += cmd[1]
+
+    frame_index = 0
 
     while True:
         g = None
@@ -662,41 +729,47 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
                     (send_objects, (trace_processes, trace_channels, trace_output), None),
                     (get_setup, update_setup())
                     ]).execute()
+
         (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects() 
   
         if CHANGE_LEVEL > 1:
+            frame_index += 1
             
-            next = False
-            while (not next):
+            if skip_frames[0] > 0:
+                skip_frames[0] -= 1
+            else:
 
-                new_dot_file_1 = "digraph G {\nsize=\""+str(size[0][0])+","+str(size[0][1])+"\";\nbgcolor=\""+theme[0]['Background2']+"\";\nfontcolor=\""+theme[0]['FontColor']+"\";\ncolor=\""+theme[0]['FrameColor']+"\";\n"
+                next = False
+                while (not next):
 
-                contents = []
+                    new_dot_file_1 = "digraph G {\nsize=\""+str(size[0][0])+","+str(size[0][1])+"\";\nbgcolor=\""+theme[0]['Background2']+"\";\nfontcolor=\""+theme[0]['FontColor']+"\";\ncolor=\""+theme[0]['FrameColor']+"\";\n"
 
-                if trace_processes.has_key('__main__'):
-                    contents.extend(trace_processes['__main__'].to_dot(theme=theme[0]))
+                    contents = []
 
-                for chan in trace_channels.values():
-                    contents.extend(chan.to_dot(theme=theme[0]))
+                    if trace_processes.has_key('__main__'):
+                        contents.extend(trace_processes['__main__'].to_dot(theme=theme[0]))
 
-                new_dot_file_2 = "\n}"
+                    for chan in trace_channels.values():
+                        contents.extend(chan.to_dot(theme=theme[0]))
 
-                g, cmd = Alternation([
-                            (send_dotfile, (new_dot_file_1 + "\n".join(contents) + new_dot_file_2, trace_output), None),
-                            (get_setup, update_setup()) 
-                            ]).execute()
+                    new_dot_file_2 = "\n}"
 
-                if (g == send_dotfile):
-                    next = True
-                    trace_output = []
-                
-                    
+                    g, cmd = Alternation([
+                                (send_dotfile, (new_dot_file_1 + "\n".join(contents) + new_dot_file_2, trace_output, frame_index), None),
+                                (get_setup, update_setup()) 
+                                ]).execute()
+
+                    if (g == send_dotfile):
+                        next = True
+                        trace_output = []
+
+                                
 
 @process
 def RunDot2gifParser(get_dotfile, send_image, get_setup):
     zoom_param = ''
     while True:
-        dotfile, trace_output = get_dotfile()        
+        dotfile, trace_output, frame_index = get_dotfile()        
         while (dotfile != None):
             if zoom_param != '':
                 p = subprocess.Popen((DOT, '-Tgif', zoom_param), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -708,7 +781,7 @@ def RunDot2gifParser(get_dotfile, send_image, get_setup):
                 sys.stderr.write(stderr)
 
             g, cmd = Alternation([
-                    (send_image,(dotfile, giffile, trace_output), None),
+                    (send_image,(dotfile, giffile, trace_output, frame_index), None),
                     (get_setup,None)
                     ]).select()
             if g == send_image: 

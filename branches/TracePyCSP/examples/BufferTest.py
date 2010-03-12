@@ -1,4 +1,7 @@
 from pycsp_import import *
+from pycsp.common.trace import *
+
+TraceInit()
 
 A = Channel('fisk', buffer=10)
 
@@ -19,3 +22,5 @@ def P2(cin):
 Parallel(P1(A.writer()), P2(A.reader()))
 
 
+
+TraceQuit()

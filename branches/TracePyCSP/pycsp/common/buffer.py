@@ -124,7 +124,11 @@ class BufferedChannel:
 
     def __neg__(self):
         return self.writer()
-    
+
+    def poison(self):
+        self.__inChan.poison()
+        self.__outChan.poison()
+
     @pycsp.process
     def Buffer(self, cin, cout, N):
         queue = deque()
