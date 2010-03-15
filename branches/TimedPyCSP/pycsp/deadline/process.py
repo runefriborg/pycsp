@@ -7,7 +7,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 import pycsp.greenlets.process
-from scheduling import RT_Scheduler
+from scheduling import RT_Scheduler,Now
 from pycsp.greenlets.const import *
 # Decorators
 def process(func):
@@ -70,9 +70,18 @@ def current_process_id():
 
 
 def Set_deadline(value):
-    RT_Scheduler().current.deadline = value
-    RT_Scheduler().current.priority = value
+    now = Now()
+    RT_Scheduler().current.deadline = value+now
+    RT_Scheduler().current.priority = value+now
     RT_Scheduler().current.has_priority = True
+
+def Remove_deadline():
+    RT_Scheduler().current.deadline = None
+    RT_Scheduler().current.priority = None
+    RT_Scheduler().current.has_priority = False
+        
+def Get_deadline():
+    return RT_Scheduler().current.deadline
 
 # Run tests
 process.__doc = pycsp.greenlets.process.__doc__

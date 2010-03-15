@@ -36,9 +36,12 @@ import pycsp.greenlets.scheduling
 from pycsp.greenlets.const import *
 
 class DeadlineException(Exception): 
-    def __init__(self):
-        pass
-
+    def __init__(self,process):
+        deadline = process.deadline
+        process.deadline = None
+        process.deadline = None
+        process.priority = None
+        process.has_priority = False
 
 def Now():
   return time.time() 
@@ -206,7 +209,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 _,self.current = heapq.heappop(self.next)
                 logging.debug("main:switching to next %s"%self.current)
                 if self.current.deadline<Now():
-                    self.current.greenlet.throw(DeadlineException)
+                    self.current.greenlet.throw(DeadlineException, self.current)
                 self.current.greenlet.switch()
             elif self.no_priority:
                 if len(self.no_priority) > 1000:
