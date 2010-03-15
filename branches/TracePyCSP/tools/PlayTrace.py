@@ -9,9 +9,6 @@ Requires:
   wxPython 2.8+
   PyCSP
 
-The DrawFrame class has been based on the FloatCanvas.py demo from the wxPython
-package written by Chris Barker <Chris.Barker@noaa.gov>.
-
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 Permission is hereby granted, free of charge, to any person obtaining
@@ -701,6 +698,8 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
     size = [(6,6)]
     skip_frames = [0]
 
+    frame_index = 0
+
     @choice
     def update_setup(channel_input):
         cmd = channel_input
@@ -719,50 +718,63 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
             send_node_data((ids,labels))
         elif cmd[0] == 'skip_frames':
             skip_frames[0] += cmd[1]
+        
 
-    frame_index = 0
+    def create_dot_file(size, theme, trace_processes, trace_channels):
+        header = "digraph G {\n"
+        header += "size=\""+str(size[0])+","+str(size[1])+"\";\n"
+        header += "bgcolor=\""+theme['Background2']+"\";\n"
+        header += "fontcolor=\""+theme['FontColor']+"\";\n"
+        header += "color=\""+theme['FrameColor']+"\";\n"
 
-    while True:
+        contents = []
+
+        if trace_processes.has_key('__main__'):
+            contents.extend(trace_processes['__main__'].to_dot(theme=theme))
+
+        for chan in trace_channels.values():
+            contents.extend(chan.to_dot(theme=theme))
+            
+        return header + "\n".join(contents) + "\n}"
+
+
+    def send_dot_file(dot, trace_output, frame_index):
         g = None
-        while (g != send_objects):
-            (g, msg) = Alternation([
-                    (send_objects, (trace_processes, trace_channels, trace_output), None),
-                    (get_setup, update_setup())
+        while (g != send_dotfile):
+            g, cmd = Alternation([
+                    (send_dotfile, (dot, trace_output, frame_index), None),
+                    (get_setup, update_setup()) 
                     ]).execute()
 
-        (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects() 
-  
-        if CHANGE_LEVEL > 1:
-            frame_index += 1
-            
-            if skip_frames[0] > 0:
-                skip_frames[0] -= 1
-            else:
 
-                next = False
-                while (not next):
+    try:
+        while True:
+            g = None
+            while (g != send_objects):
+                (g, msg) = Alternation([
+                        (send_objects, (trace_processes, trace_channels, trace_output), None),
+                        (get_setup, update_setup())
+                        ]).execute()
 
-                    new_dot_file_1 = "digraph G {\nsize=\""+str(size[0][0])+","+str(size[0][1])+"\";\nbgcolor=\""+theme[0]['Background2']+"\";\nfontcolor=\""+theme[0]['FontColor']+"\";\ncolor=\""+theme[0]['FrameColor']+"\";\n"
+            (trace_processes, trace_channels, trace_output, CHANGE_LEVEL) = get_objects() 
 
-                    contents = []
+            if CHANGE_LEVEL > 1:
+                frame_index += 1
 
-                    if trace_processes.has_key('__main__'):
-                        contents.extend(trace_processes['__main__'].to_dot(theme=theme[0]))
+                if skip_frames[0] > 0:
+                    skip_frames[0] -= 1
+                else:
+                    dot = create_dot_file(size[0], theme[0], trace_processes, trace_channels)
+                    send_dot_file(dot, trace_output, frame_index)
+                    trace_output = []
 
-                    for chan in trace_channels.values():
-                        contents.extend(chan.to_dot(theme=theme[0]))
-
-                    new_dot_file_2 = "\n}"
-
-                    g, cmd = Alternation([
-                                (send_dotfile, (new_dot_file_1 + "\n".join(contents) + new_dot_file_2, trace_output, frame_index), None),
-                                (get_setup, update_setup()) 
-                                ]).execute()
-
-                    if (g == send_dotfile):
-                        next = True
-                        trace_output = []
-
+    except ChannelPoisonException:
+        # End of trace file
+        # Sending last state
+        dot = create_dot_file(size[0], theme[0], trace_processes, trace_channels)
+        send_dot_file(dot, trace_output, frame_index)
+        
+        raise ChannelPoisonException
                                 
 
 @process
