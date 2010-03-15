@@ -7,14 +7,27 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-from pycsp.greenlets.channel import Channel as greenletsChannel
-from scheduling import RT_Scheduler
+from pycsp.greenlets.channel import Channel as greenletsChannel, ChannelReq as greenletsChannelReq
+from scheduling import RT_Scheduler,DeadlineException,Now
 from pycsp.greenlets.const import *
 
 class Channel(greenletsChannel):
     def __init__(self, name=None):
         greenletsChannel.__init__(self,name)
         self.s = RT_Scheduler()
+      
+    def _read(self):
+        msg  = greenletsChannel._read(self)
+        if self.s.current.has_priority and self.s.current.deadline<Now():
+            raise DeadlineException(self.s.current)
+        return msg
+
+    def _write(self,msg):
+        returnvalue =  greenletsChannel._write(self,msg)
+        if self.s.current.has_priority and self.s.current.deadline<Now():
+            raise DeadlineException(self.s.current)
+        return returnvalue
+
 
 # Run tests
 Channel.__doc__ = greenletsChannel.__doc__
