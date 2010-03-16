@@ -9,20 +9,27 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import pycsp.greenlets.alternation
 from scheduling import RT_Scheduler, Now,DeadlineException
+from pycsp.greenlets.const import *
 
 class Alternation(pycsp.greenlets.Alternation):
     def __init__(self,guards):
         pycsp.greenlets.Alternation.__init__(self,guards)
         self.s = RT_Scheduler()
+        # Default is to go one up in stackframe. 
+        # But we need one more because of inherince
+        #self.execute_frame = -1
+
 
     def choose(self):
+        #logging.warning("deadline choose")
         msg = pycsp.greenlets.Alternation.choose(self)
         if self.s.current.has_priority and self.s.current.deadline<Now():
             raise DeadlineException(self.s.current)
         return msg
-
-    def execute(self):
-        msg = pycsp.greenlets.Alternation.execute(self)
+        
+    def select(self):
+        logging.warning("deadline select")
+        msg = pycsp.greenlets.Alternation.select(self)
         if self.s.current.has_priority and self.s.current.deadline<Now():
             raise DeadlineException(self.s.current)
         return msg

@@ -37,11 +37,14 @@ from pycsp.greenlets.const import *
 
 class DeadlineException(Exception): 
     def __init__(self,process):
-        deadline = process.deadline
-        process.deadline = None
+        self.priority = process.priority
+        self.deadline = process.deadline
+        self.deadline_passed_by = Now()-self.deadline
         process.deadline = None
         process.priority = None
         process.has_priority = False
+    def __str__(self):
+        return "DeadlineException: \n\tpriority: %f\n\tdeadline: %f\n\tdeadline_passed_by:%f"%(self.priority,self.deadline,self.deadline_passed_by)
 
 def Now():
   return time.time() 
@@ -199,7 +202,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
     # Queues are new, next, timers and "blocking io counter"
     # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
     def main(self):
-        logging.debug("entering main, current:%s"%self.current)
+        logging.debug("entering Deadline main, current:%s"%self.current)
         while True:
             if self.timers and self.timers[0][0] < time.time():
                 _,process = heapq.heappop(self.timers)
@@ -208,7 +211,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 # Pop from the beginning
                 _,self.current = heapq.heappop(self.next)
                 logging.debug("main:switching to next %s"%self.current)
-                if self.current.deadline<Now():
+                if self.current.has_priority and self.current.deadline<Now():
                     self.current.greenlet.throw(DeadlineException, self.current)
                 self.current.greenlet.switch()
             elif self.no_priority:
@@ -226,6 +229,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
             self.cond.acquire()
             logging.debug("Aquired")
             if not (self.next or self.no_priority):
+                logging.debug("enter critical region")
                 # Waiting on blocking processes or all processes have finished!
                 if self.timers:
                     # Set timer to lowest activation time
@@ -249,9 +253,10 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 else:
                     # Execution finished!
                     self.cond.release()
+                    logging.debug("exiting scheduler")
                     return
             self.cond.release()
-                
+            logging.debug("taking another round")    
 
     # Join is called from _parallel and will block the greenlet until
     # greenlet processes has been executed.
@@ -275,19 +280,19 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
     # Get next greenlet available for scheduling
     def getNext(self):
-        if self.no_priority:
+        if self.next:
+            # Quick choice
+            #print "choosing a next",self.next
+            logging.debug("getNext returns from next")
+            _,self.current = heapq.heappop(self.next)
+            return self.current
+        elif self.no_priority:
             # Returning scheduler, to avoid exceeding the recursion limit.
             # All new greenlets must be started from the scheduler, to have the
             # scheduler as parent greenlet.
             # Switch to main loop
             logging.debug("getNext returns scheduler")
             return self
-        elif self.next:
-            # Quick choice
-            #print "choosing a next",self.next
-            logging.debug("getNext returns from next")
-            _,self.current = heapq.heappop(self.next)
-            return self.current
         else:
             # Some processes are blocking, are in timers or all have been executed.
             # Switch to main loop.
