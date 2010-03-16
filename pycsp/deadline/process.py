@@ -58,10 +58,33 @@ def _parallel(plist, block = True):
         p.start()
 
     s = RT_Scheduler()
+    logging.debug("deadline - adding processes")
     s.addBulk(processes)
 
     if block:
         s.join(processes)
+
+def Sequence(*plist):
+    """ Sequence(P1, [P2, .. ,PN])
+    """
+    logging.debug("deadline, running i sequence")
+    processes=[]
+    for p in plist:
+        if type(p)==list:
+            for q in p:
+                processes.append(q)
+        else:
+            processes.append(p)
+
+    # Wrap processes to be able to schedule greenlets.
+    def WrapP():
+        for p in processes:
+            # Call Run directly instead of start() and join() 
+            logging.debug("Running proces: %s",p)
+            p.run()
+    Parallel(Process(WrapP))
+
+
 
 def current_process_id():
     s = RT_Scheduler()
