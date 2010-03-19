@@ -20,15 +20,16 @@ class Alternation(pycsp.greenlets.Alternation):
         #self.execute_frame = -1
 
 
-    def choose(self):
-        #logging.warning("deadline choose")
+    def choose(self):        
+        logging.debug("deadline choose")
         msg = pycsp.greenlets.Alternation.choose(self)
+        
         if self.s.current.has_priority and self.s.current.deadline<Now():
             raise DeadlineException(self.s.current)
         return msg
         
     def select(self):
-        logging.warning("deadline select")
+        logging.debug("deadline select")
         msg = pycsp.greenlets.Alternation.select(self)
         if self.s.current.has_priority and self.s.current.deadline<Now():
             raise DeadlineException(self.s.current)
