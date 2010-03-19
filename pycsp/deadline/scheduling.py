@@ -34,10 +34,11 @@ import time
 import heapq
 import pycsp.greenlets.scheduling
 from pycsp.greenlets.const import *
+import showtree
 
 class DeadlineException(Exception): 
     def __init__(self,process):
-        self.priority = process.priority
+        self.priority = process.internal_priority
         self.deadline = process.deadline
         self.deadline_passed_by = Now()-self.deadline
         process.deadline = None
@@ -58,8 +59,13 @@ def Wait(seconds):
     p.greenlet.switch()
     while Now()<t:
       p = RT_Scheduler().getNext() 
-      logging.warning("Wait did not wait correct.Now:%d, should wait until: %d ,swicthing from %s to %s"%(Now(),t,Simulation().current, p))
+      #logging.warning("Wait did not wait correct.Now:%f, should wait until: %f"%(Now(),t))
       p.greenlet.switch()
+
+def Release():
+    RT_Scheduler().activate(RT_Scheduler().current)
+    RT_Scheduler().greenlet.switch()
+      
 
 # Decorators
 def io(func):
@@ -186,12 +192,12 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
     # Add a list of processes onto the new list.
     def addBulk(self, processes):
-        logging.debug("Adding Bulk of processes:%s",processes)
+        logging.debug("Adding Bulk of processes:\n\t%s",processes)
         for process in processes:
             self.activate(process)
 
     def activate(self, process):
-        logging.debug("Proces: %s",process)
+        logging.debug("Proces:\n\t%s",process)
         if process.has_priority:
             heapq.heappush(self.next,(process.internal_priority,process))
         else:
@@ -202,16 +208,19 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
     # Queues are new, next, timers and "blocking io counter"
     # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
     def main(self):
-        logging.debug("entering Deadline main, current:%s"%self.current)
+        logging.debug("entering Deadline main, current process:\n\t%s"%self.current)
         while True:
             if self.timers and self.timers[0][0] < time.time():
                 _,process = heapq.heappop(self.timers)
                 self.activate(process)
             elif self.next:
                 # Pop from the beginning
+                #print "\nSHOWTREE next\n"
+                #showtree.show_tree(self.next)
                 _,self.current = heapq.heappop(self.next)
-                logging.debug("main:switching to next %s"%self.current)
+                logging.debug("main:switching to next process\n\t%s"%self.current)
                 if self.current.has_priority and self.current.deadline<Now():
+                    logging.debug("Throwing deadline exception")
                     self.current.greenlet.throw(DeadlineException, self.current)
                 self.current.greenlet.switch()
             elif self.no_priority:
@@ -221,7 +230,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 else:
                     # Pop from beginning to be more fair
                     self.current = self.no_priority.pop(0)
-                logging.debug("main:switching to new %s"%self.current)
+                logging.debug("main:switching to no_priority process \n\t%s"%self.current)
                 self.current.greenlet.switch()
             # We enter a critical region, since timer threads or blocking io threads,
             # might try to update the internal queues.

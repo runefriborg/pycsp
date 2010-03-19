@@ -7,8 +7,10 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 import pycsp.greenlets.process
+import pycsp.greenlets.channelend
 from scheduling import RT_Scheduler,Now
 from pycsp.greenlets.const import *
+
 # Decorators
 def process(func):
     def _call(*args, **kwargs):
@@ -25,12 +27,18 @@ class Process(pycsp.greenlets.Process):
         self.deadline = None
         self.internal_priority = 0
         self.has_priority = False
+        logging.warning("args: %s"%args)
+        logging.warning("args: %s"%kwargs)
+        for arg in args:
+            if isinstance(arg, pycsp.greenlets.channelend.ChannelEndRead):
+                arg.channel._addReaderProcess(self)
 
     def __repr__(self):
-        return "%s%s\n\tstate:\t\t\t%s\n\texecuted:\t\t%s\n\toptional_priotity:\t%s\n\thas_priority:\t\t%s"%(
-        self.fn, self.args, state[self.state], self.executed,self.optional_priotity,self.has_priority)
-    
-    
+        #return "%s\n\tstate:\t\t\t%s\n\texecuted:\t\t%s\n\toptional_priotity:\t%s\n\thas_priority:\t\t%s"%(
+        #self.fn, state[self.state], self.executed,self.optional_priotity,self.has_priority)
+        #, self.args
+        return "%s"%self.fn
+
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
         return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
@@ -92,15 +100,18 @@ def current_process_id():
     return g.id
 
 
-def Set_deadline(value):
+def Set_deadline(value,process=None):
+    if  process == None:
+        process = RT_Scheduler().current
     now = Now()
-    RT_Scheduler().current.deadline = value+now
-    RT_Scheduler().current.priority = value+now
-    RT_Scheduler().current.has_priority = True
+    process.deadline = value+now
+    process.internal_priority = value+now
+    process.has_priority = True
+
 
 def Remove_deadline():
     RT_Scheduler().current.deadline = None
-    RT_Scheduler().current.priority = None
+    RT_Scheduler().current.internal_priority = None
     RT_Scheduler().current.has_priority = False
         
 def Get_deadline():

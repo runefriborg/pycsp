@@ -23,7 +23,7 @@ os.environ['PYCSP'] = 'DEADLINE'
 
 # Imports
 #from pycsp.greenlets.scheduling import Io, io
-from scheduling import Io, io, Now, Wait, DeadlineException
+from scheduling import Io, io, Now, Wait, DeadlineException, Release
 from guard import Timeout, Skip
 from pycsp.greenlets.alternation import choice
 from alternation import Alternation
@@ -37,7 +37,7 @@ from process import process, Process, Parallel, Spawn, Sequence, current_process
 from buffer import BufferedChannel as Channel
 
 #from collection import Buffer
-#from showtree import *
+from showtree import *
 version = (0,6,2, 'deadline')
 
 def test_suite():
