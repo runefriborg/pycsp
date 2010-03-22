@@ -88,7 +88,7 @@ class Process():
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):
-        logging.debug("notify: from state  %s to %s. force %s. current process in scheduler: %s. self:%s"%(state[self.state],state[new_state],force,self.s.current,self))
+        logging.debug("notify: from state  %s to %s. force %s. current process in scheduler: \n\t%s\n\t self:\n\t%s"%(state[self.state],state[new_state],force,self.s.current,self))
         self.state = new_state
     
         # Only activate, if we are activating someone other than ourselves
@@ -248,6 +248,7 @@ def _parallel(plist, block = True):
 def Sequence(*plist):
     """ Sequence(P1, [P2, .. ,PN])
     """
+    logging.debug("greenlets, SEquence")
     processes=[]
     for p in plist:
         if type(p)==list:

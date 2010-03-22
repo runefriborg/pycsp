@@ -28,7 +28,6 @@ import inspect
 import types
 from channel import ChannelPoisonException, ChannelRetireException, ChannelReq 
 from scheduling import Scheduler
-from header import *
 from const import *
 
 # Decorators
@@ -138,6 +137,7 @@ class Alternation:
             self.execute_frame = steps
 
     def choose(self):
+        logging.debug("greenlets choose")
         reqs={}
         self.s.current.setstate(ACTIVE)
         try:
@@ -248,17 +248,21 @@ class Alternation:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe()
                 steps = self.execute_frame
+                #logging.warning("steps:%s"%steps)
                 while (steps < 0):
+                    #code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
+                    #logging.warning("%s : %s"%(processframe,code))
                     processframe = processframe.f_back
                     steps += 1
-                
+                #logging.warning(processframe)
                 # Compile source provided in a string.
                 code = compile(action,processframe.f_code.co_filename + ' line ' + str(processframe.f_lineno) + ' in string' ,'exec')
                 f_globals = processframe.f_globals
                 f_locals = processframe.f_locals
+                #logging.warning("alternation:\n\tcode %s"%(code))
+                
                 if op==READ:
                     f_locals.update({'channel_input':req.msg})
-
                 # Execute action
                 exec(code, f_globals, f_locals)
 
