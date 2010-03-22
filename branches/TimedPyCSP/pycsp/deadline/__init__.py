@@ -30,7 +30,7 @@ from alternation import Alternation
 from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
 #from channel import Channel
 from pycsp.greenlets.channelend import retire, poison, IN, OUT
-from process import process, Process, Parallel, Spawn, Sequence, current_process_id, Set_deadline, Get_deadline, Remove_deadline
+from process import process, Process, Parallel, Spawn, Sequence, SetInherience, current_process_id, Set_deadline, Get_deadline, Remove_deadline
 
 
 # Buffered channel will fallback to the default Channel, if not buffered.

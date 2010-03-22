@@ -163,6 +163,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
     def __str__(self):
         return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tno_priority:\t%s\n\ttimers:\t%s\n\tnext:\t%s "%(self,self.current, self.blocking,self.no_priority,self.timers,self.next)
+
     def decompose(self):
       self.__Scheduler__instance = None
 
@@ -189,6 +190,20 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
         return cls.__instance
     getInstance = classmethod(getInstance)
+
+
+    def reschedule(self, p):
+        logging.warning("Reshedules %s\n. next Before:"%p)
+        #showtree.show_tree(self.next)
+        for i in xrange(len(self.next)):
+            if self.next[i][1] == p:
+                self.next.pop(i)
+                break
+        heapq.heapify(self.next)
+        self.activate(p)
+        logging.warning("Reshedule process. next After:")
+        #showtree.show_tree(self.next)
+
 
     # Add a list of processes onto the new list.
     def addBulk(self, processes):
@@ -219,8 +234,10 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 #showtree.show_tree(self.next)
                 _,self.current = heapq.heappop(self.next)
                 logging.debug("main:switching to next process\n\t%s"%self.current)
-                if self.current.has_priority and self.current.deadline<Now():
-                    logging.debug("Throwing deadline exception")
+                
+                if self.current.deadline and self.current.deadline<Now():                    
+                    logging.warning("has deadline: %s"%bool(self.current.deadline))
+                    logging.debug("Throwing deadline exception for proces %s"%self.current)
                     self.current.greenlet.throw(DeadlineException, self.current)
                 self.current.greenlet.switch()
             elif self.no_priority:

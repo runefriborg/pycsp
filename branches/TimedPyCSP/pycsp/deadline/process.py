@@ -8,7 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 import pycsp.greenlets.process
 import pycsp.greenlets.channelend
-from scheduling import RT_Scheduler,Now
+from scheduling import RT_Scheduler, Now
 from pycsp.greenlets.const import *
 
 # Decorators
@@ -22,22 +22,22 @@ class Process(pycsp.greenlets.Process):
     def __init__(self, fn, *args, **kwargs):
         pycsp.greenlets.Process.__init__(self,fn,*args,**kwargs)
         self.s = RT_Scheduler()
-        self.optional_priotity = 0
-        self.inherit_priotity = 0      
+        #self.optional_priotity = float("inf")
+        self.inherit_priotity = []     
         self.deadline = None
-        self.internal_priority = 0
+        self.internal_priority = float("inf")
         self.has_priority = False
-        logging.warning("args: %s"%args)
-        logging.warning("args: %s"%kwargs)
         for arg in args:
             if isinstance(arg, pycsp.greenlets.channelend.ChannelEndRead):
                 arg.channel._addReaderProcess(self)
+            if isinstance(arg, pycsp.greenlets.channelend.ChannelEndWrite):
+                arg.channel._addWriterProcess(self)
 
     def __repr__(self):
-        #return "%s\n\tstate:\t\t\t%s\n\texecuted:\t\t%s\n\toptional_priotity:\t%s\n\thas_priority:\t\t%s"%(
-        #self.fn, state[self.state], self.executed,self.optional_priotity,self.has_priority)
+        return "%s\n\tstate:\t\t\t%s\tdeadline:\t%s\n\texecuted:\t\t%s\tint. deadline:\t%s\n\thas_priority:\t\t%s,"%(
+        self.fn, state[self.state],self.deadline, self.executed,self.internal_priority, self.has_priority)
         #, self.args
-        return "%s"%self.fn
+        #return "%s"%self.fn
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
@@ -100,19 +100,50 @@ def current_process_id():
     return g.id
 
 
+def _set_absolute_priority(value,process):    
+    process.internal_priority = value
+    process.inherit_priotity.append(value)
+    process.has_priority = True
+
 def Set_deadline(value,process=None):
     if  process == None:
         process = RT_Scheduler().current
-    now = Now()
-    process.deadline = value+now
-    process.internal_priority = value+now
-    process.has_priority = True
+    process.deadline = value+Now()
+    _set_absolute_priority(process.deadline,process)
 
-
-def Remove_deadline():
-    RT_Scheduler().current.deadline = None
-    RT_Scheduler().current.internal_priority = None
-    RT_Scheduler().current.has_priority = False
+def SetInherience(process):
+    current_process = RT_Scheduler().current
+    new_value = min(process.internal_priority,current_process.internal_priority)
+    logging.warning("process %s\n raises priority for %s"%(current_process, process))
+    _set_absolute_priority(new_value,process)
+    logging.warning("reschedules process")
+    RT_Scheduler().reschedule(process)
+    
+def ResetInherience(process):
+    if process.state != 1:
+        logging.warning("Resetting inherience for %s"%process)
+        process.inherit_priotity.pop(-1)
+        if len(process.inherit_priotity):
+            new_value = process.inherit_priotity[-1]    
+            logging.warning("reset priorty from %f to %f"%(process.internal_priority,new_value))
+            logging.warning("Setting absolute deadline")
+            _set_absolute_priority(new_value,process)
+        else:
+            Remove_deadline(process)
+        logging.warning("reschedules process")
+        RT_Scheduler().reschedule(process)
+    
+    
+def Remove_deadline(process=None):
+    if  process == None:
+        process = RT_Scheduler().current
+    if process.state != 1:
+        process.deadline = None
+        process.internal_priority = float("inf")
+        process.inherit_priotity = []     
+        process.has_priority = False
+        logging.warning("Removing deadline for\n%s"%process)
+    
         
 def Get_deadline():
     return RT_Scheduler().current.deadline
