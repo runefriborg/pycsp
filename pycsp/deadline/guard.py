@@ -36,7 +36,6 @@ class Timeout(pycsp.greenlets.Timeout):
         # Start process
         self.p = Process(self.expire)
         
-        self.p.optional_priotity = self.parentprocess.optional_priotity
         self.p.inherit_priotity = self.parentprocess.inherit_priotity
         self.p.deadline = self.parentprocess.deadline
         self.p.internal_priority = self.parentprocess.internal_priority
