@@ -34,7 +34,7 @@ import uuid
 class BufferedChannel(object):
 
     def __new__(cls, *args, **kargs):
-        logging.warning("GREENLETS BUFFER")
+        logging.debug("GREENLETS BUFFER")
         if kargs.has_key('buffer') and kargs['buffer'] > 0:
             return object.__new__(cls)
         else:

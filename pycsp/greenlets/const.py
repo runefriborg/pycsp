@@ -6,13 +6,13 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 import logging, sys
-logging.basicConfig(level=logging.WARNING,
+logging.basicConfig(level=logging.debug,
     format=' %(levelname)s:%(filename)s:%(lineno)d: %(message)s'
   )
 
-h1 = logging.StreamHandler(sys.stdout)
-rootLogger = logging.getLogger()
-rootLogger.addHandler(h1)
+#h1 = logging.StreamHandler(sys.stdout)
+#rootLogger = logging.getLogger()
+#rootLogger.addHandler(h1)
 
 #console_logger.setFormatter(logging.Formatter(SYSLOG_FORMAT))logging.StreamHandler('/dev/stdout')
 

@@ -39,8 +39,12 @@ class ChannelReq:
         self.result = FAIL
         self.process = process
 
+    def __str__(self):
+            return "ChannelReq: msg: %s,\tresult: %s,\t%s"%(self.msg,self.result,"")
+
     def poison(self):
         if self.result != SUCCESS:
+            logging.warning("poison")
             self.result = POISON
             self.process.notify(POISON)
 
@@ -107,13 +111,15 @@ class Channel:
         self.s = Scheduler()
         #logging.warning("init greenletsChannel %s"%self.s)
         
-    def check_termination(self):        
+    def check_termination(self): 
+        logging.debug("check_termnation")       
         if self.ispoisoned:
             raise ChannelPoisonException()
         if self.isretired:
             raise ChannelRetireException()
 
     def _read(self):
+        logging.debug("_read")
         self.check_termination()
 
         p = self.s.current
@@ -194,19 +200,20 @@ class Channel:
         self.writequeue.remove(req)
 
     def match(self):
-        logging.debug("in offer read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
+        logging.debug("in match read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
         if self.readqueue and self.writequeue:
             for w in self.writequeue:
                 for r in self.readqueue:
-                    logging.debug("in loop")
+                    #logging.debug("in loop")
                     if w.offer(r):
-                        logging.debug("Did an offer")
+                        #logging.debug("Did an offer")
                         # Did an offer
                         # We can guarantee, that there will always be someone to call offer,
                         # since everything is run in a single thread. Thus we break the loop.
                         return
 
     def poison(self):
+        logging.debug("poison channel")
         if not self.ispoisoned:
             self.ispoisoned = True
             map(ChannelReq.poison, self.readqueue)

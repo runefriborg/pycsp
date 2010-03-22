@@ -201,7 +201,7 @@ class Scheduler(object):
         
     # Add a list of processes onto the new list.
     def addBulk(self, processes):
-        logging.debug("Adding Bulk of processes")
+        logging.debug("Adding Bulk of processes  -%s"%self)
         # We reverse the list of added processes, if the total amount of new processes exceeds 1000.
         if len(self.new) + len(processes) > 1000:
             processes.reverse()
@@ -213,7 +213,7 @@ class Scheduler(object):
     # Queues are new, next, timers and "blocking io counter"
     # Greenlets that are either executing, blocking on a channel or blocking on io is not in any lists.
     def main(self):
-        logging.debug("entering main, current:%s"%self.current)
+        logging.debug("entering greenlets main, current:%s"%self.current)
         while True:
             if self.timers and self.timers[0][0] < time.time():
                 _,self.current = heapq.heappop(self.timers)
@@ -266,6 +266,7 @@ class Scheduler(object):
     # Join is called from _parallel and will block the greenlet until
     # greenlet processes has been executed.
     def join(self, processes):
+        save_current = self.current
         if self.greenlet == greenlet.getcurrent():
             # Called from main greenlet
             self.main()
@@ -281,7 +282,8 @@ class Scheduler(object):
                     # p, not executed yet, switch to any waiting greenlet
                     self.getNext().greenlet.switch()
 
-
+        # Restore current
+        self.current = save_current
 
     # Get next greenlet available for scheduling
     def getNext(self):
