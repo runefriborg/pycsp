@@ -8,7 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 import pycsp.greenlets.process
 import pycsp.greenlets.channelend
-from scheduling import RT_Scheduler, Now
+from scheduling import RT_Scheduler, Now, DeadlineException
 from pycsp.greenlets.const import *
 
 # Decorators
@@ -33,6 +33,14 @@ class Process(pycsp.greenlets.Process):
             if isinstance(arg, pycsp.greenlets.channelend.ChannelEndWrite):
                 arg.channel._addWriterProcess(self)
 
+    def run(self):
+        try:
+            logging.debug("RT run")
+            pycsp.greenlets.Process.run(self)
+        except DeadlineException, e:
+            logging.debug("process got deadline, but ignore it")
+            pass
+    
     def __repr__(self):
         return "%s\n\tstate:\t\t\t%s\tdeadline:\t%s\n\texecuted:\t\t%s\tint. deadline:\t%s\n\thas_priority:\t\t%s,"%(
         self.fn, state[self.state],self.deadline, self.executed,self.internal_priority, self.has_priority)
@@ -114,23 +122,23 @@ def Set_deadline(value,process=None):
 def SetInherience(process):
     current_process = RT_Scheduler().current
     new_value = min(process.internal_priority,current_process.internal_priority)
-    logging.warning("process %s\n raises priority for %s"%(current_process, process))
+    logging.debug("process %s\n raises priority for %s"%(current_process, process))
     _set_absolute_priority(new_value,process)
-    logging.warning("reschedules process")
+    logging.debug("reschedules process")
     RT_Scheduler().reschedule(process)
     
 def ResetInherience(process):
     if process.state != 1:
-        logging.warning("Resetting inherience for %s"%process)
+        logging.debug("Resetting inherience for %s"%process)
         process.inherit_priotity.pop(-1)
         if len(process.inherit_priotity):
             new_value = process.inherit_priotity[-1]    
-            logging.warning("reset priorty from %f to %f"%(process.internal_priority,new_value))
-            logging.warning("Setting absolute deadline")
+            logging.debug("reset priorty from %f to %f"%(process.internal_priority,new_value))
+            logging.debug("Setting absolute deadline")
             _set_absolute_priority(new_value,process)
         else:
             Remove_deadline(process)
-        logging.warning("reschedules process")
+        logging.debug("reschedules process")
         RT_Scheduler().reschedule(process)
     
     
@@ -142,7 +150,7 @@ def Remove_deadline(process=None):
         process.internal_priority = float("inf")
         process.inherit_priotity = []     
         process.has_priority = False
-        logging.warning("Removing deadline for\n%s"%process)
+        logging.debug("Removing deadline for\n%s"%process)
     
         
 def Get_deadline():
