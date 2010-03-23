@@ -59,7 +59,7 @@ def Wait(seconds):
     p.greenlet.switch()
     while Now()<t:
       p = RT_Scheduler().getNext() 
-      #logging.warning("Wait did not wait correct.Now:%f, should wait until: %f"%(Now(),t))
+      #logging.debug("Wait did not wait correct.Now:%f, should wait until: %f"%(Now(),t))
       p.greenlet.switch()
 
 def Release():
@@ -98,7 +98,6 @@ def io(func):
     >>> time_start = time.time()
     >>> Parallel([P1() for i in range(10)])
     >>> diff = time.time() - time_start
-    >>> #logging.warning("diff:0.05 <=  %f < 0.6"%diff)
     >>> diff >= 0.05 and diff < 0.1
     True
     """
@@ -193,7 +192,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
 
     def reschedule(self, p):
-        logging.warning("Reshedules %s\n. next Before:"%p)
+        logging.debug("Reshedules %s\n. next Before:"%p)
         #showtree.show_tree(self.next)
         for i in xrange(len(self.next)):
             if self.next[i][1] == p:
@@ -201,7 +200,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 break
         heapq.heapify(self.next)
         self.activate(p)
-        logging.warning("Reshedule process. next After:")
+        logging.debug("Reshedule process. next After:")
         #showtree.show_tree(self.next)
 
 
@@ -236,7 +235,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 logging.debug("main:switching to next process\n\t%s"%self.current)
                 
                 if self.current.deadline and self.current.deadline<Now():                    
-                    logging.warning("has deadline: %s"%bool(self.current.deadline))
+                    logging.debug("has deadline: %s"%bool(self.current.deadline))
                     logging.debug("Throwing deadline exception for proces %s"%self.current)
                     self.current.greenlet.throw(DeadlineException, self.current)
                 self.current.greenlet.switch()
@@ -279,7 +278,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 else:
                     # Execution finished!
                     self.cond.release()
-                    logging.debug("exiting scheduler")
+                    logging.debug("exiting rt scheduler")
                     return
             self.cond.release()
             logging.debug("taking another round")    
@@ -306,6 +305,9 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
     # Get next greenlet available for scheduling
     def getNext(self):
+        import sys, traceback
+        #traceback.print_exc(file=sys.stdout)
+        #traceback.print_stack()
         if self.next:
             # Quick choice
             #print "choosing a next",self.next

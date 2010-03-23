@@ -109,6 +109,7 @@ class Alternation:
     """
     def __init__(self, guards):
         # Preserve tuple entries and convert dictionary entries to tuple entries
+        
         self.guards = []
         for g in guards:
             if type(g) == types.TupleType:
@@ -164,7 +165,7 @@ class Alternation:
                 else:
                     c.remove_write(req)
             raise e
-
+            
         # If noone have offered a channelrequest, we wait.
         self.s.current.wait()
         act=None

@@ -29,7 +29,6 @@ import types
 from scheduling import Scheduler
 from channel import ChannelPoisonException, ChannelRetireException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
-from header import *
 from const import *
 
 # Decorators
@@ -109,6 +108,7 @@ class Process():
     # Main process execution
     def run(self):
         try:
+            logging.debug("greenelt run")
             # Store the returned value from the process
             self.executed = False
             #logging.warning("%s ,%s"%(self.fn,self.args))

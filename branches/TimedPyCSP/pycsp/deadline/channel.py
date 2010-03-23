@@ -20,10 +20,12 @@ class Channel(greenletsChannel):
         self.s = RT_Scheduler()
       
     def _read(self):
+        logging.debug("_read: %s"%self)
         self.check_termination()
+        logging.debug("done check_termination")
         augment_inherience = False
         if self.s.current.has_priority and self.s.current.deadline>Now() and self.writerprocesses:
-            logging.warning("no writers are ready - will try to inherience %d writer"%len(self.writerprocesses))
+            logging.debug("no writers are ready - will try to inherience %d writer"%len(self.writerprocesses))
             augment_inherience = True
             for writer in self.writerprocesses:
                 SetInherience(writer)
@@ -31,7 +33,7 @@ class Channel(greenletsChannel):
         msg  = greenletsChannel._read(self)
 
         if augment_inherience:
-            logging.warning("will try to reset inherience")
+            logging.debug("will try to reset inherience")
             for writer in self.writerprocesses:
                 ResetInherience(writer)
         if self.s.current.deadline and self.s.current.deadline<Now():
@@ -40,16 +42,17 @@ class Channel(greenletsChannel):
 
     def _write(self,msg):
         #if writer has a priority an no readers are ready to read we augments the readers priority to speed up writer
+        logging.debug("_write: %s"%self)
         self.check_termination()
         augment_inherience = False
         if self.s.current.has_priority and self.s.current.deadline>Now() and self.readerprocesses:
-            logging.warning("no readers are ready - will try to inherience %d readers"%len(self.readerprocesses))
+            logging.debug("no readers are ready - will try to inherience %d readers"%len(self.readerprocesses))
             augment_inherience = True
             for reader in self.readerprocesses:
                 SetInherience(reader)
         returnvalue =  greenletsChannel._write(self,msg)
         if augment_inherience:
-            logging.warning("will try to reset inherience")
+            logging.debug("will try to reset inherience")
             for reader in self.readerprocesses:
                 ResetInherience(reader)
         
@@ -59,12 +62,14 @@ class Channel(greenletsChannel):
         return returnvalue
 
     def _addReaderProcess(self, process):
-        logging.warning("_addReaderProcess. self: %s\nprocess:%s",self,process)
+        logging.debug("_addReaderProcess. self: %s\nprocess:%s",self,process)
         self.readerprocesses.append(process)
 
     def _addWriterProcess(self, process):
-        logging.warning("_addWriterProcess. self: %s\nprocess:%s",self,process)
+        logging.debug("_addWriterProcess. self: %s\nprocess:%s",self,process)
         self.writerprocesses.append(process)
+
+
 
 # Run tests
 Channel.__doc__ = greenletsChannel.__doc__

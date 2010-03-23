@@ -30,6 +30,7 @@ from const import *
 # Exceptions
 class ChannelPoisonException(Exception): 
     def __init__(self):
+        logging.debug("creating posion exception")
         pass
 
 # Classes
@@ -43,10 +44,10 @@ class ChannelReq:
             return "ChannelReq: msg: %s,\tresult: %s,\t%s"%(self.msg,self.result,"")
 
     def poison(self):
-        if self.result != SUCCESS:
-            logging.warning("poison")
-            self.result = POISON
-            self.process.notify(POISON)
+            logging.debug("poison in ChannelReq")
+            if self.result != SUCCESS:
+                self.result = POISON
+                self.process.notify(POISON)
 
     def retire(self):
         if self.result != SUCCESS:
@@ -109,14 +110,16 @@ class Channel:
         self.isretired = False
 
         self.s = Scheduler()
-        #logging.warning("init greenletsChannel %s"%self.s)
+        #logging.debug("init greenletsChannel %s"%self.s)
         
     def check_termination(self): 
-        logging.debug("check_termnation")       
+        logging.debug("check_termnation. %s"%self)       
         if self.ispoisoned:
+            logging.debug("will raise poison exception")
             raise ChannelPoisonException()
         if self.isretired:
             raise ChannelRetireException()
+            
 
     def _read(self):
         logging.debug("_read")
@@ -155,7 +158,7 @@ class Channel:
         self.check_termination()
 
         p = self.s.current
-        #logging.warning("\n\n\nself.s %s, \nprocess is %s"%(self.s,p))
+        #logging.debug("\n\n\nself.s %s, \nprocess is %s"%(self.s,p))
         # If anyone is on the readqueue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
@@ -215,9 +218,15 @@ class Channel:
     def poison(self):
         logging.debug("poison channel")
         if not self.ispoisoned:
+            logging.debug("channel was not poisoned") 
             self.ispoisoned = True
             map(ChannelReq.poison, self.readqueue)
             map(ChannelReq.poison, self.writequeue)
+        import sys, traceback
+        #traceback.print_exc(file=sys.stdout)
+        #traceback.print_stack()
+        logging.debug("done poison")
+        
 
     def __pos__(self):
         return self.reader()
