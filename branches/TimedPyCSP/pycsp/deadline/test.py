@@ -392,24 +392,33 @@ class DeadlineTestCase(unittest.TestCase):
 
 #        @process
 #        def source(chan_out):
-#            pr("source")
-#            chan_out(True)
-#            pr("source done")
-#            Remove_deadline()
+#            try:
+#                pr("source")
+#                chan_out(True)
+#                pr("source done")
+#                Remove_deadline()
+#            except DeadlineException as e:
+#                self.assertTrue(False)
 #        
 #        @process
 #        def sink(chan_in):
-#            pr("sink")
-#            chan_in()          
-#            pr("sink done")
-#            Remove_deadline()
+#            try:
+#                pr("sink")
+#                chan_in()          
+#                pr("sink done")
+#                Remove_deadline()
+#            except DeadlineException as e:
+#                self.assertTrue(False)
 #        
 #        @process
 #        def middlepriority():
-#            pr("middle")
-#            time.sleep(4*self.deadline)
-#            pr("middle done")
-#            Remove_deadline()   
+#            try:
+#                pr("middle")
+#                time.sleep(4*self.deadline)
+#                pr("middle done")
+#                Remove_deadline()   
+#            except DeadlineException as e:
+#                self.assertTrue(False)
 #        print
 #        chan = Channel()
 
@@ -421,10 +430,13 @@ class DeadlineTestCase(unittest.TestCase):
 #        Set_deadline(3*self.deadline,p2)
 
 #        Set_deadline(2*self.deadline,p3)
-#        Parallel(p1,
-#                 p2,
-#                 p3)
-#                 
+#        try:
+#            Parallel(p1,
+#                     p2,
+#                     p3)
+#        except DeadlineException as e:
+#            self.assertTrue(False,e)
+#                  
 #    def test_Writer_Inheritance(self):
 #        def pr(value):
 #            print "\t-------------------------------------------------"
@@ -629,7 +641,7 @@ class DeadlineTestCase(unittest.TestCase):
 #                waittime = expovariate(1/self.deadline)-(0.3*self.deadline)
 #                Wait(waittime)
 #                val = chan_in()
-#                #print "Received one messages"
+#                print "Received one messages"
 #            retire(chan_in)
 #            
 #        @process 
@@ -712,49 +724,202 @@ class DeadlineTestCase(unittest.TestCase):
 #            1 * sink(+chan)
 #        )
 
-    def test_AlternationChoiseWriter(self):
-        @process
-        def sink1(chan_in):
-            try:
-                for i in range(self.iteration):
-                    Set_deadline(2*self.deadline)                    
-                    chan_in()
-                    Remove_deadline()
-                    #Wait(self.deadline)
-                retire(chan_in)
-            except ChannelRetireException:
-                pass
+#    def test_AlternationChoiseWriter(self):
+#        @process
+#        def sink1(chan_in):
+#            try:
+#                for i in range(self.iteration):
+#                    Set_deadline(2*self.deadline)                    
+#                    chan_in()
+#                    Remove_deadline()
+#                    #Wait(self.deadline)
+#                retire(chan_in)
+#            except ChannelRetireException:
+#                pass
 
+#        @process
+#        def sink2(chan_in):
+#            try:
+#                for i in range(self.iteration):
+#                    Set_deadline(self.deadline)                    
+#                    chan_in()
+#                    Remove_deadline()
+#                retire(chan_in)
+#            except ChannelRetireException:
+#                pass
+#               
+#        @process
+#        def source(chan_out, chan_out2):
+#            try:
+#                while True:
+#                    Wait(0.1*self.deadline)     
+#                    Alternation([
+#                        {(chan_out,True):"print'chan_out(True)'"},
+#                        {(chan_out2,True):"print' chan_out2(True)'"}
+#                    ]).execute()                       
+#            except ChannelRetireException:
+#                retire(chan_out, chan_out2)
+#                pass
+
+#        chan = Channel()
+#        chan2 = Channel()
+#        print ""
+#        Parallel(
+#            1 * sink1(+chan),
+#            1 * sink2(+chan2),
+#            1 * source(-chan,-chan2)
+#        )
+
+
+#    def test_AlternationChoiseReader(self):
+#        @process
+#        def source1(chan_out):
+#            try:
+#                for i in range(self.iteration):
+#                    Set_deadline(2*self.deadline)                    
+#                    chan_out("source1")
+#                    Remove_deadline()
+#                    Wait(self.deadline)
+#                retire(chan_out)
+#            except ChannelRetireException:
+#                pass
+
+#        @process
+#        def source2(chan_out):
+#            try:
+#                for i in range(self.iteration):
+#                    Set_deadline(self.deadline)                    
+#                    chan_out("source2")
+#                    Remove_deadline()
+#                retire(chan_out)
+#            except ChannelRetireException:
+#                pass
+#               
+#        @process
+#        def sink(chan_in, chan_in2):
+#            try:
+#                while True:
+#                    Wait(0.1*self.deadline)     
+#                    (g,msg) = Alternation([
+#                        (chan_in,None),
+#                        (chan_in2,None)
+#                    ]).select()
+#                    print "\t g:",g          
+#                    print "\t msg:",msg                       
+#             
+#            except ChannelRetireException:
+#                retire(chan_in, chan_in2)
+#                pass
+
+#        chan = Channel("chan")
+#        chan2 = Channel("chan2")
+#        print ""
+#        Parallel(
+#            1 * source1(-chan),
+#            1 * source2(-chan2),
+#            1 * sink(+chan,+chan2)
+#        )
+
+
+#    def test_ChoisemultipleWriter(self):
+#        @process
+#        def source1(chan_out):
+#            try:
+#                for i in range(self.iteration):
+#                    Set_deadline(2*self.deadline)                    
+#                    chan_out("source1")
+#                    Remove_deadline()
+#                    Wait(self.deadline)
+#                retire(chan_out)
+#            except ChannelRetireException:
+#                pass
+
+#        @process
+#        def source2(chan_out):
+#            try:
+#                for i in range(self.iteration):
+#                    Set_deadline(self.deadline)                    
+#                    chan_out("source2")
+#                    Remove_deadline()
+#                retire(chan_out)
+#            except ChannelRetireException:
+#                pass
+#               
+#        @process
+#        def sink(chan_in):
+#            try:
+#                while True:
+#                    Wait(0.1*self.deadline)     
+#                    print chan_in()
+#            except ChannelRetireException:
+#                retire(chan_in)
+#                pass
+
+#        chan = Channel("chan")
+#        print ""
+#        Parallel(
+#            1 * source1(-chan),
+#            1 * source2(-chan),
+#            1 * sink(+chan)
+#        )
+
+
+    def test_ChoisemultipleReader(self):
         @process
-        def sink2(chan_in):
-            try:
-                for i in range(self.iteration):
-                    Set_deadline(self.deadline)                    
-                    chan_in()
-                    Remove_deadline()
-                retire(chan_in)
-            except ChannelRetireException:
-                pass
-               
-        @process
-        def source(chan_out, chan_out2):
+        def sink(chan_in, deadline):
             try:
                 while True:
-                    Wait(0.1*self.deadline)     
-                    Alternation([
-                        {(chan_out,True):"print'chan_out(True)'"},
-                        {(chan_out2,True):"print' chan_out2(True)'"}
-                    ]).execute()                       
-            except ChannelRetireException:
-                retire(chan_out, chan_out2)
-                pass
+                    Set_deadline(deadline)                    
+                    chan_in()
+                    print "\t",deadline
+                    Remove_deadline()
+                    Wait(0.5*self.deadline)
+            except ChannelPoisonException:
+                print "\tgot poison"
 
-        chan = Channel()
-        chan2 = Channel()
+        @process
+        def source(chan_out):
+            Wait(0.1*self.deadline)     
+            for i in range(self.iteration):
+                chan_out(True)
+            poison(chan_out)
+            print "sent poison"
+
+
+        chan = Channel("chan")
         print ""
         Parallel(
-            1 * sink1(+chan),
-            1 * sink2(+chan2),
-            1 * source(-chan,-chan2)
+            1 * source(-chan),
+            1 * sink(+chan,self.deadline),
+            1 * sink(+chan,self.deadline*2)            
         )
 
+    def test_ChoisemultipleReader2(self):
+        @process
+        def sink(chan_in, deadline):
+            try:
+                while True:
+                    Set_deadline(deadline)                    
+                    chan_in()
+                    print "\t",deadline
+                    Remove_deadline()
+                    Wait(0.5*self.deadline)
+            except ChannelPoisonException:
+                print "\tgot poison"
+
+        @process
+        def source(chan_out):
+            Wait(0.1*self.deadline)     
+            for i in range(self.iteration):
+                chan_out(True)
+            poison(chan_out)
+            print "sent poison"
+
+
+        chan = Channel("chan")
+        print ""
+        Parallel(
+            1 * source(-chan),
+            1 * sink(+chan,self.deadline),
+            2 * sink(+chan,self.deadline*2)
+            )
