@@ -130,6 +130,7 @@ def SetInherience(process):
 def ResetInherience(process):
     if process.state != 1:
         logging.debug("Resetting inherience for %s"%process)
+        assert(len(process.inherit_priotity)>0)
         process.inherit_priotity.pop(-1)
         if len(process.inherit_priotity):
             new_value = process.inherit_priotity[-1]    
