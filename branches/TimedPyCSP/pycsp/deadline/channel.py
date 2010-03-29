@@ -12,6 +12,7 @@ from pycsp.greenlets.channel import Channel as greenletsChannel, ChannelReq as g
 from process import  SetInherience,ResetInherience
 from scheduling import RT_Scheduler,DeadlineException,Now
 from pycsp.greenlets.const import *
+import process
 
 class ChannelReq(greenletsChannelReq):
     def __init__(self, process, msg=None):
@@ -24,53 +25,56 @@ class Channel(greenletsChannel):
         #List of possible processes we can raise priority on to speed up communication
         self.readerprocesses = []
         self.writerprocesses = []
-        self.priority = []
-        self.priority.append(float("inf"))
+        #self.priority = []
+        #self.priority.append(float("inf"))
         self.s = RT_Scheduler()
     
     #Extend greenelt reader, but auguments channel priority, and will push augumentet priority to other processes
     def _read(self):
         logging.debug("_read: %s"%self)
         self.check_termination()
-        logging.debug("done check_termination")
-        augment_inherience = channel_inheritance = False
-        logging.warning(self.s.current.has_priority,self.writerprocesses, not self.s.current.deadline,self.s.current.deadline>Now())
+        augment_inherience = False
         if self.s.current.has_priority and self.writerprocesses and (not self.s.current.deadline or self.s.current.deadline>Now()) :
-            logging.warning("no writers are ready - will try to inherience %d writer"%len(self.writerprocesses))
-            channel_inheritance = True
-            #to increase performace dont increase to a lower priority as it has no effect 
-            if self.priority[-1]>self.s.current.internal_priority:
+                logging.debug("no writers are ready - will try to inherience %d writer"%len(self.writerprocesses))
+                #to increase performace dont increase to a lower priority as it has no effect 
+                #if self.priority() > self.s.current.internal_priority:
                 augment_inherience = True
                 for writer in self.writerprocesses:
                     SetInherience(writer)
-            self.priority.append(min(self.priority[-1],self.s.current.internal_priority))
 
         returnvalue =  greenletsChannel._read(self)
        
-        if channel_inheritance:
-            logging.debug("will try to reset inherience")
-            self.priority.pop()
-            if augment_inherience :
-                for writer in self.writerprocesses:
-                    ResetInherience(writer)
+        if augment_inherience :
+            for writer in self.writerprocesses:
+                ResetInherience(writer)
 
         if self.s.current.deadline and self.s.current.deadline<Now():
             raise DeadlineException(self.s.current)
         return  returnvalue
+        
+    def priority(self):       
+        logging.warning("\n\nreader: %s\nwriters:%s"%(self.readerprocesses, self.writerprocesses))
+        
+        minr = minw = process.Process("dummy")
+        if self.readerprocesses:
+            minr = min(self.readerprocesses,key=lambda obj: obj.internal_priority)
+        if self.writerprocesses:
+            minw = min(self.writerprocesses,key=lambda obj: obj.internal_priority)
+        logging.warning("\nmin: %s"%min(minr,minw))
+        return min(minr,minw,key=lambda obj: obj.internal_priority).internal_priority
 
     def _write(self,msg):
         #if writer has a priority an no readers are ready to read we augments the readers priority to speed up writer
         logging.debug("_write: %s"%self)
         self.check_termination()
         augment_inherience = False
-        logging.warning("%s and %s and (%s or %s)"%(self.s.current.has_priority,bool(self.readerprocesses), not self.s.current.deadline,self.s.current.deadline>Now()))
+        #logging.warning("%s and %s and (%s or %s)"%(self.s.current.has_priority,bool(self.readerprocesses), not self.s.current.deadline,self.s.current.deadline>Now()))
         if self.s.current.has_priority and self.readerprocesses and (not self.s.current.deadline or self.s.current.deadline>Now()):            
-            logging.warning("no readers are ready - will try to inherience %d readers"%len(self.readerprocesses))
-            augment_inherience = True
-            if self.priority[-1]>self.s.current.internal_priority:
+                logging.debug("no readers are ready - will try to inherience %d readers"%len(self.readerprocesses))
+                #if self.priority() > self.s.current.internal_priority:
+                augment_inherience = True
                 for reader in self.readerprocesses:
                     SetInherience(reader)
-            self.priority.append(min(self.priority[-1],self.s.current.internal_priority))
 
         returnvalue =  greenletsChannel._write(self,msg)
 
@@ -78,7 +82,7 @@ class Channel(greenletsChannel):
             logging.debug("will try to reset inherience")
             #print "\n\n\nResetting priority "
             #print self.priority
-            self.priority.pop()
+            #self.priority.pop()
             #print self.priority
             for reader in self.readerprocesses:
                 ResetInherience(reader)
@@ -101,7 +105,7 @@ class Channel(greenletsChannel):
             #if y == float("inf"):return -1
             #if x == float("inf"):return 1
             return cmp(x.process.internal_priority,y.process.internal_priority)
-        print "in match read: %d, write: %d"%(len(self.readqueue),len(self.writequeue))
+        logging.warning("read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
         if self.readqueue and self.writequeue:
             self.readqueue.sort(reqcmp)
             self.writequeue.sort(reqcmp)

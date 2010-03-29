@@ -186,7 +186,7 @@ class Channel:
         return None #Here we should handle that a read was cancled...
 
     def post_read(self, req):
-        logging.debug("in post_read")
+        logging.debug("greenlets post_read")
         self.check_termination()
         self.readqueue.append(req)
         self.match()

@@ -138,12 +138,14 @@ class Alternation:
             self.execute_frame = steps
 
     def choose(self):
-        logging.debug("greenlets choose")
+        logging.warning("deadline choose, guards: %s"%self.guards)
+
         reqs={}
         self.s.current.setstate(ACTIVE)
         try:
             idx = 0
             for prio_item in self.guards:
+                #logging.warning("%s,%s,%s"%prio_item)
                 if len(prio_item) == 3:
                     c, msg, action = prio_item
                     req = ChannelReq(self.s.current, msg=msg)
@@ -156,7 +158,7 @@ class Alternation:
                     op=READ
                 reqs[req]=(idx, c, op)
                 idx += 1
-
+            logging.warning("reqs: %s"%reqs) 
         except (ChannelPoisonException, ChannelRetireException) as e:
             for req in reqs.keys():
                 _, c, op = reqs[req]
@@ -171,6 +173,7 @@ class Alternation:
         act=None
         poison=False
         retire=False
+        logging.warning("reqs2: %s"%reqs) 
         for req in reqs.keys():
             _, c, op = reqs[req]
             if op==READ:
@@ -180,6 +183,7 @@ class Alternation:
 
             if req.result==SUCCESS:
                 act=req
+
             if req.result==POISON:
                 poison=True
             if req.result==RETIRE:
@@ -192,7 +196,13 @@ class Alternation:
                 raise ChannelRetireException()
 
         idx, c, op = reqs[act]
+        logging.warning("\n\tidx:%s,\n\tc: %s,\n\top: %s"%(idx,c,op))
+
         return (idx, act, c, op)
+
+
+#        idx, req, c, op = self.choose()
+#        return (c, req.msg)
 
     def execute(self):
         """
