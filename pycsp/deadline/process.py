@@ -55,6 +55,16 @@ class Process(pycsp.greenlets.Process):
     def __rmul__(self, multiplier):
         return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
+#    def __cmp__(self, other):
+#        #if other.internal_priority == float("inf"):return -1
+#        #if self.internal_priority == float("inf"):return 1
+#        if isinstance(other,None.__class__):
+#            if isinstance(self,None.__class__) : return 0
+#            else : return 1 
+#        if isinstance(self,None.__class__):
+#            return 1 
+#        return cmp(self.internal_priority,other.internal_priority)
+
 def Parallel(*plist):
     _parallel(plist, True)
 
@@ -154,8 +164,10 @@ def Remove_deadline(process=None):
         logging.debug("Removing deadline for\n%s"%process)
     
         
-def Get_deadline():
-    return RT_Scheduler().current.deadline
+def Get_deadline(process=None):
+    if  process == None:
+        process = RT_Scheduler().current
+    return process.deadline
 
 # Run tests
 process.__doc = pycsp.greenlets.process.__doc__
