@@ -17,6 +17,9 @@ import process
 class ChannelReq(greenletsChannelReq):
     def __init__(self, process, msg=None):
         greenletsChannelReq.__init__(self, process, msg=None)
+    def __str__(self):
+            return "ChannelReq: msg: %s,\tresult: %s,\t%s"%(self.msg,self.result,"")
+        
 
 
 class Channel(greenletsChannel):
@@ -52,16 +55,19 @@ class Channel(greenletsChannel):
             raise DeadlineException(self.s.current)
         return  returnvalue
         
-    def priority(self):       
-        logging.warning("\n\nreader: %s\nwriters:%s"%(self.readerprocesses, self.writerprocesses))
+    def Readpriority(self):       
+        minr = process.Process("dummy")
+        if self.readqueue:
+            minr = min(self.readqueue,key=lambda obj: obj.process.internal_priority).process
+        logging.debug("\nminReadQueue: %s"%minr)
+        return minr.internal_priority
         
-        minr = minw = process.Process("dummy")
-        if self.readerprocesses:
-            minr = min(self.readerprocesses,key=lambda obj: obj.internal_priority)
-        if self.writerprocesses:
+    def Writepriority(self):       
+        minw = process.Process("dummy")
+        if self.writequeue:
             minw = min(self.writerprocesses,key=lambda obj: obj.internal_priority)
-        logging.warning("\nmin: %s"%min(minr,minw))
-        return min(minr,minw,key=lambda obj: obj.internal_priority).internal_priority
+        logging.debug("\nminwriteQueue: %s"%minw)
+        return minw.internal_priority
 
     def _write(self,msg):
         #if writer has a priority an no readers are ready to read we augments the readers priority to speed up writer

@@ -33,13 +33,13 @@ class Process(pycsp.greenlets.Process):
             if isinstance(arg, pycsp.greenlets.channelend.ChannelEndWrite):
                 arg.channel._addWriterProcess(self)
 
-    def run(self):
-        try:
-            logging.debug("RT run")
-            pycsp.greenlets.Process.run(self)
-        except DeadlineException, e:
-            logging.debug("process got deadline, but ignore it")
-            pass
+    #def run(self):
+        #try:
+   #         logging.debug("RT run")
+   #         pycsp.greenlets.Process.run(self)
+        #except DeadlineException, e:
+        #    logging.debug("process got deadline, but ignore it")
+        #    pass
     
     def __repr__(self):
         return "%s\n\tstate:\t\t\t%s\tdeadline:\t%s\n\texecuted:\t\t%s\tint. deadline:\t%s\n\thas_priority:\t\t%s,"%(
@@ -128,17 +128,19 @@ def Set_deadline(value,process=None):
         process = RT_Scheduler().current
     process.deadline = value+Now()
     _set_absolute_priority(process.deadline,process)
+    logging.debug("Set deadline for process: %s"%process)
+
 
 def SetInherience(process):
     current_process = RT_Scheduler().current
     new_value = min(process.internal_priority,current_process.internal_priority)
-    logging.debug("process %s\n raises priority for %s"%(current_process, process))
     _set_absolute_priority(new_value,process)
+    logging.debug(" raised priority for %s"%(process))
     logging.debug("reschedules process")
     RT_Scheduler().reschedule(process)
     
 def ResetInherience(process):
-    if process.state != 1:
+    if process.state != 1 and process.inherit_priotity:
         logging.debug("Resetting inherience for %s"%process)
         assert(len(process.inherit_priotity)>0)
         process.inherit_priotity.pop(-1)
@@ -156,12 +158,13 @@ def ResetInherience(process):
 def Remove_deadline(process=None):
     if  process == None:
         process = RT_Scheduler().current
-    if process.state != 1:
-        process.deadline = None
-        process.internal_priority = float("inf")
-        process.inherit_priotity = []     
-        process.has_priority = False
-        logging.debug("Removing deadline for\n%s"%process)
+    logging.debug("\n\n\n\n\nRemoving deadline for\n%s"%process)
+    #if process.state != Executed:
+    process.deadline = None
+    process.internal_priority = float("inf")
+    process.inherit_priotity = []     
+    process.has_priority = False
+
     
         
 def Get_deadline(process=None):

@@ -23,32 +23,44 @@ class Alternation(pycsp.greenlets.Alternation):
 
 
     def choose(self):        
-        guards = []
+        guards = tmp_guards = []        
         tmp_idx = 0
         for prio_item in self.guards:
             if len(prio_item) == 3:
                 c, msg, action = prio_item
-                if isinstance(c,pycsp.greenlets.channelend.ChannelEndWrite) and c.channel.priority()<float("inf") and c.channel.readqueue>0:
-                    heapq.heappush(guards,(c.channel.priority(),(prio_item,tmp_idx)))
+                if isinstance(c,pycsp.greenlets.channelend.ChannelEndWrite) and c.channel.Readpriority()<float("inf") and c.channel.readqueue>0:
+                    heapq.heappush(guards,(c.channel.Readpriority(),(prio_item,tmp_idx)))
             else:
                 c, action = prio_item                  
-                if isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.priority()<float("inf") and c.channel.writequeue > 0:
-                    heapq.heappush(guards,(c.channel.priority() ,(prio_item,tmp_idx)))
+                if isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0:
+                    heapq.heappush(guards,(c.channel.Writepriority() ,(prio_item,tmp_idx)))
             tmp_idx+=1
         if guards :
+            logging.warning("found guards already ready: %s"%guards)
             tmp_guards = self.guards
             _,(prio_item,tmp_idx) = heapq.heappop(guards)
             logging.warning("\n\n\tprio_item: %s,\n\tidx: %s"%(prio_item,tmp_idx))
             self.guards = [prio_item]
+        #try :
+        logging.warning("self1: %s"%self.s.current)
+        tmp = self.s.current
+        try:
+            (idx, act, c, op) = pycsp.greenlets.Alternation.choose(self)
+        except DeadlineException as e:
+            logging.critical("\n\ncaught deadlineexception\n\n")
+            self.s.current = tmp
+            raise e    
+        self.s.current = tmp
 
-        (idx, act, c, op) = pycsp.greenlets.Alternation.choose(self)
-        
         if guards :    
             self.guards = tmp_guards
             idx = tmp_idx
             
         if self.s.current.deadline and self.s.current.deadline<Now():
+            logging.critical("alternation calling deadlineexception")
             raise DeadlineException(self.s.current)
+        #logging.warning("\n%s,%s,%s,%s"%(idx, act, c, op))
+        logging.warning("self2: %s"%self.s.current)
         return (idx, act, c, op)
         
     def select(self):

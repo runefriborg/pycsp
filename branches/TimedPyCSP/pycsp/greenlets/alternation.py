@@ -138,7 +138,7 @@ class Alternation:
             self.execute_frame = steps
 
     def choose(self):
-        logging.warning("deadline choose, guards: %s"%self.guards)
+        #logging.warning("deadline choose, guards: %s"%self.guards)
 
         reqs={}
         self.s.current.setstate(ACTIVE)
@@ -158,7 +158,7 @@ class Alternation:
                     op=READ
                 reqs[req]=(idx, c, op)
                 idx += 1
-            logging.warning("reqs: %s"%reqs) 
+            logging.debug("reqs: %s"%reqs) 
         except (ChannelPoisonException, ChannelRetireException) as e:
             for req in reqs.keys():
                 _, c, op = reqs[req]
@@ -173,6 +173,7 @@ class Alternation:
         act=None
         poison=False
         retire=False
+        logging.warning("Returned self:%s"%self.s.current)
         logging.warning("reqs2: %s"%reqs) 
         for req in reqs.keys():
             _, c, op = reqs[req]
@@ -196,7 +197,7 @@ class Alternation:
                 raise ChannelRetireException()
 
         idx, c, op = reqs[act]
-        logging.warning("\n\tidx:%s,\n\tc: %s,\n\top: %s"%(idx,c,op))
+        logging.debug("\n\tidx:%s,\n\tc: %s,\n\top: %s"%(idx,c,op))
 
         return (idx, act, c, op)
 
