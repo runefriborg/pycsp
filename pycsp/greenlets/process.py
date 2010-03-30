@@ -82,18 +82,23 @@ class Process():
     def wait(self):
         while self.state == ACTIVE:
             logging.debug("waiting")
-            self.s.getNext().greenlet.switch()
+            p = self.s.getNext()
+            p.greenlet.switch()
         logging.debug("done waiting, state=%s"%state[self.state])
+        #import sys, traceback
+        #traceback.print_stack()
+
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):
-        logging.debug("notify: from state  %s to %s. force %s. current process in scheduler: \n\t%s\n\t self:\n\t%s"%(state[self.state],state[new_state],force,self.s.current,self))
+        logging.debug("notify: from state  %s to %s. force %s. for \n%s  current: \n\t%s"%(state[self.state],state[new_state],force,self,self.s.current))
         self.state = new_state
     
         # Only activate, if we are activating someone other than ourselves
         # or we force an activation, which happens when an Io thread finishes, while
         # the calling process is still current process.
         if self.s.current != self or force:
+            logging.debug("notify activating other process")
             self.s.activate(self)
 
 
@@ -111,8 +116,8 @@ class Process():
             logging.debug("greenelt run")
             # Store the returned value from the process
             self.executed = False
-            #logging.warning("%s ,%s"%(self.fn,self.args))
             self.fn(*self.args, **self.kwargs)
+            logging.warning("ending process")
             self.executed = True
         except ChannelPoisonException, e:
             # look for channels and channel ends

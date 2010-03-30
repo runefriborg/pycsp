@@ -117,11 +117,14 @@ class Timeout(Guard):
     # Timer expired, offer an active Channel Request
     def expire(self):
         op, req = self.posted
-        logging.debug("expire")
+        logging.warning("Im in expire. self: %s\n\np:%s"%(self.s.current,self.p))
+        logging.warning("(%s,%s)"%(op,req))
         if op == READ:
             ChannelReq(self.p, msg=None).offer(req)
         elif op == WRITE:
             req.offer(ChannelReq(self.p))
+        logging.debug("\n\n\nexiting expire")
+ 
 
     def post_read(self, reader):
         self.posted = (READ, reader)

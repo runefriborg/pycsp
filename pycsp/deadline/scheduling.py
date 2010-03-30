@@ -192,7 +192,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
 
 
     def reschedule(self, p):
-        logging.debug("Reshedules %s\n. next Before:"%p)
+        logging.debug("Reshedules %s\n. "%p)
         #showtree.show_tree(self.next)
         for i in xrange(len(self.next)):
             if self.next[i][1] == p:
@@ -200,7 +200,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 break
         heapq.heapify(self.next)
         self.activate(p)
-        logging.debug("Reshedule process. next After:")
+        #logging.debug("Reshedule process. next After:")
         #showtree.show_tree(self.next)
 
 
@@ -211,7 +211,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
             self.activate(process)
 
     def activate(self, process):
-        logging.debug("Proces:\n\t%s",process)
+        logging.debug("activating proces:\n\t%s\n self:\n\t%s",process,self.current)
         if process.has_priority:
             heapq.heappush(self.next,(process.internal_priority,process))
         else:
@@ -226,17 +226,15 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
         while True:
             if self.timers and self.timers[0][0] < time.time():
                 _,process = heapq.heappop(self.timers)
+                logging.debug("activating  process from timer")
                 self.activate(process)
             elif self.next:
-                # Pop from the beginning
-                #print "\nSHOWTREE next\n"
-                #showtree.show_tree(self.next)
                 _,self.current = heapq.heappop(self.next)
-                logging.debug("main:switching to next process\n\t%s"%self.current)
-                
+                logging.debug("main:switching to next process\n%s"%self.current)
+                logging.warning("\n%s"%self.next)
                 if self.current.deadline and self.current.deadline<Now():                    
-                    logging.debug("has deadline: %s"%bool(self.current.deadline))
-                    logging.debug("Throwing deadline exception for proces %s"%self.current)
+                    logging.warning("Throwing deadline exception for process")
+                    
                     self.current.greenlet.throw(DeadlineException, self.current)
                 self.current.greenlet.switch()
             elif self.no_priority:
@@ -246,7 +244,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 else:
                     # Pop from beginning to be more fair
                     self.current = self.no_priority.pop(0)
-                logging.debug("main:switching to no_priority process \n\t%s"%self.current)
+                logging.debug("main:switching to no_priority process \n%s"%self.current)
                 self.current.greenlet.switch()
             # We enter a critical region, since timer threads or blocking io threads,
             # might try to update the internal queues.
