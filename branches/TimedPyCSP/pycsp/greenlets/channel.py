@@ -61,7 +61,7 @@ class ChannelReq:
             recipient.result=SUCCESS
             self.process.notify(DONE)
             recipient.process.notify(DONE)
-            logging.warning("made a succesful offer with msg %s,%s"%(type(self.msg),self.msg))
+            logging.debug("made a succesful offer with msg %s,%s"%(type(self.msg),self.msg))
             return True
         return False
 

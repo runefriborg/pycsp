@@ -42,8 +42,8 @@ class Process(pycsp.greenlets.Process):
         #    pass
     
     def __repr__(self):
-        return "%s\n\tstate:\t\t\t%s\tdeadline:\t%s\n\texecuted:\t\t%s\tint. deadline:\t%s\n\thas_priority:\t\t%s,"%(
-        self.fn, state[self.state],self.deadline, self.executed,self.internal_priority, self.has_priority)
+        return "%s\n\tstate:\t\t\t%s\tdeadline:\t%s\n\texecuted:\t\t%s\tinternal deadline:\t%s\n\thas_priority:\t\t%s\n\t%s"%(
+        self.fn, state[self.state],self.deadline, self.executed,self.internal_priority, self.has_priority,self.inherit_priotity)
         #, self.args
         #return "%s"%self.fn
 
@@ -131,7 +131,7 @@ def Set_deadline(value,process=None):
     logging.debug("Set deadline for process: %s"%process)
 
 
-def SetInherience(process):
+def SetInheritance(process):
     current_process = RT_Scheduler().current
     new_value = min(process.internal_priority,current_process.internal_priority)
     _set_absolute_priority(new_value,process)
@@ -139,10 +139,11 @@ def SetInherience(process):
     logging.debug("reschedules process")
     RT_Scheduler().reschedule(process)
     
-def ResetInherience(process):
-    if process.state != 1 and process.inherit_priotity:
-        logging.debug("Resetting inherience for %s"%process)
+def ResetInheritance(process):
+    #logging.warning("trying to reset inherince for : %s\ninheiret :%s "%(process,process.inherit_priotity))
+    if process.inherit_priotity:
         assert(len(process.inherit_priotity)>0)
+        #logging.warning("Resetting Inheritance for %s"%process)
         process.inherit_priotity.pop(-1)
         if len(process.inherit_priotity):
             new_value = process.inherit_priotity[-1]    
@@ -151,7 +152,7 @@ def ResetInherience(process):
             _set_absolute_priority(new_value,process)
         else:
             Remove_deadline(process)
-        logging.debug("reschedules process")
+        #logging.warning("process is now: %s"%process)
         RT_Scheduler().reschedule(process)
     
     
@@ -180,6 +181,9 @@ def test_suite():
   return
 test_suite.__doc__ = pycsp.greenlets.Sequence.__doc__
 
+        
+
 if __name__ == '__main__':
   import doctest
+  test()
   doctest.testmod()
