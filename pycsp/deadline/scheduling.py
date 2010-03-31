@@ -231,7 +231,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
             elif self.next:
                 _,self.current = heapq.heappop(self.next)
                 logging.debug("main:switching to next process\n%s"%self.current)
-                logging.warning("\n%s"%self.next)
+                logging.debug("\n%s"%self.next)
                 if self.current.deadline and self.current.deadline<Now():                    
                     logging.warning("Throwing deadline exception for process")
                     

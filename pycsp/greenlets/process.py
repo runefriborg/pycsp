@@ -117,7 +117,7 @@ class Process():
             # Store the returned value from the process
             self.executed = False
             self.fn(*self.args, **self.kwargs)
-            logging.warning("ending process")
+            logging.debug("ending process")
             self.executed = True
         except ChannelPoisonException, e:
             # look for channels and channel ends
