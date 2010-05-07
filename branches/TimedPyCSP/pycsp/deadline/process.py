@@ -22,7 +22,6 @@ class Process(pycsp.greenlets.Process):
     def __init__(self, fn, *args, **kwargs):
         pycsp.greenlets.Process.__init__(self,fn,*args,**kwargs)
         self.s = RT_Scheduler()
-        #self.optional_priotity = float("inf")
         self.inherit_priotity = []     
         self.deadline = None
         self.internal_priority = float("inf")
@@ -55,15 +54,6 @@ class Process(pycsp.greenlets.Process):
     def __rmul__(self, multiplier):
         return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
-#    def __cmp__(self, other):
-#        #if other.internal_priority == float("inf"):return -1
-#        #if self.internal_priority == float("inf"):return 1
-#        if isinstance(other,None.__class__):
-#            if isinstance(self,None.__class__) : return 0
-#            else : return 1 
-#        if isinstance(self,None.__class__):
-#            return 1 
-#        return cmp(self.internal_priority,other.internal_priority)
 
 def Parallel(*plist):
     _parallel(plist, True)

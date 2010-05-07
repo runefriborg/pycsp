@@ -55,13 +55,14 @@ def test_suite():
 if __name__ == '__main__':
     import unittest
     import test
-
+    import test2
     suite = test_suite()
     deadlinesuite =  unittest.TestLoader().loadTestsFromTestCase(test.DeadlineTestCase)
+    deadlinesuite2 = unittest.TestLoader().loadTestsFromTestCase(test2.DeadlineTestCase)
     allsuites = unittest.TestSuite([suite,deadlinesuite])
 
     runner = unittest.TextTestRunner(verbosity=2)
     #runner.run(suite)
     #runner.run(allsuites)
     runner.run(deadlinesuite)
-
+    #runner.run(deadlinesuite2)

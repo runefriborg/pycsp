@@ -27,35 +27,34 @@ class Channel(greenletsChannel):
         greenletsChannel.__init__(self,name)
         #List of possible processes we can raise priority on to speed up communication
         self.readerprocesses = []
-        self.writerprocesses = []
-        #self.priority = []
-        #self.priority.append(float("inf"))
+        self.writerprocesses = []    
         self.s = RT_Scheduler()
-    
+    def __str__(self):
+        return "%s, %d af %d read klar, %d af %d writer klar, poison = %s"%(self.name, len(self.readqueue), self.readers ,len(self.writequeue), self.writers, self.ispoisoned)
         
     def Readpriority(self):       
         minr = process.Process("dummy")
         if self.readqueue:
             minr = min(self.readqueue,key=lambda obj: obj.process.internal_priority).process
-        logging.debug("\nminReadQueue: %s"%minr)
+        #logging.warning("\nminReadQueue: %s"%minr)
         return minr.internal_priority
         
     def Writepriority(self):       
         minw = process.Process("dummy")
         if self.writequeue:
-            minw = min(self.writerprocesses,key=lambda obj: obj.internal_priority)
-        logging.debug("\nminwriteQueue: %s"%minw)
+            minw = min(self.writequeue,key=lambda obj: obj.process.internal_priority).process
+        #logging.warning("\nminwriteQueue: %s"%minw)
         return minw.internal_priority
 
     #Extend greenelt reader, but auguments channel priority, and will push augumentet priority to other processes
     def _read(self):
-        logging.debug("_read: %s"%self)
+        logging.warning("starting _read: %s"%self)
         self.check_termination()
         augment_Inheritance = False
-        logging.warning("%s"%self.s.current)
-        logging.warning("%s and %s and %s and (%s or %s)"%
-                       (self.s.current.has_priority,bool(self.readerprocesses), not self.readqueue, not self.s.current.deadline,self.s.current.deadline>Now()))
-        if self.s.current.has_priority and self.writerprocesses and not self.writequeue and (not self.s.current.deadline or self.s.current.deadline>Now()) :
+        #logging.warning("%s"%self.s.current)
+        #logging.warning("%s and %s and %s and (%s or %s)"%
+        #               (self.s.current.has_priority,bool(self.readerprocesses), not self.readqueue, not self.s.current.deadline,self.s.current.deadline>Now()))
+        if PRIORITY_INHERITANCE and self.s.current.has_priority and self.writerprocesses and not self.writequeue and (not self.s.current.deadline or self.s.current.deadline>Now()) :
                 logging.warning("no writers are ready - will try to Inheritance %d writer"%len(self.writerprocesses))
                 #to increase performace dont increase to a lower priority as it has no effect 
                 #if self.priority() > self.s.current.internal_priority:
@@ -74,16 +73,18 @@ class Channel(greenletsChannel):
 
         if self.s.current.deadline and self.s.current.deadline<Now():
             raise DeadlineException(self.s.current)
+        logging.warning("ending _read: %s"%self)
         return  returnvalue
 
     def _write(self,msg):
         #if writer has a priority an no readers are ready to read we augments the readers priority to speed up writer
-        logging.debug("_write: %s"%self)
+        logging.warning("_write: %s"%self)
         self.check_termination()
         augment_Inheritance = False
-        logging.warning("%s and %s and %s and (%s or %s)"%
-                       (self.s.current.has_priority,bool(self.readerprocesses), not self.readqueue, not self.s.current.deadline,self.s.current.deadline>Now()))
-        if self.s.current.has_priority and self.readerprocesses and not self.readqueue and (not self.s.current.deadline or self.s.current.deadline>Now()):            
+        #logging.warning("%s will inheritance %s =  %s and %s and %s and (%s or %s)"%
+        #               (self.name, self.s.current.has_priority and self.readerprocesses and not self.readqueue and (not self.s.current.deadline or self.s.current.deadline>Now()),
+        #               self.s.current.has_priority,bool(self.readerprocesses), not self.readqueue, not self.s.current.deadline,self.s.current.deadline>Now()))
+        if PRIORITY_INHERITANCE and self.s.current.has_priority and self.readerprocesses and not self.readqueue and (not self.s.current.deadline or self.s.current.deadline>Now()):            
                 logging.warning("no readers are ready - will try to Inheritance %d readers"%len(self.readerprocesses))
                 #if self.priority() > self.s.current.internal_priority:
                 augment_Inheritance = True
@@ -93,53 +94,37 @@ class Channel(greenletsChannel):
         returnvalue =  greenletsChannel._write(self,msg)
 
         if augment_Inheritance:
-            logging.debug("will try to reset Inheritance")
+            logging.warning("will try to reset Inheritance")
             #print "\n\n\nResetting priority "
             #print self.priority
             #self.priority.pop()
             #print self.priority
             for reader in self.readerprocesses:
                 ResetInheritance(reader)
-        
+            logging.warning("done resetting Inheritance")
         if self.s.current.deadline and self.s.current.deadline<Now():
-            logging.debug("Throwing Deadline exception")
+            logging.warning("Throwing Deadline exception")
             raise DeadlineException(self.s.current)
         return returnvalue
 
     def _addReaderProcess(self, process):
-        logging.debug("_addReaderProcess. self: %s\nprocess:%s",self,process)
+        #logging.warning("_addReaderProcess. self: %s\nprocess:%s",self,process)
         self.readerprocesses.append(process)
 
     def _addWriterProcess(self, process):
-        logging.debug("_addWriterProcess. self: %s\nprocess:%s",self,process)
+        #logging.warning("_addWriterProcess. self: %s\nprocess:%s",self,process)
         self.writerprocesses.append(process)
         
-    def match(self):
-        def reqcmp(x,y):
-            #if y == float("inf"):return -1
-            #if x == float("inf"):return 1
-            return cmp(x.process.internal_priority,y.process.internal_priority)
-        #logging.warning("read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
+    def match(self):        
+        print "in match, \n\treadq:%s \n\t writeq:%s"%(self.readqueue, self.writequeue)
         if self.readqueue and self.writequeue:
-            self.readqueue.sort(reqcmp)
-            self.writequeue.sort(reqcmp)
-            #tmp = []
-            #for r in self.readqueue:
-            #    tmp.append(r.process)
-            #logging.warning("read: %s"%tmp)
+            self.readqueue.sort(key=lambda channelReq:channelReq.process.internal_priority)
+            self.writequeue.sort(key=lambda channelReq:channelReq.process.internal_priority)
             for w in self.writequeue:
-                #logging.warning("writer: %s"%w.process)
                 for r in self.readqueue:
-                    #logging.debug("in loop")
                     if w.offer(r):
-                        #logging.debug("Did an offer")
-                        # Did an offer
-                        # We can guarantee, that there will always be someone to call offer,
-                        # since everything is run in a single thread. Thus we break the loop.
-                        return
-
-
-        
+                        print "made succesful offer"
+                        return     
 
 
 # Run tests
