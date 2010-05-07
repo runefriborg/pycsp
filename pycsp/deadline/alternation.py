@@ -10,6 +10,7 @@ See LICENSE.txt for licensing details (MIT License).
 import pycsp.greenlets.alternation
 import pycsp.greenlets.channelend
 from scheduling import RT_Scheduler, Now,DeadlineException
+from channel import ChannelReq
 from pycsp.greenlets.const import *
 import heapq
 
@@ -23,44 +24,57 @@ class Alternation(pycsp.greenlets.Alternation):
 
 
     def choose(self):        
-        guards = tmp_guards = []        
-        tmp_idx = 0
-        for prio_item in self.guards:
+        t_guards = []
+        tmp_idx = 0        
+        idx = None
+        act = None
+        c = None
+        op  = None
+        def a(x,y): 
+            if x == True : return y.process.state == ACTIVE
+            else : return x.process.state and y.process.state
+
+        if True and PRIORITY_INHERITANCE:
+            for prio_item in self.guards:
+                if len(prio_item) == 3:
+                    c, msg, action = prio_item
+                    if isinstance(c,pycsp.greenlets.channelend.ChannelEndWrite) and c.channel.Readpriority()<float("inf") and c.channel.readqueue>0 and bool(reduce(a,c.channel.readqueue,True)):
+                        heapq.heappush(t_guards,(c.channel.Readpriority(),(prio_item,tmp_idx)))
+                else:
+                    c, action = prio_item                  
+                    if isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0 and bool(reduce(a,c.channel.writequeue,True)):
+                        print "%s = %s and %s and %s and %s"%(isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0 and bool(reduce(a,c.channel.writequeue,True)),isinstance(c,pycsp.greenlets.channelend.ChannelEndRead),c.channel.Writepriority()<float("inf"),c.channel.writequeue > 0,bool(reduce(a,c.channel.writequeue,True)))                        
+                        heapq.heappush(t_guards,(c.channel.Writepriority(),(prio_item,tmp_idx)))
+                tmp_idx+=1
+        if True and PRIORITY_INHERITANCE and t_guards :
+            logging.warning("found guards already ready: %s"%t_guards)
+            _,(prio_item,idx) = heapq.heappop(t_guards)
             if len(prio_item) == 3:
                 c, msg, action = prio_item
-                if isinstance(c,pycsp.greenlets.channelend.ChannelEndWrite) and c.channel.Readpriority()<float("inf") and c.channel.readqueue>0:
-                    heapq.heappush(guards,(c.channel.Readpriority(),(prio_item,tmp_idx)))
+                logging.warning("\n\nWRITER:\n\tc: %s,\n\tmsg: %s \n\t action:%s"%(c,msg,action))
+                act = ChannelReq(self.s.current)
+                c(msg)
+                op = WRITE
             else:
-                c, action = prio_item                  
-                if isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0:
-                    heapq.heappush(guards,(c.channel.Writepriority() ,(prio_item,tmp_idx)))
-            tmp_idx+=1
-        if guards :
-            logging.warning("found guards already ready: %s"%guards)
-            tmp_guards = self.guards
-            _,(prio_item,tmp_idx) = heapq.heappop(guards)
-            logging.warning("\n\n\tprio_item: %s,\n\tidx: %s"%(prio_item,tmp_idx))
-            self.guards = [prio_item]
-        #try :
-        logging.warning("self1: %s"%self.s.current)
-        tmp = self.s.current
-        try:
+                print "in d choose"
+                c, action = prio_item
+                logging.warning("\n\nREADER:\n\tc: %s\n\t action:%s"%(c,action))
+                act = ChannelReq(self.s.current)
+                act.msg = c()
+                op = READ
+                
+        else :
+            print "in g choose"
             (idx, act, c, op) = pycsp.greenlets.Alternation.choose(self)
-        except DeadlineException as e:
-            logging.critical("\n\ncaught deadlineexception\n\n")
-            self.s.current = tmp
-            raise e    
-        self.s.current = tmp
 
-        if guards :    
-            self.guards = tmp_guards
-            idx = tmp_idx
-            
+
         if self.s.current.deadline and self.s.current.deadline<Now():
             logging.critical("alternation calling deadlineexception")
             raise DeadlineException(self.s.current)
         #logging.warning("\n%s,%s,%s,%s"%(idx, act, c, op))
-        logging.warning("self2: %s"%self.s.current)
+        logging.warning("\n\tidx:%s,\n\tc: %s,\n\top: %s"%(idx,c,op))
+        logging.warning("\n\tact:%s",act)
+
         return (idx, act, c, op)
         
     def select(self):
