@@ -138,7 +138,7 @@ class Alternation:
             self.execute_frame = steps
 
     def choose(self):
-        #logging.warning("deadline choose, guards: %s"%self.guards)
+        logging.warning("deadline choose, guards: %s"%self.guards)
 
         reqs={}
         self.s.current.setstate(ACTIVE)
@@ -151,11 +151,14 @@ class Alternation:
                     req = ChannelReq(self.s.current, msg=msg)
                     c.post_write(req)
                     op=WRITE
+                    logging.warning("added write to channel: %s"%c)
                 else:
                     c, action = prio_item
                     req = ChannelReq(self.s.current)
                     c.post_read(req)
                     op=READ
+                    logging.warning("added read to channel: %s"%c)
+
                 reqs[req]=(idx, c, op)
                 idx += 1
             logging.debug("reqs: %s"%reqs) 
@@ -173,8 +176,8 @@ class Alternation:
         act=None
         poison=False
         retire=False
-        logging.warning("Returned self:%s"%self.s.current)
-        logging.warning("reqs2: %s"%reqs) 
+        #logging.warning("Returned self:%s"%self.s.current)
+        #logging.warning("reqs2: %s"%reqs) 
         for req in reqs.keys():
             _, c, op = reqs[req]
             if op==READ:
@@ -197,8 +200,8 @@ class Alternation:
                 raise ChannelRetireException()
 
         idx, c, op = reqs[act]
-        logging.debug("\n\tidx:%s,\n\tc: %s,\n\top: %s"%(idx,c,op))
-
+        logging.warning("\n\tidx:%s,\n\tc: %s,\n\top: %s"%(idx,c,op))
+        logging.warning("\n\tact:%s",act)
         return (idx, act, c, op)
 
 
@@ -241,8 +244,9 @@ class Alternation:
                 if op==WRITE:
                     action.invoke_on_output()
                 else:
+                    logging.warning("req: %s\nmsg:%s"%(req, req.msg))                    
                     action.invoke_on_input(req.msg)
-
+                    
             # Executing callback function object
             elif callable(action):
                 # Choice function not allowed as callback

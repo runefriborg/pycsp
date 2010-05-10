@@ -161,7 +161,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
         RT_Scheduler.__Scheduler__instance = None
 
     def __str__(self):
-        return "%r\ncurrent:%r, n# blocking:%d \nqueues. \n\tno_priority:\t%s\n\ttimers:\t%s\n\tnext:\t%s "%(self,self.current, self.blocking,self.no_priority,self.timers,self.next)
+        return "%r\n\tCURRENT:\n\t%r\n\n\tBLOCKING:\t%d\n\n\tNO_PRIO:\n\t%s\n\n\tTIMERS:\n\t%s\n\n\tNEXT:\n\t%s "%(self,self.current, self.blocking,self.no_priority,self.timers,self.next)
 
     def decompose(self):
       self.__Scheduler__instance = None
@@ -244,7 +244,7 @@ class RT_Scheduler(pycsp.greenlets.scheduling.Scheduler):
                 else:
                     # Pop from beginning to be more fair
                     self.current = self.no_priority.pop(0)
-                logging.debug("main:switching to no_priority process \n%s"%self.current)
+                    logging.error("main:switching to no_priority process \n%s\n\nscheduling: \n%s"%(self.current,self))
                 self.current.greenlet.switch()
             # We enter a critical region, since timer threads or blocking io threads,
             # might try to update the internal queues.

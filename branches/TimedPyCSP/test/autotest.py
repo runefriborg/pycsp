@@ -29,30 +29,44 @@ def action(id, channel_input=None):
 
 @process
 def reader(cin, id,  sleeper):
-    while True:
-        if sleeper: sleeper()
-        got=cin()
-        print id,
-    
+    try:
+        while True:
+            if sleeper: sleeper()
+            got=cin()
+            print id,
+    except ChannelRetireException:
+        pass
+        
 @process
 def writer(cout, id, cnt, sleeper):
     for i in range(cnt):
         if sleeper: sleeper()
         cout((id, i))
     retire(cout)
+    print "\nwriter ",id," returning"
 
 @process
 def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
+    
+    retire = 0
     while True:
-        if sleeper: sleeper()
-        Alternation([
-            {
-                cin1:action(0),
-                cin2:action(1),
-                cin3:action(2),
-                cin4:action(3)
-            }
-        ]).execute()
+        try:
+            if sleeper: sleeper()
+            Alternation([
+                {
+                    cin1:action(0),
+                    cin2:action(1),
+                    cin3:action(2),
+                    cin4:action(3)
+                }
+            ]).execute()
+        except ChannelRetireException:
+            retire += 1
+            print "retire ",retire
+            if retire == 4:
+                print "reader returning"
+                return
+
 
 
 @io

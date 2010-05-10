@@ -55,13 +55,14 @@ class ChannelReq:
             self.process.notify(RETIRE)
 
     def offer(self, recipient):
+        logging.error("\nself: %s\nrecipient: %s"%(self.process, recipient.process))
         if self.process.state == recipient.process.state == ACTIVE:
             recipient.msg= self.msg
             self.result=SUCCESS
             recipient.result=SUCCESS
             self.process.notify(DONE)
             recipient.process.notify(DONE)
-            logging.debug("made a succesful offer with msg %s,%s"%(type(self.msg),self.msg))
+            logging.error("made a succesful offer with msg %s,%s"%(type(self.msg),self.msg))
             return True
         return False
 
@@ -110,7 +111,7 @@ class Channel:
         self.isretired = False
 
         self.s = Scheduler()
-        #logging.debug("init greenletsChannel %s"%self.s)
+        #logging.warning("init greenletsChannel %s"%self.s)
         
     def check_termination(self): 
         logging.debug("check_termnation. %s"%self)       
@@ -122,7 +123,7 @@ class Channel:
             
 
     def _read(self):
-        logging.debug("_read")
+        #logging.warning("greenlets _read")
         self.check_termination()
 
         p = self.s.current
@@ -143,9 +144,8 @@ class Channel:
         self.post_read(req)
         req.process.wait()
         self.remove_read(req)
-
         if req.result==SUCCESS:
-          logging.debug("got success in channel read")
+          logging.warning("got success in channel read")
           return req.msg
         
         self.check_termination()
@@ -158,7 +158,7 @@ class Channel:
         self.check_termination()
 
         p = self.s.current
-        #logging.debug("\n\n\nself.s %s, \nprocess is %s"%(self.s,p))
+        #logging.warning("\n\n\nself.s %s, \nprocess is %s"%(self.s,p))
         # If anyone is on the readqueue and ACTIVE, then we can do the match right away
         # This hack provides a 150% performance improvement and can be removed
         # without breaking anything.
@@ -177,7 +177,7 @@ class Channel:
         self.remove_write(req)
 
         if req.result==SUCCESS:
-            logging.debug("got succes in channel, write")
+            logging.warning("got succes in channel, write")
             return True
     
         self.check_termination()
@@ -186,12 +186,13 @@ class Channel:
         return None #Here we should handle that a read was cancled...
 
     def post_read(self, req):
-        logging.debug("greenlets post_read")
+        logging.warning("greenlets post_read")
         self.check_termination()
         self.readqueue.append(req)
         self.match()
 
     def remove_read(self, req):
+        logging.warning("greenlets remove_read")
         self.readqueue.remove(req)
         
     def post_write(self, req):
@@ -200,16 +201,17 @@ class Channel:
         self.match()
 
     def remove_write(self, req):
+        logging.warning("greenlets remove_write")
         self.writequeue.remove(req)
 
     def match(self):
-        logging.debug("in match read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
+        logging.warning("in match read: %d, write: %d"%(len(self.readqueue),len(self.writequeue)))
         if self.readqueue and self.writequeue:
             for w in self.writequeue:
                 for r in self.readqueue:
-                    #logging.debug("in loop")
+                    #logging.warning("in loop")
                     if w.offer(r):
-                        #logging.debug("Did an offer")
+                        logging.warning("made succesful match")
                         # Did an offer
                         # We can guarantee, that there will always be someone to call offer,
                         # since everything is run in a single thread. Thus we break the loop.
