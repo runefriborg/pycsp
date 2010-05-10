@@ -6,7 +6,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 import logging, sys
-logging.basicConfig(level=logging.debug,
+logging.basicConfig(level=logging.ERROR,
     format=' %(levelname)s:%(filename)s:%(lineno)d: %(message)s'
   )
 
@@ -38,3 +38,6 @@ ACTIVE, DONE = range(2)
 
 # Constants used for both ChannelReq results and ReqStatus states.
 POISON, RETIRE = range(2,4)
+
+
+PRIORITY_INHERITANCE = True

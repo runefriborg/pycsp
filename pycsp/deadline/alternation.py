@@ -43,7 +43,7 @@ class Alternation(pycsp.greenlets.Alternation):
                 else:
                     c, action = prio_item                  
                     if isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0 and bool(reduce(a,c.channel.writequeue,True)):
-                        print "%s = %s and %s and %s and %s"%(isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0 and bool(reduce(a,c.channel.writequeue,True)),isinstance(c,pycsp.greenlets.channelend.ChannelEndRead),c.channel.Writepriority()<float("inf"),c.channel.writequeue > 0,bool(reduce(a,c.channel.writequeue,True)))                        
+                        logging.debug("%s = %s and %s and %s and %s"%(isinstance(c,pycsp.greenlets.channelend.ChannelEndRead) and c.channel.Writepriority()<float("inf") and c.channel.writequeue > 0 and bool(reduce(a,c.channel.writequeue,True)),isinstance(c,pycsp.greenlets.channelend.ChannelEndRead),c.channel.Writepriority()<float("inf"),c.channel.writequeue > 0,bool(reduce(a,c.channel.writequeue,True))))
                         heapq.heappush(t_guards,(c.channel.Writepriority(),(prio_item,tmp_idx)))
                 tmp_idx+=1
         if True and PRIORITY_INHERITANCE and t_guards :
@@ -56,7 +56,7 @@ class Alternation(pycsp.greenlets.Alternation):
                 c(msg)
                 op = WRITE
             else:
-                print "in d choose"
+                #print "in d choose"
                 c, action = prio_item
                 logging.warning("\n\nREADER:\n\tc: %s\n\t action:%s"%(c,action))
                 act = ChannelReq(self.s.current)
@@ -64,7 +64,7 @@ class Alternation(pycsp.greenlets.Alternation):
                 op = READ
                 
         else :
-            print "in g choose"
+            #print "in g choose"
             (idx, act, c, op) = pycsp.greenlets.Alternation.choose(self)
 
 

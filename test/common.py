@@ -37,8 +37,10 @@ elif (mod == 'net'):
     from pycsp.net import *    
 elif (mod == 'simulation'):
     from pycsp.simulation import *
+elif (mod == 'deadline'):
+    from pycsp.deadline import *    
 else:
-    print "python",sys.argv[0],"[ threads | processes | greenlets | net | simulation ]"
+    print "python",sys.argv[0],"[ threads | processes | greenlets | net | simulation | deadline]"
     from pycsp import *
 
 print 'Using version', version

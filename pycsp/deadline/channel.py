@@ -116,14 +116,13 @@ class Channel(greenletsChannel):
         self.writerprocesses.append(process)
         
     def match(self):        
-        print "in match, \n\treadq:%s \n\t writeq:%s"%(self.readqueue, self.writequeue)
+        logging.debug("in match, \n\treadq:%s \n\t writeq:%s"%(self.readqueue, self.writequeue))
         if self.readqueue and self.writequeue:
             self.readqueue.sort(key=lambda channelReq:channelReq.process.internal_priority)
             self.writequeue.sort(key=lambda channelReq:channelReq.process.internal_priority)
             for w in self.writequeue:
                 for r in self.readqueue:
                     if w.offer(r):
-                        print "made succesful offer"
                         return     
 
 

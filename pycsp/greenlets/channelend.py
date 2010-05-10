@@ -156,7 +156,7 @@ class ChannelEndRead():
         if self.channel.name == None:
             return "<ChannelEndRead wrapping %s>" % self.channel
         else:
-            return "<ChannelEndRead wrapping %s named %s>" % (self.channel, self.channel.name)
+            return "<ChannelEndRead wrapping %s >" % (self.channel)
 
 
 # Run tests
