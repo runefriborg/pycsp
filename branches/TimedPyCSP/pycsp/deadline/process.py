@@ -107,6 +107,13 @@ def current_process_id():
     g = s.current
     return g.id
 
+def Set_priority(value,process=None):
+    print process
+    if  process == None:
+        process = RT_Scheduler().current
+    new_value = max(min(100-value,100),0)
+    print new_value
+    _set_absolute_priority(new_value,process)
 
 def _set_absolute_priority(value,process):    
     process.internal_priority = value

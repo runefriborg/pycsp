@@ -31,7 +31,7 @@ class Alternation(pycsp.greenlets.Alternation):
         c = None
         op  = None
         def a(x,y): 
-            if x == True : return y.process.state == ACTIVE
+            if isinstance(x,bool)  : return x and y.process.state == ACTIVE
             else : return x.process.state and y.process.state
 
         if True and PRIORITY_INHERITANCE:
