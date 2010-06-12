@@ -151,6 +151,14 @@ class BufferedChannel(object):
             except ChannelRetireException, e:
                 retired = True
 
+    def retire(self):
+        self.__inChan.retire()
+        self.__outChan.retire()
+
+    def poison(self):
+        self.__inChan.poison()
+        self.__outChan.poison()
+
 # Run tests
 if __name__ == '__main__':
     import doctest
