@@ -75,6 +75,10 @@ def io(func):
         io_thread.start()
         io_thread.s.io_block_wait(io_thread.p)
 
+        # Check for exception progation.
+        if io_thread.exception:
+            raise io_thread.exception
+
         # Return value from function, set by Io class.
         return io_thread.retval
     return _call_io
@@ -92,12 +96,18 @@ class Io(threading.Thread):
         self.args = args
         self.kwargs = kwargs
         self.retval = None
+        self.exception = None
 
         self.s = Scheduler()
         self.p = self.s.current
 
     def run(self):
-        self.retval = self.fn(*self.args, **self.kwargs)
+        try:
+            self.retval = self.fn(*self.args, **self.kwargs)
+        except Exception, e:
+            # Save exception for greenlet.
+            self.exception = e
+
         self.s.io_unblock(self.p)
 
 
