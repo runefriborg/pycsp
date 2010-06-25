@@ -23,6 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
+try: from greenlet import greenlet
+except ImportError, e:
+    from py.magic import greenlet
+    
 from scheduling import Scheduler
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
 from const import *
