@@ -1,11 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: latin-1 -*-
-# 
-# see http://docs.python.org/dist/dist.html
-# 
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -24,28 +19,26 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+# Communicating on channels from the main namespace
 
-from setuptools import setup
-import os
+# In pycsp.greenlets pre 0.7.1 this fails, because the main namespace
+# cannot be scheduled, by the greenlet scheduler.
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+# In PyCSP 0.7.1 this issue is fixed.
 
-setup(name='pycsp',
-      version='0.7.1',
-      description='PyCSP - Python CSP Library',
-      long_description=read('README.txt'),
-      keywords = "python csp concurrency communicating sequential processes",
-      author='Rune M. Friborg',
-      author_email='runef@diku.dk',
-      url='http://code.google.com/p/pycsp/',
-      license='MIT',
-      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net', 'pycsp.common'],
-      platforms=['any'],
-      classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",        
-        ],
-      )
+import sys
+sys.path.append("../..")
+
+from pycsp.greenlets import *
+
+@process
+def func(cout):
+    while True:
+        cout(42)
+        
+
+ch = Channel()
+cin, cout = +ch, -ch
+Spawn(func(cout))
+
+print cin()
