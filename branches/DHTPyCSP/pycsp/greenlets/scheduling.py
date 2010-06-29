@@ -23,7 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
-from greenlet import greenlet
+try: from greenlet import greenlet
+except ImportError, e:
+    from py.magic import greenlet
+
 import threading
 import time
 from const import *
@@ -72,6 +75,10 @@ def io(func):
         io_thread.start()
         io_thread.s.io_block_wait(io_thread.p)
 
+        # Check for exception progation.
+        if io_thread.exception:
+            raise io_thread.exception
+
         # Return value from function, set by Io class.
         return io_thread.retval
     return _call_io
@@ -89,13 +96,56 @@ class Io(threading.Thread):
         self.args = args
         self.kwargs = kwargs
         self.retval = None
+        self.exception = None
 
         self.s = Scheduler()
         self.p = self.s.current
 
     def run(self):
-        self.retval = self.fn(*self.args, **self.kwargs)
+        try:
+            self.retval = self.fn(*self.args, **self.kwargs)
+        except Exception, e:
+            # Save exception for greenlet.
+            self.exception = e
+
         self.s.io_unblock(self.p)
+
+
+class MainProcess():
+    """
+    A special process implementation for the __main__ namespace.
+    
+    This allows __main__ to communicate with greenlets processes using channels.
+    """
+
+    def __init__(self, main_greenlet, scheduler):
+        # Create unique id
+        self.id = '__main__'
+
+        # Greenlet specific
+        self.greenlet = main_greenlet
+        
+        # Synchronization specific
+        self.state = None
+        self.s = scheduler
+
+    def setstate(self, new_state):
+        self.state = new_state
+
+    # Reschedule, without putting this process on either the next[] or the blocking[] list.
+    def wait(self):
+        while self.state == ACTIVE:
+            self.s.getNext().greenlet.switch()
+
+    # Notify, by activating and setting state.    
+    def notify(self, new_state, force=False):
+        self.state = new_state
+
+        # Only activate, if we are activating someone other than ourselves
+        # or we force an activation, which happens when an Io thread finishes, while
+        # the calling process is still current process.
+        if self.s.current != self or force:
+            self.s.activate(self)
 
 
 class Scheduler(object):
@@ -128,8 +178,8 @@ class Scheduler(object):
             # Initialize members for scheduler
             cls.__instance.new = []
             cls.__instance.next = []
-            cls.__instance.current = None
-            cls.__instance.greenlet = greenlet.getcurrent()
+            cls.__instance.main_process = MainProcess(greenlet.getcurrent(), cls.__instance)
+            cls.__instance.current = cls.__instance.main_process
 
             # Timer specific  value = (activation time, process)
             # On update we do a sort based on the activation time
@@ -138,6 +188,9 @@ class Scheduler(object):
             # Io specific
             cls.__instance.cond = threading.Condition()
             cls.__instance.blocking = 0
+
+            # Start scheduler greenlet
+            cls.__instance.greenlet = greenlet(cls.__instance.main)
 
         return cls.__instance
     getInstance = classmethod(getInstance)
@@ -244,7 +297,11 @@ class Scheduler(object):
                 else:
                     # Execution finished!
                     self.cond.release()
-                    return
+                    self.done = True
+
+                    # Switch to main process and leave the greenlet scheduler
+                    # running for continued usage of PyCSP greenlets.
+                    self.main_process.greenlet.switch()
             self.cond.release()
                 
 
@@ -252,19 +309,17 @@ class Scheduler(object):
     # greenlet processes has been executed.
     def join(self, processes):
         save_current = self.current
+        self.done = False
 
-        if self.greenlet == greenlet.getcurrent():
-            # Called from main greenlet
-            self.main()
-            for p in processes:
-                if not p.executed:
+        for p in processes:
+            while not p.executed:
+
+                # __main__ check for deadlock
+                if self.done:
                     raise Exception('Deadlock')
-        else:
-            # Called from child greenlet
-            for p in processes:
-                while not p.executed:
-                    # p, not executed yet, switch to any waiting greenlet                    
-                    self.getNext().greenlet.switch()
+
+                # p, not executed yet, switch to any waiting greenlet                    
+                self.getNext().greenlet.switch()
 
         # Restore current
         self.current = save_current

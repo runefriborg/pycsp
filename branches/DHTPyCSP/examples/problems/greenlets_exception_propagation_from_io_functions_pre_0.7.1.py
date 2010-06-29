@@ -1,11 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: latin-1 -*-
-# 
-# see http://docs.python.org/dist/dist.html
-# 
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -24,28 +19,28 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+# No exception propagation from within @pycsp.greenlets.io-decorated functions.
 
-from setuptools import setup
-import os
+# In pycsp.greenlets pre 0.7.1 this does not propagate exceptions.
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+import sys
+sys.path.append("../..")
 
-setup(name='pycsp',
-      version='0.7.1',
-      description='PyCSP - Python CSP Library',
-      long_description=read('README.txt'),
-      keywords = "python csp concurrency communicating sequential processes",
-      author='Rune M. Friborg',
-      author_email='runef@diku.dk',
-      url='http://code.google.com/p/pycsp/',
-      license='MIT',
-      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net', 'pycsp.common'],
-      platforms=['any'],
-      classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",        
-        ],
-      )
+from pycsp.greenlets import *
+import time
+
+@io
+def blocking():
+    time.sleep(1)
+    raise Exception('OMG!')
+
+@process
+def show():
+    try:
+        blocking()
+    except Exception as ex:
+        print 'Exception caught: %s' % str(ex)
+    else:
+        print 'No exception!'
+
+Parallel(show())
