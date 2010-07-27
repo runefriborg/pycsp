@@ -20,19 +20,22 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
+import check
 import time
 import random
 
 @choice
-def action(channel_input=None):
-    print '.',
-    
+def action(assertCheck, id, channel_input=None):
+    if assertCheck:
+        assertCheck(id)
+
 @process
-def reader(cin, id, cnt, sleeper):
+def reader(cin, id,  sleeper, assertCheck=None):
     while True:
         if sleeper: sleeper()
-        got= cin()
-        print '.',
+        got = cin()
+        if assertCheck:
+            assertCheck(id)
     
 @process
 def writer(cout, id, cnt, sleeper):
@@ -42,14 +45,14 @@ def writer(cout, id, cnt, sleeper):
     retire(cout)
 
 @process
-def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
+def par_reader(cin1,cin2,cin3,cin4, sleeper, assertCheck=None):
     while True:
         if sleeper: sleeper()
         AltSelect(
-            InputGuard(cin1, action()),
-            InputGuard(cin2, action()),
-            InputGuard(cin3, action()),
-            InputGuard(cin4, action())
+            InputGuard(cin1, action(assertCheck, 0)),
+            InputGuard(cin2, action(assertCheck, 1)),
+            InputGuard(cin3, action(assertCheck, 2)),
+            InputGuard(cin4, action(assertCheck, 3))
             )
 
 @process
@@ -74,6 +77,9 @@ def sleep_one():
     time.sleep(0.01)
 
 def One2One_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+
     c1=Channel(buffer=1)
     c2=Channel(buffer=5)
     c3=Channel(buffer=10)
@@ -81,35 +87,44 @@ def One2One_Test(read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(reader(+c1,0,cnt, read_sleeper), writer(-c1,0,cnt, write_sleeper),
-             reader(+c2,1,cnt, read_sleeper), writer(-c2,1,cnt, write_sleeper),
-             reader(+c3,2,cnt, read_sleeper), writer(-c3,2,cnt, write_sleeper),
-             reader(+c4,3,cnt, read_sleeper), writer(-c4,3,cnt, write_sleeper))
+    Parallel(reader(+c1,0, read_sleeper, x.writer()), writer(-c1,0,cnt, write_sleeper),
+             reader(+c2,1, read_sleeper, x.writer()), writer(-c2,1,cnt, write_sleeper),
+             reader(+c3,2, read_sleeper, x.writer()), writer(-c3,2,cnt, write_sleeper),
+             reader(+c4,3, read_sleeper, x.writer()), writer(-c4,3,cnt, write_sleeper))
 
 def Any2One_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any2One_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0]))
+
     c1=Channel(buffer=20)
 
     cnt = 10
     
-    Parallel(reader(c1.reader(),0,cnt*4, read_sleeper),
+    Parallel(reader(c1.reader(),0, read_sleeper, x.writer()),
              writer(c1.writer(),0,cnt, write_sleeper),
              writer(c1.writer(),1,cnt, write_sleeper),
              writer(c1.writer(),2,cnt, write_sleeper),
              writer(c1.writer(),3,cnt, write_sleeper))
 
 def One2Any_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "One2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+
     c1=Channel(buffer=20)
 
     cnt = 10
     
     Parallel(writer(c1.writer(),0,cnt*4, write_sleeper),
-             reader(c1.reader(),0,cnt, read_sleeper),
-             reader(c1.reader(),1,cnt, read_sleeper),
-             reader(c1.reader(),2,cnt, read_sleeper),
-             reader(c1.reader(),3,cnt, read_sleeper))
+             reader(c1.reader(),0, read_sleeper, x.writer()),
+             reader(c1.reader(),1, read_sleeper, x.writer()),
+             reader(c1.reader(),2, read_sleeper, x.writer()),
+             reader(c1.reader(),3, read_sleeper, x.writer()))
 
 
 def One_Alting2Any_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "One_Alting2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+
     c1=Channel(buffer=1)
     c2=Channel(buffer=5)
     c3=Channel(buffer=10)
@@ -118,21 +133,27 @@ def One_Alting2Any_Test(read_sleeper, write_sleeper):
     cnt = 10
     
     Parallel(par_writer(c1.writer(),c2.writer(),c3.writer(),c4.writer(),cnt, write_sleeper),
-             reader(c1.reader(),0,cnt, read_sleeper),
-             reader(c2.reader(),1,cnt, read_sleeper),
-             reader(c3.reader(),2,cnt, read_sleeper),
-             reader(c4.reader(),3,cnt, read_sleeper))
+             reader(c1.reader(),0, read_sleeper, x.writer()),
+             reader(c2.reader(),1, read_sleeper, x.writer()),
+             reader(c3.reader(),2, read_sleeper, x.writer()),
+             reader(c4.reader(),3, read_sleeper, x.writer()))
 
 def Any2Any_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+
     c1=Channel(buffer=20)
     cnt = 10
 
-    Parallel(reader(+c1,0,cnt, read_sleeper), writer(-c1,0,cnt, write_sleeper),
-             reader(+c1,1,cnt, read_sleeper), writer(-c1,1,cnt, write_sleeper),
-             reader(+c1,2,cnt, read_sleeper), writer(-c1,2,cnt, write_sleeper),
-             reader(+c1,3,cnt, read_sleeper), writer(-c1,3,cnt, write_sleeper))
+    Parallel(reader(+c1,0, read_sleeper, x.writer()), writer(-c1,0,cnt, write_sleeper),
+             reader(+c1,1, read_sleeper, x.writer()), writer(-c1,1,cnt, write_sleeper),
+             reader(+c1,2, read_sleeper, x.writer()), writer(-c1,2,cnt, write_sleeper),
+             reader(+c1,3, read_sleeper, x.writer()), writer(-c1,3,cnt, write_sleeper))
 
 def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any_Alting2Any_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=160, minimum=40, vocabulary=[0,1,2,3]))
+
     c1=Channel(buffer=1)
     c2=Channel(buffer=5)
     c3=Channel(buffer=10)
@@ -144,10 +165,10 @@ def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
              par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
              par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
              par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
-             par_reader(+c1, +c2, +c3, +c4,cnt, read_sleeper),
-             par_reader(+c1, +c2, +c3, +c4,cnt, read_sleeper),
-             par_reader(+c1, +c2, +c3, +c4,cnt, read_sleeper),
-             par_reader(+c1, +c2, +c3, +c4,cnt, read_sleeper))
+             par_reader(+c1, +c2, +c3, +c4, read_sleeper, x.writer()),
+             par_reader(+c1, +c2, +c3, +c4, read_sleeper, x.writer()),
+             par_reader(+c1, +c2, +c3, +c4, read_sleeper, x.writer()),
+             par_reader(+c1, +c2, +c3, +c4, read_sleeper, x.writer()))
 
 
 
@@ -157,18 +178,11 @@ def commtest():
             rname, rsleep = read_sleep
             wname, wsleep = write_sleep
             if not rsleep==wsleep==sleep_one: #No reason to test with both sleep_one
-                print '***',rname,wname,'***'
-                print 'One2One_Test()'
                 One2One_Test(rsleep, wsleep)
-                print 'Any2One_Test()'
                 Any2One_Test(rsleep, wsleep)
-                print 'One2AnyTest()'
                 One2Any_Test(rsleep, wsleep)
-                print 'One_Alting2Any_Test()'
                 One_Alting2Any_Test(rsleep, wsleep)
-                print 'Any2Any_Test()'
                 Any2Any_Test(rsleep,wsleep)
-                print 'Any_Alting2Any_Alting_Test()'
                 Any_Alting2Any_Alting_Test(rsleep, wsleep)
 
 if __name__ == '__main__':

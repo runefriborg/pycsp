@@ -20,19 +20,22 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
+import check
 import time
 import random
 
 @choice
-def action(id, channel_input=None):
-    print id,
+def action(assertCheck, id, channel_input=None):
+    if assertCheck:
+        assertCheck(id)
 
 @process
-def reader(cin, id,  sleeper):
+def reader(cin, id,  sleeper, assertCheck=None):
     while True:
         if sleeper: sleeper()
-        got=cin()
-        print id,
+        got = cin()
+        if assertCheck:
+            assertCheck(id)
     
 @process
 def writer(cout, id, cnt, sleeper):
@@ -42,15 +45,15 @@ def writer(cout, id, cnt, sleeper):
     retire(cout)
 
 @process
-def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
+def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
     while True:
         if sleeper: sleeper()
         
         AltSelect(
-            InputGuard(cin1, action(0)),
-            InputGuard(cin2, action(1)),
-            InputGuard(cin3, action(2)),
-            InputGuard(cin4, action(3))
+            InputGuard(cin1, action(assertCheck, 0)),
+            InputGuard(cin2, action(assertCheck, 1)),
+            InputGuard(cin3, action(assertCheck, 2)),
+            InputGuard(cin4, action(assertCheck, 3))
             )
 
 @io
@@ -63,11 +66,16 @@ def sleep_random():
 
 
 def One2One_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
+
     c1=Channel()
-    Parallel(reader(c1.reader(), 0 , read_sleeper), writer(c1.writer(),1,10, write_sleeper))
-    print
+    Parallel(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
+
     c1=Channel()
     c2=Channel()
     c3=Channel()
@@ -75,21 +83,23 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
     cnt = 10
 
-    Parallel(par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper),
+    Parallel(par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
              writer(c1.writer(),0,cnt, write_sleeper),
              writer(c2.writer(),1,cnt, write_sleeper),
              writer(c3.writer(),2,cnt, write_sleeper),
              writer(c4.writer(),3,cnt, write_sleeper))
-    print
 
 def Any2Any_Test(read_sleeper, write_sleeper):
-    c1=Channel()
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+
+    c1=Channel()    
     cnt = 10
 
-    Parallel(reader(c1.reader(),0, read_sleeper), writer(c1.writer(),0,cnt, write_sleeper),
-             reader(c1.reader(),1, read_sleeper), writer(c1.writer(),1,cnt, write_sleeper),
-             reader(c1.reader(),2, read_sleeper), writer(c1.writer(),2,cnt, write_sleeper),
-             reader(c1.reader(),3, read_sleeper), writer(c1.writer(),3,cnt, write_sleeper))
+    Parallel(reader(c1.reader(),0, read_sleeper, x.writer()), writer(c1.writer(),0,cnt, write_sleeper),
+             reader(c1.reader(),1, read_sleeper, x.writer()), writer(c1.writer(),1,cnt, write_sleeper),
+             reader(c1.reader(),2, read_sleeper, x.writer()), writer(c1.writer(),2,cnt, write_sleeper),
+             reader(c1.reader(),3, read_sleeper, x.writer()), writer(c1.writer(),3,cnt, write_sleeper))
     
 
 def autotest():
@@ -99,12 +109,8 @@ def autotest():
             wname, wsleep = write_sleep
 
             if not rsleep==wsleep==sleep_one:
-                print '***',rname,wname,'***'
-                print 'One2One_Test'
                 One2One_Test(rsleep, wsleep)
-                print 'Any2One_Alting_Test()'
                 Any2One_Alting_Test(rsleep, wsleep)
-                print 'Any2Any_Test()'
                 Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':
