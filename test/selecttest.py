@@ -47,8 +47,22 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
             
         print 'From ',c ,'got',msg
 
+@process
+def par_reader_fair(cin1,cin2,cin3,cin4, cnt, sleeper):
+    for i in range(cnt*4):
+        if sleeper: sleeper()
+        
+        c, msg = FairSelect(
+            InputGuard(cin1),
+            InputGuard(cin2),
+            InputGuard(cin3),
+            InputGuard(cin4)
+            )
+            
+        print 'From ',c ,'got',msg
 
-def Any2One_Alting_Test(read_sleeper, write_sleeper):
+
+def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
     c1=Channel('C1')
     c2=Channel('C2')
     c3=Channel('C3')
@@ -63,5 +77,8 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
              writer(-c4,3,cnt, write_sleeper))
 
 if __name__ == '__main__':
-    Any2One_Alting_Test(sleep_random, sleep_random)
+    print "Any2One_Alting_Test - AltSelect"
+    Any2One_Alting_Test(par_reader, sleep_random, sleep_random)
+    print "Any2One_Alting_Test - FairSelect"
+    Any2One_Alting_Test(par_reader_fair, sleep_random, sleep_random)
         
