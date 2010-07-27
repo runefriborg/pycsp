@@ -33,23 +33,47 @@ except ImportError, e:
     sys.stderr.write("PyCSP.net requires Pyro, the latest version is\navailable from http://pyro.sourceforge.net/.\n\n")
     raise ImportError(e)
 
-# Set current implementation
-import os
-os.environ['PYCSP'] = 'NET'
-
 # Imports
 from configuration import *
-from net import Alternation, AltSelect, InputGuard, OutputGuard
+from net import Channel, Alternation
+from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from alternation import choice
 from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from channel import ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id
 
-# Buffered channel will fallback to the default Channel, if not buffered.
-from buffer import BufferedChannel as Channel
-
 version = (0,7,1, 'net')
+
+# Set current implementation
+import pycsp.current
+pycsp.current.version = version
+pycsp.current.trace = False
+
+pycsp.current.Skip = Skip
+pycsp.current.Timeout = Timeout
+pycsp.current.SkipGuard = SkipGuard
+pycsp.current.TimeoutGuard = TimeoutGuard
+pycsp.current.choice = choice
+pycsp.current.Alternation = Alternation
+pycsp.current.Channel = Channel
+pycsp.current.ChannelPoisonException = ChannelPoisonException
+pycsp.current.ChannelRetireException = ChannelRetireException
+pycsp.current.retire = retire
+pycsp.current.poison = poison
+pycsp.current.IN = IN
+pycsp.current.OUT = OUT
+pycsp.current.io = io
+pycsp.current.Process = Process
+pycsp.current.process = process
+pycsp.current.Sequence = Sequence
+pycsp.current.Parallel = Parallel
+pycsp.current.Spawn = Spawn
+pycsp.current.current_process_id = current_process_id
+pycsp.current.FairSelect = FairSelect
+pycsp.current.AltSelect = AltSelect
+pycsp.current.InputGuard = InputGuard
+pycsp.current.OutputGuard = OutputGuard
 
 def test_suite():
     import unittest

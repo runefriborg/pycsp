@@ -29,7 +29,7 @@ except ImportError, e:
 
 import threading
 import time
-from const import *
+from pycsp.common.const import *
 
 # Decorators
 def io(func):

@@ -23,9 +23,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
-import threading
+import threading, random, time
 from channelend import ChannelRetireException
-from const import *
+from pycsp.common.const import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -123,9 +123,7 @@ class RealChannel():
         self.writers=0
 
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            self.name = str(uuid.uuid1())
+            self.name = str(random.random())+str(time.time())
         else:
             self.name=name
 

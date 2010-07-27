@@ -29,7 +29,9 @@ except ImportError, e:
     
 from scheduling import Scheduler
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
-from const import *
+from pycsp.common.const import *
+
+import time, random
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -64,18 +66,25 @@ class ChannelReq:
         return False
 
 
-class Channel:
+class Channel(object):
     """ Channel class. Blocking communication
     """
 
-    def __init__(self, name=None):
+    def __new__(cls, *args, **kargs):
+        if kargs.has_key('buffer') and kargs['buffer'] > 0:
+            import buffer                      
+            chan = buffer.BufferedChannel(*args, **kargs)
+            return chan
+        else:
+            return object.__new__(cls)
+
+    def __init__(self, name=None, buffer=0):
 
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            name = str(uuid.uuid1())
-
-        self.name=name
+            # Create unique name
+            self.name = str(random.random())+str(time.time())
+        else:
+            self.name=name
 
         self.readqueue = []
         self.writequeue = []
@@ -195,6 +204,15 @@ class Channel:
 
     def __neg__(self):
         return self.writer()
+
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
 
     def reader(self):
         self.join_reader()

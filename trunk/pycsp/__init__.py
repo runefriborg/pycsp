@@ -33,6 +33,8 @@ Modules
 > import pycsp.processes
 > import pycsp.net
 
+>>> from pycsp.threads import *
+
 >>> @process
 ... def P():
 ...     pass
@@ -47,7 +49,7 @@ Modules
 42
 
 >>> print selected # doctest:+ELLIPSIS
-<threads.guard.SkipGuard instance at 0x...>
+<pycsp.threads.guard.SkipGuard instance at 0x...>
 
 >>> cout = c.writer()
 >>> _,_ = AltSelect( OutputGuard(cout, 'MSG_DATA', "print 'sent'"), TimeoutGuard(0.01, "print 'abort'") )
@@ -85,42 +87,21 @@ any-to-any channel example
 """
 
 # Import threads version
-from threads import *
-
-# Run tests
-if __name__ == '__main__':
+if not __name__ == '__main__':
+    from threads import *
+else:
+    # Run tests
     import sys
     import unittest
     import doctest
+
+
+    sys.path.append("..")
+
     mods = []
 
-    try:
-        import greenlets
-        mods.append(greenlets)
-    except ImportError:
-        print "Skipping doctest for greenlets"
-        print
-
-    try:
-        if sys.platform == 'win32':
-            print "Skipping doctest for processes"
-            print
-        else:
-            import processes
-            mods.append(processes)
-    except ImportError:
-        print "Skipping doctest for processes"
-        print
-
-    try:
-        import net
-        mods.append(net)
-    except ImportError:
-        print "Skipping doctest for net"
-        print
-
-    import threads
-    mods.append(threads)
+    import pycsp.threads
+    mods.append(pycsp.threads)
 
     suite = unittest.TestSuite()
     for mod in mods:
