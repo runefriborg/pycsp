@@ -21,12 +21,11 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
 # Imports
 import threading
 import time, random
 from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
-from const import *
+from pycsp.common.const import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -76,7 +75,6 @@ class ChannelReq:
             self.status.cond.wait()
         self.status.cond.release()
 
-
     def offer(self, recipient):
         # Eliminate unnecessary locking, by adding an extra test
         if self.status.state == recipient.status.state == ACTIVE:
@@ -111,7 +109,7 @@ class ChannelReq:
 
 
         
-class Channel:
+class Channel(object):
     """ Channel class. Blocking communication
     
     >>> from __init__ import *
@@ -130,7 +128,15 @@ class Channel:
 
     >>> retire(cin)
     """
-    def __init__(self, name=None):
+    def __new__(cls, *args, **kargs):
+        if kargs.has_key('buffer') and kargs['buffer'] > 0:
+            import buffer                      
+            chan = buffer.BufferedChannel(*args, **kargs)
+            return chan
+        else:
+            return object.__new__(cls)
+
+    def __init__(self, name=None, buffer=0):
         self.readqueue=[]
         self.writequeue=[]
         self.ispoisoned=False
@@ -145,13 +151,8 @@ class Channel:
             self.name=name
 
         # This lock is used to ensure atomic updates of the channelend
-        # reference counting
+        # reference counting and to protect the read/write queue operations. 
         self.lock = threading.RLock()
-
-        # We can avoid protecting the queue operations with this lock
-        # , because of the Global Interpreter Lock preventing us from
-        # updating Python lists simultaneously from multiple threads.
-
     
     def check_termination(self):
         if self.ispoisoned:
@@ -188,31 +189,63 @@ class Channel:
 
     def post_read(self, req):
         self.check_termination()
-        self.readqueue.append(req) # ATOMIC
-        self.match()
+
+        success = True
+        self.lock.acquire()
+        if self.isretired or self.ispoisoned:
+            success = False
+        else:
+            self.readqueue.append(req)
+        self.lock.release()
+
+        if success:
+            self.match()
+        else:
+            self.check_termination()
+        
 
     def remove_read(self, req):
-        self.readqueue.remove(req) # ATOMIC
+        self.lock.acquire()
+        self.readqueue.remove(req)
+        self.lock.release()
 
     def post_write(self, req):
         self.check_termination()
-        self.writequeue.append(req) # ATOMIC
-        self.match()
+
+        success = True
+        self.lock.acquire()
+        if self.isretired or self.ispoisoned:
+            success = False
+        else:
+            self.writequeue.append(req)
+        self.lock.release()
+
+        if success:
+            self.match()
+        else:
+            self.check_termination()
 
     def remove_write(self, req):
-        self.writequeue.remove(req) # ATOMIC
+        self.lock.acquire()
+        self.writequeue.remove(req)
+        self.lock.release()
 
     def match(self):
-        for w in self.writequeue[:]: # ATOMIC copy
-            for r in self.readqueue[:]: # ATOMIC copy
+        self.lock.acquire()
+        for w in self.writequeue:
+            for r in self.readqueue:
                 w.offer(r)
+        self.lock.release()
+
 
     def poison(self):
+        self.lock.acquire()
         self.ispoisoned=True
-        for p in self.readqueue[:]: # ATOMIC copy
+        for p in self.readqueue:
             p.poison()
-        for p in self.writequeue[:]: # ATOMIC copy
+        for p in self.writequeue:
             p.poison()
+        self.lock.release()
 
     # syntactic sugar: cin = +chan
     def __pos__(self):
@@ -222,6 +255,17 @@ class Channel:
     def __neg__(self):
         return self.writer()
 
+    # syntactic sugar: Channel() * N
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    # syntactic sugar: N * Channel()
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+    
     def reader(self):
         """
         Join as reader
@@ -264,7 +308,7 @@ class Channel:
             if self.readers==0:
                 # Set channel retired
                 self.isretired = True
-                for p in self.writequeue[:]: # ATOMIC copy
+                for p in self.writequeue:
                     p.retire()
         self.lock.release()
 
@@ -275,7 +319,7 @@ class Channel:
             if self.writers==0:
                 # Set channel retired
                 self.isretired = True
-                for p in self.readqueue[:]: # ATOMIC copy
+                for p in self.readqueue:
                     p.retire()
         self.lock.release()        
 

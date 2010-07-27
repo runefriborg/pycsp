@@ -21,22 +21,15 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import pycsp.current as pycsp
 
-import os
-if os.environ.has_key('PYCSP'):
-    if os.environ['PYCSP'] == 'PROCESSES':
-        import pycsp.processes as pycsp
-    elif os.environ['PYCSP'] == 'GREENLETS':
-        import pycsp.greenlets as pycsp
-    elif os.environ['PYCSP'] == 'NET':
-        import pycsp.net as pycsp
-    elif os.environ['PYCSP'] == 'THREADS':
-        import pycsp.threads as pycsp
-else:
-    import pycsp.threads as pycsp
+if pycsp.trace:
+    from pycsp.common import trace as pycsp
 
 import subprocess
 import types
+
+
 
 def which(cmd):
     P = subprocess.Popen(args=('which', cmd), stdin=None, stdout=subprocess.PIPE)

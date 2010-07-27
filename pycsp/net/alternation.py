@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import inspect
 import types
 from channel import *
-from const import *
+from pycsp.common.const import *
 
 # Decorators
 def choice(func):

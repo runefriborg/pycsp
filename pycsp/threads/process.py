@@ -28,7 +28,7 @@ import threading
 import time, random
 from channel import ChannelPoisonException, ChannelRetireException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
-from const import *
+from pycsp.common.const import *
 
 # Decorators
 def process(func):
@@ -131,14 +131,17 @@ class Process(threading.Thread):
         if types.ListType == type(args) or types.TupleType == type(args):
             R = []
             for item in args:
-                if isinstance(item, ChannelEndRead):
-                    R.append(item.channel.reader())
-                elif isinstance(item, ChannelEndWrite):
-                    R.append(item.channel.writer())
-                elif item == types.ListType or item == types.DictType or item == types.TupleType:
-                    R.append(self.__mul_channel_ends(item))
-                else:
-                    R.append(item)
+                try:                    
+                    if type(item.isReader) == types.UnboundMethodType and item.isReader():
+                        R.append(item.channel.reader())
+                    elif type(item.isWriter) == types.UnboundMethodType and item.isWriter():
+                        R.append(item.channel.writer())
+                except AttributeError:
+                    if item == types.ListType or item == types.DictType or item == types.TupleType:
+                        R.append(self.__mul_channel_ends(item))
+                    else:
+                        R.append(item)
+
             if types.TupleType == type(args):
                 return tuple(R)
             else:
@@ -147,16 +150,20 @@ class Process(threading.Thread):
         elif types.DictType == type(args):
             R = {}
             for key in args:
-                if isinstance(key, ChannelEndRead):
-                    R[key.channel.reader()] = args[key]
-                elif isinstance(key, ChannelEndWrite):
-                    R[key.channel.writer()] = args[key]
-                elif isinstance(args[key], ChannelEndRead):
-                    R[key] = args[key].channel.reader() 
-                elif isinstance(args[key], ChannelEndWrite):
-                    R[key] = args[key].channel.writer() 
-                elif args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
-                    R[key] = self.__mul_channel_ends(args[key])
+                try:
+                    if type(key.isReader) == types.UnboundMethodType and key.isReader():
+                        R[key.channel.reader()] = args[key]
+                    elif type(key.isWriter) == types.UnboundMethodType and key.isWriter():
+                        R[key.channel.writer()] = args[key]
+                    elif type(args[key].isReader) == types.UnboundMethodType and args[key].isReader():
+                        R[key] = args[key].channel.reader()
+                    elif type(args[key].isWriter) == types.UnboundMethodType and args[key].isWriter():
+                        R[key] = args[key].channel.writer()
+                except AttributeError:
+                    if args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
+                        R[key] = self.__mul_channel_ends(args[key])
+                    else:
+                        R[key] = args[key]
             return R
         return args
                 
@@ -250,19 +257,49 @@ def Sequence(*plist):
         else:
             processes.append(p)
 
-    for p in processes:
-        # Call Run directly instead of start() and join() 
-        p.run()
-
-def current_process_id():
+    # For every process we simulate a new process_id. When executing
+    # in Main thread/process we set the new id in a global variable.
     try:
+        # compatible with Python 2.6+
         t = threading.current_thread()
         name = t.name
     except AttributeError:
+        # compatible with Python 2.5- 
         t = threading.currentThread()
         name = t.getName()
+
     if name == 'MainThread':
-        return 'main'
+        global MAINTHREAD_ID
+        for p in processes:
+            MAINTHREAD_ID = p.id
+
+            # Call Run directly instead of start() and join() 
+            p.run()
+        del MAINTHREAD_ID
+    else:
+        t_original_id = t.id
+        for p in processes:
+            t.id = p.id
+
+            # Call Run directly instead of start() and join() 
+            p.run()
+        t.id = t_original_id
+
+def current_process_id():
+    try:
+        # compatible with Python 2.6+
+        t = threading.current_thread()
+        name = t.name
+    except AttributeError:
+        # compatible with Python 2.5- 
+        t = threading.currentThread()
+        name = t.getName()
+
+    if name == 'MainThread':
+        try:
+            return MAINTHREAD_ID        
+        except NameError:            
+            return '__main__'
     return t.id
 
 # Run tests

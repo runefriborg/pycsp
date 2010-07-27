@@ -25,8 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import threading
 from channel import ChannelReq, ReqStatus
-import uuid
-from const import *
+import random, time
+from pycsp.common.const import *
 
 # Classes
 class Guard():
@@ -35,7 +35,7 @@ class Guard():
     """
 
     def __init__(self):
-        self.id = str(uuid.uuid1())
+        self.id = str(random.random())+str(time.time())
 
     def post_read(self, req):
         pass

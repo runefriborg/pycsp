@@ -29,7 +29,7 @@ import types
 from scheduling import Scheduler
 from channel import ChannelPoisonException, ChannelRetireException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
-from const import *
+from pycsp.common.const import *
 
 # Decorators
 def process(func):
@@ -148,14 +148,17 @@ class Process():
         if types.ListType == type(args) or types.TupleType == type(args):
             R = []
             for item in args:
-                if isinstance(item, ChannelEndRead):
-                    R.append(item.channel.reader())
-                elif isinstance(item, ChannelEndWrite):
-                    R.append(item.channel.writer())
-                elif item == types.ListType or item == types.DictType or item == types.TupleType:
-                    R.append(self.__mul_channel_ends(item))
-                else:
-                    R.append(item)
+                try:                    
+                    if type(item.isReader) == types.UnboundMethodType and item.isReader():
+                        R.append(item.channel.reader())
+                    elif type(item.isWriter) == types.UnboundMethodType and item.isWriter():
+                        R.append(item.channel.writer())
+                except AttributeError:
+                    if item == types.ListType or item == types.DictType or item == types.TupleType:
+                        R.append(self.__mul_channel_ends(item))
+                    else:
+                        R.append(item)
+
             if types.TupleType == type(args):
                 return tuple(R)
             else:
@@ -164,16 +167,20 @@ class Process():
         elif types.DictType == type(args):
             R = {}
             for key in args:
-                if isinstance(key, ChannelEndRead):
-                    R[key.channel.reader()] = args[key]
-                elif isinstance(key, ChannelEndWrite):
-                    R[key.channel.writer()] = args[key]
-                elif isinstance(args[key], ChannelEndRead):
-                    R[key] = args[key].channel.reader() 
-                elif isinstance(args[key], ChannelEndWrite):
-                    R[key] = args[key].channel.writer() 
-                elif args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
-                    R[key] = self.__mul_channel_ends(args[key])
+                try:
+                    if type(key.isReader) == types.UnboundMethodType and key.isReader():
+                        R[key.channel.reader()] = args[key]
+                    elif type(key.isWriter) == types.UnboundMethodType and key.isWriter():
+                        R[key.channel.writer()] = args[key]
+                    elif type(args[key].isReader) == types.UnboundMethodType and args[key].isReader():
+                        R[key] = args[key].channel.reader()
+                    elif type(args[key].isWriter) == types.UnboundMethodType and args[key].isWriter():
+                        R[key] = args[key].channel.writer()
+                except AttributeError:
+                    if args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
+                        R[key] = self.__mul_channel_ends(args[key])
+                    else:
+                        R[key] = args[key]
             return R
         return args
 
@@ -218,12 +225,18 @@ def Sequence(*plist):
         else:
             processes.append(p)
 
-    # Wrap processes to be able to schedule greenlets.
-    def WrapP():
-        for p in processes:
-            # Call Run directly instead of start() and join() 
-            p.run()
-    Parallel(Process(WrapP))
+    # For every process we simulate a new process_id. When executing
+    # in Main thread/process we set the new id in a global variable.
+
+    s = Scheduler()
+    _p = s.current
+    _p_original_id = _p.id
+    for p in processes:
+        _p.id = p.id
+
+        # Call Run directly instead of start() and join() 
+        p.run()
+    _p.id = _p_original_id
 
 def current_process_id():
     s = Scheduler()

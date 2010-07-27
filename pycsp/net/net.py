@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
-import uuid
 import Pyro.naming, Pyro.core
 
 from configuration import *
@@ -32,7 +31,7 @@ from alternation import *
 from channel import *
 from channelend import *
 from guard import *
-from const import *
+from pycsp.common.const import *
 
 # Classes
 class PyroServerProcess(threading.Thread):
@@ -83,7 +82,7 @@ class PyroServerManager(Pyro.core.ObjBase):
 
     def Alternation(self, reduced_guards):
         self.lock.acquire()
-        id = str(uuid.uuid1())
+        id = str(random.random())+str(time.time())
 
         # Swap channel names for channels, preserve guards
         new_guards = []
@@ -257,10 +256,18 @@ class PyroClientManager(object):
     getInstance = classmethod(getInstance)
 
 
-class Channel:
+class Channel(object):
     """ Channel class with Pyro support. Blocking communication
     """
-    def __init__(self, name=None):
+    def __new__(cls, *args, **kargs):
+        if kargs.has_key('buffer') and kargs['buffer'] > 0:
+            import buffer                      
+            chan = buffer.BufferedChannel(*args, **kargs)
+            return chan
+        else:
+            return object.__new__(cls)
+
+    def __init__(self, name=None, buffer=0):
         self.URI = PyroClientManager().URI
         server = Pyro.core.getProxyForURI(self.URI)
 
@@ -318,6 +325,15 @@ class Channel:
 
     def __neg__(self):
         return self.writer()
+
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
 
     def reader(self):
         self.join_reader()

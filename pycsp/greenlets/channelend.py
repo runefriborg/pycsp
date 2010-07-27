@@ -21,7 +21,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 """
-from const import *
+from pycsp.common.const import *
 
 # Exceptions
 class ChannelRetireException(Exception): 
@@ -82,6 +82,11 @@ class ChannelEndWrite():
         else:
             return "<ChannelEndWrite wrapping %s named %s>" % (self.channel, self.channel.name)
 
+    def isWriter(self):
+        return True
+
+    def isReader(self):
+        return False
 
 class ChannelEndRead():
     def __init__(self, channel):
@@ -112,6 +117,11 @@ class ChannelEndRead():
         else:
             return "<ChannelEndRead wrapping %s named %s>" % (self.channel, self.channel.name)
 
+    def isWriter(self):
+        return False
+
+    def isReader(self):
+        return True
 
 # Run tests
 if __name__ == '__main__':

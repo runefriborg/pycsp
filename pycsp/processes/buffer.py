@@ -1,5 +1,9 @@
 """
-Add buffering to Channel module
+BufferedChannel implementation.
+
+Automatically instantiated if buffer argument is used.
+
+A = Channel(buffer=10)
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
@@ -22,34 +26,67 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-# Imports
-from configuration import *
-from alternation import Alternation
 from channel import Channel, ChannelPoisonException, ChannelRetireException
-from channelend import retire, poison
-from process import Process, Spawn
+from channelend import poison, retire
+from process import process, Spawn
+from alternation import Alternation
+
+import pycsp.current
+if pycsp.current.trace:
+    from pycsp.common.trace import *
+
 from collections import deque
-import uuid
+import time, random
 
-class BufferedChannel(object):
-    def __new__(cls, *args, **kargs):
-        if kargs.has_key('buffer') and kargs['buffer'] > 0:
-            return object.__new__(cls)
-        else:
-            if kargs.has_key('buffer'):
-                del kargs['buffer']
-            return Channel(*args, **kargs)
+class BufferedChannel:
+    """ Channel class.
+    Blocking or buffered communication.
+    
+    >>> from pycsp import *
 
-    def __init__(self, name=None, buffer=0):
+    >>> @process
+    ... def P1(cout):
+    ...     while True:
+    ...         cout('Hello World')
+
+    >>> C = Channel()
+    >>> Spawn(P1(OUT(C)))
+    
+    >>> cin = IN(C)
+    >>> cin()
+    'Hello World'
+
+    >>> retire(cin)
+
+    Buffered channels are semantically equivalent with a chain
+    of forwarding processes.
+    >>> B = Channel(buffer=5)
+    >>> cout = OUT(B)
+    >>> for i in range(5):
+    ...     cout(i)
+
+    Poison and retire are attached to final element of the buffer.
+    >>> poison(cout)
+
+    >>> @process
+    ... def sink(cin, L):
+    ...     while True:
+    ...         L.append(cin())
+
+    >>> L = []
+    >>> Parallel(sink(IN(B), L))
+    >>> L
+    [0, 1, 2, 3, 4]
+    """
+    def __init__(self, name=None, buffer=1):
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            name = str(uuid.uuid1())
+            # Create unique name
+            name = str(random.random())+str(time.time())
 
+        self.name = name
         self.__inChan = Channel(name=name+'inChan')
         self.__outChan = Channel(name=name+'outChan')
-        self.__bufferProcess = Process(self.__proc,
-                                       self.__inChan.reader(),
+        self.__bufferProcess = self.Buffer(self.__inChan.reader(),
                                        self.__outChan.writer(),
                                        N=buffer)
 
@@ -57,7 +94,11 @@ class BufferedChannel(object):
         self.reader = self.__outChan.reader
         self.writer = self.__inChan.writer
 
-        # Start buffer process
+        # Set buffer process as deamon to allow kill if mother process
+        # exists.
+        self.__bufferProcess.daemon = True
+
+        # Start buffer process        
         Spawn(self.__bufferProcess)
 
     def __pos__(self):
@@ -65,13 +106,22 @@ class BufferedChannel(object):
 
     def __neg__(self):
         return self.writer()
-    
-    def __proc(self, cin, cout, N):
+
+    def poison(self):
+        self.__inChan.poison()
+        self.__outChan.poison()
+
+    @process
+    def Buffer(self, cin, cout, N):
         queue = deque()
         poisoned = False
         retired = False
         while True:
             try:
+                import pycsp.current
+                if pycsp.current.trace:
+                    TraceMsg(len(queue))
+
                 # Handling poison / retire
                 if (poisoned or retired):
                     if len(queue):

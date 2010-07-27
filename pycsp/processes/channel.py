@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import ctypes
+import time, random
 import cPickle as pickle
 import sys
 import multiprocessing as mp
@@ -232,18 +233,24 @@ class ShmManager(object):
                 s_cond.release()
                 r_cond.release()
 
-class Channel:
+class Channel(object):
     """ Channel class. Blocking communication
     """
+    def __new__(cls, *args, **kargs):
+        if kargs.has_key('buffer') and kargs['buffer'] > 0:
+            import buffer                      
+            chan = buffer.BufferedChannel(*args, **kargs)
+            return chan
+        else:
+            return object.__new__(cls)
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, buffer=0):
 
         if name == None:
-            # Create name based on host ID and current time
-            import uuid
-            name = str(uuid.uuid1())
-
-        self.name=name
+            # Create unique name
+            self.name = str(random.random())+str(time.time())
+        else:
+            self.name=name
 
         self.conf = Configuration()
         self.manager = ShmManager(allocate=True)
@@ -465,6 +472,15 @@ class Channel:
     def __neg__(self):
         return self.writer()
 
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+    
     def reader(self):
         self.join_reader()
         return ChannelEndRead(self)

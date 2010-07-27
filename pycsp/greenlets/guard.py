@@ -27,7 +27,7 @@ import threading
 from scheduling import Scheduler
 from channel import ChannelReq
 from process import Process
-from const import *
+from pycsp.common.const import *
 
 # Classes
 class Guard():

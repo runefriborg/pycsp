@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import threading
 from channel import ChannelReq, ReqStatus
-from const import *
+from pycsp.common.const import *
 
 # Classes
 class Guard:
