@@ -31,7 +31,7 @@ import multiprocessing as mp
 import mem
 from configuration import *
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
-from const import *
+from pycsp.common.const import *
 
 # Exceptions
 class ChannelPoisonException(Exception): 

@@ -32,7 +32,7 @@ import sys
 
 from channel import ChannelPoisonException, ChannelRetireException, Channel, ShmManager
 from channelend import ChannelEndRead, ChannelEndWrite
-from const import *
+from pycsp.common.const import *
 
 # Decorators
 def process(func):
