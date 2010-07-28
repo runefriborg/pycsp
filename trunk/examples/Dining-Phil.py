@@ -40,7 +40,7 @@ def philosopher(id, left, right, down, up):
             down(True)
 
             # pick up the forks (left and right)
-            AltSelect(
+            FairSelect(
                     OutputGuard(left, msg=True, action="right(True)"),
                     OutputGuard(right, msg=True, action="left(True)")
                     )
@@ -49,7 +49,7 @@ def philosopher(id, left, right, down, up):
             eat += 1
 
             # put down the forks (left and right)
-            AltSelect(
+            FairSelect(
                     OutputGuard(left, msg=True, action="right(True)"),
                     OutputGuard(right, msg=True, action="left(True)")
                     )
@@ -64,7 +64,7 @@ def philosopher(id, left, right, down, up):
 @process
 def fork(left, right):
     while True:
-        AltSelect(
+        FairSelect(
             # philosopher left picks up fork
             # philosopher left puts down fork
             InputGuard(left, "left()"),
@@ -92,18 +92,17 @@ def security(steps, down, up):
             # always allow this
             guards.append(InputGuard(up[i], action="n_sat_down[0] -= 1"))
 
-        AltSelect(*guards)
+        FairSelect(*guards)
 
     retire(*down)
     retire(*up)
     
 @process
 def secure_college(steps):
-    left, right, up, down = 4*[5*[None]]
-    left = map(Channel, left)
-    right = map(Channel, right)
-    up = map(Channel, up)
-    down = map(Channel, down)
+    left  = Channel() * 5
+    right = Channel() * 5
+    up    = Channel() * 5
+    down  = Channel() * 5
 
     Parallel(
         security(steps, [d.reader() for d in down] , [u.reader() for u in up]),
