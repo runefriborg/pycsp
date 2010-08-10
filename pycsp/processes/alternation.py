@@ -98,56 +98,18 @@ class Alternation:
         else:
             self.execute_frame = steps
 
-    def choose(self):
-        req_status_id = self.manager.ReqStatusDataPool.new()
-        self.manager.ReqStatus_reset(req_status_id)
 
-        reqs={}
-        try:
-            idx = 0
-            for prio_item in self.guards:
-                if len(prio_item) == 3:
-                    c, msg, action = prio_item
+    def __cleanup(self, req_status_id, reqs):
+        # Clean up
+        self.manager.ReqStatusDataPool.retire(req_status_id)
+        for req_id in reqs.keys():
+            self.manager.ChannelReqDataPool.retire(req_id)
 
-                    req_id = self.manager.ChannelReqDataPool.new()
-                    self.manager.ChannelReq_reset(req_id, req_status_id, msg=msg, write=True)
-
-                    c.post_write(req_id)
-                    op=WRITE
-                else:
-                    c, action = prio_item
-
-                    req_id = self.manager.ChannelReqDataPool.new()
-                    self.manager.ChannelReq_reset(req_id, req_status_id)
-
-                    c.post_read(req_id)
-                    op=READ
-                reqs[req_id]=(idx, c, op)
-                idx += 1
-
-        except (ChannelPoisonException, ChannelRetireException) as e:
-
-            # Clean up
-            self.manager.ReqStatusDataPool.retire(req_status_id)
-
-            for req_id in reqs.keys():
-                _, c, op = reqs[req_id]
-                if op==READ:
-                    c.remove_read(req_id)
-                else:
-                    c.remove_write(req_id)
-                self.manager.ChannelReqDataPool.retire(req_id)
-
-            raise e
-
-        # If noone have offered a channelrequest, we wait.
-        self.manager.ReqStatus_wait(req_status_id)
-
+    def __result(self, reqs):
         act=None
-        msg=None
         poison=False
         retire=False
-
+        msg=None
         for req_id in reqs.keys():
             _, c, op = reqs[req_id]
             if op==READ:
@@ -171,26 +133,69 @@ class Alternation:
                 poison=True
             if req.result==RETIRE:
                 retire=True
+        return (act, msg, poison, retire)
 
-        if poison or retire:
+    def choose(self):
+        req_status_id = self.manager.ReqStatusDataPool.new()
+        self.manager.ReqStatus_reset(req_status_id)
 
-            # Clean up
-            self.manager.ReqStatusDataPool.retire(req_status_id)
-            for req_id in reqs.keys():
-                self.manager.ChannelReqDataPool.retire(req_id)
-            
-            if poison:
-                raise ChannelPoisonException()
-            if retire:
-                raise ChannelRetireException()
+        reqs={}
+        act = None
+        poison = False
+        retire = False
+        try:
+            idx = 0
+            for prio_item in self.guards:
+                if len(prio_item) == 3:
+                    c, msg, action = prio_item
+
+                    req_id = self.manager.ChannelReqDataPool.new()
+                    self.manager.ChannelReq_reset(req_id, req_status_id, msg=msg, write=True)
+
+                    c.post_write(req_id)
+                    op=WRITE
+                else:
+                    c, action = prio_item
+
+                    req_id = self.manager.ChannelReqDataPool.new()
+                    self.manager.ChannelReq_reset(req_id, req_status_id)
+
+                    c.post_read(req_id)
+                    op=READ
+                reqs[req_id]=(idx, c, op)
+                idx += 1
+
+        except ChannelPoisonException:
+            act, msg, poison, retire = self.__result(reqs)
+            if not act:
+                self.__cleanup(req_status_id,reqs)
+                raise ChannelPoisonException
+        except ChannelRetireException:
+            act, msg, poison, retire = self.__result(reqs)
+            if not act:
+                self.__cleanup(req_status_id,reqs)
+                raise ChannelRetireException
+
+
+        # If noone have offered a channelrequest, we wait.
+        if not act:
+            self.manager.ReqStatus_wait(req_status_id)
+
+        if not act:
+            act, msg, poison, retire = self.__result(reqs)
+
+            if not act:
+                if poison:
+                    self.__cleanup(req_status_id,reqs)
+                    raise ChannelPoisonException()
+                if retire:
+                    self.__cleanup(req_status_id,reqs)
+                    raise ChannelRetireException()
 
         # Read selected guard
         idx, c, op = reqs[act]
 
-        # Clean up
-        self.manager.ReqStatusDataPool.retire(req_status_id)
-        for req_id in reqs.keys():
-            self.manager.ChannelReqDataPool.retire(req_id)
+        self.__cleanup(req_status_id,reqs)
 
         return (idx, c, msg, op)
 
