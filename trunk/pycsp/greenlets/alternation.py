@@ -98,8 +98,30 @@ class Alternation:
         else:
             self.execute_frame = steps
 
+    def __result(self, reqs):
+        act=None
+        poison=False
+        retire=False
+        for req in reqs.keys():
+            _, c, op = reqs[req]
+            if op==READ:
+                c.remove_read(req)
+            else:
+                c.remove_write(req)
+            if req.result==SUCCESS:
+                act=req
+            if req.result==POISON:
+                poison=True
+            if req.result==RETIRE:
+                retire=True
+        return (act, poison, retire)
+
     def choose(self):
         reqs={}
+        act = None
+        poison = False
+        retire = False
+
         self.s.current.setstate(ACTIVE)
         try:
             idx = 0
@@ -116,41 +138,27 @@ class Alternation:
                     op=READ
                 reqs[req]=(idx, c, op)
                 idx += 1
-
-        except (ChannelPoisonException, ChannelRetireException) as e:
-            for req in reqs.keys():
-                _, c, op = reqs[req]
-                if op==READ:
-                    c.remove_read(req)
-                else:
-                    c.remove_write(req)
-            raise e
+        except ChannelPoisonException:
+            act, poison, retire = self.__result(reqs)
+            if not act:
+                raise ChannelPoisonException
+        except ChannelRetireException:
+            act, poison, retire = self.__result(reqs)
+            if not act:
+                raise ChannelRetireException
 
         # If noone have offered a channelrequest, we wait.
-        self.s.current.wait()
-
-        act=None
-        poison=False
-        retire=False
-        for req in reqs.keys():
-            _, c, op = reqs[req]
-            if op==READ:
-                c.remove_read(req)
-            else:
-                c.remove_write(req)            
-
-            if req.result==SUCCESS:
-                act=req
-            if req.result==POISON:
-                poison=True
-            if req.result==RETIRE:
-                retire=True
+        if not act:
+            self.s.current.wait()
 
         if not act:
-            if poison:
-                raise ChannelPoisonException()
-            if retire:
-                raise ChannelRetireException()
+            act, poison, retire = self.__result(reqs)
+
+            if not act:
+                if poison:
+                    raise ChannelPoisonException()
+                if retire:
+                    raise ChannelRetireException()
 
         idx, c, op = reqs[act]
         return (idx, act, c, op)

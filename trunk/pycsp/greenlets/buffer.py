@@ -26,10 +26,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from channel import Channel, ChannelPoisonException, ChannelRetireException
-from channelend import poison, retire
-from process import process, Spawn
-from alternation import Alternation
+from .channel import Channel, ChannelPoisonException, ChannelRetireException
+from .channelend import poison, retire
+from .process import process, Spawn
+from .alternation import Alternation
 
 import pycsp.current
 if pycsp.current.trace:
@@ -133,16 +133,13 @@ class BufferedChannel:
                             if retired:
                                 retire(cin, cout)
                     else:
-                        try:
-                            if poisoned:
-                                poison(cin, cout)
-                            if retired:
-                                retire(cin, cout)
-                        except:
-                            pass
+                        if poisoned:
+                            poison(cin, cout)
+                        if retired:
+                            retire(cin, cout)
                         return # quit
                 # Queue empty
-                elif not len(queue):
+                elif len(queue) == 0:
                     queue.append(cin())
                 # Queue not full and not empty
                 elif len(queue) < N:

@@ -239,7 +239,7 @@ def FairSelect(*guards):
         chan_name = result[0].channel.name
         A.update_history(alt_key, chan_name)
     except:
-        # Can not record skip og timer guard.
+        # Can not record skip or timer guard.
         pass
     return result
 
