@@ -75,7 +75,7 @@ def io(func):
         io_thread.start()
         io_thread.s.io_block_wait(io_thread.p)
 
-        # Check for exception progation.
+        # Check for exception propagation.
         if io_thread.exception:
             raise io_thread.exception
 
