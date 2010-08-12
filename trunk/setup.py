@@ -40,7 +40,7 @@ setup(name='pycsp',
       author_email='runef@diku.dk',
       url='http://code.google.com/p/pycsp/',
       license='MIT',
-      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net', 'pycsp.common'],
+      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net', 'pycsp.common', 'pycsp.current'],
       platforms=['any'],
       classifiers=[
         "Development Status :: 4 - Beta",
