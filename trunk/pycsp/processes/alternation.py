@@ -133,6 +133,7 @@ class Alternation:
                 poison=True
             if req.result==RETIRE:
                 retire=True
+
         return (act, msg, poison, retire)
 
     def choose(self):
@@ -167,30 +168,38 @@ class Alternation:
 
         except ChannelPoisonException:
             act, msg, poison, retire = self.__result(reqs)
-            if not act:
+            if act == None:
                 self.__cleanup(req_status_id,reqs)
                 raise ChannelPoisonException
         except ChannelRetireException:
             act, msg, poison, retire = self.__result(reqs)
-            if not act:
+            if act == None:
                 self.__cleanup(req_status_id,reqs)
                 raise ChannelRetireException
 
 
         # If noone have offered a channelrequest, we wait.
-        if not act:
+        if act == None:
             self.manager.ReqStatus_wait(req_status_id)
 
-        if not act:
+        if act == None:
             act, msg, poison, retire = self.__result(reqs)
 
-            if not act:
+            if act == None:
                 if poison:
                     self.__cleanup(req_status_id,reqs)
                     raise ChannelPoisonException()
                 if retire:
                     self.__cleanup(req_status_id,reqs)
                     raise ChannelRetireException()
+            
+                print 'We should not get here in choice!!!', act, reqs
+                for req_id in reqs.keys():
+                    _, c, op = reqs[req_id]
+            
+                    req = self.manager.ChannelReqDataPool.get(req_id)
+                    print req_id, req, req.result
+
 
         # Read selected guard
         idx, c, op = reqs[act]

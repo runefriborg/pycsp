@@ -280,12 +280,17 @@ class Channel(object):
         self.restore()
 
         # Retire the syncData structure, for later reuse
+        self.lock.acquire()
         self.manager.global_lock.acquire()
-        if self.syncData.copies == 0:
-            self.manager.ChannelDataPool.retire(self.syncData_id)
+        if self.syncData.copies == 0:            
+            if self.syncData.readqueue_len == 0 and self.syncData.writequeue_len == 0: 
+                # self.manager.ChannelDataPool.retire(self.syncData_id)
+                # Temporary disabled garbage collection of shared channel structures.
+                pass
         else:
             self.syncData.copies -= 1
         self.manager.global_lock.release()
+        self.lock.release()
 
         # The self.lock is shared and doesn't need to be retired.
         
@@ -327,31 +332,29 @@ class Channel(object):
     def _read(self):
         self.restore()
 
-        done=False
-        while not done:
-            req_id = self.manager.ChannelReqDataPool.new()
-            req_status_id = self.manager.ReqStatusDataPool.new()
-            self.manager.ReqStatus_reset(req_status_id)
-            self.manager.ChannelReq_reset(req_id, req_status_id)
+        req_id = self.manager.ChannelReqDataPool.new()
+        req_status_id = self.manager.ReqStatusDataPool.new()
+        self.manager.ReqStatus_reset(req_status_id)
+        self.manager.ChannelReq_reset(req_id, req_status_id)
 
-            self.post_read(req_id)
-            self.check_termination(cleanup_req_id = req_id)
-            self.manager.ChannelReq_wait(req_id)
-            self.remove_read(req_id)
+        self.post_read(req_id)
+        self.check_termination(cleanup_req_id = req_id)
+        self.manager.ChannelReq_wait(req_id)
+        self.remove_read(req_id)
 
-            req = self.manager.ChannelReqDataPool.get(req_id)
-            if req.result==SUCCESS:
-                done=True
-                msg = pickle.loads(self.manager.MemoryHandler.read_and_free(req.mem_id))
-                
-                # Clean up
-                self.manager.ReqStatusDataPool.retire(req.status_id)
-                self.manager.ChannelReqDataPool.retire(req_id)
+        req = self.manager.ChannelReqDataPool.get(req_id)
+        if req.result==SUCCESS:
+            done=True
+            msg = pickle.loads(self.manager.MemoryHandler.read_and_free(req.mem_id))
 
-                return msg
+            # Clean up
+            self.manager.ReqStatusDataPool.retire(req.status_id)
+            self.manager.ChannelReqDataPool.retire(req_id)
 
-            self.check_termination(cleanup_req_id = req_id)
-            
+            return msg
+
+        self.check_termination(cleanup_req_id = req_id)
+
         print 'We should not get here in read!!!', req.status.state
         return None #Here we should handle that a read was cancled...
 
@@ -360,27 +363,26 @@ class Channel(object):
         self.restore()
 
         self.check_termination()
-        done=False
-        while not done:
-            req_id = self.manager.ChannelReqDataPool.new()
-            req_status_id = self.manager.ReqStatusDataPool.new()
-            self.manager.ReqStatus_reset(req_status_id)
-            self.manager.ChannelReq_reset(req_id, req_status_id, msg, write=True)
 
-            self.post_write(req_id)
-            self.manager.ChannelReq_wait(req_id)
-            self.remove_write(req_id)
+        req_id = self.manager.ChannelReqDataPool.new()
+        req_status_id = self.manager.ReqStatusDataPool.new()
+        self.manager.ReqStatus_reset(req_status_id)
+        self.manager.ChannelReq_reset(req_id, req_status_id, msg, write=True)
 
-            req = self.manager.ChannelReqDataPool.get(req_id)
-            if req.result==SUCCESS:
-                done=True
+        self.post_write(req_id)
+        self.manager.ChannelReq_wait(req_id)
+        self.remove_write(req_id)
 
-                # Clean up
-                self.manager.ReqStatusDataPool.retire(req.status_id)
-                self.manager.ChannelReqDataPool.retire(req_id)
+        req = self.manager.ChannelReqDataPool.get(req_id)
+        if req.result==SUCCESS:
+            done=True
 
-                return done
-            self.check_termination(cleanup_req_id = req_id)
+            # Clean up
+            self.manager.ReqStatusDataPool.retire(req.status_id)
+            self.manager.ChannelReqDataPool.retire(req_id)
+
+            return
+        self.check_termination(cleanup_req_id = req_id)
 
         print 'We should not get here in write!!!', req.status
         return None #Here we should handle that a read was cancled...
