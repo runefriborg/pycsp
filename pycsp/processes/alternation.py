@@ -193,12 +193,7 @@ class Alternation:
                     self.__cleanup(req_status_id,reqs)
                     raise ChannelRetireException()
             
-                print 'We should not get here in choice!!!', act, reqs
-                for req_id in reqs.keys():
-                    _, c, op = reqs[req_id]
-            
-                    req = self.manager.ChannelReqDataPool.get(req_id)
-                    print req_id, req, req.result
+                print 'We should not get here in choice!!!'            
 
 
         # Read selected guard
