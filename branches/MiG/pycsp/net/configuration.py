@@ -23,27 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Constants
-NET_SERVER_ID = 0
+NET_SERVER_URI = 0
 
 # Classes
 class Configuration(object):
-    """
-    Configuration is a singleton class.
-    
-    >>> A = Configuration()
-    >>> B = Configuration()
-    >>> A == B
-    True
-
-    Retrieve value
-    >>> Configuration().get(NET_SERVER_ID)
-    42
-
-    Set value
-    >>> Configuration().set(NET_SERVER_ID, 25)
-    >>> Configuration().get(NET_SERVER_ID)
-    25
-    """
 
     __instance = None  # the unique instance
     __conf = {}
@@ -61,7 +44,7 @@ class Configuration(object):
             cls.__instance = object.__new__(cls)
             
             cls.__conf = {
-                NET_SERVER_ID:42
+                NET_SERVER_URI:""
                 }
             
         return cls.__instance

@@ -22,7 +22,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
+from pycsp.net import *
 import time
+
+Configuration().set(NET_SERVER_URI, "PYRO://127.0.1.1:7766/7f00010176411de57a4f70356b2ac5635e")
 
 @process
 def Prefix(cin, cout, prefixItem=None):
