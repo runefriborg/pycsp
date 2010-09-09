@@ -34,146 +34,6 @@ from guard import *
 from pycsp.common.const import *
 
 # Classes
-class PyroServerProcess(threading.Thread):
-    def __init__(self, ns):
-        threading.Thread.__init__(self)
-        self.managerObj = None
-        self.cond = threading.Condition()
-        self.ns = ns
-
-    def run(self):
-        self.cond.acquire()
-
-        # Init server
-        Pyro.core.initServer()
-        Pyro.config.PYRO_NS_DEFAULTGROUP=':PyCSP'
-
-        # make sure our namespace group exists
-        try:
-            self.ns.createGroup(':PyCSP')
-        except Pyro.errors.NamingError, e:
-            pass
-
-
-        daemon = Pyro.core.Daemon()
-        daemon.useNameServer(self.ns)
-
-        self.managerObj = PyroServerManager()
-        daemon.connectPersistent(self.managerObj, 'SERVER-'+str(Configuration().get(NET_SERVER_ID)))
-        self.cond.notify()
-        self.cond.release()
-        
-        #Starting requestLoop'
-        
-        try:
-            daemon.requestLoop()
-        except Exception, e:
-            daemon.disconnect(self.managerObj)
-            daemon.shutdown()
-            raise Exception(e)
-        
-
-class PyroServerManager(Pyro.core.ObjBase):
-    def __init__(self):
-        Pyro.core.ObjBase.__init__(self)
-        self.ChannelIndex = {}
-        self.AlternationIndex = {}
-        self.lock = threading.RLock()
-
-    def Alternation(self, reduced_guards):
-        self.lock.acquire()
-        id = str(random.random())+str(time.time())
-
-        # Swap channel names for channels, preserve guards
-        new_guards = []
-        for prio_item in reduced_guards:
-            c, op, msg = prio_item
-
-            if not isinstance(c, Guard):
-                # Swap channel name for channel
-                if not self.ChannelIndex.has_key(c):
-                    self.lock.release()
-                    raise ChannelPoisonException()
-                
-                c = self.ChannelIndex[c]
-
-            new_guards.append((c, op, msg))
-
-        self.AlternationIndex[id] = RealAlternation(new_guards)
-        self.lock.release()
-        return id
-
-    def Alternation_delete(self, id):
-        del self.AlternationIndex[id]
-
-
-    def Alternation_choose(self, id):
-        idx, req, c, op = self.AlternationIndex[id].choose()
-        if isinstance(c, RealChannel):
-            c = c.name
-        return idx, c, req.msg, op
-
-    def Channel(self, name = None):
-        self.lock.acquire()
-        id = name
-        if id == None:
-            c = RealChannel()
-            self.ChannelIndex[c.name] = c
-            id = c.name
-        elif not self.ChannelIndex.has_key(id):
-            self.ChannelIndex[id] = RealChannel(id)
-        self.lock.release()
-        return id
-
-    def Channel_delete(self, id):
-        del self.ChannelIndex[id]
-        
-    def Channel_read(self, id):
-        try:
-            return self.ChannelIndex[id]._read()
-        except KeyError:
-            raise ChannelPoisonException()
-
-    def Channel_write(self, id, msg):
-        try:
-            return self.ChannelIndex[id]._write(msg)
-        except KeyError:
-            raise ChannelPoisonException()
-
-    def Channel_poison(self, id):
-        try:
-            self.ChannelIndex[id].poison()
-            self.Channel_delete(id)
-        except KeyError:
-            pass
-        
-    def Channel_join_reader(self, id):
-        try:
-            self.ChannelIndex[id].join_reader()
-        except KeyError:
-            raise ChannelPoisonException()
-
-    def Channel_leave_reader(self, id):
-        try: 
-            self.ChannelIndex[id].leave_reader()
-        except KeyError:
-            pass
-
-    def Channel_join_writer(self, id):
-        try:
-            self.ChannelIndex[id].join_writer()
-        except KeyError:
-            raise ChannelPoisonException()
-
-    def Channel_leave_writer(self, id):
-        try:
-            self.ChannelIndex[id].leave_writer()
-        except KeyError:
-            pass
-
-    def test(self):
-        return True
-
 class PyroClientManager(object):
     """
     PyroClientManageer is a singleton class.
@@ -201,55 +61,14 @@ class PyroClientManager(object):
         '''Static method to have a reference to **THE UNIQUE** instance'''
         if cls.__instance is None:
 
-            # locate the NS
-            Pyro.config.PYRO_NS_DEFAULTGROUP=':PyCSP'
-            locator = Pyro.naming.NameServerLocator()
-
-            #Searching Name Server...
-            ns = locator.getNS()
-
             # Initialize **the unique** instance
             cls.__instance = object.__new__(cls)
-            cls.__instance.nameserver = ns
 
-            def create_server():
-                # Create server
+            cls.__instance.URI = Configuration().get(NET_SERVER_URI)
+            print 'URI', cls.__instance.URI
+            cls.__instance.server = Pyro.core.getProxyForURI(cls.__instance.URI)
 
-                cls.__instance.server_process = PyroServerProcess(cls.__instance.nameserver)
-
-                cls.__instance.server_process.cond.acquire()
-                cls.__instance.server_process.daemon = True
-                cls.__instance.server_process.start()
-
-                # Wait for server to init
-                cls.__instance.server_process.cond.wait()
-                cls.__instance.server_process.cond.release()
-
-                URI = ns.resolve('SERVER-'+str(Configuration().get(NET_SERVER_ID)))
-                return URI
-
-            try:
-                # Fetch URI for server and test
-                URI= ns.resolve('SERVER-'+str(Configuration().get(NET_SERVER_ID)))
-                
-                server = Pyro.core.getProxyForURI(URI)
-                server.test()
-
-            except Pyro.errors.ProtocolError:
-                ns.unregister('SERVER-'+str(Configuration().get(NET_SERVER_ID)))
-                URI = create_server()
-
-            except Pyro.errors.NamingError:
-                try:
-                    ns.unregister('SERVER-'+str(Configuration().get(NET_SERVER_ID)))
-                except Pyro.errors.NamingError:
-                    pass
-                URI = create_server()
-
-            cls.__instance.URI = URI
-            cls.__instance.server = Pyro.core.getProxyForURI(URI)
-
-            # Found nameserver and daemon
+            # Found daemon
             
 
         return cls.__instance

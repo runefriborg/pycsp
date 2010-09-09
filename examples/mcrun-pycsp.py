@@ -12,11 +12,12 @@ Options:
 """
 
 from pycsp_import import *
-from pycsp.common.trace import *
-
 from pycsp import threads as pycsplocal
- 
+from pycsp.net import *
+from pycsp.common.mig import * 
 
+# This must be set for new channel server.
+Configuration().set(NET_SERVER_URI, "PYRO://127.0.1.1:7766/7f0001016af21de5763fd1ac4ffd822f57")
 
 import sys, types
 import time
@@ -26,7 +27,6 @@ import math
 import subprocess
 import types
 
-TraceInit('mcrun-pycsp.trace')
 
 def which(cmd):
     P = subprocess.Popen(args=('which', cmd), stdin=None, stdout=subprocess.PIPE)
@@ -90,7 +90,6 @@ def runner(cin):
 @process
 def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None, retire_on_eof=True):
 
-        TraceMsg(command[0])
 
         stdin, stdout, stderr = [None]*3
         if stdinChEnd: stdin = subprocess.PIPE
@@ -236,8 +235,10 @@ def divide_jobs(job_in, job_out, ncount, maxncount):
         if job_rest:
             job_out((job_rest, params))
         
+#@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=['linup-5.out'], execFiles=['linup-5.out'])
 @process
 def simulate(job_in, result_out, screenC, exec_file):
+    
     while True:
         ncount, params = job_in()
         data_dir = exec_file + "-data-" + str(random.random())+str(time.time())
@@ -247,13 +248,14 @@ def simulate(job_in, result_out, screenC, exec_file):
              '--ncount=' + str(ncount),
              '--dir=' + data_dir] + params)
              
-        screenC(str(cmd))
+        #screenC(str(cmd))
         Parallel(
             execute(cmd, stdoutChEnd=screenC, retire_on_eof=False)
             )
 
         result_out(data_dir)
         
+MiGInit()
 
 @process
 def merge(result_in, exec_file=''):
@@ -375,4 +377,3 @@ Parallel(
 
 
 
-TraceQuit()
