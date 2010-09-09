@@ -35,6 +35,7 @@ except ImportError, e:
 
 # Imports
 from configuration import *
+from server import start
 from net import Channel, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from alternation import choice

@@ -16,8 +16,10 @@ from pycsp import threads as pycsplocal
 from pycsp.net import *
 from pycsp.common.mig import * 
 
-# This must be set for new channel server.
-Configuration().set(NET_SERVER_URI, "PYRO://127.0.1.1:7766/7f0001016af21de5763fd1ac4ffd822f57")
+
+# Start channel server
+# This must be run a host that is accesible from the resources in MiGrid
+S = server.start()
 
 import sys, types
 import time
@@ -26,7 +28,6 @@ import math
 
 import subprocess
 import types
-
 
 def which(cmd):
     P = subprocess.Popen(args=('which', cmd), stdin=None, stdout=subprocess.PIPE)
@@ -89,7 +90,6 @@ def runner(cin):
         
 @process
 def execute(command, stdinChEnd=None, stdoutChEnd=None, stderrChEnd=None, retire_on_eof=True):
-
 
         stdin, stdout, stderr = [None]*3
         if stdinChEnd: stdin = subprocess.PIPE
@@ -248,7 +248,7 @@ def simulate(job_in, result_out, screenC, exec_file):
              '--ncount=' + str(ncount),
              '--dir=' + data_dir] + params)
              
-        #screenC(str(cmd))
+        screenC(str(cmd))
         Parallel(
             execute(cmd, stdoutChEnd=screenC, retire_on_eof=False)
             )
@@ -376,4 +376,6 @@ Parallel(
     )
 
 
+
+S.stop()
 

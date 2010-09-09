@@ -2,7 +2,7 @@
 Copyright (C) 2009 Rune M. Friborg <runef@diku.dk>
 """
 
-import pycsp.current as pycsp
+import pycsp.net as pycsp
 
 import inspect
 import cPickle as pickle
@@ -11,6 +11,8 @@ import random
 import time
 import types
 import sys
+import subprocess
+
 
 def generate_mRSL(data):
     return ""
@@ -49,11 +51,22 @@ class MiGProcess(threading.Thread):
         self.id = str(random.random())+str(time.time())
 
     def run(self):
+        print 'Run Mig Process', str(self.fn)
         # Setup MiG submission
         mRSL_data = self.mig
         #mRSL_data...
         mRSL = generate_mRSL(mRSL_data)
 
+        URI = pycsp.Configuration().get(pycsp.NET_SERVER_URI)
+
+        func_name = self.fn.func_name
+        srcfile = inspect.getsourcefile(self.fn)
+        pickled_args = pickle.dumps((self.args, self.kwargs), protocol=pickle.HIGHEST_PROTOCOL)
+
+        cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]
+        print cmd
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        stdoutdata, stderrdata = p.communicate(pickled_args)
         
 
     def __check_poison(self, args):
@@ -137,10 +150,13 @@ class MiGProcess(threading.Thread):
 
 
 def MiGInit():
+    print 'HEY'
     if 'run_from_daemon' in sys.argv:
         func_name = sys.argv[-1]
         stdindata = ''.join(sys.stdin.readlines())
         args, kwargs = pickle.loads(stdindata)
+
+        print 'Executing', func_name
 
         # Fetch main namespace and execution function
         g = inspect.currentframe().f_back.f_globals
