@@ -1,3 +1,0 @@
-include *.txt
-recursive-include test *.py
-recursive-include examples *.py *.c *.h

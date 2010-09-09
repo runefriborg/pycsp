@@ -148,9 +148,9 @@ class BufferedChannel:
                             (cin, None)
                             ]).select()
                     if g == cin:
-                        queue.append(msg)
+                        print 'cin', len(queue), msg, queue.append(msg)
                     else:
-                        queue.popleft()
+                        print 'cout', len(queue), queue.popleft()
                 # Queue full
                 else:
                     cout(queue.popleft())
