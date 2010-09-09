@@ -23,9 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
 from pycsp.net import *
+from pycsp.common.mig import * 
 import time
-
-Configuration().set(NET_SERVER_URI, "PYRO://127.0.1.1:7766/7f00010176411de57a4f70356b2ac5635e")
 
 @process
 def Prefix(cin, cout, prefixItem=None):
@@ -41,7 +40,8 @@ def Delta2(cin, cout1, cout2):
         cout1(t)
         cout2(t)
 
-@process
+#@process
+@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
 def Successor(cin, cout):
     """Adds 1 to the value read on the input channel and outputs it on the output channel.
     Infinite loop.
@@ -49,10 +49,14 @@ def Successor(cin, cout):
     while True:
         cout(cin()+1)
 
+MiGInit()
+
+server.start(host="192.168.16.135")
+
 @process
 def Consumer(cin):
     "Commstime consumer process"
-    N = 1000
+    N = 100
     ts = time.time
     t1 = ts()
     cin()
@@ -80,7 +84,7 @@ def CommsTimeBM():
              Successor(+b, -c),               # feeding back to prefix
              Consumer(+d))                         # timing process
 
-N_BM = 10
+N_BM = 1
 for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()

@@ -2,7 +2,7 @@
  * Format:     ANSI C source code
  * Creator:    McStas <http://neutron.risoe.dk>
  * Instrument: linup-5.instr (TAS1_Diff_Powder)
- * Date:       Thu Sep  9 10:44:40 2010
+ * Date:       Thu Sep  9 16:43:56 2010
  */
 
 

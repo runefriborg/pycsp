@@ -38,5 +38,10 @@ except ImportError:
     from pycsp.net import server
 
 # Start
-server.run()
+
+server_process = server.start()
+URI = server_process.uri
+print 'Server at '+str(URI)
+print 'Press enter to stop server and quit.', raw_input()
+server_process.stop()
 

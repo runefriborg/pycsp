@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
-import threading
+import threading, sys
 import Pyro.naming, Pyro.core
 
 from configuration import *
@@ -65,6 +65,11 @@ class PyroClientManager(object):
             cls.__instance = object.__new__(cls)
 
             cls.__instance.URI = Configuration().get(NET_SERVER_URI)
+            if cls.__instance.URI == "":
+                print 'ERROR: You are required to set the URI'
+                print 'Example:'
+                print 'Configuration().set(NET_SERVER_URI, "PYRO://127.0.1.1:7766/7f00010176411de57a4f70356b2ac5635e")'
+                sys.exit(0)
             print 'URI', cls.__instance.URI
             cls.__instance.server = Pyro.core.getProxyForURI(cls.__instance.URI)
 

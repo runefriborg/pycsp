@@ -35,21 +35,25 @@ from pycsp.common.const import *
 
 # Classes
 class PyroServerProcess(threading.Thread):
-    def __init__(self):
+    def __init__(self, host):
         threading.Thread.__init__(self)
         self.managerObj = None
         self.cond = threading.Condition()
         self.uri = None
+        self.host = host
 
     def run(self):
         self.cond.acquire()
 
         # Init server
         Pyro.core.initServer()
-        self._daemon = Pyro.core.Daemon()
+        self._daemon = Pyro.core.Daemon(host=self.host)
 
         self.managerObj = PyroServerManager()
+
         self.uri = self._daemon.connectPersistent(self.managerObj, 'SERVER')
+        Configuration().set(NET_SERVER_URI, self.uri)
+
         self.cond.notify()
         self.cond.release()
         
@@ -62,9 +66,11 @@ class PyroServerProcess(threading.Thread):
             self._daemon.shutdown()
             raise Exception(e)
         
-    def shutdown(self):
+    def stop(self):
         self._daemon.disconnect(self.managerObj)
         self._daemon.shutdown()
+        import time
+        time.sleep(0.2)
         
 
 class PyroServerManager(Pyro.core.ObjBase):
@@ -168,19 +174,16 @@ class PyroServerManager(Pyro.core.ObjBase):
     def test(self):
         return True
 
-def run():
-    server_process = PyroServerProcess()
+def start(host=None):
+    server_process = PyroServerProcess(host)
 
     server_process.cond.acquire()
+    server_process.daemon = True
     server_process.start()
 
     # Wait for server to init
     server_process.cond.wait()
     server_process.cond.release()
 
-    URI = server_process.uri
-    print 'Server at '+str(URI)
-    
-    print 'Press enter to stop server and quit.', raw_input()
-    server_process.shutdown()
-    return
+    return server_process
+
