@@ -65,39 +65,10 @@ class MiGProcess(threading.Thread):
 
         cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]
         print cmd
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-        stdoutdata, stderrdata = p.communicate(pickled_args)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+        #stdoutdata, stderrdata = 
+        p.communicate(pickled_args)
         
-
-    def __check_poison(self, args):
-        for arg in args:
-            try:
-                if types.ListType == type(arg) or types.TupleType == type(arg):
-                    self.__check_poison(arg)
-                elif types.DictType == type(arg):
-                    self.__check_poison(arg.keys())
-                    self.__check_poison(arg.values())
-                elif type(arg.poison) == types.UnboundMethodType:
-                    arg.poison()
-            except AttributeError:
-                pass
-
-    def __check_retire(self, args):
-        for arg in args:
-            try:
-                if types.ListType == type(arg) or types.TupleType == type(arg):
-                    self.__check_retire(arg)
-                elif types.DictType == type(arg):
-                    self.__check_retire(arg.keys())
-                    self.__check_retire(arg.values())
-                elif type(arg.retire) == types.UnboundMethodType:
-                    # Ignore if try to retire an already retired channel end.
-                    try:
-                        arg.retire()
-                    except ChannelRetireException:
-                        pass
-            except AttributeError:
-                pass
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
@@ -150,13 +121,14 @@ class MiGProcess(threading.Thread):
 
 
 def MiGInit():
-    print 'HEY'
     if 'run_from_daemon' in sys.argv:
-        func_name = sys.argv[-1]
+        func_name = sys.argv[-2]
+        uri = sys.argv[-1]
         stdindata = ''.join(sys.stdin.readlines())
         args, kwargs = pickle.loads(stdindata)
 
-        print 'Executing', func_name
+        pycsp.Configuration().set(pycsp.NET_SERVER_URI, uri)
+        #print 'Executing', func_name
 
         # Fetch main namespace and execution function
         g = inspect.currentframe().f_back.f_globals
@@ -166,13 +138,43 @@ def MiGInit():
                 p.fn(*args, **kwargs)
             except pycsp.ChannelPoisonException, e:
                 # look for channels and channel ends
-                self.__check_poison(args)
-                self.__check_poison(kwargs.values())
+                __check_poison(args)
+                __check_poison(kwargs.values())
             except pycsp.ChannelRetireException, e:
                 # look for channel ends
-                self.__check_retire(args)
-                self.__check_retire(kwargs.values())
+                __check_retire(args)
+                __check_retire(kwargs.values())
 
         sys.exit(0)
 
+
+def __check_poison(args):
+    for arg in args:
+        try:
+            if types.ListType == type(arg) or types.TupleType == type(arg):
+                __check_poison(arg)
+            elif types.DictType == type(arg):
+                __check_poison(arg.keys())
+                __check_poison(arg.values())
+            elif type(arg.poison) == types.UnboundMethodType:
+                arg.poison()
+        except AttributeError:
+            pass
+
+def __check_retire(args):
+    for arg in args:
+        try:
+            if types.ListType == type(arg) or types.TupleType == type(arg):
+                __check_retire(arg)
+            elif types.DictType == type(arg):
+                __check_retire(arg.keys())
+                __check_retire(arg.values())
+            elif type(arg.retire) == types.UnboundMethodType:
+                # Ignore if try to retire an already retired channel end.
+                try:
+                    arg.retire()
+                except ChannelRetireException:
+                    pass
+        except AttributeError:
+            pass
 
