@@ -33,7 +33,8 @@ def Prefix(cin, cout, prefixItem=None):
         cout(t)
         t = cin()
 
-@process
+#@process
+@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
 def Delta2(cin, cout1, cout2):
     while True:
         t = cin()
@@ -55,7 +56,7 @@ server.start()
 @process
 def Consumer(cin):
     "Commstime consumer process"
-    N = 100
+    N = 1000
     ts = time.time
     t1 = ts()
     cin()
