@@ -1,5 +1,5 @@
 """
-Copyright (C) 2009 Rune M. Friborg <runef@diku.dk>
+Copyright (C) 2010 Rune M. Friborg <runef@diku.dk>
 """
 
 import pycsp.net as pycsp
@@ -13,9 +13,10 @@ import types
 import sys
 import subprocess
 
+# local
+import support
+#import migrid as grid
 
-def generate_mRSL(data):
-    return ""
 
 def migprocess(vgrid='ANY', resource=[], disk=1, cputime=60, cpucount=1, nodecount=1, memory=1, inFiles=[], outFiles=[], execFiles=[]):    
     def wrap_process(func):
@@ -55,21 +56,23 @@ class MiGProcess(threading.Thread):
         # Setup MiG submission
         mRSL_data = self.mig
         #mRSL_data...
-        mRSL = generate_mRSL(mRSL_data)
 
         URI = pycsp.Configuration().get(pycsp.NET_SERVER_URI)
-
         func_name = self.fn.func_name
         srcfile = inspect.getsourcefile(self.fn)
         pickled_args = pickle.dumps((self.args, self.kwargs), protocol=pickle.HIGHEST_PROTOCOL)
-        cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]
-        print cmd
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-        p.stdin.write(pickled_args+"\n")
-        p.stdin.write("ENDOFPICKLE\n")
-        p.stdin.close()                
-        p.wait()
+
         
+        session = support.Session(self.mig, URI, srcfile, func_name, self.args, self.kwargs)
+        session.create_package()
+
+        #grid.submit(session)
+                
+
+        # New exec that are moved to EXEC section of mRSL
+        cmd = ['/usr/bin/env', 'python', 'exec.py', session.ID]
+        p = subprocess.Popen(cmd)
+        p.wait()
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
