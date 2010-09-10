@@ -62,12 +62,13 @@ class MiGProcess(threading.Thread):
         func_name = self.fn.func_name
         srcfile = inspect.getsourcefile(self.fn)
         pickled_args = pickle.dumps((self.args, self.kwargs), protocol=pickle.HIGHEST_PROTOCOL)
-
         cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]
         print cmd
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-        #stdoutdata, stderrdata = 
-        p.communicate(pickled_args)
+        p.stdin.write(pickled_args+"\n")
+        p.stdin.write("ENDOFPICKLE\n")
+        p.stdin.close()                
+        p.wait()
         
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
@@ -124,15 +125,21 @@ def MiGInit():
     if 'run_from_daemon' in sys.argv:
         func_name = sys.argv[-2]
         uri = sys.argv[-1]
-        stdindata = ''.join(sys.stdin.readlines())
+        stdindata = ""
+        while True:
+            l = sys.stdin.readline()
+            if not l or l == "ENDOFPICKLE\n":
+                break
+            stdindata += l
+
         args, kwargs = pickle.loads(stdindata)
 
         pycsp.Configuration().set(pycsp.NET_SERVER_URI, uri)
-        #print 'Executing', func_name
 
         # Fetch main namespace and execution function
         g = inspect.currentframe().f_back.f_globals
         if g.has_key(func_name):
+            print 'Executing', func_name, g[func_name]
             try:
                 p = g[func_name](*args, **kwargs)
                 p.fn(*args, **kwargs)
