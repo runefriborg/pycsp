@@ -50,8 +50,7 @@ def Successor(cin, cout):
         cout(cin()+1)
 
 MiGInit()
-
-server.start(host="192.168.16.135")
+server.start()
 
 @process
 def Consumer(cin):

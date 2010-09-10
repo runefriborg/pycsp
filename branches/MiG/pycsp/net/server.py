@@ -47,7 +47,10 @@ class PyroServerProcess(threading.Thread):
 
         # Init server
         Pyro.core.initServer()
-        self._daemon = Pyro.core.Daemon(host=self.host)
+        if self.host == None:
+            self._daemon = Pyro.core.Daemon()
+        else:
+            self._daemon = Pyro.core.Daemon(host=self.host)
 
         self.managerObj = PyroServerManager()
 
