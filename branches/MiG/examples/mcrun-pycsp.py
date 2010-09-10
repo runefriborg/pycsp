@@ -236,7 +236,8 @@ def divide_jobs(job_in, job_out, ncount, maxncount):
             job_out((job_rest, params))
         
 #@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=['linup-5.out'], execFiles=['linup-5.out'])
-@process
+#@process
+@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
 def simulate(job_in, result_out, screenC, exec_file):
     
     while True:
