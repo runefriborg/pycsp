@@ -21,9 +21,13 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from pycsp_import import *
+try:
+    from pycsp_import import *
+except:
+    pass
+
 from pycsp.net import *
-from pycsp.common.mig import * 
+from pycsp.common.grid import * 
 import time
 
 @process
@@ -33,14 +37,15 @@ def Prefix(cin, cout, prefixItem=None):
         cout(t)
         t = cin()
 
-@process
+#@process
+@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
 def Delta2(cin, cout1, cout2):
     while True:
         t = cin()
         cout1(t)
         cout2(t)
 
-#@process
+
 @migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
 def Successor(cin, cout):
     """Adds 1 to the value read on the input channel and outputs it on the output channel.

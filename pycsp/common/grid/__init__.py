@@ -15,7 +15,7 @@ import subprocess
 
 # local
 import support
-#import migrid as grid
+import migrid as grid
 
 
 def migprocess(vgrid='ANY', resource=[], disk=1, cputime=60, cpucount=1, nodecount=1, memory=1, inFiles=[], outFiles=[], execFiles=[]):    
@@ -60,19 +60,20 @@ class MiGProcess(threading.Thread):
         URI = pycsp.Configuration().get(pycsp.NET_SERVER_URI)
         func_name = self.fn.func_name
         srcfile = inspect.getsourcefile(self.fn)
-        pickled_args = pickle.dumps((self.args, self.kwargs), protocol=pickle.HIGHEST_PROTOCOL)
-
         
         session = support.Session(self.mig, URI, srcfile, func_name, self.args, self.kwargs)
         session.create_package()
+
+        grid.upload(session)
+        
 
         #grid.submit(session)
                 
 
         # New exec that are moved to EXEC section of mRSL
-        cmd = ['/usr/bin/env', 'python', 'exec.py', session.ID]
-        p = subprocess.Popen(cmd)
-        p.wait()
+        #cmd = ['/usr/bin/env', 'python', 'exec.py', session.ID]
+        #p = subprocess.Popen(cmd)
+        #p.wait()
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
