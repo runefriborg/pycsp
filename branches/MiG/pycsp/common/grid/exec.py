@@ -1,13 +1,9 @@
 """
 Copyright (C) 2010 Rune M. Friborg <runef@diku.dk>
 """
-
 import subprocess
 import sys, os
 import cPickle as pickle
-
-TEMP_DIR = "/tmp"
-os.chdir(TEMP_DIR)
 
 session_ID = sys.argv[1]
 package_file = session_ID + ".tgz"
@@ -24,7 +20,10 @@ subprocess.Popen(["tar", "-xzf", package_file]).wait()
 os.chdir(session_ID)
 
 # load values
-URI, func_name, srcfile, pickled_args = pickle.load(session_ID + ".data")
+f = open(session_ID + ".data", "r")
+URI, func_name, srcfile, pickled_args = pickle.load(f)
+f.close()
+
 
 # Exec
 cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]

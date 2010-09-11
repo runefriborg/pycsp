@@ -3,12 +3,14 @@ Copyright (C) 2010 Rune M. Friborg <runef@diku.dk>
 """
 import uuid
 import os, shutil
+import cPickle as pickle
+import subprocess
 
 TEMP_DIR="/tmp"
 
 class Session:
-    def Session(self, grid_settings, URI, srcfile, fn, args, kwargs):
-        self.ID = uuid.uuid4()
+    def __init__(self, grid_settings, URI, srcfile, fn, args, kwargs):
+        self.ID = "pycsp_grid_" + str(uuid.uuid4())
         self.grid_settings = grid_settings
         self.URI = URI
         self.srcfile = srcfile
@@ -17,43 +19,32 @@ class Session:
         self.kwargs = kwargs
         
     def create_package(self):
-        self.package_file = self.ID + ".tgz"
+        self.package_file = TEMP_DIR + "/" + self.ID + ".tgz"
 
-        curdir = os.path.realpath(os.curdir)
-        os.chdir(TEMP_DIR)
-        
-        os.mkdir(self.ID)
+        PACKAGE_DIR = TEMP_DIR + "/" + self.ID
+        os.mkdir(PACKAGE_DIR)
         
         # copy pycsp
-        pycsp_loc = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-        shutil.copytree(pycsp_loc, self.ID + "/")
+        pycsp_loc = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        shutil.copytree(pycsp_loc, PACKAGE_DIR + "/" + 'pycsp', symlinks=True)
 
         # copy input files
-        shutil.copy(curdir + "/" + self.srcfile, self.ID + "/")
+        shutil.copy(self.srcfile, PACKAGE_DIR + "/" + self.srcfile)
         for f in self.grid_settings['inFiles']:
-            shutil.copy(curdir + "/" + f, self.ID + "/")
-        
+            shutil.copy(f, PACKAGE_DIR + "/" + f)
+
+        # create arg file
+        pickled_args = pickle.dumps((self.args, self.kwargs), protocol=pickle.HIGHEST_PROTOCOL)
+
+        f = open(PACKAGE_DIR + "/" + self.ID + ".data", "w")
+        pickle.dump((self.URI, self.fn, self.srcfile, pickled_args), f , protocol=pickle.HIGHEST_PROTOCOL)
+        f.close()
+
         # pack
-        subprocess.Popen(["tar", "-xcf", package_file, self.ID]).wait()
+        subprocess.Popen(["tar", "-czf", self.package_file, "-C", TEMP_DIR, self.ID]).wait()
 
 
-# Change dir to session folder
-os.chdir(session_ID)
-
-# load values
-URI, func_name, srcfile, pickled_args = pickle.load(session_ID + ".data")
-
-# Exec
-cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]
-print cmd
-p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-p.stdin.write(pickled_args+"\n")
-p.stdin.write("ENDOFPICKLE\n")
-p.stdin.close()                
-p.wait()
-
-
-
+        
 
 
 
