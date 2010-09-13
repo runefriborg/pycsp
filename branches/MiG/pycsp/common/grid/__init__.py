@@ -10,7 +10,7 @@ import threading
 import random
 import time
 import types
-import sys
+import os, sys
 import subprocess
 
 # local
@@ -64,16 +64,36 @@ class MiGProcess(threading.Thread):
         session = support.Session(self.mig, URI, srcfile, func_name, self.args, self.kwargs)
         session.create_package()
 
-        grid.upload(session)
+
+        #grid.execute_test(session)
+        grid_job = grid.Migjob("/usr/bin/env python exec.py " + session.ID,
+                    self.mig["vgrid"],
+                    session.ID,
+                    grid.TEMPDIR)
+        grid_job.add_input_file(session.ID + ".tgz")
+        grid_job.add_input_file("exec.py")
+        
+        grid.migput(os.path.dirname(__file__) + "/exec.py", "exec.py")
+        grid.migput(session.package_file, session.ID + ".tgz")
+        
+
+        #grid_job.set_resources()
+        #grid'resource':resource,
+        #            'disk':disk,
+        #            'cputime':cputime,
+        #            'cpucount':cpucount,
+        #            'nodecount':nodecount,
+        #            'memory':memory,
+        #            'inFiles':inFiles,
+        #            'outFiles':outFiles,
+        #            'execFiles':execFiles
+
+        grid_job.submit()
+        grid_job.wait()
         
 
         #grid.submit(session)
                 
-
-        # New exec that are moved to EXEC section of mRSL
-        #cmd = ['/usr/bin/env', 'python', 'exec.py', session.ID]
-        #p = subprocess.Popen(cmd)
-        #p.wait()
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):

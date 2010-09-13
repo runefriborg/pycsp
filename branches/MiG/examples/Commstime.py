@@ -37,8 +37,7 @@ def Prefix(cin, cout, prefixItem=None):
         cout(t)
         t = cin()
 
-#@process
-@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
+@process
 def Delta2(cin, cout1, cout2):
     while True:
         t = cin()
