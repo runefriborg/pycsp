@@ -24,6 +24,9 @@ f = open(session_ID + ".data", "r")
 URI, func_name, srcfile, pickled_args = pickle.load(f)
 f.close()
 
+# Test connection
+cmd = ["/usr/bin/env", "ping", "-c", "1", "130.226.158.14"]
+subprocess.Popen(cmd).wait()
 
 # Exec
 cmd = ['/usr/bin/env', 'python', srcfile, 'run_from_daemon', func_name, str(URI)]

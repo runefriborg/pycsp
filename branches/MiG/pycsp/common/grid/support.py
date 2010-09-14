@@ -28,6 +28,10 @@ class Session:
         pycsp_loc = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         shutil.copytree(pycsp_loc, PACKAGE_DIR + "/" + 'pycsp', symlinks=True)
 
+        # copy Pyro
+        pyro_loc = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))) + "/Pyro"
+        shutil.copytree(pyro_loc, PACKAGE_DIR + "/" + 'Pyro', symlinks=True)
+
         # copy input files
         shutil.copy(self.srcfile, PACKAGE_DIR + "/" + self.srcfile)
         for f in self.grid_settings['inFiles']:
@@ -37,7 +41,7 @@ class Session:
         pickled_args = pickle.dumps((self.args, self.kwargs), protocol=pickle.HIGHEST_PROTOCOL)
 
         f = open(PACKAGE_DIR + "/" + self.ID + ".data", "w")
-        pickle.dump((self.URI, self.fn, self.srcfile, pickled_args), f , protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump((str(self.URI), self.fn, self.srcfile, pickled_args), f , protocol=pickle.HIGHEST_PROTOCOL)
         f.close()
 
         # pack

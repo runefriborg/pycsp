@@ -109,7 +109,7 @@ class ChannelReq:
 
 
 
-class RealChannel():
+class RealChannel:
     """
     RealChannel is the Channel object that handles synchronization
     at the channel server daemon.

@@ -29,7 +29,7 @@ import random, time
 from pycsp.common.const import *
 
 # Classes
-class Guard():
+class Guard:
     """
     The empty interface of a guard.
     """

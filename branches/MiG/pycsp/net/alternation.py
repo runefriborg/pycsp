@@ -104,10 +104,14 @@ class RealAlternation:
                 reqs[req]=(idx, c, op)
                 idx += 1
 
-        except (ChannelPoisonException, ChannelRetireException) as e:
+        except ChannelPoisonException:
             act, poison, retire = self.__result(reqs)
             if not act:
-                raise e
+                raise ChannelPoisonException
+        except ChannelRetireException:
+            act, poison, retire = self.__result(reqs)
+            if not act:
+                raise ChannelRetireException
 
         # If noone have offered a channelrequest, we wait.
         if not act:
