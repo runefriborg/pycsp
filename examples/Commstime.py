@@ -54,7 +54,7 @@ def Successor(cin, cout):
         cout(cin()+1)
 
 MiGInit()
-server.start()
+server.start(host="130.226.158.14")
 
 @process
 def Consumer(cin):
@@ -65,7 +65,7 @@ def Consumer(cin):
     cin()
     t1 = ts()
     for i in range(N):
-        cin()
+        print cin()
     t2 = ts()
     dt = t2-t1
     tchan = dt / (4 * N)

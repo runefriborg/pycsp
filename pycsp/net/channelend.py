@@ -53,7 +53,7 @@ def poison(*list_of_channelEnds):
         channelEnd.poison()
 
 # Classes
-class ChannelEndWrite():
+class ChannelEndWrite:
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False
@@ -88,7 +88,7 @@ class ChannelEndWrite():
     def isReader(self):
         return False
 
-class ChannelEndRead():
+class ChannelEndRead:
     def __init__(self, channel):
         self.channel = channel
         self.isretired = False

@@ -66,13 +66,14 @@ class MiGProcess(threading.Thread):
 
 
         #grid.execute_test(session)
+    
         grid_job = grid.Migjob("/usr/bin/env python exec.py " + session.ID,
                     self.mig["vgrid"],
                     session.ID,
                     grid.TEMPDIR)
         grid_job.add_input_file(session.ID + ".tgz")
         grid_job.add_input_file("exec.py")
-        
+
         grid.migput(os.path.dirname(__file__) + "/exec.py", "exec.py")
         grid.migput(session.package_file, session.ID + ".tgz")
         
