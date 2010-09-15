@@ -11,15 +11,14 @@ Options:
   --help            print this info
 """
 
-from pycsp_import import *
+try:
+    from pycsp_import import *
+except:
+    pass
+
 from pycsp import threads as pycsplocal
 from pycsp.net import *
-from pycsp.common.mig import * 
-
-
-# Start channel server
-# This must be run a host that is accesible from the resources in MiGrid
-S = server.start()
+from pycsp.common.grid import * 
 
 import sys, types
 import time
@@ -236,10 +235,17 @@ def divide_jobs(job_in, job_out, ncount, maxncount):
             job_out((job_rest, params))
         
 #@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=['linup-5.out'], execFiles=['linup-5.out'])
+#@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
 #@process
-@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
+
+rlist = ['pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
+
+@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'])
 def simulate(job_in, result_out, screenC, exec_file):
-    
+
+    import socket
+    print "HOST:", socket.gethostname()
+
     while True:
         ncount, params = job_in()
         data_dir = exec_file + "-data-" + str(random.random())+str(time.time())
@@ -249,14 +255,18 @@ def simulate(job_in, result_out, screenC, exec_file):
              '--ncount=' + str(ncount),
              '--dir=' + data_dir] + params)
              
-        screenC(str(cmd))
+        print str(cmd)
         Parallel(
-            execute(cmd, stdoutChEnd=screenC, retire_on_eof=False)
+            execute(cmd, retire_on_eof=False)
             )
 
         result_out(data_dir)
         
 MiGInit()
+
+# Start channel server
+# This must be run a host that is accesible from the resources in MiGrid
+server.start(host="130.226.158.14")
 
 @process
 def merge(result_in, exec_file=''):
@@ -375,8 +385,4 @@ Parallel(
     mcstas(  +C[1], -C[4], -C[0]),
     compile( -C[2], +C[4], -C[0])
     )
-
-
-
-S.stop()
 
