@@ -74,26 +74,18 @@ class MiGProcess(threading.Thread):
         grid_job.add_input_file(session.ID + ".tgz")
         grid_job.add_input_file("exec.py")
 
+        grid_job.set_resources("\n".join(self.mig["resource"]))
+        grid_job.set_disk(self.mig["disk"])
+        grid_job.set_cpu_time(self.mig["cputime"])
+        grid_job.set_node_count(self.mig["nodecount"])
+        grid_job.set_memory(self.mig["memory"])
+                    
         grid.migput(os.path.dirname(__file__) + "/exec.py", "exec.py")
         grid.migput(session.package_file, session.ID + ".tgz")
-        
 
-        #grid_job.set_resources()
-        #grid'resource':resource,
-        #            'disk':disk,
-        #            'cputime':cputime,
-        #            'cpucount':cpucount,
-        #            'nodecount':nodecount,
-        #            'memory':memory,
-        #            'inFiles':inFiles,
-        #            'outFiles':outFiles,
-        #            'execFiles':execFiles
-
+    
         grid_job.submit()
         grid_job.wait()
-        
-
-        #grid.submit(session)
                 
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
