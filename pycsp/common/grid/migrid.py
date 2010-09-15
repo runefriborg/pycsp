@@ -310,7 +310,7 @@ class Migjob:
                 self.node_count = node_count
 
         def set_resources(self, resources):
-                self.resouces = resources
+                self.resources = resources
 
 	def set_architecture(self, arch):
 		self.arch = arch
