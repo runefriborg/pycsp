@@ -247,13 +247,27 @@ def divide_jobs(job_in, job_out, ncount, maxncount):
 #rlist = ['amigos50.diku.dk.0_*', 'pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
 #@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
 
-@migprocess(vgrid='DCSC', inFiles=['linup-5.out'], cputime=1200)
-def simulate(job_in, result_out, screenC, exec_file):
-    Parallel(simulate2(job_in, result_out, screenC, exec_file) * 4)
+#@migprocess(vgrid='DCSC', inFiles=['linup-5.out'], cputime=1200)
 
 
 @process
-def simulate2(job_in, result_out, screenC, exec_file):
+def simulate(job_in, result_out, screenC, exec_file):
+    Parallel(simulate_8core(job_in, result_out, screenC, exec_file),
+             simulate_4core(job_in, result_out, screenC, exec_file) * 4)
+    
+rlist = ['amigos50.diku.dk.0_*']
+@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
+def simulate_8core(job_in, result_out, screenC, exec_file):
+    Parallel(simulate_cores(job_in, result_out, screenC, exec_file) * 8)
+
+rlist = ['pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
+@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
+def simulate_4core(job_in, result_out, screenC, exec_file):
+    Parallel(simulate_cores(job_in, result_out, screenC, exec_file) * 4)
+
+
+@process
+def simulate_cores(job_in, result_out, screenC, exec_file):
     print current_process_id()
 
     while True:

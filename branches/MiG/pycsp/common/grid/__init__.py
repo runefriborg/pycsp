@@ -90,11 +90,11 @@ class MiGProcess(threading.Thread):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MiGProcess(self.fn, self.mig['vgrid'], self.mig['resource'], self.mig['disk'], self.mig['cputime'], self.mig['cpucount'], self.mig['nodecount'], self.mig['memory'], self.mig['inFiles'], self.mig['outFiles'], self.mig['execFiles'], *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MiGProcess(self.fn, self.mig['vgrid'], self.mig['resource'], self.mig['disk'], self.mig['cputime'], self.mig['cpucount'], self.mig['nodecount'], self.mig['memory'], self.mig['inFiles'], self.mig['outFiles'], self.mig['execFiles'], *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
