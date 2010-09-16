@@ -1,0 +1,459 @@
+python mcrun-pycsp.py [ threads | processes | greenlets | net ]
+Using version (0, 7, 1, 'threads')
+TIME: 1284637640.03
+URI PYRO://130.226.158.14:7766/0a00000141fd1de9097a251e56f9f0aedf
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig ProcessRun Mig Process <function simulate at 0x1a352050>
+ <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>Run Mig Process <function simulate at 0x1a352050>
+
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process <function simulate at 0x1a352050>
+Run Mig Process Run Mig Process <function simulate at 0x1a352050><function simulate at 0x1a352050>
+
+Run Mig Process <function simulate at 0x1a352050>
+[pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53] Adding input file: pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53.tgz
+[pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53] Adding input file: exec.py
+[pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5] Adding input file: pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5.tgz
+[pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] Adding input file: pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15.tgz
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] Adding input file: exec.py
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] Adding input file: pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7.tgz
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] Adding input file: exec.py
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] Adding input file: pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075.tgz
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] Adding input file: exec.py
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] Adding input file: pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18.tgz
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] Adding input file: exec.py
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] Adding input file: pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74.tgz
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] Adding input file: exec.py
+[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] Adding input file: pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64.tgz
+[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] Adding input file: pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb.tgz
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53] Submitting MiG job to vgrid DCSC
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] Adding input file: pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344.tgz
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] Adding input file: pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0.tgz
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] Adding input file: exec.py
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] Adding input file: pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c.tgz
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] Adding input file: exec.py
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] Adding input file: pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34.tgz
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] Adding input file: exec.py
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] Adding input file: pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7.tgz
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] Submitting MiG job to vgrid DCSC
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] Adding input file: pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c.tgz
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] Adding input file: pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b.tgz
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] Adding input file: exec.py
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/exec.py). It can now be used as an inputfile in your .mRSL files
+
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] Submitting MiG job to vgrid DCSC
+[pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5] Job submitted with MiG id: 333834_9_16_2010__11_47_25_dk.migrid.org.0
+[pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5] Waiting for result. Checking status every 10 seconds.
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] Submitting MiG job to vgrid DCSC
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] Submitting MiG job to vgrid DCSC
+[pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53] Job submitted with MiG id: 333835_9_16_2010__11_47_25_dk.migrid.org.0
+[pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53] Waiting for result. Checking status every 10 seconds.
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] Submitting MiG job to vgrid DCSC
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] Job submitted with MiG id: 333837_9_16_2010__11_47_25_dk.migrid.org.0
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] Waiting for result. Checking status every 10 seconds.
+Got non-empty output from migput.py: 0
+A 'normal' file was uploaded (/pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0.tgz). It can now be used as an inputfile in your .mRSL files
+
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] Submitting MiG job to vgrid DCSC
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] Job submitted with MiG id: 333839_9_16_2010__11_47_25_dk.migrid.org.0[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] Job submitted with MiG id: 333836_9_16_2010__11_47_25_dk.migrid.org.0
+
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] Job submitted with MiG id: 333840_9_16_2010__11_47_25_dk.migrid.org.0
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] Job submitted with MiG id: 333838_9_16_2010__11_47_25_dk.migrid.org.0
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] Job submitted with MiG id: 333841_9_16_2010__11_47_25_dk.migrid.org.0
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] Job submitted with MiG id: 333842_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] Job submitted with MiG id: 333844_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] Job submitted with MiG id: 333845_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] Job submitted with MiG id: 333846_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] Job submitted with MiG id: 333843_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] Job submitted with MiG id: 333848_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] Job submitted with MiG id: 333849_9_16_2010__11_47_27_dk.migrid.org.0
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] Job submitted with MiG id: 333847_9_16_2010__11_47_26_dk.migrid.org.0
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] Waiting for result. Checking status every 10 seconds.
+[pycsp_grid_540d84fd-bb4e-4946-a9b6-27017ae1d3a5] New Status: Executing
+[pycsp_grid_1b8d927f-4ec7-4e07-a738-d0697ac31e53] New Status: Executing
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] New Status: Queued
+[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] New Status: Queued
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] New Status: Queued
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] New Status: Queued
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] New Status: Queued
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] New Status: Queued
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] New Status: Queued
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] New Status: Queued
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] New Status: Queued
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] New Status: Queued
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] New Status: Queued
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] New Status: Queued
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] New Status: Queued
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] New Status: Queued
+[pycsp_grid_9ecb182f-d230-4d9e-ac2e-a0fb83c54a64] New Status: Executing
+[pycsp_grid_70a608aa-8919-43c0-a347-83d91758bf74] New Status: Executing
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] New Status: Executing
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] New Status: Executing
+[pycsp_grid_42235a81-127e-4519-9cf7-1887790889e7] New Status: Executing
+job 0 done at time 1284637727.29mcformat: Will process and merge/scan 0 data file in 0 directory.
+[pycsp_grid_4d4a9b6c-aeb5-4e8a-ab74-379f34cfba18] New Status: Executing
+[pycsp_grid_37a11019-ed3d-4b3d-9716-8bc8f16523bb] New Status: Executing
+[pycsp_grid_c966f818-2213-4754-9a13-eba85f221e34] New Status: Executing
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] New Status: Executing
+job 1 done at time 1284637729.85mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 2 done at time 1284637732.19mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 3 done at time 1284637732.2mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 4 done at time 1284637733.31mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 5 done at time 1284637734.31mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 6 done at time 1284637734.83mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 7 done at time 1284637735.5mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 8 done at time 1284637737.74mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 9 done at time 1284637738.14mcformat: Will process and merge/scan 0 data file in 0 directory.
+[pycsp_grid_d5ed1071-e3bc-4cb4-b4f2-e1cc0636645b] New Status: Executing
+[pycsp_grid_63fc527c-bff5-4302-93a4-b838bf97042c] New Status: Executing
+job 10 done at time 1284637739.85mcformat: Will process and merge/scan 0 data file in 0 directory.
+[pycsp_grid_46f473d8-e7d2-4e3e-9c04-b06b5fb109c7] New Status: Executing
+job 11 done at time 1284637741.76mcformat: Will process and merge/scan 0 data file in 0 directory.
+[pycsp_grid_f348c967-7f93-4ff6-8ad4-766a570a8344] New Status: Executing
+job 12 done at time 1284637763.97mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 13 done at time 1284637764.16mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 14 done at time 1284637764.67mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 15 done at time 1284637769.65mcformat: Will process and merge/scan 0 data file in 0 directory.
+[pycsp_grid_57d7b1fc-eedd-4cba-8f1c-4bb8252787c0] New Status: Executing
+job 16 done at time 1284637780.8mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 17 done at time 1284637781.29mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 18 done at time 1284637784.98mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 19 done at time 1284637785.09mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 20 done at time 1284637785.41mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 21 done at time 1284637791.11mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 22 done at time 1284637791.68mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 23 done at time 1284637791.84mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 24 done at time 1284637792.03mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 25 done at time 1284637792.61mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 26 done at time 1284637794.27mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 27 done at time 1284637795.36mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 28 done at time 1284637801.68mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 29 done at time 1284637808.96mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 30 done at time 1284637811.32mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 31 done at time 1284637812.04mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 32 done at time 1284637814.68mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 33 done at time 1284637820.33mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 34 done at time 1284637822.5mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 35 done at time 1284637823.39mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 36 done at time 1284637823.51mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 37 done at time 1284637823.7mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 38 done at time 1284637824.18mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 39 done at time 1284637824.58mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 40 done at time 1284637824.93mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 41 done at time 1284637825.1mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 42 done at time 1284637826.1mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 43 done at time 1284637826.41mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 44 done at time 1284637827.39mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 45 done at time 1284637828.22mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 46 done at time 1284637828.77mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 47 done at time 1284637829.26mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 48 done at time 1284637829.92mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 49 done at time 1284637830.26mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 50 done at time 1284637831.07mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 51 done at time 1284637831.51mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 52 done at time 1284637831.6mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 53 done at time 1284637832.54mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 54 done at time 1284637833.62mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 55 done at time 1284637833.62mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 56 done at time 1284637833.67mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 57 done at time 1284637833.91mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 58 done at time 1284637834.24mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 59 done at time 1284637834.63mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 60 done at time 1284637835.49mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 61 done at time 1284637837.44mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 62 done at time 1284637837.85mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 63 done at time 1284637838.66mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 64 done at time 1284637838.75mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 65 done at time 1284637838.85mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 66 done at time 1284637838.99mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 67 done at time 1284637839.1mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 68 done at time 1284637839.2mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 69 done at time 1284637842.88mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 70 done at time 1284637842.94mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 71 done at time 1284637843.13mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 72 done at time 1284637843.82mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 73 done at time 1284637844.09mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 74 done at time 1284637844.69mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 75 done at time 1284637845.09mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 76 done at time 1284637851.13mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 77 done at time 1284637855.68mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 78 done at time 1284637859.75mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 79 done at time 1284637860.36mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 80 done at time 1284637860.4mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 81 done at time 1284637862.13mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 82 done at time 1284637864.82mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 83 done at time 1284637865.95mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 84 done at time 1284637870.24mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 85 done at time 1284637872.07mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 86 done at time 1284637874.38mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 87 done at time 1284637875.56mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 88 done at time 1284637875.82mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 89 done at time 1284637875.82mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 90 done at time 1284637877.02mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 91 done at time 1284637879.1mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 92 done at time 1284637884.65mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 93 done at time 1284637888.81mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 94 done at time 1284637890.13mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 95 done at time 1284637890.17mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 96 done at time 1284637891.08mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 97 done at time 1284637891.73mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 98 done at time 1284637891.92mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 99 done at time 1284637894.55mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 100 done at time 1284637895.92mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 101 done at time 1284637895.93mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 102 done at time 1284637896.66mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 103 done at time 1284637896.69mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 104 done at time 1284637897.42mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 105 done at time 1284637898.34mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 106 done at time 1284637902.25mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 107 done at time 1284637906.23mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 108 done at time 1284637911.48mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 109 done at time 1284637912.46mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 110 done at time 1284637913.49mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 111 done at time 1284637914.33mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 112 done at time 1284637914.61mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 113 done at time 1284637914.76mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 114 done at time 1284637915.47mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 115 done at time 1284637916.0mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 116 done at time 1284637916.11mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 117 done at time 1284637916.47mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 118 done at time 1284637917.16mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 119 done at time 1284637917.61mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 120 done at time 1284637920.05mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 121 done at time 1284637920.29mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 122 done at time 1284637920.97mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 123 done at time 1284637924.61mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 124 done at time 1284637925.4mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 125 done at time 1284637928.1mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 126 done at time 1284637928.42mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 127 done at time 1284637930.31mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 128 done at time 1284637932.12mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 129 done at time 1284637932.59mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 130 done at time 1284637932.99mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 131 done at time 1284637933.97mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 132 done at time 1284637934.11mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 133 done at time 1284637934.58mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 134 done at time 1284637935.58mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 135 done at time 1284637938.21mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 136 done at time 1284637939.2mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 137 done at time 1284637939.29mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 138 done at time 1284637939.65mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 139 done at time 1284637942.45mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 140 done at time 1284637942.45mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 141 done at time 1284637942.79mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 142 done at time 1284637943.49mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 143 done at time 1284637944.67mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 144 done at time 1284637946.03mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 145 done at time 1284637947.0mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 146 done at time 1284637948.62mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 147 done at time 1284637948.64mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 148 done at time 1284637949.02mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 149 done at time 1284637949.08mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 150 done at time 1284637949.36mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 151 done at time 1284637949.76mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 152 done at time 1284637951.26mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 153 done at time 1284637951.61mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 154 done at time 1284637953.23mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 155 done at time 1284637955.43mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 156 done at time 1284637960.13mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 157 done at time 1284637960.24mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 158 done at time 1284637966.79mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 159 done at time 1284637967.58mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 160 done at time 1284637970.33mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 161 done at time 1284637970.94mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 162 done at time 1284637971.6mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 163 done at time 1284637973.91mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 164 done at time 1284637975.35mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 165 done at time 1284637981.0mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 166 done at time 1284637981.22mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 167 done at time 1284637985.21mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 168 done at time 1284637990.09mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 169 done at time 1284637993.65mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 170 done at time 1284637994.73mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 171 done at time 1284637995.37mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 172 done at time 1284637995.65mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 173 done at time 1284637995.81mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 174 done at time 1284637996.54mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 175 done at time 1284637997.11mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 176 done at time 1284637998.93mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 177 done at time 1284637999.47mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 178 done at time 1284638000.73mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 179 done at time 1284638001.18mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 180 done at time 1284638001.21mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 181 done at time 1284638001.3mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 182 done at time 1284638001.46mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 183 done at time 1284638001.74mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 184 done at time 1284638001.92mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 185 done at time 1284638002.14mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 186 done at time 1284638003.32mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 187 done at time 1284638004.65mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 188 done at time 1284638004.91mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 189 done at time 1284638005.72mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 190 done at time 1284638007.12mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 191 done at time 1284638007.66mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 192 done at time 1284638007.87mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 193 done at time 1284638009.36mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 194 done at time 1284638010.15mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 195 done at time 1284638010.27mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 196 done at time 1284638011.07mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 197 done at time 1284638011.95mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 198 done at time 1284638013.34mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 199 done at time 1284638014.28mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 200 done at time 1284638015.61mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 201 done at time 1284638018.3mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 202 done at time 1284638019.1mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 203 done at time 1284638019.49mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 204 done at time 1284638020.59mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 205 done at time 1284638021.88mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 206 done at time 1284638026.56mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 207 done at time 1284638027.97mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 208 done at time 1284638028.05mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 209 done at time 1284638028.88mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 210 done at time 1284638030.45mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 211 done at time 1284638030.53mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 212 done at time 1284638030.54mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 213 done at time 1284638032.56mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 214 done at time 1284638033.8mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 215 done at time 1284638035.73mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 216 done at time 1284638036.9mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 217 done at time 1284638038.46mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 218 done at time 1284638038.98mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 219 done at time 1284638039.32mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 220 done at time 1284638041.2mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 221 done at time 1284638041.24mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 222 done at time 1284638047.24mcformat: Will process and merge/scan 0 data file in 0 directory.
+[pycsp_grid_042c6a0f-3ba0-431a-a5a0-d3f647636075] New Status: Finished
+[pycsp_grid_4298a5ac-f07a-4047-8806-1024d3cf2d15] New Status: Finished
+[pycsp_grid_c45fda3b-e52b-426f-b2a0-ab447d92c82c] New Status: Finished
+job 223 done at time 1284638047.96mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 224 done at time 1284638048.12mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 225 done at time 1284638048.79mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 226 done at time 1284638051.0mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 227 done at time 1284638051.06mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 228 done at time 1284638051.39mcformat: Will process and merge/scan 0 data file in 0 directory.
+job 229 done at time 1284638051.65mcformat: Will process and merge/scan 0 data file in 0 directory.

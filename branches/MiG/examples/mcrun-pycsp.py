@@ -233,18 +233,28 @@ def divide_jobs(job_in, job_out, ncount, maxncount):
             job_out((job_ncount, params))
         if job_rest:
             job_out((job_rest, params))
-        
-#@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=['linup-5.out'], execFiles=['linup-5.out'])
-#@migprocess(vgrid='DIKU', resource=['klynge.ekstranet.diku.dk.0_*'], inFiles=[], execFiles=[])
-#@process
 
-rlist = ['pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
+#@migprocess(vgrid='DCSC', resource=rlist, inFiles=['linup-5.out'], cputime=300)
 
-@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'])
+
+#rlist = ['amigos50.diku.dk.0_*', 'pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
+
+
+
+
+#rlist = ['amigos50.diku.dk.0_*']
+
+#rlist = ['amigos50.diku.dk.0_*', 'pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
+#@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
+
+@migprocess(vgrid='DCSC', inFiles=['linup-5.out'], cputime=1200)
 def simulate(job_in, result_out, screenC, exec_file):
+    Parallel(simulate2(job_in, result_out, screenC, exec_file) * 4)
 
-    import socket
-    print "HOST:", socket.gethostname()
+
+@process
+def simulate2(job_in, result_out, screenC, exec_file):
+    print current_process_id()
 
     while True:
         ncount, params = job_in()
@@ -268,10 +278,16 @@ MiGInit()
 # This must be run a host that is accesible from the resources in MiGrid
 server.start(host="130.226.158.14")
 
+print "TIME: "+str(time.time())
+            
 @process
 def merge(result_in, exec_file=''):
+    i = 0
     while True:
         data_dir = result_in()
+        sys.stdout.write("job "+str(i)+" done at time "+str(time.time()))
+        sys.stdout.flush()
+        i+=1
         merged_dir = exec_file + "-merged"
 
         cmd=(MCFORMAT,
