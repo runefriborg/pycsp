@@ -2,11 +2,11 @@
  * Format:     ANSI C source code
  * Creator:    McStas <http://neutron.risoe.dk>
  * Instrument: linup-5.instr (TAS1_Diff_Powder)
- * Date:       Fri Sep 10 10:47:56 2010
+ * Date:       Thu Sep 16 18:10:05 2010
  */
 
 
-#define MCSTAS_VERSION "1.12a - Apr. 02, 2009"
+#define MCSTAS_VERSION "1.12b - Jul. 15, 2010"
 #define MC_USE_DEFAULT_MAIN
 #define MC_TRACE_ENABLED
 #define MC_EMBEDDED_RUNTIME
@@ -15,7 +15,7 @@
 /*******************************************************************************
 *
 * McStas, neutron ray-tracing package
-*         Copyright (C) 1997-2009, All rights reserved
+*         Copyright (C) 1997-2010, All rights reserved
 *         Risoe National Laboratory, Roskilde, Denmark
 *         Institut Laue Langevin, Grenoble, France
 *
@@ -43,10 +43,10 @@
 *
 * Usage: Automatically embbeded in the c code.
 *
-* $Id: mcstas-r.h,v 1.101 2009/04/02 09:47:46 pkwi Exp $
+* $Id: mcstas-r.h,v 1.101 2009-04-02 09:47:46 pkwi Exp $
 *
 *       $Log: mcstas-r.h,v $
-*       Revision 1.101  2009/04/02 09:47:46  pkwi
+*       Revision 1.101  2009-04-02 09:47:46  pkwi
 *       Updated runtime and interoff from dev branch (bugfixes etc.)
 *
 *       Proceeding to test before release
@@ -58,7 +58,7 @@
 *       Revision 1.107  2009/01/23 10:51:30  farhi
 *       Minor speedup: Identity rotation matrices are now checked for and
 *       caculations reduced.
-*       It seems this McSatsStable commit did not got through for McStas 1.12a
+*       It seems this McSatsStable commit did not got through for McStas 1.12b
 *
 *       Revision 1.106  2009/01/15 15:42:44  farhi
 *       Saving lists using MPI: must use MPI_Ssend to avoid the buffer max size
@@ -1011,7 +1011,7 @@ int mcstas_main(int argc, char *argv[]);
 /*******************************************************************************
 *
 * McStas, neutron ray-tracing package
-*         Copyright (C) 1997-2009, All rights reserved
+*         Copyright (C) 1997-2010, All rights reserved
 *         Risoe National Laboratory, Roskilde, Denmark
 *         Institut Laue Langevin, Grenoble, France
 *
@@ -1029,10 +1029,10 @@ int mcstas_main(int argc, char *argv[]);
 *
 * Usage: Automatically embbeded in the c code whenever required.
 *
-* $Id: nexus-lib.h,v 1.8 2008/02/09 22:26:27 farhi Exp $
+* $Id: nexus-lib.h,v 1.8 2008-02-09 22:26:27 farhi Exp $
 *
 * $Log: nexus-lib.h,v $
-* Revision 1.8  2008/02/09 22:26:27  farhi
+* Revision 1.8  2008-02-09 22:26:27  farhi
 * Major contrib for clusters/multi-core: OpenMP support
 * 	try ./configure --with-cc=gcc4.2 or icc
 * then mcrun --threads ...
@@ -1151,7 +1151,7 @@ int mcnxfile_datablock(NXhandle nxhandle, char *part,
 /*******************************************************************************
 *
 * McStas, neutron ray-tracing package
-*         Copyright (C) 1997-2009, All rights reserved
+*         Copyright (C) 1997-2010, All rights reserved
 *         Risoe National Laboratory, Roskilde, Denmark
 *         Institut Laue Langevin, Grenoble, France
 *
@@ -1160,7 +1160,7 @@ int mcnxfile_datablock(NXhandle nxhandle, char *part,
 * %Identification
 * Written by: KN
 * Date:    Jan 17, 2007
-* Release: McStas 1.12a
+* Release: McStas 1.12b
 * Version: $Revision: 1.12 $
 *
 * NeXus Runtime output functions for McStas.
@@ -1169,10 +1169,10 @@ int mcnxfile_datablock(NXhandle nxhandle, char *part,
 *
 * Usage: Automatically embbeded in the c code whenever required.
 *
-* $Id: nexus-lib.c,v 1.12 2008/02/09 22:26:27 farhi Exp $
+* $Id: nexus-lib.c,v 1.12 2008-02-09 22:26:27 farhi Exp $
 *
 * $Log: nexus-lib.c,v $
-* Revision 1.12  2008/02/09 22:26:27  farhi
+* Revision 1.12  2008-02-09 22:26:27  farhi
 * Major contrib for clusters/multi-core: OpenMP support
 * 	try ./configure --with-cc=gcc4.2 or icc
 * then mcrun --threads ...
@@ -1486,7 +1486,7 @@ int mcnxfile_datablock(NXhandle nxhandle, char *part,
 /*******************************************************************************
 *
 * McStas, neutron ray-tracing package
-*         Copyright (C) 1997-2009, All rights reserved
+*         Copyright (C) 1997-2010, All rights reserved
 *         Risoe National Laboratory, Roskilde, Denmark
 *         Institut Laue Langevin, Grenoble, France
 *
@@ -1503,10 +1503,10 @@ int mcnxfile_datablock(NXhandle nxhandle, char *part,
 *
 * Usage: Automatically embbeded in the c code whenever required.
 *
-* $Id: mcstas-r.c,v 1.194 2009/04/02 09:47:46 pkwi Exp $
+* $Id: mcstas-r.c,v 1.194 2009-04-02 09:47:46 pkwi Exp $
 *
 * $Log: mcstas-r.c,v $
-* Revision 1.194  2009/04/02 09:47:46  pkwi
+* Revision 1.194  2009-04-02 09:47:46  pkwi
 * Updated runtime and interoff from dev branch (bugfixes etc.)
 *
 * Proceeding to test before release
@@ -1529,7 +1529,7 @@ int mcnxfile_datablock(NXhandle nxhandle, char *part,
 * Revision 1.212  2009/01/23 10:51:30  farhi
 * Minor speedup: Identity rotation matrices are now checked for and
 * caculations reduced.
-* It seems this McSatsStable commit did not got through for McStas 1.12a
+* It seems this McSatsStable commit did not got through for McStas 1.12b
 *
 * Revision 1.211  2009/01/18 14:43:13  farhi
 * Fixed MPI event list output (broken and reported first by A. Percival).
@@ -2403,7 +2403,7 @@ double mcestimate_error(double N, double p1, double p2)
   n1 = N - 1;
   /* Note: underflow may cause p2 to become zero; the fabs() below guards
      against this. */
-  return sqrt((N/n1)*fabs(p2/N - pmean*pmean));
+  return sqrt((N/n1)*fabs(p2 - pmean*pmean));
 }
 
 /* mcset_ncount: set total number of neutrons to generate */
@@ -2456,7 +2456,7 @@ int mc_MPI_Reduce(void *sbuf, void *rbuf,
   }
 
   if(res != MPI_SUCCESS)
-    fprintf(stderr, "Warning: node %i: MPI_Reduce error (mc_MPI_Reduce) at offset=%i, count=%i\n", mpi_node_rank, offset, count);
+    fprintf(stderr, "Warning: node %i: MPI_Reduce error (mc_MPI_Reduce) at offset=%li, count=%i\n", mpi_node_rank, offset, count);
 
   if(mpi_node_rank == root)
     memcpy(rbuf, lrbuf, count*dsize);
@@ -2489,7 +2489,7 @@ int mc_MPI_Send(void *sbuf,
   }
 
   if(res != MPI_SUCCESS)
-    fprintf(stderr, "Warning: node %i: MPI_Send error (mc_MPI_Send) at offset=%i, count=%i tag=%i\n", mpi_node_rank, offset, count, tag);
+    fprintf(stderr, "Warning: node %i: MPI_Send error (mc_MPI_Send) at offset=%li, count=%i tag=%i\n", mpi_node_rank, offset, count, tag);
 
   return res;
 }
@@ -2519,7 +2519,7 @@ int mc_MPI_Recv(void *sbuf,
   }
 
   if(res != MPI_SUCCESS)
-    fprintf(stderr, "Warning: node %i: MPI_Send error (mc_MPI_Send) at offset=%i, count=%i tag=%i\n", mpi_node_rank, offset, count, tag);
+    fprintf(stderr, "Warning: node %i: MPI_Send error (mc_MPI_Send) at offset=%li, count=%i tag=%i\n", mpi_node_rank, offset, count, tag);
 
   return res;
 }
@@ -3254,14 +3254,17 @@ static char *mcvalid_name(char *valid, char *original, int n)
   return(valid);
 } /* mcvalid_name */
 
-#if defined(NL_ARGMAX) || defined(WIN32)
 /*******************************************************************************
-* pfprintf: just as fprintf, but with (char *)fmt_args being the list of arg type
+* pfprintf: just as fprintf with positional arguments %N$t, 
+*   but with (char *)fmt_args being the list of arg type 't'.
 *   Needed as the vfprintf is not correctly handled on some platforms.
 *   1- look for the maximum %d$ field in fmt
 *   2- look for all %d$ fields up to max in fmt and set their type (next alpha)
 *   3- retrieve va_arg up to max, and save pointer to arg in local arg array
 *   4- use strchr to split around '%' chars, until all pieces are written
+*   returns number of arguments written.
+* Warning: this function is restricted to only handles types t=s,g,i,li
+*          without additional field formating, e.g. %N$t
 *******************************************************************************/
 static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
 {
@@ -3291,34 +3294,40 @@ static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
 
     arg_posB[this_arg] = (char *)strchr(fmt_pos, '%');
     tmp = arg_posB[this_arg];
-    if (tmp)
+    if (tmp)	/* found a percent */
     {
+      char  printf_formats[]="dliouxXeEfgGcs\0";
       arg_posE[this_arg] = (char *)strchr(tmp, '$');
-      if (arg_posE[this_arg] && tmp[1] != '%')
-      {
+      if (arg_posE[this_arg] && isdigit(tmp[1]))
+      { /* found a dollar following a percent  and a digit after percent */
         char  this_arg_chr[10];
-        char  printf_formats[]="dliouxXeEfgGcs\0";
+        
 
         /* extract positional argument index %*$ in fmt */
-        strncpy(this_arg_chr, arg_posB[this_arg]+1, arg_posE[this_arg]-arg_posB[this_arg]-1);
+        strncpy(this_arg_chr, arg_posB[this_arg]+1, arg_posE[this_arg]-arg_posB[this_arg]-1 < 10 ? arg_posE[this_arg]-arg_posB[this_arg]-1 : 9);
         this_arg_chr[arg_posE[this_arg]-arg_posB[this_arg]-1] = '\0';
         arg_num[this_arg] = atoi(this_arg_chr);
         if (arg_num[this_arg] <=0 || arg_num[this_arg] >= MyNL_ARGMAX)
-          return(-fprintf(stderr,"pfprintf: invalid positional argument number (<=0 or >=%i) %s.\n", MyNL_ARGMAX, arg_posB[this_arg]));
+          return(-fprintf(stderr,"pfprintf: invalid positional argument number (%i is <=0 or >=%i) from '%s'.\n", arg_num[this_arg], MyNL_ARGMAX, this_arg_chr));
         /* get type of positional argument: follows '%' -> arg_posE[this_arg]+1 */
         fmt_pos = arg_posE[this_arg]+1;
+        fmt_pos[0] = tolower(fmt_pos[0]);
         if (!strchr(printf_formats, fmt_pos[0]))
           return(-fprintf(stderr,"pfprintf: invalid positional argument type (%c != expected %c).\n", fmt_pos[0], fmt_args[arg_num[this_arg]-1]));
-        if (fmt_pos[0] == 'l' && fmt_pos[1] == 'i') fmt_pos++;
+        if (fmt_pos[0] == 'l' && (fmt_pos[1] == 'i' || fmt_pos[1] == 'd')) fmt_pos++;
         arg_posT[this_arg] = fmt_pos;
         /* get next argument... */
         this_arg++;
       }
       else
-      {
-        if  (tmp[1] != '%')
+      { /* no dollar or no digit */
+        if  (tmp[1] == '%') {
+          fmt_pos = arg_posB[this_arg]+2;  /* found %% */
+        } else if (strchr(printf_formats,tmp[1])) {
+          fmt_pos = arg_posB[this_arg]+1;  /* found %s */
+        } else { 
           return(-fprintf(stderr,"pfprintf: must use only positional arguments (%s).\n", arg_posB[this_arg]));
-        else fmt_pos = arg_posB[this_arg]+2;  /* found %% */
+        }
       }
     } else
       break;  /* no more % argument */
@@ -3329,22 +3338,22 @@ static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
   for (this_arg=0; this_arg<strlen(fmt_args); this_arg++)
   {
 
-    switch(fmt_args[this_arg])
+    switch(tolower(fmt_args[this_arg]))
     {
       case 's':                       /* string */
               arg_char[this_arg] = va_arg(ap, char *);
               break;
       case 'd':
       case 'i':
-      case 'c':                     /* int */
+      case 'c':                      /* int */
               arg_int[this_arg] = va_arg(ap, int);
               break;
-      case 'l':                       /* int */
+      case 'l':                       /* long int */
               arg_long[this_arg] = va_arg(ap, long int);
               break;
       case 'f':
       case 'g':
-      case 'G':                      /* double */
+      case 'e':                      /* double */
               arg_double[this_arg] = va_arg(ap, double);
               break;
       default: fprintf(stderr,"pfprintf: argument type is not implemented (arg %%%i$ type %c).\n", this_arg+1, fmt_args[this_arg]);
@@ -3364,7 +3373,7 @@ static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
       if (!fmt_bit) return(-fprintf(stderr,"pfprintf: not enough memory.\n"));
       strncpy(fmt_bit, fmt_pos, arg_posB[this_arg]-fmt_pos);
       fmt_bit[arg_posB[this_arg]-fmt_pos] = '\0';
-      fprintf(f, fmt_bit); /* fmt part without argument */
+      fprintf(f, "%s", fmt_bit); /* fmt part without argument */
     } else
     {
       fmt_bit = (char*)malloc(10);
@@ -3375,7 +3384,7 @@ static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
     strncat(fmt_bit, arg_posE[this_arg]+1, arg_posT[this_arg]-arg_posE[this_arg]);
     fmt_bit[arg_posT[this_arg]-arg_posE[this_arg]+1] = '\0';
 
-    switch(fmt_args[arg_n])
+    switch(tolower(fmt_args[arg_n]))
     {
       case 's': fprintf(f, fmt_bit, arg_char[arg_n]);
                 break;
@@ -3389,7 +3398,7 @@ static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
               break;
       case 'f':
       case 'g':
-      case 'G':                       /* double */
+      case 'e':                       /* double */
               fprintf(f, fmt_bit, arg_double[arg_n]);
               break;
     }
@@ -3403,19 +3412,7 @@ static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
 
   }
   return(this_arg);
-}
-#else
-static int pfprintf(FILE *f, char *fmt, char *fmt_args, ...)
-{ /* wrapper to standard fprintf when the library function is OK (linux) */
-  va_list ap;
-  int tmp;
-
-  va_start(ap, fmt_args);
-  tmp=vfprintf(f, fmt, ap);
-  va_end(ap);
-  return(tmp);
-}
-#endif
+} /* pfprintf */
 
 /*******************************************************************************
 * mcfile_header: output header/footer using specific file format.
@@ -4470,6 +4467,13 @@ static double mcdetector_out_012D(struct mcformats_struct format,
 
     /* slaves are done */
     if(mpi_node_rank != mpi_node_root) return 0;
+      
+    if (!p0) {  /* additive signal must be then divided by the number of nodes */ 
+      for (i=0; i<abs(m*n*p); i++) { 
+        p1[i] /= mpi_node_count; 
+        if (p2) p2[i] /= mpi_node_count; 
+      } 
+    } 
   }
 #endif /* USE_MPI */
 
@@ -5119,14 +5123,18 @@ Coords coords_xp(Coords b, Coords c) {
 
 /* coords_mirror: Mirror a in plane (through the origin) defined by normal n*/
 Coords coords_mirror(Coords a, Coords n) {
-  double t;
+  double t = scalar_prod(n.x, n.y, n.z, n.x, n.y, n.z);
   Coords b;
-  if ((t=scalar_prod(n.x,n.y,n.z, n.x,n.y,n.z))!=1)
-    n.x/=sqrt(t);n.y/=sqrt(t);n.z/=sqrt(t);
-  t=scalar_prod(a.x,a.y,a.z,n.x,n.y,n.z);
-  b.x=a.x-2*t*n.x;
-  b.y=a.y-2*t*n.y;
-  b.z=a.z-2*t*n.z;
+  if (t!=1) {
+    t = sqrt(t);
+    n.x /= t;
+    n.y /= t;
+    n.z /= t;
+  }
+  t=scalar_prod(a.x, a.y, a.z, n.x, n.y, n.z);
+  b.x = a.x-2*t*n.x;
+  b.y = a.y-2*t*n.y;
+  b.z = a.z-2*t*n.z;
   return b;
 }
 
@@ -5941,10 +5949,10 @@ int box_intersect(double *dt_in, double *dt_out,
 
 }
 
-/* cylinder_intersect: compute intersction with a cylinder
+/* cylinder_intersect: compute intersection with a cylinder
  * returns 0 when no intersection is found
  *      or 2/4/8/16 bits depending on intersection,
- *     and resulting times t0 and tdt_out1
+ *     and resulting times t0 and t1
  * Written by: EM,NB,ABA 4.2.98 */
 int
 cylinder_intersect(double *t0, double *t1, double x, double y, double z,
@@ -5964,6 +5972,10 @@ cylinder_intersect(double *t0, double *t1, double x, double y, double z,
     } else if (vy) { /* trajectory parallel to cylinder axis */
       t_in = (y + h/2)/vy;
       t_out = (y - h/2)/vy;
+      if (t_in>t_out){ 
+	        double tmp=t_in; 
+	        t_in=t_out;t_out=tmp; 
+	    } 
     } else return 0;
     y_in = vy*t_in + y;
     y_out =vy*t_out + y;
@@ -6076,7 +6088,7 @@ plane_intersect(double *t, double x, double y, double z,
   double s;
   if (fabs(s=scalar_prod(nx,ny,nz,vx,vy,vz))<FLT_EPSILON) return 0;
   *t = - scalar_prod(nx,ny,nz,x-wx,y-wy,z-wz)/s;
-  if (t<0) return -1;
+  if (*t<0) return -1;
   else return 1;
 }
 
@@ -6839,11 +6851,13 @@ int mcstas_main(int argc, char *argv[])
       mcinstrument_name, mcinstrument_source, mpi_node_count, mpi_node_name, MPI_VERSION, MPI_SUBVERSION);
     );
     /* adapt random seed for each node */
-    srandom(time(&t) + mpi_node_rank);
+    mcseed=(long)(time(&t) + mpi_node_rank); 
+    srandom(mcseed); 
     t += mpi_node_rank;
   }
 #else /* !USE_MPI */
-  srandom(time(&t));
+  mcseed=(long)time(&t);
+  srandom(mcseed); 
 #endif /* !USE_MPI */
   mcstartdate = t;  /* set start date before parsing options and creating sim file */
 
@@ -6939,13 +6953,13 @@ mcstas_raytrace(&mcncount);
 #endif /* !MCSTAS_H */
 /* End of file "mcstas-r.c". */
 
-#line 6942 "linup-5.c"
+#line 6956 "linup-5.c"
 #ifdef MC_TRACE_ENABLED
 int mctraceenabled = 1;
 #else
 int mctraceenabled = 0;
 #endif
-#define MCSTAS "/usr/local/lib/mcstas/"
+#define MCSTAS "/users/software/mcstas/lib/mcstas/"
 int mcdefaultmain = 1;
 char mcinstrument_name[] = "TAS1_Diff_Powder";
 char mcinstrument_source[] = "linup-5.instr";
@@ -6957,7 +6971,7 @@ void mcfinally(void);
 void mcdisplay(void);
 
 /* Shared user declarations for all components 'Monochromator_flat'. */
-#line 58 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 58 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 #ifndef GAUSS
   /* Define these arrays only once for all instances. */
   /* Values for Gauss quadrature. Taken from Brice Carnahan, H. A. Luther and
@@ -6978,7 +6992,7 @@ void mcdisplay(void);
 #define GAUSS(x,mean,rms) \
   (exp(-((x)-(mean))*((x)-(mean))/(2*(rms)*(rms)))/(sqrt(2*PI)*(rms)))
 #endif
-#line 6981 "linup-5.c"
+#line 6995 "linup-5.c"
 
 /* Instrument parameters. */
 MCNUM mcipPHM;
@@ -7026,7 +7040,7 @@ double OMC1_d;
 
 double mpos0, mpos1, mpos2, mpos3, mpos4, mpos5, mpos6, mpos7;
 double mrot0, mrot1, mrot2, mrot3, mrot4, mrot5, mrot6, mrot7;
-#line 7029 "linup-5.c"
+#line 7043 "linup-5.c"
 #undef C3
 #undef C2
 #undef OMC1
@@ -7399,10 +7413,10 @@ MCNUM mccemon2_Emax;
 #define flux mccsource_flux
 #define gauss mccsource_gauss
 #define compat mccsource_compat
-#line 60 "/usr/local/lib/mcstas/sources/Source_simple.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/sources/Source_simple.comp"
   double pmul, srcArea;
   int square;
-#line 7405 "linup-5.c"
+#line 7419 "linup-5.c"
 #undef compat
 #undef gauss
 #undef flux
@@ -7520,12 +7534,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm0_r0
 #define Q mccm0_Q
 #define DM mccm0_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7528 "linup-5.c"
+#line 7542 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7564,12 +7578,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm1_r0
 #define Q mccm1_Q
 #define DM mccm1_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7572 "linup-5.c"
+#line 7586 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7608,12 +7622,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm2_r0
 #define Q mccm2_Q
 #define DM mccm2_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7616 "linup-5.c"
+#line 7630 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7652,12 +7666,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm3_r0
 #define Q mccm3_Q
 #define DM mccm3_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7660 "linup-5.c"
+#line 7674 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7696,12 +7710,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm4_r0
 #define Q mccm4_Q
 #define DM mccm4_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7704 "linup-5.c"
+#line 7718 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7740,12 +7754,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm5_r0
 #define Q mccm5_Q
 #define DM mccm5_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7748 "linup-5.c"
+#line 7762 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7784,12 +7798,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm6_r0
 #define Q mccm6_Q
 #define DM mccm6_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7792 "linup-5.c"
+#line 7806 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7828,12 +7842,12 @@ MCNUM mccemon2_Emax;
 #define r0 mccm7_r0
 #define Q mccm7_Q
 #define DM mccm7_DM
-#line 82 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
   double mos_rms_y; /* root-mean-square of mosaic, in radians */
   double mos_rms_z;
   double mos_rms_max;
   double mono_Q;
-#line 7836 "linup-5.c"
+#line 7850 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -7925,9 +7939,9 @@ MCNUM mccemon2_Emax;
 #define divergence mccc1_divergence
 #define transmission mccc1_transmission
 #define divergenceV mccc1_divergenceV
-#line 58 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 58 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
   double slope, slopeV;
-#line 7930 "linup-5.c"
+#line 7944 "linup-5.c"
 #undef divergenceV
 #undef transmission
 #undef divergence
@@ -8030,10 +8044,10 @@ MCNUM mccemon2_Emax;
 #define xwidth mccmon_xwidth
 #define yheight mccmon_yheight
 #define restore_neutron mccmon_restore_neutron
-#line 53 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 53 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
     double Nsum;
     double psum, p2sum;
-#line 8036 "linup-5.c"
+#line 8050 "linup-5.c"
 #undef restore_neutron
 #undef yheight
 #undef xwidth
@@ -8093,11 +8107,11 @@ MCNUM mccemon2_Emax;
 #define yheight mccemon1_yheight
 #define Emin mccemon1_Emin
 #define Emax mccemon1_Emax
-#line 60 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
     double E_N[nchan];
     double E_p[nchan], E_p2[nchan];
     double S_p, S_pE, S_pE2;
-#line 8100 "linup-5.c"
+#line 8114 "linup-5.c"
 #undef Emax
 #undef Emin
 #undef yheight
@@ -8141,10 +8155,10 @@ MCNUM mccemon2_Emax;
 #define xwidth mccsample_xwidth
 #define zthick mccsample_zthick
 #define h mccsample_h
-#line 78 "/usr/local/lib/mcstas/samples/Powder1.comp"
+#line 78 "/users/software/mcstas/lib/mcstas/samples/Powder1.comp"
   double my_s_v2, my_a_v, q_v;
   char   isrect=0;
-#line 8147 "linup-5.c"
+#line 8161 "linup-5.c"
 #undef h
 #undef zthick
 #undef xwidth
@@ -8215,9 +8229,9 @@ MCNUM mccemon2_Emax;
 #define divergence mccc2_divergence
 #define transmission mccc2_transmission
 #define divergenceV mccc2_divergenceV
-#line 58 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 58 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
   double slope, slopeV;
-#line 8220 "linup-5.c"
+#line 8234 "linup-5.c"
 #undef divergenceV
 #undef transmission
 #undef divergence
@@ -8266,9 +8280,9 @@ MCNUM mccemon2_Emax;
 #define divergence mccc3_divergence
 #define transmission mccc3_transmission
 #define divergenceV mccc3_divergenceV
-#line 58 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 58 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
   double slope, slopeV;
-#line 8271 "linup-5.c"
+#line 8285 "linup-5.c"
 #undef divergenceV
 #undef transmission
 #undef divergence
@@ -8299,10 +8313,10 @@ MCNUM mccemon2_Emax;
 #define xwidth mccsng_xwidth
 #define yheight mccsng_yheight
 #define restore_neutron mccsng_restore_neutron
-#line 53 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 53 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
     double Nsum;
     double psum, p2sum;
-#line 8305 "linup-5.c"
+#line 8319 "linup-5.c"
 #undef restore_neutron
 #undef yheight
 #undef xwidth
@@ -8338,11 +8352,11 @@ MCNUM mccemon2_Emax;
 #define yheight mccemon2_yheight
 #define Emin mccemon2_Emin
 #define Emax mccemon2_Emax
-#line 60 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
     double E_N[nchan];
     double E_p[nchan], E_p2[nchan];
     double S_p, S_pE, S_pE2;
-#line 8345 "linup-5.c"
+#line 8359 "linup-5.c"
 #undef Emax
 #undef Emin
 #undef yheight
@@ -8460,7 +8474,7 @@ void mcinit(void) {
 
   OMC1_d = OMC1/60.0;
 }
-#line 8463 "linup-5.c"
+#line 8477 "linup-5.c"
 #undef C3
 #undef C2
 #undef OMC1
@@ -8482,7 +8496,7 @@ void mcinit(void) {
       (0.0)*DEG2RAD,
       (0.0)*DEG2RAD,
       (0.0)*DEG2RAD);
-#line 8485 "linup-5.c"
+#line 8499 "linup-5.c"
     rot_copy(mcrotra1, mcrotaa1);
     mcposaa1 = coords_set(
 #line 84 "linup-5.instr"
@@ -8491,7 +8505,7 @@ void mcinit(void) {
       0,
 #line 84 "linup-5.instr"
       0);
-#line 8494 "linup-5.c"
+#line 8508 "linup-5.c"
     mctc1 = coords_neg(mcposaa1);
     mcposra1 = rot_apply(mcrotaa1, mctc1);
     mcDEBUG_COMPONENT("a1", mcposaa1, mcrotaa1)
@@ -8508,7 +8522,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 93 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8511 "linup-5.c"
+#line 8525 "linup-5.c"
     rot_mul(mctr1, mcrotaa1, mcrotasource);
     rot_transpose(mcrotaa1, mctr1);
     rot_mul(mcrotasource, mctr1, mcrotrsource);
@@ -8519,7 +8533,7 @@ void mcinit(void) {
       0,
 #line 93 "linup-5.instr"
       0);
-#line 8522 "linup-5.c"
+#line 8536 "linup-5.c"
     rot_transpose(mcrotaa1, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposasource = coords_add(mcposaa1, mctc2);
@@ -8539,7 +8553,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 98 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8542 "linup-5.c"
+#line 8556 "linup-5.c"
     rot_mul(mctr1, mcrotaa1, mcrotaslit1);
     rot_transpose(mcrotasource, mctr1);
     rot_mul(mcrotaslit1, mctr1, mcrotrslit1);
@@ -8550,7 +8564,7 @@ void mcinit(void) {
       0,
 #line 98 "linup-5.instr"
       1.1215);
-#line 8553 "linup-5.c"
+#line 8567 "linup-5.c"
     rot_transpose(mcrotaa1, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslit1 = coords_add(mcposaa1, mctc2);
@@ -8570,7 +8584,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 103 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8573 "linup-5.c"
+#line 8587 "linup-5.c"
     rot_mul(mctr1, mcrotaa1, mcrotaslit2);
     rot_transpose(mcrotaslit1, mctr1);
     rot_mul(mcrotaslit2, mctr1, mcrotrslit2);
@@ -8581,7 +8595,7 @@ void mcinit(void) {
       0,
 #line 103 "linup-5.instr"
       1.900);
-#line 8584 "linup-5.c"
+#line 8598 "linup-5.c"
     rot_transpose(mcrotaa1, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslit2 = coords_add(mcposaa1, mctc2);
@@ -8601,7 +8615,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 108 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8604 "linup-5.c"
+#line 8618 "linup-5.c"
     rot_mul(mctr1, mcrotaa1, mcrotaslit3);
     rot_transpose(mcrotaslit2, mctr1);
     rot_mul(mcrotaslit3, mctr1, mcrotrslit3);
@@ -8612,7 +8626,7 @@ void mcinit(void) {
       0,
 #line 108 "linup-5.instr"
       3.288);
-#line 8615 "linup-5.c"
+#line 8629 "linup-5.c"
     rot_transpose(mcrotaa1, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslit3 = coords_add(mcposaa1, mctc2);
@@ -8632,7 +8646,7 @@ void mcinit(void) {
       (mcipPHM)*DEG2RAD,
 #line 111 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8635 "linup-5.c"
+#line 8649 "linup-5.c"
     rot_mul(mctr1, mcrotaa1, mcrotafocus_mono);
     rot_transpose(mcrotaslit3, mctr1);
     rot_mul(mcrotafocus_mono, mctr1, mcrotrfocus_mono);
@@ -8643,7 +8657,7 @@ void mcinit(void) {
       0,
 #line 111 "linup-5.instr"
       3.56);
-#line 8646 "linup-5.c"
+#line 8660 "linup-5.c"
     rot_transpose(mcrotaa1, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposafocus_mono = coords_add(mcposaa1, mctc2);
@@ -8663,7 +8677,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 118 "linup-5.instr"
       (mrot0)*DEG2RAD);
-#line 8666 "linup-5.c"
+#line 8680 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam0);
     rot_transpose(mcrotafocus_mono, mctr1);
     rot_mul(mcrotam0, mctr1, mcrotrm0);
@@ -8674,7 +8688,7 @@ void mcinit(void) {
       mpos0,
 #line 117 "linup-5.instr"
       0);
-#line 8677 "linup-5.c"
+#line 8691 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam0 = coords_add(mcposafocus_mono, mctc2);
@@ -8694,7 +8708,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 125 "linup-5.instr"
       (mrot1)*DEG2RAD);
-#line 8697 "linup-5.c"
+#line 8711 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam1);
     rot_transpose(mcrotam0, mctr1);
     rot_mul(mcrotam1, mctr1, mcrotrm1);
@@ -8705,7 +8719,7 @@ void mcinit(void) {
       mpos1,
 #line 124 "linup-5.instr"
       0);
-#line 8708 "linup-5.c"
+#line 8722 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam1 = coords_add(mcposafocus_mono, mctc2);
@@ -8725,7 +8739,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 132 "linup-5.instr"
       (mrot2)*DEG2RAD);
-#line 8728 "linup-5.c"
+#line 8742 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam2);
     rot_transpose(mcrotam1, mctr1);
     rot_mul(mcrotam2, mctr1, mcrotrm2);
@@ -8736,7 +8750,7 @@ void mcinit(void) {
       mpos2,
 #line 131 "linup-5.instr"
       0);
-#line 8739 "linup-5.c"
+#line 8753 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam2 = coords_add(mcposafocus_mono, mctc2);
@@ -8756,7 +8770,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 139 "linup-5.instr"
       (mrot3)*DEG2RAD);
-#line 8759 "linup-5.c"
+#line 8773 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam3);
     rot_transpose(mcrotam2, mctr1);
     rot_mul(mcrotam3, mctr1, mcrotrm3);
@@ -8767,7 +8781,7 @@ void mcinit(void) {
       mpos3,
 #line 138 "linup-5.instr"
       0);
-#line 8770 "linup-5.c"
+#line 8784 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam3 = coords_add(mcposafocus_mono, mctc2);
@@ -8787,7 +8801,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 146 "linup-5.instr"
       (mrot4)*DEG2RAD);
-#line 8790 "linup-5.c"
+#line 8804 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam4);
     rot_transpose(mcrotam3, mctr1);
     rot_mul(mcrotam4, mctr1, mcrotrm4);
@@ -8798,7 +8812,7 @@ void mcinit(void) {
       mpos4,
 #line 145 "linup-5.instr"
       0);
-#line 8801 "linup-5.c"
+#line 8815 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam4 = coords_add(mcposafocus_mono, mctc2);
@@ -8818,7 +8832,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 153 "linup-5.instr"
       (mrot5)*DEG2RAD);
-#line 8821 "linup-5.c"
+#line 8835 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam5);
     rot_transpose(mcrotam4, mctr1);
     rot_mul(mcrotam5, mctr1, mcrotrm5);
@@ -8829,7 +8843,7 @@ void mcinit(void) {
       mpos5,
 #line 152 "linup-5.instr"
       0);
-#line 8832 "linup-5.c"
+#line 8846 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam5 = coords_add(mcposafocus_mono, mctc2);
@@ -8849,7 +8863,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 160 "linup-5.instr"
       (mrot6)*DEG2RAD);
-#line 8852 "linup-5.c"
+#line 8866 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam6);
     rot_transpose(mcrotam5, mctr1);
     rot_mul(mcrotam6, mctr1, mcrotrm6);
@@ -8860,7 +8874,7 @@ void mcinit(void) {
       mpos6,
 #line 159 "linup-5.instr"
       0);
-#line 8863 "linup-5.c"
+#line 8877 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam6 = coords_add(mcposafocus_mono, mctc2);
@@ -8880,7 +8894,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 167 "linup-5.instr"
       (mrot7)*DEG2RAD);
-#line 8883 "linup-5.c"
+#line 8897 "linup-5.c"
     rot_mul(mctr1, mcrotafocus_mono, mcrotam7);
     rot_transpose(mcrotam6, mctr1);
     rot_mul(mcrotam7, mctr1, mcrotrm7);
@@ -8891,7 +8905,7 @@ void mcinit(void) {
       mpos7,
 #line 166 "linup-5.instr"
       0);
-#line 8894 "linup-5.c"
+#line 8908 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposam7 = coords_add(mcposafocus_mono, mctc2);
@@ -8911,7 +8925,7 @@ void mcinit(void) {
       (mcipTTM)*DEG2RAD,
 #line 170 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8914 "linup-5.c"
+#line 8928 "linup-5.c"
     rot_mul(mctr1, mcrotaa1, mcrotaa2);
     rot_transpose(mcrotam7, mctr1);
     rot_mul(mcrotaa2, mctr1, mcrotra2);
@@ -8922,7 +8936,7 @@ void mcinit(void) {
       0,
 #line 170 "linup-5.instr"
       0);
-#line 8925 "linup-5.c"
+#line 8939 "linup-5.c"
     rot_transpose(mcrotafocus_mono, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaa2 = coords_add(mcposafocus_mono, mctc2);
@@ -8942,7 +8956,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 174 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8945 "linup-5.c"
+#line 8959 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaslitMS1);
     rot_transpose(mcrotaa2, mctr1);
     rot_mul(mcrotaslitMS1, mctr1, mcrotrslitMS1);
@@ -8953,7 +8967,7 @@ void mcinit(void) {
       0,
 #line 174 "linup-5.instr"
       0.565);
-#line 8956 "linup-5.c"
+#line 8970 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitMS1 = coords_add(mcposaa2, mctc2);
@@ -8973,7 +8987,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 178 "linup-5.instr"
       (0)*DEG2RAD);
-#line 8976 "linup-5.c"
+#line 8990 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaslitMS2);
     rot_transpose(mcrotaslitMS1, mctr1);
     rot_mul(mcrotaslitMS2, mctr1, mcrotrslitMS2);
@@ -8984,7 +8998,7 @@ void mcinit(void) {
       0,
 #line 178 "linup-5.instr"
       0.855);
-#line 8987 "linup-5.c"
+#line 9001 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitMS2 = coords_add(mcposaa2, mctc2);
@@ -9004,7 +9018,7 @@ void mcinit(void) {
       (OMC1_d)*DEG2RAD,
 #line 183 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9007 "linup-5.c"
+#line 9021 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotac1);
     rot_transpose(mcrotaslitMS2, mctr1);
     rot_mul(mcrotac1, mctr1, mcrotrc1);
@@ -9015,7 +9029,7 @@ void mcinit(void) {
       0,
 #line 183 "linup-5.instr"
       0.87);
-#line 9018 "linup-5.c"
+#line 9032 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposac1 = coords_add(mcposaa2, mctc2);
@@ -9035,7 +9049,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 186 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9038 "linup-5.c"
+#line 9052 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaslitMS3);
     rot_transpose(mcrotac1, mctr1);
     rot_mul(mcrotaslitMS3, mctr1, mcrotrslitMS3);
@@ -9046,7 +9060,7 @@ void mcinit(void) {
       0,
 #line 186 "linup-5.instr"
       1.130);
-#line 9049 "linup-5.c"
+#line 9063 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitMS3 = coords_add(mcposaa2, mctc2);
@@ -9066,7 +9080,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 189 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9069 "linup-5.c"
+#line 9083 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaslitMS4);
     rot_transpose(mcrotaslitMS3, mctr1);
     rot_mul(mcrotaslitMS4, mctr1, mcrotrslitMS4);
@@ -9077,7 +9091,7 @@ void mcinit(void) {
       0,
 #line 189 "linup-5.instr"
       1.180);
-#line 9080 "linup-5.c"
+#line 9094 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitMS4 = coords_add(mcposaa2, mctc2);
@@ -9097,7 +9111,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 192 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9100 "linup-5.c"
+#line 9114 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaslitMS5);
     rot_transpose(mcrotaslitMS4, mctr1);
     rot_mul(mcrotaslitMS5, mctr1, mcrotrslitMS5);
@@ -9108,7 +9122,7 @@ void mcinit(void) {
       0,
 #line 192 "linup-5.instr"
       1.230);
-#line 9111 "linup-5.c"
+#line 9125 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitMS5 = coords_add(mcposaa2, mctc2);
@@ -9128,7 +9142,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 196 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9131 "linup-5.c"
+#line 9145 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotamon);
     rot_transpose(mcrotaslitMS5, mctr1);
     rot_mul(mcrotamon, mctr1, mcrotrmon);
@@ -9139,7 +9153,7 @@ void mcinit(void) {
       0,
 #line 196 "linup-5.instr"
       1.280);
-#line 9142 "linup-5.c"
+#line 9156 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposamon = coords_add(mcposaa2, mctc2);
@@ -9159,7 +9173,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 200 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9162 "linup-5.c"
+#line 9176 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaslitMS6);
     rot_transpose(mcrotamon, mctr1);
     rot_mul(mcrotaslitMS6, mctr1, mcrotrslitMS6);
@@ -9170,7 +9184,7 @@ void mcinit(void) {
       0,
 #line 200 "linup-5.instr"
       1.370);
-#line 9173 "linup-5.c"
+#line 9187 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitMS6 = coords_add(mcposaa2, mctc2);
@@ -9190,7 +9204,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 206 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9193 "linup-5.c"
+#line 9207 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaemon1);
     rot_transpose(mcrotaslitMS6, mctr1);
     rot_mul(mcrotaemon1, mctr1, mcrotremon1);
@@ -9201,7 +9215,7 @@ void mcinit(void) {
       0,
 #line 206 "linup-5.instr"
       1.5);
-#line 9204 "linup-5.c"
+#line 9218 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaemon1 = coords_add(mcposaa2, mctc2);
@@ -9221,7 +9235,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 216 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9224 "linup-5.c"
+#line 9238 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotasample);
     rot_transpose(mcrotaemon1, mctr1);
     rot_mul(mcrotasample, mctr1, mcrotrsample);
@@ -9232,7 +9246,7 @@ void mcinit(void) {
       0,
 #line 216 "linup-5.instr"
       1.565);
-#line 9235 "linup-5.c"
+#line 9249 "linup-5.c"
     rot_transpose(mcrotaa2, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposasample = coords_add(mcposaa2, mctc2);
@@ -9252,7 +9266,7 @@ void mcinit(void) {
       (mcipTT)*DEG2RAD,
 #line 219 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9255 "linup-5.c"
+#line 9269 "linup-5.c"
     rot_mul(mctr1, mcrotaa2, mcrotaa3);
     rot_transpose(mcrotasample, mctr1);
     rot_mul(mcrotaa3, mctr1, mcrotra3);
@@ -9263,7 +9277,7 @@ void mcinit(void) {
       0,
 #line 219 "linup-5.instr"
       0);
-#line 9266 "linup-5.c"
+#line 9280 "linup-5.c"
     rot_transpose(mcrotasample, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaa3 = coords_add(mcposasample, mctc2);
@@ -9283,7 +9297,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 223 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9286 "linup-5.c"
+#line 9300 "linup-5.c"
     rot_mul(mctr1, mcrotaa3, mcrotaslitSA1);
     rot_transpose(mcrotaa3, mctr1);
     rot_mul(mcrotaslitSA1, mctr1, mcrotrslitSA1);
@@ -9294,7 +9308,7 @@ void mcinit(void) {
       0,
 #line 223 "linup-5.instr"
       0.320);
-#line 9297 "linup-5.c"
+#line 9311 "linup-5.c"
     rot_transpose(mcrotaa3, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaslitSA1 = coords_add(mcposaa3, mctc2);
@@ -9314,7 +9328,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 228 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9317 "linup-5.c"
+#line 9331 "linup-5.c"
     rot_mul(mctr1, mcrotaa3, mcrotac2);
     rot_transpose(mcrotaslitSA1, mctr1);
     rot_mul(mcrotac2, mctr1, mcrotrc2);
@@ -9325,7 +9339,7 @@ void mcinit(void) {
       0,
 #line 228 "linup-5.instr"
       0.370);
-#line 9328 "linup-5.c"
+#line 9342 "linup-5.c"
     rot_transpose(mcrotaa3, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposac2 = coords_add(mcposaa3, mctc2);
@@ -9345,7 +9359,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 231 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9348 "linup-5.c"
+#line 9362 "linup-5.c"
     rot_mul(mctr1, mcrotaa3, mcrotaana);
     rot_transpose(mcrotac2, mctr1);
     rot_mul(mcrotaana, mctr1, mcrotrana);
@@ -9356,7 +9370,7 @@ void mcinit(void) {
       0,
 #line 231 "linup-5.instr"
       0.770);
-#line 9359 "linup-5.c"
+#line 9373 "linup-5.c"
     rot_transpose(mcrotaa3, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaana = coords_add(mcposaa3, mctc2);
@@ -9376,7 +9390,7 @@ void mcinit(void) {
       (mcipTTA)*DEG2RAD,
 #line 234 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9379 "linup-5.c"
+#line 9393 "linup-5.c"
     rot_mul(mctr1, mcrotaa3, mcrotaa4);
     rot_transpose(mcrotaana, mctr1);
     rot_mul(mcrotaa4, mctr1, mcrotra4);
@@ -9387,7 +9401,7 @@ void mcinit(void) {
       0,
 #line 234 "linup-5.instr"
       0);
-#line 9390 "linup-5.c"
+#line 9404 "linup-5.c"
     rot_transpose(mcrotaana, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaa4 = coords_add(mcposaana, mctc2);
@@ -9407,7 +9421,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 239 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9410 "linup-5.c"
+#line 9424 "linup-5.c"
     rot_mul(mctr1, mcrotaa4, mcrotac3);
     rot_transpose(mcrotaa4, mctr1);
     rot_mul(mcrotac3, mctr1, mcrotrc3);
@@ -9418,7 +9432,7 @@ void mcinit(void) {
       0,
 #line 239 "linup-5.instr"
       0.104);
-#line 9421 "linup-5.c"
+#line 9435 "linup-5.c"
     rot_transpose(mcrotaa4, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposac3 = coords_add(mcposaa4, mctc2);
@@ -9438,7 +9452,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 243 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9441 "linup-5.c"
+#line 9455 "linup-5.c"
     rot_mul(mctr1, mcrotaa4, mcrotasng);
     rot_transpose(mcrotac3, mctr1);
     rot_mul(mcrotasng, mctr1, mcrotrsng);
@@ -9449,7 +9463,7 @@ void mcinit(void) {
       0,
 #line 243 "linup-5.instr"
       0.43);
-#line 9452 "linup-5.c"
+#line 9466 "linup-5.c"
     rot_transpose(mcrotaa4, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposasng = coords_add(mcposaa4, mctc2);
@@ -9469,7 +9483,7 @@ void mcinit(void) {
       (0)*DEG2RAD,
 #line 249 "linup-5.instr"
       (0)*DEG2RAD);
-#line 9472 "linup-5.c"
+#line 9486 "linup-5.c"
     rot_mul(mctr1, mcrotaa4, mcrotaemon2);
     rot_transpose(mcrotasng, mctr1);
     rot_mul(mcrotaemon2, mctr1, mcrotremon2);
@@ -9480,7 +9494,7 @@ void mcinit(void) {
       0,
 #line 249 "linup-5.instr"
       0.430001);
-#line 9483 "linup-5.c"
+#line 9497 "linup-5.c"
     rot_transpose(mcrotaa4, mctr1);
     mctc2 = rot_apply(mctr1, mctc1);
     mcposaemon2 = coords_add(mcposaa4, mctc2);
@@ -9524,7 +9538,7 @@ void mcinit(void) {
   mccsource_gauss = 0;
 #line 92 "linup-5.instr"
   mccsource_compat = 1;
-#line 9527 "linup-5.c"
+#line 9541 "linup-5.c"
 
 #define mccompcurname  source
 #define mccompcurtype  Source_simple
@@ -9543,7 +9557,7 @@ void mcinit(void) {
 #define flux mccsource_flux
 #define gauss mccsource_gauss
 #define compat mccsource_compat
-#line 64 "/usr/local/lib/mcstas/sources/Source_simple.comp"
+#line 64 "/users/software/mcstas/lib/mcstas/sources/Source_simple.comp"
 {
   square = 0;
   /* Determine source area: */
@@ -9584,7 +9598,7 @@ void mcinit(void) {
       exit(0);
   }
 }
-#line 9587 "linup-5.c"
+#line 9601 "linup-5.c"
 #undef compat
 #undef gauss
 #undef flux
@@ -9621,7 +9635,7 @@ void mcinit(void) {
   mccslit1_width = 0;
 #line 46 "linup-5.instr"
   mccslit1_height = 0;
-#line 9624 "linup-5.c"
+#line 9638 "linup-5.c"
 
 #define mccompcurname  slit1
 #define mccompcurtype  Slit
@@ -9634,7 +9648,7 @@ void mcinit(void) {
 #define cut mccslit1_cut
 #define width mccslit1_width
 #define height mccslit1_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -9642,7 +9656,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 9645 "linup-5.c"
+#line 9659 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -9673,7 +9687,7 @@ void mcinit(void) {
   mccslit2_width = 0;
 #line 46 "linup-5.instr"
   mccslit2_height = 0;
-#line 9676 "linup-5.c"
+#line 9690 "linup-5.c"
 
 #define mccompcurname  slit2
 #define mccompcurtype  Slit
@@ -9686,7 +9700,7 @@ void mcinit(void) {
 #define cut mccslit2_cut
 #define width mccslit2_width
 #define height mccslit2_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -9694,7 +9708,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 9697 "linup-5.c"
+#line 9711 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -9725,7 +9739,7 @@ void mcinit(void) {
   mccslit3_width = 0;
 #line 46 "linup-5.instr"
   mccslit3_height = 0;
-#line 9728 "linup-5.c"
+#line 9742 "linup-5.c"
 
 #define mccompcurname  slit3
 #define mccompcurtype  Slit
@@ -9738,7 +9752,7 @@ void mcinit(void) {
 #define cut mccslit3_cut
 #define width mccslit3_width
 #define height mccslit3_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -9746,7 +9760,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 9749 "linup-5.c"
+#line 9763 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -9787,7 +9801,7 @@ void mcinit(void) {
   mccm0_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm0_DM = 0;
-#line 9790 "linup-5.c"
+#line 9804 "linup-5.c"
 
 #define mccompcurname  m0
 #define mccompcurtype  Monochromator_flat
@@ -9807,7 +9821,7 @@ void mcinit(void) {
 #define r0 mccm0_r0
 #define Q mccm0_Q
 #define DM mccm0_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -9822,7 +9836,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 9825 "linup-5.c"
+#line 9839 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -9866,7 +9880,7 @@ void mcinit(void) {
   mccm1_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm1_DM = 0;
-#line 9869 "linup-5.c"
+#line 9883 "linup-5.c"
 
 #define mccompcurname  m1
 #define mccompcurtype  Monochromator_flat
@@ -9886,7 +9900,7 @@ void mcinit(void) {
 #define r0 mccm1_r0
 #define Q mccm1_Q
 #define DM mccm1_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -9901,7 +9915,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 9904 "linup-5.c"
+#line 9918 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -9945,7 +9959,7 @@ void mcinit(void) {
   mccm2_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm2_DM = 0;
-#line 9948 "linup-5.c"
+#line 9962 "linup-5.c"
 
 #define mccompcurname  m2
 #define mccompcurtype  Monochromator_flat
@@ -9965,7 +9979,7 @@ void mcinit(void) {
 #define r0 mccm2_r0
 #define Q mccm2_Q
 #define DM mccm2_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -9980,7 +9994,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 9983 "linup-5.c"
+#line 9997 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -10024,7 +10038,7 @@ void mcinit(void) {
   mccm3_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm3_DM = 0;
-#line 10027 "linup-5.c"
+#line 10041 "linup-5.c"
 
 #define mccompcurname  m3
 #define mccompcurtype  Monochromator_flat
@@ -10044,7 +10058,7 @@ void mcinit(void) {
 #define r0 mccm3_r0
 #define Q mccm3_Q
 #define DM mccm3_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -10059,7 +10073,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 10062 "linup-5.c"
+#line 10076 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -10103,7 +10117,7 @@ void mcinit(void) {
   mccm4_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm4_DM = 0;
-#line 10106 "linup-5.c"
+#line 10120 "linup-5.c"
 
 #define mccompcurname  m4
 #define mccompcurtype  Monochromator_flat
@@ -10123,7 +10137,7 @@ void mcinit(void) {
 #define r0 mccm4_r0
 #define Q mccm4_Q
 #define DM mccm4_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -10138,7 +10152,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 10141 "linup-5.c"
+#line 10155 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -10182,7 +10196,7 @@ void mcinit(void) {
   mccm5_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm5_DM = 0;
-#line 10185 "linup-5.c"
+#line 10199 "linup-5.c"
 
 #define mccompcurname  m5
 #define mccompcurtype  Monochromator_flat
@@ -10202,7 +10216,7 @@ void mcinit(void) {
 #define r0 mccm5_r0
 #define Q mccm5_Q
 #define DM mccm5_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -10217,7 +10231,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 10220 "linup-5.c"
+#line 10234 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -10261,7 +10275,7 @@ void mcinit(void) {
   mccm6_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm6_DM = 0;
-#line 10264 "linup-5.c"
+#line 10278 "linup-5.c"
 
 #define mccompcurname  m6
 #define mccompcurtype  Monochromator_flat
@@ -10281,7 +10295,7 @@ void mcinit(void) {
 #define r0 mccm6_r0
 #define Q mccm6_Q
 #define DM mccm6_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -10296,7 +10310,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 10299 "linup-5.c"
+#line 10313 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -10340,7 +10354,7 @@ void mcinit(void) {
   mccm7_Q = tas1_mono_q;
 #line 52 "linup-5.instr"
   mccm7_DM = 0;
-#line 10343 "linup-5.c"
+#line 10357 "linup-5.c"
 
 #define mccompcurname  m7
 #define mccompcurtype  Monochromator_flat
@@ -10360,7 +10374,7 @@ void mcinit(void) {
 #define r0 mccm7_r0
 #define Q mccm7_Q
 #define DM mccm7_DM
-#line 89 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 89 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   mos_rms_y = MIN2RAD*mosaich/sqrt(8*log(2));
   mos_rms_z = MIN2RAD*mosaicv/sqrt(8*log(2));
@@ -10375,7 +10389,7 @@ void mcinit(void) {
   if (zmin==zmax || ymin==ymax)
     exit(fprintf(stderr, "Monochromator_flat: %s : Surface is null (zmin,zmax,ymin,ymax)\n", NAME_CURRENT_COMP));
 }
-#line 10378 "linup-5.c"
+#line 10392 "linup-5.c"
 #undef DM
 #undef Q
 #undef r0
@@ -10417,7 +10431,7 @@ void mcinit(void) {
   mccslitMS1_width = 0;
 #line 46 "linup-5.instr"
   mccslitMS1_height = 0;
-#line 10420 "linup-5.c"
+#line 10434 "linup-5.c"
 
 #define mccompcurname  slitMS1
 #define mccompcurtype  Slit
@@ -10430,7 +10444,7 @@ void mcinit(void) {
 #define cut mccslitMS1_cut
 #define width mccslitMS1_width
 #define height mccslitMS1_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -10438,7 +10452,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 10441 "linup-5.c"
+#line 10455 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -10469,7 +10483,7 @@ void mcinit(void) {
   mccslitMS2_width = 0;
 #line 46 "linup-5.instr"
   mccslitMS2_height = 0;
-#line 10472 "linup-5.c"
+#line 10486 "linup-5.c"
 
 #define mccompcurname  slitMS2
 #define mccompcurtype  Slit
@@ -10482,7 +10496,7 @@ void mcinit(void) {
 #define cut mccslitMS2_cut
 #define width mccslitMS2_width
 #define height mccslitMS2_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -10490,7 +10504,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 10493 "linup-5.c"
+#line 10507 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -10525,7 +10539,7 @@ void mcinit(void) {
   mccc1_transmission = 1;
 #line 52 "linup-5.instr"
   mccc1_divergenceV = 0;
-#line 10528 "linup-5.c"
+#line 10542 "linup-5.c"
 
 #define mccompcurname  c1
 #define mccompcurtype  Collimator_linear
@@ -10542,7 +10556,7 @@ void mcinit(void) {
 #define divergence mccc1_divergence
 #define transmission mccc1_transmission
 #define divergenceV mccc1_divergenceV
-#line 61 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 61 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
   slope = tan(MIN2RAD*divergence);
   slopeV= tan(MIN2RAD*divergenceV);
@@ -10557,7 +10571,7 @@ void mcinit(void) {
   }
 
 }
-#line 10560 "linup-5.c"
+#line 10574 "linup-5.c"
 #undef divergenceV
 #undef transmission
 #undef divergence
@@ -10592,7 +10606,7 @@ void mcinit(void) {
   mccslitMS3_width = 0;
 #line 46 "linup-5.instr"
   mccslitMS3_height = 0;
-#line 10595 "linup-5.c"
+#line 10609 "linup-5.c"
 
 #define mccompcurname  slitMS3
 #define mccompcurtype  Slit
@@ -10605,7 +10619,7 @@ void mcinit(void) {
 #define cut mccslitMS3_cut
 #define width mccslitMS3_width
 #define height mccslitMS3_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -10613,7 +10627,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 10616 "linup-5.c"
+#line 10630 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -10644,7 +10658,7 @@ void mcinit(void) {
   mccslitMS4_width = 0;
 #line 46 "linup-5.instr"
   mccslitMS4_height = 0;
-#line 10647 "linup-5.c"
+#line 10661 "linup-5.c"
 
 #define mccompcurname  slitMS4
 #define mccompcurtype  Slit
@@ -10657,7 +10671,7 @@ void mcinit(void) {
 #define cut mccslitMS4_cut
 #define width mccslitMS4_width
 #define height mccslitMS4_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -10665,7 +10679,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 10668 "linup-5.c"
+#line 10682 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -10696,7 +10710,7 @@ void mcinit(void) {
   mccslitMS5_width = 0;
 #line 46 "linup-5.instr"
   mccslitMS5_height = 0;
-#line 10699 "linup-5.c"
+#line 10713 "linup-5.c"
 
 #define mccompcurname  slitMS5
 #define mccompcurtype  Slit
@@ -10709,7 +10723,7 @@ void mcinit(void) {
 #define cut mccslitMS5_cut
 #define width mccslitMS5_width
 #define height mccslitMS5_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -10717,7 +10731,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 10720 "linup-5.c"
+#line 10734 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -10746,7 +10760,7 @@ void mcinit(void) {
   mccmon_yheight = 0;
 #line 47 "linup-5.instr"
   mccmon_restore_neutron = 0;
-#line 10749 "linup-5.c"
+#line 10763 "linup-5.c"
 
 #define mccompcurname  mon
 #define mccompcurtype  Monitor
@@ -10761,7 +10775,7 @@ void mcinit(void) {
 #define xwidth mccmon_xwidth
 #define yheight mccmon_yheight
 #define restore_neutron mccmon_restore_neutron
-#line 57 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 57 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
     psum = 0;
     p2sum = 0;
@@ -10777,7 +10791,7 @@ void mcinit(void) {
       exit(0);
     }
 }
-#line 10780 "linup-5.c"
+#line 10794 "linup-5.c"
 #undef restore_neutron
 #undef yheight
 #undef xwidth
@@ -10810,7 +10824,7 @@ void mcinit(void) {
   mccslitMS6_width = 0;
 #line 46 "linup-5.instr"
   mccslitMS6_height = 0;
-#line 10813 "linup-5.c"
+#line 10827 "linup-5.c"
 
 #define mccompcurname  slitMS6
 #define mccompcurtype  Slit
@@ -10823,7 +10837,7 @@ void mcinit(void) {
 #define cut mccslitMS6_cut
 #define width mccslitMS6_width
 #define height mccslitMS6_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -10831,7 +10845,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 10834 "linup-5.c"
+#line 10848 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -10862,7 +10876,7 @@ void mcinit(void) {
   mccemon1_Emin = 19.25;
 #line 204 "linup-5.instr"
   mccemon1_Emax = 20.75;
-#line 10865 "linup-5.c"
+#line 10879 "linup-5.c"
 
 #define mccompcurname  emon1
 #define mccompcurtype  E_monitor
@@ -10884,7 +10898,7 @@ void mcinit(void) {
 #define yheight mccemon1_yheight
 #define Emin mccemon1_Emin
 #define Emax mccemon1_Emax
-#line 65 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 65 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
     int i;
 
@@ -10906,7 +10920,7 @@ void mcinit(void) {
     }
     S_p = S_pE = S_pE2 = 0;
 }
-#line 10909 "linup-5.c"
+#line 10923 "linup-5.c"
 #undef Emax
 #undef Emin
 #undef yheight
@@ -10958,7 +10972,7 @@ void mcinit(void) {
   mccsample_zthick = 0;
 #line 210 "linup-5.instr"
   mccsample_h = 0.015;
-#line 10961 "linup-5.c"
+#line 10975 "linup-5.c"
 
 #define mccompcurname  sample
 #define mccompcurtype  Powder1
@@ -10981,7 +10995,7 @@ void mcinit(void) {
 #define xwidth mccsample_xwidth
 #define zthick mccsample_zthick
 #define h mccsample_h
-#line 82 "/usr/local/lib/mcstas/samples/Powder1.comp"
+#line 82 "/users/software/mcstas/lib/mcstas/samples/Powder1.comp"
 {
   if (h) yheight=h;
   if (!radius || !yheight) {
@@ -10995,7 +11009,7 @@ void mcinit(void) {
   if (d) q=2*PI/d;
   q_v = q*K2V;
 }
-#line 10998 "linup-5.c"
+#line 11012 "linup-5.c"
 #undef h
 #undef zthick
 #undef xwidth
@@ -11040,7 +11054,7 @@ void mcinit(void) {
   mccslitSA1_width = 0;
 #line 46 "linup-5.instr"
   mccslitSA1_height = 0;
-#line 11043 "linup-5.c"
+#line 11057 "linup-5.c"
 
 #define mccompcurname  slitSA1
 #define mccompcurtype  Slit
@@ -11053,7 +11067,7 @@ void mcinit(void) {
 #define cut mccslitSA1_cut
 #define width mccslitSA1_width
 #define height mccslitSA1_height
-#line 51 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 51 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   if (width > 0)  { xmax=width/2;  xmin=-xmax; }
   if (height > 0) { ymax=height/2; ymin=-ymax; }
@@ -11061,7 +11075,7 @@ void mcinit(void) {
     { fprintf(stderr,"Slit: %s: Error: give geometry\n", NAME_CURRENT_COMP); exit(-1); }
 
 }
-#line 11064 "linup-5.c"
+#line 11078 "linup-5.c"
 #undef height
 #undef width
 #undef cut
@@ -11096,7 +11110,7 @@ void mcinit(void) {
   mccc2_transmission = 1;
 #line 52 "linup-5.instr"
   mccc2_divergenceV = 0;
-#line 11099 "linup-5.c"
+#line 11113 "linup-5.c"
 
 #define mccompcurname  c2
 #define mccompcurtype  Collimator_linear
@@ -11113,7 +11127,7 @@ void mcinit(void) {
 #define divergence mccc2_divergence
 #define transmission mccc2_transmission
 #define divergenceV mccc2_divergenceV
-#line 61 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 61 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
   slope = tan(MIN2RAD*divergence);
   slopeV= tan(MIN2RAD*divergenceV);
@@ -11128,7 +11142,7 @@ void mcinit(void) {
   }
 
 }
-#line 11131 "linup-5.c"
+#line 11145 "linup-5.c"
 #undef divergenceV
 #undef transmission
 #undef divergence
@@ -11175,7 +11189,7 @@ void mcinit(void) {
   mccc3_transmission = 1;
 #line 52 "linup-5.instr"
   mccc3_divergenceV = 0;
-#line 11178 "linup-5.c"
+#line 11192 "linup-5.c"
 
 #define mccompcurname  c3
 #define mccompcurtype  Collimator_linear
@@ -11192,7 +11206,7 @@ void mcinit(void) {
 #define divergence mccc3_divergence
 #define transmission mccc3_transmission
 #define divergenceV mccc3_divergenceV
-#line 61 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 61 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
   slope = tan(MIN2RAD*divergence);
   slopeV= tan(MIN2RAD*divergenceV);
@@ -11207,7 +11221,7 @@ void mcinit(void) {
   }
 
 }
-#line 11210 "linup-5.c"
+#line 11224 "linup-5.c"
 #undef divergenceV
 #undef transmission
 #undef divergence
@@ -11240,7 +11254,7 @@ void mcinit(void) {
   mccsng_yheight = 0;
 #line 47 "linup-5.instr"
   mccsng_restore_neutron = 0;
-#line 11243 "linup-5.c"
+#line 11257 "linup-5.c"
 
 #define mccompcurname  sng
 #define mccompcurtype  Monitor
@@ -11255,7 +11269,7 @@ void mcinit(void) {
 #define xwidth mccsng_xwidth
 #define yheight mccsng_yheight
 #define restore_neutron mccsng_restore_neutron
-#line 57 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 57 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
     psum = 0;
     p2sum = 0;
@@ -11271,7 +11285,7 @@ void mcinit(void) {
       exit(0);
     }
 }
-#line 11274 "linup-5.c"
+#line 11288 "linup-5.c"
 #undef restore_neutron
 #undef yheight
 #undef xwidth
@@ -11304,7 +11318,7 @@ void mcinit(void) {
   mccemon2_Emin = 19.25;
 #line 247 "linup-5.instr"
   mccemon2_Emax = 20.75;
-#line 11307 "linup-5.c"
+#line 11321 "linup-5.c"
 
 #define mccompcurname  emon2
 #define mccompcurtype  E_monitor
@@ -11326,7 +11340,7 @@ void mcinit(void) {
 #define yheight mccemon2_yheight
 #define Emin mccemon2_Emin
 #define Emax mccemon2_Emax
-#line 65 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 65 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
     int i;
 
@@ -11348,7 +11362,7 @@ void mcinit(void) {
     }
     S_p = S_pE = S_pE2 = 0;
 }
-#line 11351 "linup-5.c"
+#line 11365 "linup-5.c"
 #undef Emax
 #undef Emin
 #undef yheight
@@ -11489,7 +11503,7 @@ MCNUM dLambda = mccsource_dLambda;
 MCNUM flux = mccsource_flux;
 MCNUM gauss = mccsource_gauss;
 MCNUM compat = mccsource_compat;
-#line 105 "/usr/local/lib/mcstas/sources/Source_simple.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/sources/Source_simple.comp"
 {
  double chi,E,Lambda,v,r, xf, yf, rf, dx, dy, pdir;
 
@@ -11534,7 +11548,7 @@ MCNUM compat = mccsource_compat;
  vy=v*dy/rf;
  vx=v*dx/rf;
 }
-#line 11533 "linup-5.c"
+#line 11547 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef pmul
 #undef mccompcurname
@@ -11590,7 +11604,7 @@ MCNUM radius = mccslit1_radius;
 MCNUM cut = mccslit1_cut;
 MCNUM width = mccslit1_width;
 MCNUM height = mccslit1_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -11602,7 +11616,7 @@ MCNUM height = mccslit1_height;
       else
         SCATTER;
 }
-#line 11601 "linup-5.c"
+#line 11615 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -11657,7 +11671,7 @@ MCNUM radius = mccslit2_radius;
 MCNUM cut = mccslit2_cut;
 MCNUM width = mccslit2_width;
 MCNUM height = mccslit2_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -11669,7 +11683,7 @@ MCNUM height = mccslit2_height;
       else
         SCATTER;
 }
-#line 11668 "linup-5.c"
+#line 11682 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -11724,7 +11738,7 @@ MCNUM radius = mccslit3_radius;
 MCNUM cut = mccslit3_cut;
 MCNUM width = mccslit3_width;
 MCNUM height = mccslit3_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -11736,7 +11750,7 @@ MCNUM height = mccslit3_height;
       else
         SCATTER;
 }
-#line 11735 "linup-5.c"
+#line 11749 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -11842,7 +11856,7 @@ MCNUM mosaicv = mccm0_mosaicv;
 MCNUM r0 = mccm0_r0;
 MCNUM Q = mccm0_Q;
 MCNUM DM = mccm0_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -11974,7 +11988,7 @@ MCNUM DM = mccm0_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 11973 "linup-5.c"
+#line 11987 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -12040,7 +12054,7 @@ MCNUM mosaicv = mccm1_mosaicv;
 MCNUM r0 = mccm1_r0;
 MCNUM Q = mccm1_Q;
 MCNUM DM = mccm1_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -12172,7 +12186,7 @@ MCNUM DM = mccm1_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 12171 "linup-5.c"
+#line 12185 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -12238,7 +12252,7 @@ MCNUM mosaicv = mccm2_mosaicv;
 MCNUM r0 = mccm2_r0;
 MCNUM Q = mccm2_Q;
 MCNUM DM = mccm2_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -12370,7 +12384,7 @@ MCNUM DM = mccm2_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 12369 "linup-5.c"
+#line 12383 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -12436,7 +12450,7 @@ MCNUM mosaicv = mccm3_mosaicv;
 MCNUM r0 = mccm3_r0;
 MCNUM Q = mccm3_Q;
 MCNUM DM = mccm3_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -12568,7 +12582,7 @@ MCNUM DM = mccm3_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 12567 "linup-5.c"
+#line 12581 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -12634,7 +12648,7 @@ MCNUM mosaicv = mccm4_mosaicv;
 MCNUM r0 = mccm4_r0;
 MCNUM Q = mccm4_Q;
 MCNUM DM = mccm4_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -12766,7 +12780,7 @@ MCNUM DM = mccm4_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 12765 "linup-5.c"
+#line 12779 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -12832,7 +12846,7 @@ MCNUM mosaicv = mccm5_mosaicv;
 MCNUM r0 = mccm5_r0;
 MCNUM Q = mccm5_Q;
 MCNUM DM = mccm5_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -12964,7 +12978,7 @@ MCNUM DM = mccm5_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 12963 "linup-5.c"
+#line 12977 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -13030,7 +13044,7 @@ MCNUM mosaicv = mccm6_mosaicv;
 MCNUM r0 = mccm6_r0;
 MCNUM Q = mccm6_Q;
 MCNUM DM = mccm6_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -13162,7 +13176,7 @@ MCNUM DM = mccm6_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 13161 "linup-5.c"
+#line 13175 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -13228,7 +13242,7 @@ MCNUM mosaicv = mccm7_mosaicv;
 MCNUM r0 = mccm7_r0;
 MCNUM Q = mccm7_Q;
 MCNUM DM = mccm7_DM;
-#line 105 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 105 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   double y1,z1,t1,dt,kix,kiy,kiz,ratio,order,q0x,k,q0,theta;
   double bx,by,bz,kux,kuy,kuz,ax,ay,az,phi;
@@ -13360,7 +13374,7 @@ MCNUM DM = mccm7_DM;
     } /* End intersect the crystal */
   } /* End neutron moving towards crystal */
 }
-#line 13359 "linup-5.c"
+#line 13373 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -13463,7 +13477,7 @@ MCNUM radius = mccslitMS1_radius;
 MCNUM cut = mccslitMS1_cut;
 MCNUM width = mccslitMS1_width;
 MCNUM height = mccslitMS1_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -13475,7 +13489,7 @@ MCNUM height = mccslitMS1_height;
       else
         SCATTER;
 }
-#line 13474 "linup-5.c"
+#line 13488 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -13530,7 +13544,7 @@ MCNUM radius = mccslitMS2_radius;
 MCNUM cut = mccslitMS2_cut;
 MCNUM width = mccslitMS2_width;
 MCNUM height = mccslitMS2_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -13542,7 +13556,7 @@ MCNUM height = mccslitMS2_height;
       else
         SCATTER;
 }
-#line 13541 "linup-5.c"
+#line 13555 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -13601,7 +13615,7 @@ MCNUM len = mccc1_len;
 MCNUM divergence = mccc1_divergence;
 MCNUM transmission = mccc1_transmission;
 MCNUM divergenceV = mccc1_divergenceV;
-#line 76 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 76 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
     double phi, dt;
 
@@ -13631,7 +13645,7 @@ MCNUM divergenceV = mccc1_divergenceV;
       SCATTER;
     }
 }
-#line 13630 "linup-5.c"
+#line 13644 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef slopeV
 #undef slope
@@ -13688,7 +13702,7 @@ MCNUM radius = mccslitMS3_radius;
 MCNUM cut = mccslitMS3_cut;
 MCNUM width = mccslitMS3_width;
 MCNUM height = mccslitMS3_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -13700,7 +13714,7 @@ MCNUM height = mccslitMS3_height;
       else
         SCATTER;
 }
-#line 13699 "linup-5.c"
+#line 13713 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -13755,7 +13769,7 @@ MCNUM radius = mccslitMS4_radius;
 MCNUM cut = mccslitMS4_cut;
 MCNUM width = mccslitMS4_width;
 MCNUM height = mccslitMS4_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -13767,7 +13781,7 @@ MCNUM height = mccslitMS4_height;
       else
         SCATTER;
 }
-#line 13766 "linup-5.c"
+#line 13780 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -13822,7 +13836,7 @@ MCNUM radius = mccslitMS5_radius;
 MCNUM cut = mccslitMS5_cut;
 MCNUM width = mccslitMS5_width;
 MCNUM height = mccslitMS5_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -13834,7 +13848,7 @@ MCNUM height = mccslitMS5_height;
       else
         SCATTER;
 }
-#line 13833 "linup-5.c"
+#line 13847 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -13894,7 +13908,7 @@ MCNUM ymax = mccmon_ymax;
 MCNUM xwidth = mccmon_xwidth;
 MCNUM yheight = mccmon_yheight;
 MCNUM restore_neutron = mccmon_restore_neutron;
-#line 73 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
     PROP_Z0;
     if (x>xmin && x<xmax && y>ymin && y<ymax)
@@ -13908,7 +13922,7 @@ MCNUM restore_neutron = mccmon_restore_neutron;
       RESTORE_NEUTRON(INDEX_CURRENT_COMP, x, y, z, vx, vy, vz, t, sx, sy, sz, p);
     }
 }
-#line 13907 "linup-5.c"
+#line 13921 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef p2sum
 #undef psum
@@ -13969,7 +13983,7 @@ MCNUM radius = mccslitMS6_radius;
 MCNUM cut = mccslitMS6_cut;
 MCNUM width = mccslitMS6_width;
 MCNUM height = mccslitMS6_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -13981,7 +13995,7 @@ MCNUM height = mccslitMS6_height;
       else
         SCATTER;
 }
-#line 13980 "linup-5.c"
+#line 13994 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -14048,7 +14062,7 @@ MCNUM xwidth = mccemon1_xwidth;
 MCNUM yheight = mccemon1_yheight;
 MCNUM Emin = mccemon1_Emin;
 MCNUM Emax = mccemon1_Emax;
-#line 87 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 87 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
     int i;
     double E;
@@ -14075,7 +14089,7 @@ MCNUM Emax = mccemon1_Emax;
       RESTORE_NEUTRON(INDEX_CURRENT_COMP, x, y, z, vx, vy, vz, t, sx, sy, sz, p);
     }
 }
-#line 14074 "linup-5.c"
+#line 14088 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef S_pE2
 #undef S_pE
@@ -14152,7 +14166,7 @@ MCNUM sigma_a = mccsample_sigma_a;
 MCNUM xwidth = mccsample_xwidth;
 MCNUM zthick = mccsample_zthick;
 MCNUM h = mccsample_h;
-#line 96 "/usr/local/lib/mcstas/samples/Powder1.comp"
+#line 96 "/users/software/mcstas/lib/mcstas/samples/Powder1.comp"
 {
   double t0, t1, v, l_full, l, l_1, dt, d_phi0, theta, my_s;
   double arg, tmp_vx, tmp_vy, tmp_vz, vout_x, vout_y, vout_z;
@@ -14234,7 +14248,7 @@ MCNUM h = mccsample_h;
     SCATTER;
   }
 }
-#line 14233 "linup-5.c"
+#line 14247 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef isrect
 #undef q_v
@@ -14337,7 +14351,7 @@ MCNUM radius = mccslitSA1_radius;
 MCNUM cut = mccslitSA1_cut;
 MCNUM width = mccslitSA1_width;
 MCNUM height = mccslitSA1_height;
-#line 60 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 60 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
     PROP_Z0;
     if (((radius == 0) && (x<xmin || x>xmax || y<ymin || y>ymax))
@@ -14349,7 +14363,7 @@ MCNUM height = mccslitSA1_height;
       else
         SCATTER;
 }
-#line 14348 "linup-5.c"
+#line 14362 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -14408,7 +14422,7 @@ MCNUM len = mccc2_len;
 MCNUM divergence = mccc2_divergence;
 MCNUM transmission = mccc2_transmission;
 MCNUM divergenceV = mccc2_divergenceV;
-#line 76 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 76 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
     double phi, dt;
 
@@ -14438,7 +14452,7 @@ MCNUM divergenceV = mccc2_divergenceV;
       SCATTER;
     }
 }
-#line 14437 "linup-5.c"
+#line 14451 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef slopeV
 #undef slope
@@ -14587,7 +14601,7 @@ MCNUM len = mccc3_len;
 MCNUM divergence = mccc3_divergence;
 MCNUM transmission = mccc3_transmission;
 MCNUM divergenceV = mccc3_divergenceV;
-#line 76 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 76 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
     double phi, dt;
 
@@ -14617,7 +14631,7 @@ MCNUM divergenceV = mccc3_divergenceV;
       SCATTER;
     }
 }
-#line 14616 "linup-5.c"
+#line 14630 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef slopeV
 #undef slope
@@ -14679,7 +14693,7 @@ MCNUM ymax = mccsng_ymax;
 MCNUM xwidth = mccsng_xwidth;
 MCNUM yheight = mccsng_yheight;
 MCNUM restore_neutron = mccsng_restore_neutron;
-#line 73 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
     PROP_Z0;
     if (x>xmin && x<xmax && y>ymin && y<ymax)
@@ -14693,7 +14707,7 @@ MCNUM restore_neutron = mccsng_restore_neutron;
       RESTORE_NEUTRON(INDEX_CURRENT_COMP, x, y, z, vx, vy, vz, t, sx, sy, sz, p);
     }
 }
-#line 14692 "linup-5.c"
+#line 14706 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef p2sum
 #undef psum
@@ -14766,7 +14780,7 @@ MCNUM xwidth = mccemon2_xwidth;
 MCNUM yheight = mccemon2_yheight;
 MCNUM Emin = mccemon2_Emin;
 MCNUM Emax = mccemon2_Emax;
-#line 87 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 87 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
     int i;
     double E;
@@ -14793,7 +14807,7 @@ MCNUM Emax = mccemon2_Emax;
       RESTORE_NEUTRON(INDEX_CURRENT_COMP, x, y, z, vx, vy, vz, t, sx, sy, sz, p);
     }
 }
-#line 14792 "linup-5.c"
+#line 14806 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef S_pE2
 #undef S_pE
@@ -14859,11 +14873,11 @@ MCNUM ymax = mccmon_ymax;
 MCNUM xwidth = mccmon_xwidth;
 MCNUM yheight = mccmon_yheight;
 MCNUM restore_neutron = mccmon_restore_neutron;
-#line 87 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 87 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
     DETECTOR_OUT_0D("Single monitor " NAME_CURRENT_COMP, Nsum, psum, p2sum);
 }
-#line 14862 "linup-5.c"
+#line 14876 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef p2sum
 #undef psum
@@ -14895,7 +14909,7 @@ MCNUM xwidth = mccemon1_xwidth;
 MCNUM yheight = mccemon1_yheight;
 MCNUM Emin = mccemon1_Emin;
 MCNUM Emax = mccemon1_Emax;
-#line 114 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 114 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
     DETECTOR_OUT_1D(
         "Energy monitor",
@@ -14907,7 +14921,7 @@ MCNUM Emax = mccemon1_Emax;
     if (S_p) printf("<E> : %g meV , E-width : %g meV \n",
      S_pE/S_p,sqrt(S_pE2/S_p - S_pE*S_pE/(S_p*S_p)) );
 }
-#line 14906 "linup-5.c"
+#line 14920 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef S_pE2
 #undef S_pE
@@ -14938,11 +14952,11 @@ MCNUM ymax = mccsng_ymax;
 MCNUM xwidth = mccsng_xwidth;
 MCNUM yheight = mccsng_yheight;
 MCNUM restore_neutron = mccsng_restore_neutron;
-#line 87 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 87 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
     DETECTOR_OUT_0D("Single monitor " NAME_CURRENT_COMP, Nsum, psum, p2sum);
 }
-#line 14941 "linup-5.c"
+#line 14955 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef p2sum
 #undef psum
@@ -14974,7 +14988,7 @@ MCNUM xwidth = mccemon2_xwidth;
 MCNUM yheight = mccemon2_yheight;
 MCNUM Emin = mccemon2_Emin;
 MCNUM Emax = mccemon2_Emax;
-#line 114 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 114 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
     DETECTOR_OUT_1D(
         "Energy monitor",
@@ -14986,7 +15000,7 @@ MCNUM Emax = mccemon2_Emax;
     if (S_p) printf("<E> : %g meV , E-width : %g meV \n",
      S_pE/S_p,sqrt(S_pE2/S_p - S_pE*S_pE/(S_p*S_p)) );
 }
-#line 14985 "linup-5.c"
+#line 14999 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef S_pE2
 #undef S_pE
@@ -15093,7 +15107,7 @@ void mcdisplay(void) {
 #define mccompcurname  a1
 #define mccompcurtype  Arm
 #define mccompcurindex 1
-#line 43 "/usr/local/lib/mcstas/optics/Arm.comp"
+#line 43 "/users/software/mcstas/lib/mcstas/optics/Arm.comp"
 {
   /* A bit ugly; hard-coded dimensions. */
   magnify("");
@@ -15101,7 +15115,7 @@ void mcdisplay(void) {
   line(0,0,0,0,0.2,0);
   line(0,0,0,0,0,0.2);
 }
-#line 15100 "linup-5.c"
+#line 15114 "linup-5.c"
 #undef mccompcurname
 #undef mccompcurtype
 #undef mccompcurindex
@@ -15127,7 +15141,7 @@ MCNUM dLambda = mccsource_dLambda;
 MCNUM flux = mccsource_flux;
 MCNUM gauss = mccsource_gauss;
 MCNUM compat = mccsource_compat;
-#line 151 "/usr/local/lib/mcstas/sources/Source_simple.comp"
+#line 151 "/users/software/mcstas/lib/mcstas/sources/Source_simple.comp"
 {
   if (square == 1) {
     magnify("xy");
@@ -15137,7 +15151,7 @@ MCNUM compat = mccsource_compat;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15136 "linup-5.c"
+#line 15150 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef pmul
 #undef mccompcurname
@@ -15159,7 +15173,7 @@ MCNUM radius = mccslit1_radius;
 MCNUM cut = mccslit1_cut;
 MCNUM width = mccslit1_width;
 MCNUM height = mccslit1_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15182,7 +15196,7 @@ MCNUM height = mccslit1_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15181 "linup-5.c"
+#line 15195 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15203,7 +15217,7 @@ MCNUM radius = mccslit2_radius;
 MCNUM cut = mccslit2_cut;
 MCNUM width = mccslit2_width;
 MCNUM height = mccslit2_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15226,7 +15240,7 @@ MCNUM height = mccslit2_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15225 "linup-5.c"
+#line 15239 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15247,7 +15261,7 @@ MCNUM radius = mccslit3_radius;
 MCNUM cut = mccslit3_cut;
 MCNUM width = mccslit3_width;
 MCNUM height = mccslit3_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15270,7 +15284,7 @@ MCNUM height = mccslit3_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15269 "linup-5.c"
+#line 15283 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15282,7 +15296,7 @@ MCNUM height = mccslit3_height;
 #define mccompcurname  focus_mono
 #define mccompcurtype  Arm
 #define mccompcurindex 6
-#line 43 "/usr/local/lib/mcstas/optics/Arm.comp"
+#line 43 "/users/software/mcstas/lib/mcstas/optics/Arm.comp"
 {
   /* A bit ugly; hard-coded dimensions. */
   magnify("");
@@ -15290,7 +15304,7 @@ MCNUM height = mccslit3_height;
   line(0,0,0,0,0.2,0);
   line(0,0,0,0,0,0.2);
 }
-#line 15289 "linup-5.c"
+#line 15303 "linup-5.c"
 #undef mccompcurname
 #undef mccompcurtype
 #undef mccompcurindex
@@ -15317,7 +15331,7 @@ MCNUM mosaicv = mccm0_mosaicv;
 MCNUM r0 = mccm0_r0;
 MCNUM Q = mccm0_Q;
 MCNUM DM = mccm0_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15326,7 +15340,7 @@ MCNUM DM = mccm0_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15325 "linup-5.c"
+#line 15339 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15358,7 +15372,7 @@ MCNUM mosaicv = mccm1_mosaicv;
 MCNUM r0 = mccm1_r0;
 MCNUM Q = mccm1_Q;
 MCNUM DM = mccm1_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15367,7 +15381,7 @@ MCNUM DM = mccm1_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15366 "linup-5.c"
+#line 15380 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15399,7 +15413,7 @@ MCNUM mosaicv = mccm2_mosaicv;
 MCNUM r0 = mccm2_r0;
 MCNUM Q = mccm2_Q;
 MCNUM DM = mccm2_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15408,7 +15422,7 @@ MCNUM DM = mccm2_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15407 "linup-5.c"
+#line 15421 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15440,7 +15454,7 @@ MCNUM mosaicv = mccm3_mosaicv;
 MCNUM r0 = mccm3_r0;
 MCNUM Q = mccm3_Q;
 MCNUM DM = mccm3_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15449,7 +15463,7 @@ MCNUM DM = mccm3_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15448 "linup-5.c"
+#line 15462 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15481,7 +15495,7 @@ MCNUM mosaicv = mccm4_mosaicv;
 MCNUM r0 = mccm4_r0;
 MCNUM Q = mccm4_Q;
 MCNUM DM = mccm4_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15490,7 +15504,7 @@ MCNUM DM = mccm4_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15489 "linup-5.c"
+#line 15503 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15522,7 +15536,7 @@ MCNUM mosaicv = mccm5_mosaicv;
 MCNUM r0 = mccm5_r0;
 MCNUM Q = mccm5_Q;
 MCNUM DM = mccm5_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15531,7 +15545,7 @@ MCNUM DM = mccm5_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15530 "linup-5.c"
+#line 15544 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15563,7 +15577,7 @@ MCNUM mosaicv = mccm6_mosaicv;
 MCNUM r0 = mccm6_r0;
 MCNUM Q = mccm6_Q;
 MCNUM DM = mccm6_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15572,7 +15586,7 @@ MCNUM DM = mccm6_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15571 "linup-5.c"
+#line 15585 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15604,7 +15618,7 @@ MCNUM mosaicv = mccm7_mosaicv;
 MCNUM r0 = mccm7_r0;
 MCNUM Q = mccm7_Q;
 MCNUM DM = mccm7_DM;
-#line 238 "/usr/local/lib/mcstas/optics/Monochromator_flat.comp"
+#line 238 "/users/software/mcstas/lib/mcstas/optics/Monochromator_flat.comp"
 {
   magnify("zy");
   multiline(5, 0.0, (double)ymin, (double)zmin,
@@ -15613,7 +15627,7 @@ MCNUM DM = mccm7_DM;
                0.0, (double)ymin, (double)zmax,
                0.0, (double)ymin, (double)zmin);
 }
-#line 15612 "linup-5.c"
+#line 15626 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mono_Q
 #undef mos_rms_max
@@ -15629,7 +15643,7 @@ MCNUM DM = mccm7_DM;
 #define mccompcurname  a2
 #define mccompcurtype  Arm
 #define mccompcurindex 15
-#line 43 "/usr/local/lib/mcstas/optics/Arm.comp"
+#line 43 "/users/software/mcstas/lib/mcstas/optics/Arm.comp"
 {
   /* A bit ugly; hard-coded dimensions. */
   magnify("");
@@ -15637,7 +15651,7 @@ MCNUM DM = mccm7_DM;
   line(0,0,0,0,0.2,0);
   line(0,0,0,0,0,0.2);
 }
-#line 15636 "linup-5.c"
+#line 15650 "linup-5.c"
 #undef mccompcurname
 #undef mccompcurtype
 #undef mccompcurindex
@@ -15657,7 +15671,7 @@ MCNUM radius = mccslitMS1_radius;
 MCNUM cut = mccslitMS1_cut;
 MCNUM width = mccslitMS1_width;
 MCNUM height = mccslitMS1_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15680,7 +15694,7 @@ MCNUM height = mccslitMS1_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15679 "linup-5.c"
+#line 15693 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15701,7 +15715,7 @@ MCNUM radius = mccslitMS2_radius;
 MCNUM cut = mccslitMS2_cut;
 MCNUM width = mccslitMS2_width;
 MCNUM height = mccslitMS2_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15724,7 +15738,7 @@ MCNUM height = mccslitMS2_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15723 "linup-5.c"
+#line 15737 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15749,7 +15763,7 @@ MCNUM len = mccc1_len;
 MCNUM divergence = mccc1_divergence;
 MCNUM transmission = mccc1_transmission;
 MCNUM divergenceV = mccc1_divergenceV;
-#line 107 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 107 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
   double x;
   int i;
@@ -15764,7 +15778,7 @@ MCNUM divergenceV = mccc1_divergenceV;
   line(xmin, ymin, len, xmax, ymin, len);
   line(xmin, ymax, len, xmax, ymax, len);
 }
-#line 15763 "linup-5.c"
+#line 15777 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef slopeV
 #undef slope
@@ -15787,7 +15801,7 @@ MCNUM radius = mccslitMS3_radius;
 MCNUM cut = mccslitMS3_cut;
 MCNUM width = mccslitMS3_width;
 MCNUM height = mccslitMS3_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15810,7 +15824,7 @@ MCNUM height = mccslitMS3_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15809 "linup-5.c"
+#line 15823 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15831,7 +15845,7 @@ MCNUM radius = mccslitMS4_radius;
 MCNUM cut = mccslitMS4_cut;
 MCNUM width = mccslitMS4_width;
 MCNUM height = mccslitMS4_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15854,7 +15868,7 @@ MCNUM height = mccslitMS4_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15853 "linup-5.c"
+#line 15867 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15875,7 +15889,7 @@ MCNUM radius = mccslitMS5_radius;
 MCNUM cut = mccslitMS5_cut;
 MCNUM width = mccslitMS5_width;
 MCNUM height = mccslitMS5_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15898,7 +15912,7 @@ MCNUM height = mccslitMS5_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15897 "linup-5.c"
+#line 15911 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -15921,7 +15935,7 @@ MCNUM ymax = mccmon_ymax;
 MCNUM xwidth = mccmon_xwidth;
 MCNUM yheight = mccmon_yheight;
 MCNUM restore_neutron = mccmon_restore_neutron;
-#line 92 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 92 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
   magnify("xy");
   multiline(5, (double)xmin, (double)ymin, 0.0,
@@ -15930,7 +15944,7 @@ MCNUM restore_neutron = mccmon_restore_neutron;
                (double)xmin, (double)ymax, 0.0,
                (double)xmin, (double)ymin, 0.0);
 }
-#line 15929 "linup-5.c"
+#line 15943 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef p2sum
 #undef psum
@@ -15954,7 +15968,7 @@ MCNUM radius = mccslitMS6_radius;
 MCNUM cut = mccslitMS6_cut;
 MCNUM width = mccslitMS6_width;
 MCNUM height = mccslitMS6_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -15977,7 +15991,7 @@ MCNUM height = mccslitMS6_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 15976 "linup-5.c"
+#line 15990 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -16007,7 +16021,7 @@ MCNUM xwidth = mccemon1_xwidth;
 MCNUM yheight = mccemon1_yheight;
 MCNUM Emin = mccemon1_Emin;
 MCNUM Emax = mccemon1_Emax;
-#line 127 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 127 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
   magnify("xy");
   multiline(5, (double)xmin, (double)ymin, 0.0,
@@ -16016,7 +16030,7 @@ MCNUM Emax = mccemon1_Emax;
                (double)xmin, (double)ymax, 0.0,
                (double)xmin, (double)ymin, 0.0);
 }
-#line 16015 "linup-5.c"
+#line 16029 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef S_pE2
 #undef S_pE
@@ -16056,7 +16070,7 @@ MCNUM sigma_a = mccsample_sigma_a;
 MCNUM xwidth = mccsample_xwidth;
 MCNUM zthick = mccsample_zthick;
 MCNUM h = mccsample_h;
-#line 179 "/usr/local/lib/mcstas/samples/Powder1.comp"
+#line 179 "/users/software/mcstas/lib/mcstas/samples/Powder1.comp"
 {
   double h;
   h=yheight;
@@ -16091,7 +16105,7 @@ MCNUM h = mccsample_h;
     line(xmax, ymax, zmin, xmax, ymax, zmax);
   }
 }
-#line 16090 "linup-5.c"
+#line 16104 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef isrect
 #undef q_v
@@ -16107,7 +16121,7 @@ MCNUM h = mccsample_h;
 #define mccompcurname  a3
 #define mccompcurtype  Arm
 #define mccompcurindex 26
-#line 43 "/usr/local/lib/mcstas/optics/Arm.comp"
+#line 43 "/users/software/mcstas/lib/mcstas/optics/Arm.comp"
 {
   /* A bit ugly; hard-coded dimensions. */
   magnify("");
@@ -16115,7 +16129,7 @@ MCNUM h = mccsample_h;
   line(0,0,0,0,0.2,0);
   line(0,0,0,0,0,0.2);
 }
-#line 16114 "linup-5.c"
+#line 16128 "linup-5.c"
 #undef mccompcurname
 #undef mccompcurtype
 #undef mccompcurindex
@@ -16135,7 +16149,7 @@ MCNUM radius = mccslitSA1_radius;
 MCNUM cut = mccslitSA1_cut;
 MCNUM width = mccslitSA1_width;
 MCNUM height = mccslitSA1_height;
-#line 73 "/usr/local/lib/mcstas/optics/Slit.comp"
+#line 73 "/users/software/mcstas/lib/mcstas/optics/Slit.comp"
 {
   magnify("xy");
   if (radius == 0) {
@@ -16158,7 +16172,7 @@ MCNUM height = mccslitSA1_height;
     circle("xy",0,0,0,radius);
   }
 }
-#line 16157 "linup-5.c"
+#line 16171 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef mccompcurname
 #undef mccompcurtype
@@ -16183,7 +16197,7 @@ MCNUM len = mccc2_len;
 MCNUM divergence = mccc2_divergence;
 MCNUM transmission = mccc2_transmission;
 MCNUM divergenceV = mccc2_divergenceV;
-#line 107 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 107 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
   double x;
   int i;
@@ -16198,7 +16212,7 @@ MCNUM divergenceV = mccc2_divergenceV;
   line(xmin, ymin, len, xmax, ymin, len);
   line(xmin, ymax, len, xmax, ymax, len);
 }
-#line 16197 "linup-5.c"
+#line 16211 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef slopeV
 #undef slope
@@ -16212,7 +16226,7 @@ MCNUM divergenceV = mccc2_divergenceV;
 #define mccompcurname  ana
 #define mccompcurtype  Arm
 #define mccompcurindex 29
-#line 43 "/usr/local/lib/mcstas/optics/Arm.comp"
+#line 43 "/users/software/mcstas/lib/mcstas/optics/Arm.comp"
 {
   /* A bit ugly; hard-coded dimensions. */
   magnify("");
@@ -16220,7 +16234,7 @@ MCNUM divergenceV = mccc2_divergenceV;
   line(0,0,0,0,0.2,0);
   line(0,0,0,0,0,0.2);
 }
-#line 16219 "linup-5.c"
+#line 16233 "linup-5.c"
 #undef mccompcurname
 #undef mccompcurtype
 #undef mccompcurindex
@@ -16231,7 +16245,7 @@ MCNUM divergenceV = mccc2_divergenceV;
 #define mccompcurname  a4
 #define mccompcurtype  Arm
 #define mccompcurindex 30
-#line 43 "/usr/local/lib/mcstas/optics/Arm.comp"
+#line 43 "/users/software/mcstas/lib/mcstas/optics/Arm.comp"
 {
   /* A bit ugly; hard-coded dimensions. */
   magnify("");
@@ -16239,7 +16253,7 @@ MCNUM divergenceV = mccc2_divergenceV;
   line(0,0,0,0,0.2,0);
   line(0,0,0,0,0,0.2);
 }
-#line 16238 "linup-5.c"
+#line 16252 "linup-5.c"
 #undef mccompcurname
 #undef mccompcurtype
 #undef mccompcurindex
@@ -16263,7 +16277,7 @@ MCNUM len = mccc3_len;
 MCNUM divergence = mccc3_divergence;
 MCNUM transmission = mccc3_transmission;
 MCNUM divergenceV = mccc3_divergenceV;
-#line 107 "/usr/local/lib/mcstas/optics/Collimator_linear.comp"
+#line 107 "/users/software/mcstas/lib/mcstas/optics/Collimator_linear.comp"
 {
   double x;
   int i;
@@ -16278,7 +16292,7 @@ MCNUM divergenceV = mccc3_divergenceV;
   line(xmin, ymin, len, xmax, ymin, len);
   line(xmin, ymax, len, xmax, ymax, len);
 }
-#line 16277 "linup-5.c"
+#line 16291 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef slopeV
 #undef slope
@@ -16303,7 +16317,7 @@ MCNUM ymax = mccsng_ymax;
 MCNUM xwidth = mccsng_xwidth;
 MCNUM yheight = mccsng_yheight;
 MCNUM restore_neutron = mccsng_restore_neutron;
-#line 92 "/usr/local/lib/mcstas/monitors/Monitor.comp"
+#line 92 "/users/software/mcstas/lib/mcstas/monitors/Monitor.comp"
 {
   magnify("xy");
   multiline(5, (double)xmin, (double)ymin, 0.0,
@@ -16312,7 +16326,7 @@ MCNUM restore_neutron = mccsng_restore_neutron;
                (double)xmin, (double)ymax, 0.0,
                (double)xmin, (double)ymin, 0.0);
 }
-#line 16311 "linup-5.c"
+#line 16325 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef p2sum
 #undef psum
@@ -16345,7 +16359,7 @@ MCNUM xwidth = mccemon2_xwidth;
 MCNUM yheight = mccemon2_yheight;
 MCNUM Emin = mccemon2_Emin;
 MCNUM Emax = mccemon2_Emax;
-#line 127 "/usr/local/lib/mcstas/monitors/E_monitor.comp"
+#line 127 "/users/software/mcstas/lib/mcstas/monitors/E_monitor.comp"
 {
   magnify("xy");
   multiline(5, (double)xmin, (double)ymin, 0.0,
@@ -16354,7 +16368,7 @@ MCNUM Emax = mccemon2_Emax;
                (double)xmin, (double)ymax, 0.0,
                (double)xmin, (double)ymin, 0.0);
 }
-#line 16353 "linup-5.c"
+#line 16367 "linup-5.c"
 }   /* End of SETTING parameter declarations. */
 #undef S_pE2
 #undef S_pE

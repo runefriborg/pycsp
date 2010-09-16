@@ -45,9 +45,9 @@ def Delta2(cin, cout1, cout2):
         cout2(t)
 
 
-rlist = ['pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
+#rlist = ['pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
 
-@migprocess(vgrid='DIKU', resource=rlist, inFiles=[], execFiles=[])
+@migprocess(vgrid='DCSC', inFiles=[], execFiles=[])
 def Successor(cin, cout):
     """Adds 1 to the value read on the input channel and outputs it on the output channel.
     Infinite loop.
