@@ -6,7 +6,6 @@ Usage:
 
 Requires:
   PyCSP
-  Pyro
 
 Copyright (c) 2009 Rune M. Friborg <runef@diku.dk>.
 Permission is hereby granted, free of charge, to any person obtaining
