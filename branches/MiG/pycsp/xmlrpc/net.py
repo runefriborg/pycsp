@@ -24,7 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading, sys
-import Pyro.naming, Pyro.core
+
+import xmlrpclib
 
 from configuration import *
 from alternation import *
@@ -34,17 +35,17 @@ from guard import *
 from pycsp.common.const import *
 
 # Classes
-class PyroClientManager(object):
+class ClientManager(object):
     """
-    PyroClientManageer is a singleton class.
+    ClientManageer is a singleton class.
 
     The purpose is the handle the connection to a nameserver and to
-    create a PyroServerManager if necessary. This PyroServerManager runs
+    create a ServerManager if necessary. This ServerManager runs
     as a process and functions as a channel server, handling all blocking
     communication.
 
-    >>> A = PyroClientManager()
-    >>> B = PyroClientManager()
+    >>> A = ClientManager()
+    >>> B = ClientManager()
     >>> A == B
     True
     """
@@ -71,7 +72,7 @@ class PyroClientManager(object):
                 print 'Configuration().set(NET_SERVER_URI, "PYRO://127.0.1.1:7766/7f00010176411de57a4f70356b2ac5635e")'
                 sys.exit(0)
             print 'URI', cls.__instance.URI
-            cls.__instance.server = Pyro.core.getProxyForURI(cls.__instance.URI)
+            cls.__instance.server = xmlrpclib.ServerProxy(cls.__instance.URI)
 
             # Found daemon
             
@@ -81,7 +82,7 @@ class PyroClientManager(object):
 
 
 class Channel(object):
-    """ Channel class with Pyro support. Blocking communication
+    """ Channel class with network support. Blocking communication
     """
     def __new__(cls, *args, **kargs):
         if kargs.has_key('buffer') and kargs['buffer'] > 0:
@@ -92,57 +93,24 @@ class Channel(object):
             return object.__new__(cls)
 
     def __init__(self, name=None, buffer=0):
-        self.URI = PyroClientManager().URI
-        server = Pyro.core.getProxyForURI(self.URI)
-
-        ok = False
-        while not ok:
-            try:
-                self.name = server.Channel(name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        self.URI = ClientManager().URI
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        self.name = server.Channel(name)
 
 
     def _read(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-
-        ok = False
-        while not ok:
-            try: 
-                result = server.Channel_read(self.name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        result = server.Channel_read(self.name)
         return result
 
     def _write(self, msg):
-        server = Pyro.core.getProxyForURI(self.URI)
-
-        ok = False
-        while not ok:
-            try: 
-                result = server.Channel_write(self.name, msg)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
-    
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        result = server.Channel_write(self.name, msg)
         return result
 
     def poison(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-
-        ok = False
-        while not ok:
-            try: 
-                server.Channel_poison(self.name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()    
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        server.Channel_poison(self.name)
 
     def __pos__(self):
         return self.reader()
@@ -168,52 +136,24 @@ class Channel(object):
         return ChannelEndWrite(self)
 
     def join_reader(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-        ok = False
-        while not ok:
-            try:
-                server.Channel_join_reader(self.name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        server.Channel_join_reader(self.name)
 
     def leave_reader(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-        ok = False
-        while not ok:
-            try:
-                server.Channel_leave_reader(self.name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        server.Channel_leave_reader(self.name)
 
     def join_writer(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-        ok = False
-        while not ok:
-            try:
-                server.Channel_join_writer(self.name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        server.Channel_join_writer(self.name)
 
     def leave_writer(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-        ok = False
-        while not ok:
-            try:
-                server.Channel_leave_writer(self.name)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        server.Channel_leave_writer(self.name)
 
 class Alternation:
     """
-    Alternation class with Pyro support
+    Alternation class with XML-RPC support
 
     Alternation supports input and output guards. Guards are ChannelEnd
     or Guard objects.
@@ -226,7 +166,7 @@ class Alternation:
     """
     def __init__(self, guards):
         self.id = None
-        self.URI = PyroClientManager().URI
+        self.URI = ClientManager().URI
 
         # Preserve tuple entries and convert dictionary entries to tuple entries
         self.guards = []
@@ -265,27 +205,13 @@ class Alternation:
             else:
                 reduced_guards.append((c.channel.name, op, msg))
 
-        server = Pyro.core.getProxyForURI(self.URI)
-        ok = False
-        while not ok:
-            try:
-                self.id = server.Alternation(reduced_guards)
-                ok = True
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        self.id = server.Alternation(reduced_guards)
 
     def __del__(self):
         if not self.id == None:
-            server = Pyro.core.getProxyForURI(self.URI)
-            ok = False
-            while not ok:
-                try:
-                    server.Alternation_delete(self.id)
-                    ok = True
-                except Pyro.errors.ProtocolError:
-                    # Connection refused. Try again
-                    server.adapter.rebindURI()
+            server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+            server.Alternation_delete(self.id)
 
 
     def set_execute_frame(self, steps):
@@ -295,16 +221,9 @@ class Alternation:
             self.execute_frame = steps
 
     def choose(self):
-        server = Pyro.core.getProxyForURI(self.URI)
-        result = None
-        while result == None:
-            try:
-                result = server.Alternation_choose(self.id)
-            except Pyro.errors.ProtocolError:
-                # Connection refused. Try again
-                server.adapter.rebindURI()
-        return result
-        
+        server = xmlrpclib.ServerProxy(self.URI, allow_none=True)
+        result = server.Alternation_choose(self.id)
+        return result        
 
     def execute(self):
         """

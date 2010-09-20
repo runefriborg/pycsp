@@ -3,7 +3,7 @@
 """
 PyCSP.net implementation of the CSP Core functionality (Channels, Processes, PAR, ALT).
 
-Handles all channel communications in a main server process. All network communication is handled by Pyro.
+Handles all channel communications in a main server process. All network communication is handled by XML-RPC
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
@@ -25,13 +25,6 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
-# Test for Pyro
-import sys
-try: import Pyro.naming
-except ImportError, e:
-    sys.stderr.write("PyCSP.net requires Pyro, the latest version is\navailable from http://pyro.sourceforge.net/.\n\n")
-    raise ImportError(e)
 
 # Imports
 from configuration import *

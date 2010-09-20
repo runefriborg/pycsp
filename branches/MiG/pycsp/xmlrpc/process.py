@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
+import xmlrpclib
 import types
 import threading
 import time, random, sys
@@ -69,14 +70,15 @@ class Process(threading.Thread):
         try:
             # Store the returned value from the process
             self.fn(*self.args, **self.kwargs)
-        except ChannelPoisonException, e:
-            # look for channels and channel ends
-            self.__check_poison(self.args)
-            self.__check_poison(self.kwargs.values())
-        except ChannelRetireException, e:
-            # look for channel ends
-            self.__check_retire(self.args)
-            self.__check_retire(self.kwargs.values())
+        except xmlrpclib.Fault, e:
+            if not (e.faultString.find("ChannelPoisonException") == -1):
+                # look for channels and channel ends
+                self.__check_poison(self.args)
+                self.__check_poison(self.kwargs.values())
+            elif not (e.faultString.find("ChannelRetireException") == -1):
+                # look for channel ends
+                self.__check_retire(self.args)
+                self.__check_retire(self.kwargs.values())
 
 
     def __check_poison(self, args):

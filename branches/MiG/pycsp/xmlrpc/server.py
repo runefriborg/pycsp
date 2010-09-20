@@ -24,7 +24,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
-import Pyro.naming, Pyro.core
+
+import SocketServer
+from SimpleXMLRPCServer import SimpleXMLRPCServer
+ 
+# Threaded mix-in
+class AsyncXMLRPCServer(SocketServer.ThreadingMixIn,SimpleXMLRPCServer): pass
+
 
 from configuration import *
 from alternation import *
@@ -34,10 +40,9 @@ from guard import *
 from pycsp.common.const import *
 
 # Classes
-class PyroServerProcess(threading.Thread):
+class ServerProcess(threading.Thread):
     def __init__(self, host):
         threading.Thread.__init__(self)
-        self.managerObj = None
         self.cond = threading.Condition()
         self.uri = None
         self.host = host
@@ -46,39 +51,38 @@ class PyroServerProcess(threading.Thread):
         self.cond.acquire()
 
         # Init server
-        Pyro.core.initServer()
-        if self.host == None:
-            self._daemon = Pyro.core.Daemon()
+        if self.host == None:            
+            self._daemon = AsyncXMLRPCServer(("localhost", 8000), logRequests=False, allow_none=True)
+            self.uri = 'http://localhost:8000'
         else:
-            self._daemon = Pyro.core.Daemon(host=self.host)
+            self._daemon = AsyncXMLRPCServer((self.host, 8000), allow_none=True)
+            self.uri = 'http://'+self.host+':8000'
+        
+            
+        self._daemon.register_introspection_functions()
 
-        self.managerObj = PyroServerManager()
+        self._daemon.register_instance(ServerManager())
 
-        self.uri = self._daemon.connectPersistent(self.managerObj, 'SERVER')
         Configuration().set(NET_SERVER_URI, self.uri)
 
         self.cond.notify()
         self.cond.release()
         
-        #Starting requestLoop'
         
         try:
-            self._daemon.requestLoop()
+            self._daemon.serve_forever()
         except Exception, e:
-            self._daemon.disconnect(self.managerObj)
-            self._daemon.shutdown()
+            self._daemon.shutdown()            
             raise Exception(e)
         
     def stop(self):
-        self._daemon.disconnect(self.managerObj)
         self._daemon.shutdown()
         import time
         time.sleep(0.2)
         
 
-class PyroServerManager(Pyro.core.ObjBase):
+class ServerManager:
     def __init__(self):
-        Pyro.core.ObjBase.__init__(self)
         self.ChannelIndex = {}
         self.AlternationIndex = {}
         self.lock = threading.RLock()
@@ -178,7 +182,7 @@ class PyroServerManager(Pyro.core.ObjBase):
         return True
 
 def start(host=None):
-    server_process = PyroServerProcess(host)
+    server_process = ServerProcess(host)
 
     server_process.cond.acquire()
     server_process.daemon = True
