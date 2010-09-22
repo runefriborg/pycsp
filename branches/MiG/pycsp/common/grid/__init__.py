@@ -18,16 +18,16 @@ import support
 import migrid as grid
 
 
-def migprocess(vgrid='ANY', resource=[], disk=1, cputime=60, cpucount=1, nodecount=1, memory=1, inFiles=[], outFiles=[], execFiles=[]):    
+def grid_process(vgrid='ANY', resource=[], disk=1, cputime=60, cpucount=1, nodecount=1, memory=1, inFiles=[], outFiles=[], execFiles=[]):    
     def wrap_process(func):
         def _call(*args, **kwargs):
-            return MiGProcess(func, vgrid, resource, disk, cputime, cpucount, nodecount, memory, inFiles, outFiles, execFiles, *args, **kwargs)
+            return GridProcess(func, vgrid, resource, disk, cputime, cpucount, nodecount, memory, inFiles, outFiles, execFiles, *args, **kwargs)
         _call.func_name = func.func_name
         return _call
     return wrap_process
 
 
-class MiGProcess(threading.Thread):
+class GridProcess(threading.Thread):
     def __init__(self, fn, vgrid, resource, disk, cputime, cpucount, nodecount, memory, inFiles, outFiles, execFiles, *args, **kwargs):
 
         threading.Thread.__init__(self)
@@ -52,8 +52,8 @@ class MiGProcess(threading.Thread):
         self.id = str(random.random())+str(time.time())
 
     def run(self):
-        print 'Run Mig Process', str(self.fn)
-        # Setup MiG submission
+        print 'Run Grid Process', str(self.fn)
+        # Setup Grid submission
         mRSL_data = self.mig
         #mRSL_data...
 
@@ -90,11 +90,11 @@ class MiGProcess(threading.Thread):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [MiGProcess(self.fn, self.mig['vgrid'], self.mig['resource'], self.mig['disk'], self.mig['cputime'], self.mig['cpucount'], self.mig['nodecount'], self.mig['memory'], self.mig['inFiles'], self.mig['outFiles'], self.mig['execFiles'], *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [GridProcess(self.fn, self.mig['vgrid'], self.mig['resource'], self.mig['disk'], self.mig['cputime'], self.mig['cpucount'], self.mig['nodecount'], self.mig['memory'], self.mig['inFiles'], self.mig['outFiles'], self.mig['execFiles'], *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [MiGProcess(self.fn, self.mig['vgrid'], self.mig['resource'], self.mig['disk'], self.mig['cputime'], self.mig['cpucount'], self.mig['nodecount'], self.mig['memory'], self.mig['inFiles'], self.mig['outFiles'], self.mig['execFiles'], *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [GridProcess(self.fn, self.mig['vgrid'], self.mig['resource'], self.mig['disk'], self.mig['cputime'], self.mig['cpucount'], self.mig['nodecount'], self.mig['memory'], self.mig['inFiles'], self.mig['outFiles'], self.mig['execFiles'], *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
@@ -138,7 +138,7 @@ class MiGProcess(threading.Thread):
         return args
 
 
-def MiGInit():
+def GridInit():
     if 'run_from_daemon' in sys.argv:
         func_name = sys.argv[-2]
         uri = sys.argv[-1]
