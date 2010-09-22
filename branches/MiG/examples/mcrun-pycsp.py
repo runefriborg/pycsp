@@ -256,12 +256,12 @@ def simulate(job_in, result_out, screenC, exec_file):
              simulate_4core(job_in, result_out, screenC, exec_file) * 4)
     
 rlist = ['amigos50.diku.dk.0_*']
-@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
+@grid_process(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
 def simulate_8core(job_in, result_out, screenC, exec_file):
     Parallel(simulate_cores(job_in, result_out, screenC, exec_file) * 8)
 
 rlist = ['pig01.ekstranet.diku.dk.0_*', 'pig02.ekstranet.diku.dk.0_*']
-@migprocess(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
+@grid_process(vgrid='DIKU', resource=rlist, inFiles=['linup-5.out'], cputime=2400)
 def simulate_4core(job_in, result_out, screenC, exec_file):
     Parallel(simulate_cores(job_in, result_out, screenC, exec_file) * 4)
 
@@ -286,7 +286,7 @@ def simulate_cores(job_in, result_out, screenC, exec_file):
 
         result_out(data_dir)
         
-MiGInit()
+GridInit()
 
 # Start channel server
 # This must be run a host that is accesible from the resources in MiGrid
