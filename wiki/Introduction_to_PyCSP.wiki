@@ -1,5 +1,4 @@
 #summary This is a short introduction on how to use PyCSP
-#labels Featured
 
 = Introduction =
 
@@ -118,7 +117,5 @@ Output:
 = More Examples =
 
 For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/examples examples].
-
-
 
 
