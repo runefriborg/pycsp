@@ -76,17 +76,31 @@ To start two instances of our newly created counter process we have the followin
 
 === In parallel ===
 
+The Parallel construct will block until both counter processes have terminated.
+
 {{{
 Parallel(counter(...), counter(...))
 }}}
 
+They can also be started asynchronously by using the Spawn construct. 
+
+{{{
+Spawn(counter(...), counter(...))
+}}}
+
 === In sequence ===
+
+The Sequence construct will block until both counter processes have terminated. Only one process will be execute at any possible time and will be executed in the order they are provided.
 
 {{{
 Sequence(counter(...), counter(...))
 }}}
 
-These will block until both counter processes have terminated.
+
+
+
+
+
 
 == Channels and channel ends ==
 
