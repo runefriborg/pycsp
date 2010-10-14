@@ -8,8 +8,6 @@ This article have just been started and will require a few days to get fully goi
 PyCSP provides an API that can be used to write concurrent
 applications using [http://en.wikipedia.org/wiki/Communicating_sequential_processes CSP (Communicating Sequential Processes)].
 
-
-
 The API is implemented in four versions:
 Threads, processes, greenlets and net. All implementations share an
 almost identical API making it trivial to switch from one implementation to 
@@ -30,8 +28,11 @@ Requirements:
   * pycsp.greenlets - Requires the [http://pypi.python.org/pypi/greenlet greenlet] module
   * pycsp.net - Requires [http://www.xs4all.nl/~irmen/pyro3/ Pyro] 3.8+
 
+= Contents =
+<wiki:toc max_depth="2" />
 
-= Getting Started =
+
+= Installing =
 
 Start by fetching the latest [http://code.google.com/p/pycsp/downloads/list tarball].
 
@@ -49,6 +50,7 @@ You can now try starting your python interpreter and type `import pycsp`. If no 
 (0, 7, 1, 'threads')
 }}}
 
+= Elements of PyCSP =
 
 Open a new file and put
 
@@ -58,7 +60,7 @@ from pycsp.threads import *
 
 as your first line.
 
-= Creating Processes =
+== Processes ==
 
 This is a process with one output channel end:
 
@@ -70,17 +72,15 @@ def counter(cout, limit=1000)
 }}}
 
 
-= Starting Processes =
-
 To start two instances of our newly created counter process we have the following options.
 
-== In parallel ==
+=== In parallel ===
 
 {{{
 Parallel(counter(...), counter(...))
 }}}
 
-=== In sequence ==
+=== In sequence ===
 
 {{{
 Sequence(counter(...), counter(...))
@@ -88,7 +88,7 @@ Sequence(counter(...), counter(...))
 
 These will block until both counter processes have terminated.
 
-= Channels and channel ends =
+== Channels and channel ends ==
 
 Channels can have any number of readers and writers and will block until a read or write have been committed to the opposite action.
 
@@ -131,4 +131,3 @@ Output:
 = More Examples =
 
 For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/examples examples].
-
