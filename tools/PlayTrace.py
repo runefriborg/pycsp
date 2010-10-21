@@ -156,6 +156,9 @@ class MainFrame(wx.Frame):
         self.btnZoomFit = wx.Button(panel, wx.ID_ZOOM_FIT)
         self.Bind(wx.EVT_BUTTON, self.OnZoomFit, self.btnZoomFit)
 
+        self.btnOrientation = wx.Button(panel, wx.ID_ANY, 'Orientation')
+        self.Bind(wx.EVT_BUTTON, self.OnOrientation, self.btnOrientation)
+
         self.btnTheme = wx.Button(panel, wx.ID_ANY, 'Set Theme')
         self.Bind(wx.EVT_BUTTON, self.OnTheme, self.btnTheme)
 
@@ -165,10 +168,11 @@ class MainFrame(wx.Frame):
         self.follow = ''
         self.export = ''
         self.current_theme = 0
+        self.current_orientation = 'TopDown'
         
         # Send update theme message to CSP network
         wx.CallLater(1, self.UpdateTheme)
-
+        wx.CallLater(1, self.UpdateOrientation)
 
         # Setup left bar with controls
         border = 4
@@ -181,6 +185,7 @@ class MainFrame(wx.Frame):
         leftSizer.Add(self.btnZoomOut, 1 , wx.EXPAND | wx.ALL, border)
         leftSizer.Add(self.btnFollow, 1 , wx.EXPAND | wx.ALL, border)
         leftSizer.Add(self.btnZoomFit, 1 , wx.EXPAND | wx.ALL, border)
+        leftSizer.Add(self.btnOrientation, 1 , wx.EXPAND | wx.ALL, border)
         leftSizer.Add(self.btnTheme, 1 , wx.EXPAND | wx.ALL, border)
         
         # Create controls for top bar
@@ -281,10 +286,16 @@ class MainFrame(wx.Frame):
 
         self.UpdateZoom()
 
-    def OnTheme(self, event=None):
+    def OnOrientation(self, event=None):
 
-        self.setup_dotgen(['request_node_list'])
-        ids, labels = self.get_node_data()
+        if self.current_orientation == "TopDown":
+            self.current_orientation = "LeftRight"
+        else:
+            self.current_orientation = "TopDown"
+
+        self.UpdateOrientation()
+
+    def OnTheme(self, event=None):
 
         names = []
         for theme in THEMES:
@@ -374,6 +385,12 @@ class MainFrame(wx.Frame):
         except ChannelPoisonException:
             return
         
+    def UpdateOrientation(self):
+        try:
+            self.setup_dotgen(('orientation', self.current_orientation))
+        except ChannelPoisonException:
+            return
+
     def UpdateTheme(self):
         try:
             self.ImagePanel.SetBackgroundColour(THEMES[self.current_theme]['Background'])
@@ -695,6 +712,7 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
     trace_channels = {}
     
     theme = [THEMES[0]]
+    orientation = ["TopDown"]
     size = [(6,6)]
     skip_frames = [0]
 
@@ -705,6 +723,8 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
         cmd = channel_input
         if cmd[0] == 'size':
             size[0] = (int(cmd[1][0] / 96), int(cmd[1][1] / 96))
+        elif cmd[0] == 'orientation':
+            orientation[0] = cmd[1]
         elif cmd[0] == 'theme':
             theme[0] = THEMES[cmd[1]]
         elif cmd[0] == 'request_node_list':
@@ -720,8 +740,10 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
             skip_frames[0] += cmd[1]
         
 
-    def create_dot_file(size, theme, trace_processes, trace_channels):
+    def create_dot_file(size, rankdir, theme, trace_processes, trace_channels):
         header = "digraph G {\n"
+        if rankdir=="LeftRight":
+            header += "rankdir=LR\n"
         header += "size=\""+str(size[0])+","+str(size[1])+"\";\n"
         header += "bgcolor=\""+theme['Background2']+"\";\n"
         header += "fontcolor=\""+theme['FontColor']+"\";\n"
@@ -764,14 +786,14 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
                 if skip_frames[0] > 0:
                     skip_frames[0] -= 1
                 else:
-                    dot = create_dot_file(size[0], theme[0], trace_processes, trace_channels)
+                    dot = create_dot_file(size[0], orientation[0], theme[0], trace_processes, trace_channels)
                     send_dot_file(dot, trace_output, frame_index)
                     trace_output = []
 
     except ChannelPoisonException:
         # End of trace file
         # Sending last state
-        dot = create_dot_file(size[0], theme[0], trace_processes, trace_channels)
+        dot = create_dot_file(size[0], orientation[0], theme[0], trace_processes, trace_channels)
         send_dot_file(dot, trace_output, frame_index)
         
         raise ChannelPoisonException
