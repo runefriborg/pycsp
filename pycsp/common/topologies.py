@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: latin-1 -*-
-# 
-# see http://docs.python.org/dist/dist.html
-# 
 """
+Topologies module
+
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 Permission is hereby granted, free of charge, to any person obtaining
@@ -24,28 +21,17 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import pycsp.current as pycsp
 
-from setuptools import setup
-import os
+if pycsp.trace:
+    from pycsp.common import trace as pycsp
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-setup(name='pycsp',
-      version='0.7.1',
-      description='PyCSP - Python CSP Library',
-      long_description=read('README.txt'),
-      keywords = "python csp concurrency communicating sequential processes",
-      author='Rune M. Friborg',
-      author_email='runef@diku.dk',
-      url='http://code.google.com/p/pycsp/',
-      license='MIT',
-      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net', 'pycsp.common', 'pycsp.current'],
-      platforms=['any'],
-      classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",        
-        ],
-      )
+def ring(func):
+    """
+    ...
+    """
+    def _call(*args, **kwargs):
+        return Process(func, *args, **kwargs)
+    return _call
+

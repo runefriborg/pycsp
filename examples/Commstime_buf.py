@@ -21,21 +21,27 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-from common import *
+from pycsp_import import *
+from pycsp.common.trace import *
 import time
 
+TraceInit()
+
+@process
 def Prefix(cin, cout, prefixItem=None):
     t = prefixItem
     while True:
         cout(t)
         t = cin()
 
+@process
 def Delta2(cin, cout1, cout2):
     while True:
         t = cin()
         cout1(t)
         cout2(t)
 
+@process
 def Successor(cin, cout):
     """Adds 1 to the value read on the input channel and outputs it on the output channel.
     Infinite loop.
@@ -43,9 +49,10 @@ def Successor(cin, cout):
     while True:
         cout(cin()+1)
 
+@process
 def Consumer(cin):
     "Commstime consumer process"
-    N = 1000
+    N = 100
     ts = time.time
     t1 = ts()
     cin()
@@ -58,24 +65,24 @@ def Consumer(cin):
     print "DT = %f.\nTime per ch : %f/(4*%d) = %f s = %f us" % \
         (dt, dt, N, tchan, tchan * 1000000)
     print "consumer done, posioning channel"
-    retire(cin)
+    poison(cin)
 
 def CommsTimeBM():
     # Create channels
-    a = Channel("a")
+    a = Channel("a", buffer=10)
     b = Channel("b")
     c = Channel("c")
     d = Channel("d")
 
     print "Running commstime test"
-    Parallel(Process(Prefix, c.reader(), a.writer(), prefixItem = 0),  # initiator
-             Process(Delta2, a.reader(), b.writer(), d.writer()),         # forwarding to two
-             Process(Successor, b.reader(), c.writer()),               # feeding back to prefix
-             Process(Consumer, d.reader()))                         # timing process
+    Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
+             Delta2(+a, -b, -d),         # forwarding to two
+             Successor(+b, -c),               # feeding back to prefix
+             Consumer(+d))                         # timing process
 
-if __name__ == '__main__':
-    N_BM = 10
-    for i in range(N_BM):
-        print "----------- run %d/%d -------------" % (i+1, N_BM)
-        CommsTimeBM()
+N_BM = 2
+for i in range(N_BM):
+    print "----------- run %d/%d -------------" % (i+1, N_BM)
+    CommsTimeBM()
 
+TraceQuit()
