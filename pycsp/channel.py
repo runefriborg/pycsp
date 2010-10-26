@@ -215,15 +215,11 @@ class Channel(object):
         return self.__mul__(multiplier)
 
     def reader(self):
-        print "Join_reader "+current_process_id()
-
         end = ChannelEndRead(current_process_id(), self)
         self.join_reader(end)
         return end
 
     def writer(self):
-        print "Join_writer "+current_process_id()
-
         end = ChannelEndWrite(current_process_id(), self)
         self.join_writer(end)
         return end
