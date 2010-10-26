@@ -3,7 +3,6 @@ class Test1:
     def __init__(self, val):        
         self.val = val
 
-
 class Test2:
     def __init__(self):
         pass
@@ -13,10 +12,20 @@ class Test2:
 
 
 t = Test1('Hello')
+print t
+
+def foo():
+    print t
+    _t = t
+    print _t.read()
+
+test_for_sideeffect = Test1('Fisk')
 
 # Fails: print t.read()
-t2 = Test2()
-t2.__dict__ = t.__dict__
 
+t.__class__ = Test2
 
-print t2.read()
+print t.read()
+foo()
+
+print test_for_sideeffect.read() # should fail
