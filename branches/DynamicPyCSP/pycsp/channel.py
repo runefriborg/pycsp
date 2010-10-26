@@ -177,10 +177,25 @@ class ChannelOne2One(object):
         self.join_writer(end)
         return end
 
+    def upgrade(self):
+        self.__class__ = Channel
+
+        if self.internal['reader'] != None:
+            req = ChannelReq(self.internal['reader'])
+            self.readqueue.append(req)
+        elif self.internal['writer'] != None:
+            req = ChannelReq(self.internal['writer'], self.internal['msg'])
+            self.writequeue.append(req)
+        
+    
     def join_reader(self, end):
+        if len(self.readers) == 1:
+            self.upgrade()
         self.readers.append(end)
 
     def join_writer(self, end):
+        if len(self.writers) == 1:
+            self.upgrade()            
         self.writers.append(end)
 
     def leave_reader(self, end):
@@ -246,6 +261,9 @@ class Channel(object):
         self.isretired = False
 
         self.s = Scheduler()
+
+        self.__class__ = ChannelOne2One
+        
         
     def check_termination(self):
         if self.ispoisoned:
