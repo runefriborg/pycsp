@@ -66,6 +66,149 @@ class ChannelReq:
         return False
 
 
+class ChannelOne2One(object):
+    """
+    Always put the writer on the scheduler's next queue and continue with the reader.
+    """
+    
+    def __init__(self):
+        pass
+
+    def check_termination(self):
+        if self.ispoisoned:
+            raise ChannelPoisonException()
+        if self.isretired:
+            raise ChannelRetireException()
+
+    def _read(self):
+        self.check_termination()
+
+        p = self.s.current
+        
+        if self.internal['writer'] == None:
+            self.internal['reader'] = p
+            p.setstate(ACTIVE)
+            p.wait()
+            self.internal['reader'] = None
+        else:
+            self.internal['writer'].notify(DONE)
+            self.internal['writer'] = None
+            p.state = DONE
+
+        if p.state==DONE:
+            return self.internal['msg']
+        
+        self.check_termination()
+
+        print 'We should not get here in read!!!'
+        return None #Here we should handle that a read was cancled...
+
+    
+    def _write(self, msg):
+        self.check_termination()
+
+        p = self.s.current
+        
+        self.internal['msg'] = msg
+
+        if self.internal['reader'] == None:
+            self.internal['writer'] = p
+            p.setstate(ACTIVE)
+            p.wait()
+        else:
+            self.s.next.append(p)
+            self.s.current = self.internal['reader']
+            self.internal['reader'].state = DONE
+            self.internal['reader'].greenlet.switch()                    
+            #self.internal['reader'].notify(DONE)
+            p.state = DONE
+
+        if p.state==DONE:
+            return True
+    
+        self.check_termination()
+
+        print 'We should not get here in write!!!'
+        return None #Here we should handle that a read was cancled...
+
+    def poison(self):
+        if not self.ispoisoned:
+            self.ispoisoned = True
+            self.internal['result'] = POISON
+            if self.internal['reader'] != None:
+                self.internal['reader'].notify(POISON)
+            if self.internal['writer'] != None:
+                self.internal['writer'].notify(POISON)
+
+    def post_read(self, req):
+        pass
+        
+    def remove_read(self, req):
+        pass
+
+    def post_write(self, req):
+        pass
+
+    def remove_write(self, req):
+        pass
+
+    def __pos__(self):
+        return self.reader()
+
+    def __neg__(self):
+        return self.writer()
+
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+
+    def reader(self):
+        end = ChannelEndRead(current_process_id(), self)
+        self.join_reader(end)
+        return end
+
+    def writer(self):
+        end = ChannelEndWrite(current_process_id(), self)
+        self.join_writer(end)
+        return end
+
+    def join_reader(self, end):
+        self.readers.append(end)
+
+    def join_writer(self, end):
+        self.writers.append(end)
+
+    def leave_reader(self, end):
+        if not self.isretired:
+            self.readers.remove(end)
+            if len(self.readers)==0:
+                # Set channel retired
+                self.isretired = True
+                self.internal['result'] = RETIRE
+                if self.internal['reader'] != None:
+                    self.internal['reader'].notify(RETIRE)
+                if self.internal['writer'] != None:
+                    self.internal['writer'].notify(RETIRE)
+
+    def leave_writer(self, end):
+        if not self.isretired:
+            self.writers.remove(end)
+            if len(self.writers)==0:
+                # Set channel retired
+                self.isretired = True
+                self.internal['result'] = RETIRE
+                if self.internal['reader'] != None:
+                    self.internal['reader'].notify(RETIRE)
+                if self.internal['writer'] != None:
+                    self.internal['writer'].notify(RETIRE)
+
+    
+
 class Channel(object):
     """ Channel class. Blocking communication
     """
@@ -79,6 +222,12 @@ class Channel(object):
             return object.__new__(cls)
 
     def __init__(self, name=None, buffer=0):
+
+        self.internal = {
+            'msg':None,
+            'writer':None,
+            'reader':None
+            }
 
         if name == None:
             # Create unique name
@@ -98,7 +247,7 @@ class Channel(object):
 
         self.s = Scheduler()
         
-    def check_termination(self):        
+    def check_termination(self):
         if self.ispoisoned:
             raise ChannelPoisonException()
         if self.isretired:
