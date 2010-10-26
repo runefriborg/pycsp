@@ -27,7 +27,7 @@ try: from greenlet import greenlet
 except ImportError, e:
     from py.magic import greenlet
     
-from scheduling import Scheduler
+from scheduling import Scheduler, current_process_id
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
 from pycsp.common.const import *
 
@@ -90,8 +90,8 @@ class Channel(object):
         self.writequeue = []
         
         # Count, makes sure that all processes knows how many channel ends have retired
-        self.readers = 0
-        self.writers = 0
+        self.readers = []
+        self.writers = []
 
         self.ispoisoned = False
         self.isretired = False
@@ -215,32 +215,38 @@ class Channel(object):
         return self.__mul__(multiplier)
 
     def reader(self):
-        self.join_reader()
-        return ChannelEndRead(self)
+        print "Join_reader "+current_process_id()
+
+        end = ChannelEndRead(current_process_id(), self)
+        self.join_reader(end)
+        return end
 
     def writer(self):
-        self.join_writer()
-        return ChannelEndWrite(self)
+        print "Join_writer "+current_process_id()
 
-    def join_reader(self):
-        self.readers+=1
+        end = ChannelEndWrite(current_process_id(), self)
+        self.join_writer(end)
+        return end
 
-    def join_writer(self):
-        self.writers+=1
+    def join_reader(self, end):
+        self.readers.append(end)
 
-    def leave_reader(self):
+    def join_writer(self, end):
+        self.writers.append(end)
+
+    def leave_reader(self, end):
         if not self.isretired:
-            self.readers-=1
-            if self.readers==0:
+            self.readers.remove(end)
+            if len(self.readers)==0:
                 # Set channel retired
                 self.isretired = True
                 for p in self.writequeue[:]:
                     p.retire()
 
-    def leave_writer(self):
+    def leave_writer(self, end):
         if not self.isretired:
-            self.writers-=1
-            if self.writers==0:
+            self.writers.remove(end)
+            if len(self.writers)==0:
                 # Set channel retired
                 self.isretired = True
                 for p in self.readqueue[:]: # ATOMIC copy

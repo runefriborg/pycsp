@@ -238,10 +238,6 @@ def Sequence(*plist):
         p.run()
     _p.id = _p_original_id
 
-def current_process_id():
-    s = Scheduler()
-    g = s.current
-    return g.id
 
 # Run tests
 if __name__ == '__main__':

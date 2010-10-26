@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 from alternation import Alternation
-from process import current_process_id
+from scheduling import current_process_id
 
 from pycsp.common.const import *
 import pycsp.current
