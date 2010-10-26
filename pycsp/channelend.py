@@ -54,8 +54,9 @@ def poison(*list_of_channelEnds):
 
 # Classes
 class ChannelEndWrite():
-    def __init__(self, channel):
+    def __init__(self, process, channel):
         self.channel = channel
+        self.process = process
         self.op = WRITE        
 
         # Prevention against multiple retires
@@ -71,7 +72,7 @@ class ChannelEndWrite():
 
     def retire(self):
         if not self.isretired:
-            self.channel.leave_writer()
+            self.channel.leave_writer(self)
             self.__call__ = self._retire
             self.post_write = self._retire
             self.isretired = True
@@ -89,8 +90,9 @@ class ChannelEndWrite():
         return False
 
 class ChannelEndRead():
-    def __init__(self, channel):
+    def __init__(self, process, channel):
         self.channel = channel
+        self.process = process
         self.op = READ
 
         # Prevention against multiple retires
@@ -106,7 +108,7 @@ class ChannelEndRead():
 
     def retire(self):
         if not self.isretired:
-            self.channel.leave_reader()
+            self.channel.leave_reader(self)
             self.__call__ = self._retire
             self.post_read = self._retire
             self.isretired = True

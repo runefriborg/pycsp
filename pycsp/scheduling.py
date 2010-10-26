@@ -345,6 +345,11 @@ class Scheduler(object):
     def activate(self, process):
         self.next.append(process)
 
+def current_process_id():
+    s = Scheduler()
+    g = s.current
+    return g.id
+
 
 # Run tests
 if __name__ == '__main__':
