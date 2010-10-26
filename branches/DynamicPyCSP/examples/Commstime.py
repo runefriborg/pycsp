@@ -49,7 +49,7 @@ def Successor(cin, cout):
 @process
 def Consumer(cin):
     "Commstime consumer process"
-    N = 5000
+    N = 15000
     ts = time.time
     t1 = ts()
     cin()
@@ -67,9 +67,13 @@ def Consumer(cin):
 def CommsTimeBM():
     # Create channels
     a = Channel("a")
+    a.__class__ = ChannelOne2One
     b = Channel("b")
+    b.__class__ = ChannelOne2One
     c = Channel("c")
+    c.__class__ = ChannelOne2One
     d = Channel("d")
+    d.__class__ = ChannelOne2One
 
     print "Running commstime test"
     Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
