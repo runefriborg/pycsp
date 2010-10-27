@@ -1,7 +1,14 @@
 0.7.0 - 0.7.1
 ----------
-*  (pycsp.greenlets) Fixed issue with communicating on channels from the main namespace.
-*  (pycsp.greenlets) Fixed propagation of exceptions from io functions.
+* (pycsp.greenlets) Fixed issue with communicating on channels from the main namespace.
+* (pycsp.greenlets) Fixed propagation of exceptions from io functions.
+* Added "fair" version of AltSelect, which uses the history from an Alternation to perform an ordered AltSelect (priority)
+* Replaced use of environment variables for some module magic.
+* Added pycsp.common.trace module
+* Moved AltSelect and FairSelect to a separate file (altselect.py)
+* Added Channel() * 3 and 2 * Channel() functionality
+* removed const.py from individual implementations.
+* Added support for Jython and IronPython in the threads implementation. 
 
 0.6.2 - 0.7.0
 ----------
