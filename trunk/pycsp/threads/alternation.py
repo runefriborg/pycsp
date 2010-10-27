@@ -196,6 +196,8 @@ class Alternation:
                 if retire:
                     raise ChannelRetireException()
 
+                print 'We should not get here in choice!!!'
+
         idx, c, op = reqs[act]
         return (idx, act, c, op)
 
