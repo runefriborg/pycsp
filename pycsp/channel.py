@@ -81,16 +81,35 @@ class ChannelOne2One(object):
             raise ChannelRetireException()
 
     def _read(self):
+        self._read1()
+        return self._read2()
+
+    def _read1(self):
         self.check_termination()
 
         p = self.s.current
         
         if self.internal['writer'] == None:
-            self.internal['reader'] = p
+            self.internal['reader'] = p        
             p.setstate(ACTIVE)
-            p.wait()
+            self._read_wait(p)
             self.internal['reader'] = None
-        else:
+
+
+    def _read_wait(self, p):        
+        while p.state == ACTIVE:
+            p.wait()
+            #if self.upgrade_now:
+            #    print 'UPGRADE'
+                
+
+    def _read2(self):
+        #print self.upgrade_now
+        #print '_read2_ChannelOne2One'
+
+        p = self.s.current
+
+        if self.internal['writer'] != None:
             self.internal['writer'].notify(DONE)
             self.internal['writer'] = None
             p.state = DONE
@@ -102,8 +121,8 @@ class ChannelOne2One(object):
 
         print 'We should not get here in read!!!'
         return None #Here we should handle that a read was cancled...
+        
 
-    
     def _write(self, msg):
         self.check_termination()
 
@@ -179,6 +198,7 @@ class ChannelOne2One(object):
 
     def upgrade(self):
         self.__class__ = Channel
+        self.upgrade_now = True
 
         if self.internal['reader'] != None:
             req = ChannelReq(self.internal['reader'])
@@ -238,6 +258,7 @@ class Channel(object):
 
     def __init__(self, name=None, buffer=0):
 
+        self.upgrade_now = False
         self.internal = {
             'msg':None,
             'writer':None,
@@ -271,7 +292,13 @@ class Channel(object):
         if self.isretired:
             raise ChannelRetireException()
 
+
     def _read(self):
+        state = self._read1()
+        return self._read2(state)
+        
+    def _read1(self):
+        print '_read1_Channel'
         self.check_termination()
 
         p = self.s.current
@@ -291,7 +318,13 @@ class Channel(object):
         p.setstate(ACTIVE)
         req = ChannelReq(p)
         self.post_read(req)
-        req.process.wait()
+        self._read_wait(p)
+        self.internal['read_req']
+        return req
+
+
+    def _read2(self, req):
+        print '_read2_Channel'
         self.remove_read(req)
 
         if req.result==SUCCESS:
@@ -302,6 +335,9 @@ class Channel(object):
         print 'We should not get here in read!!!'
         return None #Here we should handle that a read was cancled...
 
+    def _read_wait(self, p):
+        while p.state == ACTIVE:
+            p.wait()
     
     def _write(self, msg):
         self.check_termination()
