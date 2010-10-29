@@ -1,6 +1,8 @@
 #summary Tutorial on how to get started with PyCSP
 #labels Featured,Tutorial
 
+#sidebar TutorialList
+
 = Introduction =
 
 This article have just been started and will require a few days to get fully going.
