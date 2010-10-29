@@ -149,3 +149,5 @@ Thus running PlayTrace.py with produced pycsp_trace.log
 {{{
 $ python tools/PlayTrace.py pycsp_trace.log
 }}}
+
+<img src=http://pycsp.googlecode.com/files/Screen%20shot%202010-10-29%20at%2010.50.00%20AM.png>
