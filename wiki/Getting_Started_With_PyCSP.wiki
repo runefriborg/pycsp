@@ -1,6 +1,5 @@
 #summary Tutorial on how to get started with PyCSP
 #labels Featured,Tutorial
-
 #sidebar TutorialList
 
 = Introduction =
