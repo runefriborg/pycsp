@@ -1,3 +1,4 @@
+#summary Sidebar element
 Tutorials: 
   * [Getting_Started_With_PyCSP First Glimpse]
   * [Getting_Started_With_Tracing The Trace Module]
