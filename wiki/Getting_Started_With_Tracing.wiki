@@ -38,7 +38,7 @@ TraceMsg(< str >)
 }}}
 
 
-The written trace file is updated with every new trace update, thus it can be piped and read interactively. If not filename is provided TraceInit(), the default filename is pycsp_trace.log.
+The written trace file is updated with every new trace update, thus it can be piped and read interactively. If no filename is provided to TraceInit(), the default filename is pycsp_trace.log.
 
 = Example =
 
