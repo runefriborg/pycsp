@@ -4,8 +4,6 @@
 
 = Introduction =
 
-This article have just been started and will require a few days to get fully going.
-
 PyCSP provides an API that can be used to write concurrent
 applications using [http://en.wikipedia.org/wiki/Communicating_sequential_processes CSP (Communicating Sequential Processes)].
 
