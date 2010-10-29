@@ -1,5 +1,6 @@
 #summary A brief tutorial on pycsp.common.trace and PlayTrace.py
 #labels Featured,Tutorial
+#sidebar TutorialList
 
 = Introduction =
 
