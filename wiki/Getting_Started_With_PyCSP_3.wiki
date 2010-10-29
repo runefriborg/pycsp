@@ -1,4 +1,4 @@
-#summary Tutorial on how to get started with PyCSP (page 2)
+#summary Tutorial on how to get started with PyCSP (page 3)
 #sidebar TutorialList
 
 = Termination =
