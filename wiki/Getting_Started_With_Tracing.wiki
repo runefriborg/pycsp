@@ -145,7 +145,7 @@ Requires:
   PyCSP
 }}}
 
-Thus running PlayTrace.py with produced pycsp_trace.log
+Then running PlayTrace.py with produced pycsp_trace.log
 
 {{{
 $ python tools/PlayTrace.py pycsp_trace.log
