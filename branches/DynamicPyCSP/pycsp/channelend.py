@@ -66,7 +66,6 @@ class ChannelEndWrite():
         self.post_write = self.channel.post_write
         self.remove_write = self.channel.remove_write
         self.poison = self.channel.poison
-        self.upgrade = self.channel.upgrade
 
     def _retire(self, msg):
         raise ChannelRetireException()
@@ -103,7 +102,6 @@ class ChannelEndRead():
         self.post_read = self.channel.post_read
         self.remove_read = self.channel.remove_read
         self.poison = self.channel.poison
-        self.upgrade = self.channel.upgrade
 
     def _retire(self):
         raise ChannelRetireException()

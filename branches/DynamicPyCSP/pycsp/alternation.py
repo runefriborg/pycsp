@@ -128,13 +128,11 @@ class Alternation:
             for prio_item in self.guards:
                 if len(prio_item) == 3:
                     c, msg, action = prio_item
-                    c.upgrade()
                     req = ChannelReq(self.s.current, msg=msg)
                     c.post_write(req)
                     op=WRITE
                 else:
                     c, action = prio_item
-                    c.upgrade()
                     req = ChannelReq(self.s.current)
                     c.post_read(req)
                     op=READ
