@@ -21,11 +21,22 @@ def foo():
 
 test_for_sideeffect = Test1('Fisk')
 
-# Fails: print t.read()
+
+try:
+    print t.read() # must fail
+    print 'Fail!'    
+except:
+    print 'Success'
+
 
 t.__class__ = Test2
 
 print t.read()
 foo()
 
-print test_for_sideeffect.read() # should fail
+try:
+    print test_for_sideeffect.read() # must fail
+    print 'Fail!'    
+except:
+    print 'Success'
+
