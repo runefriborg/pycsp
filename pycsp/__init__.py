@@ -38,7 +38,7 @@ from scheduling import Io, io, current_process_id
 from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
-from channel import Channel, ChannelOne2One, ChannelPoisonException, ChannelRetireException
+from channel import Channel, ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import Process, process, Sequence, Parallel, Spawn
 
