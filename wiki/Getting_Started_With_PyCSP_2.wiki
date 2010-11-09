@@ -19,8 +19,8 @@ def sink(chan_in):
 
 chan = Channel()
 Parallel(
-    5 * source(-chan),
-    5 * sink(+chan)
+    5 * source(chan.writer()),
+    5 * sink(chan.reader())
 )
 }}}
 
