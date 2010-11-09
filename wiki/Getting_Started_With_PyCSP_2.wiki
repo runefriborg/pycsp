@@ -1,4 +1,5 @@
 #summary Tutorial on how to get started with PyCSP (page 2)
+#labels Tutorial
 #sidebar TutorialList
 
 = Multiple readers and writers =
