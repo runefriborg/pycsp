@@ -1,4 +1,35 @@
 #summary Tutorial on how to get started with PyCSP (page 2)
 #sidebar TutorialList
 
+= Buffered Channels =
+
+Channels in PyCSP are any-to-any and can be buffered. To enable a buffer on a channel.
+
+{{{
+BufferC = Channel('A', buffer=3)
+cout = BufferC.writer()
+cin = BufferC.reader()
+}}}
+
+This channel has a buffer size of 3 and is semantically equivalent to the following network.
+
+{{{
+@process
+def BufferP(cin,cout):
+  while True:
+    cout(cin())
+
+BufferC = Channel('A_buf')*4
+for i in range(3):
+  Spawn(
+    BufferP(
+      BufferC[i].reader(), BufferC[i+1].writer()
+    )
+  )
+cout = BufferC[0].writer()
+cin = BufferC[4].reader()
+}}}
+
+The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or alternatively the FairSelect may used to balance the guards.
+
 = External Choice =
