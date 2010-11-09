@@ -54,7 +54,7 @@ cout = BufferC[0].writer()
 cin = BufferC[4].reader()
 }}}
 
-When a channel is buffered, it seems that a writer is now allowed to deliver a message, without the message has been received by one reader. This is not true, which is apparent when we look the network above. Here a BufferP process actually reads the message for every message delivered. When no BufferP process is able to read, the writer trying to write to the buffered channel is blocked.
+When a channel is buffered, it seems that a writer is now allowed to deliver a message, without the message has been received by one reader. This is not true, which is apparent when we look at the network above. Here a BufferP process actually reads the message for every message delivered. When no BufferP process is able to read, the writer trying to write to the buffered channel is blocked.
 
 The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or alternatively the FairSelect may used to balance the guards.
 
