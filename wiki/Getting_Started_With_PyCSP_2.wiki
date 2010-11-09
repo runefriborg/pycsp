@@ -58,4 +58,19 @@ When a channel is buffered, it seems that a writer is now allowed to deliver a m
 
 The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or alternatively the FairSelect may used to balance the guards.
 
-= External Choice =
+= External Choice (AltSelect or FairSelect) =
+
+The external choice selects a single guard from a set of guards. The current guard types are:
+
+{{{
+* InputGuard(cin, action=[optional])
+* OutputGuard(cout, msg=<message>, action=[optional])
+* TimerGuard(seconds=<s>, action=[optional])
+* SkipGuard(action=[optional])
+}}}
+
+where
+{{{
+cin = <chan>.reader()
+cout = <chan>.writer()
+}}}
