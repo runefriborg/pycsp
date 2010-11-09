@@ -1,9 +1,32 @@
 #summary Tutorial on how to get started with PyCSP (page 2)
 #sidebar TutorialList
 
+= Multiple readers and writers =
+
+Channels may have multiple readers or writers. It is not only legal, but also a very useful feature of CSP. The consistency lies in the model, which dictates that a writer is blocked until his message is received by exactly one reader.
+
+{{{
+@process
+def source(chan_out):
+    for i in range(10):
+        chan_out("Hello world (%d)\n" % (i))
+    retire(chan_out)
+    
+@process
+def sink(chan_in):
+    while True:
+        sys.stdout.write(chan_in())
+
+chan = Channel()
+Parallel(
+    5 * source(-chan),
+    5 * sink(+chan)
+)
+}}}
+
 = Buffered Channels =
 
-Channels in PyCSP are any-to-any and can be buffered. To enable a buffer on a channel.
+Channels in PyCSP are any-to-any and can be buffered.  To enable a buffer on a channel.
 
 {{{
 BufferC = Channel('A', buffer=3)
@@ -29,6 +52,8 @@ for i in range(3):
 cout = BufferC[0].writer()
 cin = BufferC[4].reader()
 }}}
+
+When a channel is buffered, it seems that a writer is now allowed to deliver a message, without the message has been received by one reader. This is not true, which is apparent when we look the network above. Here a BufferP process actually reads the message for every message delivered. When no BufferP process is able to read, the writer trying to write to the buffered channel is blocked.
 
 The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or alternatively the FairSelect may used to balance the guards.
 
