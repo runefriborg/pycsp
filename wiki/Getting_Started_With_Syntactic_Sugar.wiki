@@ -1,0 +1,1 @@
+#summary An overview of the syntactic sugar in PyCSP
