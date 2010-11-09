@@ -80,7 +80,7 @@ The above code produces the following output:
 0.9314496638651289306925.94 9
 }}}
 
-= Reader and Writer =
+= Reader (+) and Writer (-) =
 
 {{{
 >>> A = Channel()
