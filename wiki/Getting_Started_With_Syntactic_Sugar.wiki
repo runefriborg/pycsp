@@ -79,3 +79,33 @@ The above code produces the following output:
  0.2164145215991289306925.94 4
 0.9314496638651289306925.94 9
 }}}
+
+= Reader and Writer =
+
+{{{
+>>> A = Channel()
+>>> +A
+<ChannelEndRead ...>
+>>> -A
+<ChannelEndWrite ...>
+}}}
+
+replacing
+
+{{{
+>>> A = Channel()
+>>> A.reader()
+<ChannelEndRead ...>
+>>> A.writer()
+<ChannelEndWrite ...>
+}}}
+
+In use:
+
+{{{
+chan = Channel()
+Parallel(
+  P1(+chan)
+  P2(-chan)
+)
+}}}
