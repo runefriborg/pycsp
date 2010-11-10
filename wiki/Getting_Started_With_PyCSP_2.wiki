@@ -75,6 +75,47 @@ cin = <chan>.reader()
 cout = <chan>.writer()
 }}}
 
-AltSelect will perform a prioritized selection between the given guards. 
+AltSelect will perform a prioritized selection between the given guards. To select from multiple channels:
 
+{{{
+@process
+def P1(cout, val):
+  for i in range(5):
+    cout(val)
+
+A = Channel() * 2
+
+@process
+def P2(cin1, cin2):
+  for i in range(10):
+    g, msg = AltSelect(
+      InputGuard(cin1),
+      InputGuard(cin2)
+    )
+    if g == cin1:
+      print 'Received',msg,'from chan1'
+    else:
+      print 'Received',msg,'from chan2'
+
+
+Parallel(
+  P1(A[0].writer(), 'Chan1'),
+  P1(A[1].writer(), 'Chan2'),
+  P2(A[0].reader(), A[1].reader())
+)
+}}}
+
+Output:
+{{{
+Received Chan1 from chan1
+Received Chan1 from chan1
+Received Chan1 from chan1
+Received Chan2 from chan2
+Received Chan1 from chan1
+Received Chan1 from chan1
+Received Chan2 from chan2
+Received Chan2 from chan2
+Received Chan2 from chan2
+Received Chan2 from chan2
+}}}
 
