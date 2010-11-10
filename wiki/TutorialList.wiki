@@ -2,6 +2,8 @@
 Tutorials: 
   * [Getting_Started_With_PyCSP First Glimpse]
     * [Getting_Started_With_PyCSP Page 1]
-    * [Getting_Started_With_PyCSP_2 Page 2]    
+    * [Getting_Started_With_PyCSP_2 Page 2]
+    * [Getting_Started_With_PyCSP_3 Page 3]
+    * [Getting_Started_With_PyCSP_4 Page 4]    
   * [Getting_Started_With_Tracing The Trace Module]
   * [Getting_Started_With_Syntactic_Sugar Some Syntactic Sugar]
