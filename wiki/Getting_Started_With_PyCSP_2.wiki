@@ -65,7 +65,7 @@ The external choice selects a single guard from a set of guards. The current gua
 {{{
 * InputGuard(cin, action=[optional])
 * OutputGuard(cout, msg=<message>, action=[optional])
-* TimerGuard(seconds=<s>, action=[optional])
+* TimeoutGuard(seconds=<s>, action=[optional])
 * SkipGuard(action=[optional])
 }}}
 
@@ -118,4 +118,3 @@ Received Chan2 from chan2
 Received Chan2 from chan2
 Received Chan2 from chan2
 }}}
-
