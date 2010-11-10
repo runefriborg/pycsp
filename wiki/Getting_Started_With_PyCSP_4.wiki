@@ -1,8 +1,13 @@
-#summary One-sentence summary of this page.
+#summary Tutorial on how to get started with PyCSP (page 4)
 #labels Tutorial
+
+= A Scalable Webserver =
+
+== Answer Request ==
+
 
 <img src="http://pycsp.googlecode.com/files/WebserverStep1.png" width=400>
 <img src="http://pycsp.googlecode.com/files/WebserverStep2.png" width=400>
 <img src="http://pycsp.googlecode.com/files/WebserverStep3.png" width=400>
 <img src="http://pycsp.googlecode.com/files/WebserverStep4.png" width=600>
-<img src="http://pycsp.googlecode.com/files/WebserverStep5.png" width=600>
+<img src="http://pycsp.googlecode.com/files/WebserverStep5.png" width=800>
