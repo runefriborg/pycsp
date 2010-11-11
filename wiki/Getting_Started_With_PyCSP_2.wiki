@@ -118,3 +118,46 @@ Received Chan2 from chan2
 Received Chan2 from chan2
 Received Chan2 from chan2
 }}}
+
+Next we combine different guard types in a single guard set. Also you will notice that we have introduced the choice / action construct, which provide a means of attaching an action to a guard. This is semantically identical to handling an action in the if-then-else following an AltSelect.
+
+{{{
+@choice
+def received_job(channel_input = None):
+  save_result(channel_input)
+
+@choice
+def send_job(jobs, channel_input = None):
+  jobs.pop()
+
+while jobs or len(results) < jobcount:
+  if jobs:
+    AltSelect(
+      InputGuard(workerIn, action=received_job),
+      OutputGuard(workerOut, msg=jobs[-1],
+				action=send_job(jobs)),
+      TimeoutGuard(seconds=10, action=on_timeout)
+    )
+  else:
+    received_job(workerIn())
+}}}
+
+Another example:
+
+{{{
+@choice
+def on_timeout(channel_input = None):
+  # handle timeout
+  pass
+
+ch_end, msg = AltSelect(
+    InputGuard(workerIn),
+    OutputGuard(workerOut, msg=jobs[-1]),
+    TimeoutGuard(seconds=10, action=on_timeout)
+)
+
+if ch_end == workerIn:
+  # perform action
+elif ch_end == workerOut:
+  # perform other action
+}}}
