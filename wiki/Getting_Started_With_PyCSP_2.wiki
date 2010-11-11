@@ -58,7 +58,7 @@ When a channel is buffered, it seems that a writer is now allowed to deliver a m
 
 The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or alternatively the FairSelect may used to balance the guards.
 
-= External Choice (AltSelect or FairSelect) =
+= External Choice (AltSelect, FairSelect) =
 
 The external choice selects a single guard from a set of guards. The current guard types are:
 
@@ -160,4 +160,68 @@ if ch_end == workerIn:
   # perform action
 elif ch_end == workerOut:
   # perform other action
+}}}
+
+
+Introducing the FairSelect:
+
+{{{
+@process
+def writer(cout, id):
+  while True:
+    cout((id))
+
+@process
+def par_reader_fair(cinList, cnt):
+  for i in range(cnt):
+        
+    c, msg = FairSelect(
+            InputGuard(cinList[0]),
+            InputGuard(cinList[1]),
+            InputGuard(cinList[2]),
+            InputGuard(cinList[3])
+    )
+            
+    print 'From ',c ,'got',msg
+  
+  # Terminate
+  poison(*cinList)
+
+C=Channel('C') * 4
+cnt = 10
+    
+Parallel(
+  par_reader_fair([c.reader() for c in C], cnt),
+  [ writer(C[id].writer(), id) for id in range(4)]
+)
+}}}
+
+Output using FairSelect:
+
+{{{
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100426d50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df90> named C1> got 1
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700090> named C2> got 2
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700110> named C3> got 3
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100426d50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df90> named C1> got 1
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700090> named C2> got 2
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700110> named C3> got 3
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100426d50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df90> named C1> got 1
+}}}
+
+Output using AltSelect:
+
+{{{
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700550> named C1> got 1
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x10070df50> named C> got 0
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700550> named C1> got 1
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x100700190> named C2> got 2
+From  <ChannelEndRead wrapping <pycsp.threads.channel.Channel object at 0x1007002d0> named C3> got 3
 }}}
