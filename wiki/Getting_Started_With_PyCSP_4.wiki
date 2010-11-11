@@ -1,5 +1,6 @@
 #summary Tutorial on how to get started with PyCSP (page 4)
 #labels Tutorial
+#sidebar TutorialList
 
 = A Scalable Webserver =
 
