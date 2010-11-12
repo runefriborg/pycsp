@@ -8,20 +8,21 @@ value = [0]
 import threading
 
 def tcode(val):
-    for i in range(5):
-        time.sleep(0.00001)
+    for i in range(1000):
         value[0] = 0
+        time.sleep(0.001)
         print val
 
-t = threading.Thread(target=tcode, args=('Yo',))
-t.start()
+for a in range(10):
+    t = threading.Thread(target=tcode, args=('Yo',))
+    t.start()
 
 
 
 def update(friend, quit):
     while True:
         value[0] += 1
-        print value
+        print value,
         friend.switch(greenlet.getcurrent(), quit)
         if value[0] > 1000:
             quit.switch()
