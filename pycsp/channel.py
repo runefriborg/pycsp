@@ -30,8 +30,15 @@ except ImportError, e:
 from scheduling import Scheduler, current_process_id
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
 from pycsp.common.const import *
+from discovery import Discover
+from selection import Sync
 
 import time, random
+import socket
+
+
+#HOST_IP = socket.gethostbyname(socket.gethostname())
+
 
 # Exceptions
 class ChannelPoisonException(Exception): 
@@ -39,44 +46,35 @@ class ChannelPoisonException(Exception):
         pass
 
 # Classes
-class ChannelReq:
-    def __init__(self, process, msg=None):
-        self.msg = msg
-        self.result = FAIL
-        self.process = process
 
-    def poison(self):
-        if self.result != SUCCESS:
-            self.result = POISON
-            self.process.notify(POISON)
 
-    def retire(self):
-        if self.result != SUCCESS:
-            self.result = RETIRE
-            self.process.notify(RETIRE)
+class ChannelHome(object):
+    """ Channel Home class.
+    Not every channel will have a ChannelHome.
+    Only one ChannelHome per unique channel name must exist.
+    """
+    def __init__(self, name, buffer, level):
+        self.name = name
+        self.buffer = buffer
+        self.level = level
 
-    def offer(self, recipient):
-        if self.process.state == recipient.process.state == ACTIVE:
-            recipient.msg= self.msg
-            self.result=SUCCESS
-            recipient.result=SUCCESS
-            self.process.notify(DONE)
-            recipient.process.notify(DONE)
-            return True
-        return False
+        # Channel request queues
+        self.readqueue = []
+        self.writequeue = []
+        
+        # Count, makes sure that all processes knows how many channel ends have retired
+        self.readers = []
+        self.writers = []
+
 
 
 class Channel(object):
-    """ Channel class. Blocking communication
-    """
+    """ Channel class.
 
-    def __new__(cls, *args, **kargs):
-        if kargs.has_key('buffer') and kargs['buffer'] > 0:
-            import buffer                      
-            chan = buffer.BufferedChannel(*args, **kargs)
-            return chan
-        else:
-            return object.__new__(cls)
+    This class main responsibility is to connect the channel ends with eachother, as long
+    as no ChannelHome is created. This means, that as long as we only have one reader and one
+    writer, this class will handle everything.
+    """
 
     def __init__(self, name=None, buffer=0):
 
@@ -85,42 +83,27 @@ class Channel(object):
             self.name = str(random.random())+str(time.time())
         else:
             self.name=name
-
+        
+        # Check if a ChannelHome exists? (yes, later when going distributed)
+        
         self.readqueue = []
         self.writequeue = []
-        
-        # Count, makes sure that all processes knows how many channel ends have retired
+
         self.readers = []
         self.writers = []
 
         self.ispoisoned = False
         self.isretired = False
 
-        self.s = Scheduler()
-        
-    def check_termination(self):        
-        if self.ispoisoned:
-            raise ChannelPoisonException()
-        if self.isretired:
-            raise ChannelRetireException()
+        #- self.s = Scheduler()        
+        self.level = 0
+        self.sync = Sync(self.level, self)
+
 
     def _read(self):
         self.check_termination()
 
-        p = self.s.current
-        
-        # If anyone is on the writequeue and ACTIVE, then we can do the match right away
-        # This hack provides a 150% performance improvement and can be removed
-        # without breaking anything.
-        for w in self.writequeue:
-            if w.process.state == ACTIVE:
-                msg = w.msg
-                w.result = SUCCESS
-                w.process.state = DONE
-                if p != w.process:
-                    self.s.next.append(w.process)
-                return msg        
-
+        p = self.s.current        
         p.setstate(ACTIVE)
         req = ChannelReq(p)
         self.post_read(req)
@@ -141,18 +124,6 @@ class Channel(object):
 
         p = self.s.current
         
-        # If anyone is on the readqueue and ACTIVE, then we can do the match right away
-        # This hack provides a 150% performance improvement and can be removed
-        # without breaking anything.
-        for r in self.readqueue:
-            if r.process.state == ACTIVE:
-                r.msg = msg
-                r.result = SUCCESS
-                r.process.state = DONE
-                if p != r.process:
-                    self.s.next.append(r.process)
-                return True
-
         p.setstate(ACTIVE)
         req = ChannelReq(p,msg=msg)
         self.post_write(req)
@@ -215,15 +186,11 @@ class Channel(object):
         return self.__mul__(multiplier)
 
     def reader(self):
-        print "Join_reader "+current_process_id()
-
         end = ChannelEndRead(current_process_id(), self)
         self.join_reader(end)
         return end
 
     def writer(self):
-        print "Join_writer "+current_process_id()
-
         end = ChannelEndWrite(current_process_id(), self)
         self.join_writer(end)
         return end

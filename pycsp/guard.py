@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import threading
 from scheduling import Scheduler
-from channel import ChannelReq
 from process import Process
 from pycsp.common.const import *
 

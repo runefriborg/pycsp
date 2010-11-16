@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp.common.const import *
 
+
 # Exceptions
 class ChannelRetireException(Exception): 
     def __init__(self):
@@ -55,18 +56,32 @@ def poison(*list_of_channelEnds):
 # Classes
 class ChannelEndWrite():
     def __init__(self, process, channel):
-        self.channel = channel
-        self.process = process
-        self.op = WRITE        
+        self.channel_name = channel.name
+        self.process = process # Unused..
+        self.sync = channel.sync
+        self.op = WRITE
 
         # Prevention against multiple retires
         self.isretired = False
 
-        self.__call__ = self.channel._write
-        self.post_write = self.channel.post_write
-        self.remove_write = self.channel.remove_write
-        self.poison = self.channel.poison
+    def __call__(self, msg):
+        self.sync.write(msg)
+    
 
+    def poison(self):
+        self.sync.poison()
+
+    def post_write(self, req):
+        #Alert, participating in an external choice.
+        self.sync.provide_alt_support()
+        self.sync.post_write(req)
+        
+    def remove_write(self, req):
+        #Alert, participating in an external choice.
+        self.sync.remove_write(req)
+        self.sync.no_alt_support()
+
+        
     def _retire(self, msg):
         raise ChannelRetireException()
 
@@ -76,6 +91,9 @@ class ChannelEndWrite():
             self.__call__ = self._retire
             self.post_write = self._retire
             self.isretired = True
+
+    def reconnect(self):
+        pass
 
     def __repr__(self):
         if self.channel.name == None:
@@ -91,17 +109,33 @@ class ChannelEndWrite():
 
 class ChannelEndRead():
     def __init__(self, process, channel):
-        self.channel = channel
-        self.process = process
+        self.channel_name = channel.name
+        self.process = process # Unused..
+        self.sync = channel.sync
         self.op = READ
+
 
         # Prevention against multiple retires
         self.isretired = False
 
-        self.__call__ = self.channel._read
-        self.post_read = self.channel.post_read
-        self.remove_read = self.channel.remove_read
-        self.poison = self.channel.poison
+
+
+    def __call__(self):
+        return self.sync.read()
+
+    def poison(self):
+        self.sync.poison()
+
+    def post_read(self, req):
+        #Alert, participating in an external choice.
+        self.sync.provide_alt_support()
+        self.sync.post_read(req)
+        
+    def remove_read(self, req):
+        #Alert, participating in an external choice.
+        self.sync.remove_read(req)
+        self.sync.no_alt_support()
+    
 
     def _retire(self):
         raise ChannelRetireException()
@@ -112,6 +146,9 @@ class ChannelEndRead():
             self.__call__ = self._retire
             self.post_read = self._retire
             self.isretired = True
+
+    def reconnect(self):
+        pass
 
     def __repr__(self):
         if self.channel.name == None:

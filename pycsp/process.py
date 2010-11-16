@@ -93,6 +93,10 @@ class Process():
     def run(self):
         self.executed = False
         try:
+            # Update channel ends with new process
+            self.__move_channel_ends(self.args)
+            self.__move_channel_ends(self.kwargs.values())
+            # Execute code
             self.fn(*self.args, **self.kwargs)
         except ChannelPoisonException:
             # look for channels and channel ends
@@ -104,6 +108,18 @@ class Process():
             self.__check_retire(self.kwargs.values())
         self.executed = True
             
+    def __move_channel_ends(self, args):
+        for arg in args:
+            try:
+                if types.ListType == type(arg) or types.TupleType == type(arg):
+                    self.__move_channel_ends(arg)
+                elif types.DictType == type(arg):
+                    self.__move_channel_ends(arg.keys())
+                    self.__move_channel_ends(arg.values())
+                elif type(arg.reconnect) == types.UnboundMethodType:
+                    arg.reconnect()
+            except AttributeError:
+                pass        
 
     def __check_poison(self, args):
         for arg in args:
