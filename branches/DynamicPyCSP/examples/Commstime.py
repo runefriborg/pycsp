@@ -56,6 +56,7 @@ def Consumer(cin):
     t1 = ts()
     for i in range(N):
         cin()
+        #print cin()
     t2 = ts()
     dt = t2-t1
     tchan = dt / (4 * N)
@@ -77,7 +78,7 @@ def CommsTimeBM():
              Successor(+b, -c),               # feeding back to prefix
              Consumer(+d))                         # timing process
 
-N_BM = 10
+N_BM = 2
 for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
