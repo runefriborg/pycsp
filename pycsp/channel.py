@@ -30,11 +30,11 @@ except ImportError, e:
 from scheduling import Scheduler, current_process_id
 from channelend import ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
-from discovery import Discover
+
+#+ from discovery import Discover
 from selection import Sync
 
 import time, random
-import socket
 
 
 #HOST_IP = socket.gethostbyname(socket.gethostname())
@@ -80,91 +80,17 @@ class Channel(object):
         else:
             self.name=name
         
-        # Check if a ChannelHome exists? (yes, later when going distributed)
+        #+ Check if a ChannelHome exists? (yes, later when going distributed)
         
-        self.readqueue = []
-        self.writequeue = []
-
         self.readers = []
         self.writers = []
 
         self.ispoisoned = False
         self.isretired = False
 
-        #- self.s = Scheduler()        
+        #- self.s = Scheduler()    
         self.level = 0
         self.sync = Sync(self.level, self)
-
-
-    def _read(self):
-        self.check_termination()
-
-        p = self.s.current        
-        p.setstate(ACTIVE)
-        req = ChannelReq(p)
-        self.post_read(req)
-        req.process.wait()
-        self.remove_read(req)
-
-        if req.result==SUCCESS:
-            return req.msg
-        
-        self.check_termination()
-            
-        print 'We should not get here in read!!!'
-        return None #Here we should handle that a read was cancled...
-
-    
-    def _write(self, msg):
-        self.check_termination()
-
-        p = self.s.current
-        
-        p.setstate(ACTIVE)
-        req = ChannelReq(p,msg=msg)
-        self.post_write(req)
-        req.process.wait()
-        self.remove_write(req)
-
-        if req.result==SUCCESS:
-            return True
-    
-        self.check_termination()
-
-        print 'We should not get here in write!!!'
-        return None #Here we should handle that a read was cancled...
-
-    def post_read(self, req):
-        self.check_termination()
-        self.readqueue.append(req)
-        self.match()
-
-    def remove_read(self, req):
-        self.readqueue.remove(req)
-        
-    def post_write(self, req):
-        self.check_termination()
-        self.writequeue.append(req)
-        self.match()
-
-    def remove_write(self, req):
-        self.writequeue.remove(req)
-
-    def match(self):
-        if self.readqueue and self.writequeue:
-            for w in self.writequeue:
-                for r in self.readqueue:
-                    if w.offer(r):
-                        # Did an offer
-                        # We can guarantee, that there will always be someone to call offer,
-                        # since everything is run in a single thread. Thus we break the loop.
-                        return
-
-    def poison(self):
-        if not self.ispoisoned:
-            self.ispoisoned = True
-            map(ChannelReq.poison, self.readqueue)
-            map(ChannelReq.poison, self.writequeue)
 
     def __pos__(self):
         return self.reader()
@@ -182,11 +108,19 @@ class Channel(object):
         return self.__mul__(multiplier)
 
     def reader(self):
+        # Test sync level
+        if len(self.readers) > 0:
+            self.sync.provide_any_support()
+
         end = ChannelEndRead(current_process_id(), self)
         self.join_reader(end)
         return end
 
     def writer(self):
+        # Test sync level
+        if len(self.writers) > 0:
+            self.sync.provide_any_support()
+
         end = ChannelEndWrite(current_process_id(), self)
         self.join_writer(end)
         return end

@@ -61,16 +61,33 @@ class SyncShared(object):
     def __init__(self, channel):
         self.channel = channel
 
+        # Internal structure
+        self.waiting_read = None
+        self.waiting_write = None
+
+        # Channel request queues
+        self.readqueue = []
+        self.writequeue = []
+
     def check_termination(self):
         if self.channel.ispoisoned:
             raise ChannelPoisonException()
         if self.channel.isretired:
             raise ChannelRetireException()
 
+    def provide_any_support(self):
+        if self.channel.level == 0:
+            transcend(self, 1)                        
+
     def provide_alt_support(self):
-        pass
+        if self.channel.level == 0:
+            transcend(self, 1)            
 
     def no_alt_support(self):
+        pass
+
+    def change_to_level(self, level):
+        # Must be implemented by all Sync levels.
         pass
 
 
@@ -78,16 +95,24 @@ class SyncOneOneLocalNoALT(SyncShared):
     def __init__(self, channel):
         SyncShared.__init__(self, channel)
         self.s = Scheduler()
-
-        # Internal structure
-        self.waiting_req = None
+        
+    def change_to_level(self, level):
+        if level == 1:
+            if self.waiting_read != None and self.waiting_read.process.state == ACTIVE:
+                # Notify process to wake up and reconfigure.
+                self.waiting_read.process.state = NEW_LEVEL
+                self.s.next.append(self.waiting_read.process)
+            elif self.waiting_write != None and self.waiting_write.process.state == ACTIVE:
+                # Notify process to wake up and reconfigure.
+                self.waiting_write.process.state = NEW_LEVEL
+                self.s.next.append(self.waiting_write.process)
 
     def read(self):
         req, msg = self.enter_read()
         if req == None:
             return msg
         else:
-            self.wait(req)
+            self.wait_read(req)
             self.leave_read(req)
             return req.msg
 
@@ -97,8 +122,8 @@ class SyncOneOneLocalNoALT(SyncShared):
         p = self.s.current
 
         # match
-        if self.waiting_req != None:
-            w = self.waiting_req
+        if self.waiting_write != None:
+            w = self.waiting_write
             if w.process.state == ACTIVE:
                 msg = w.msg
                 w.result = SUCCESS
@@ -106,7 +131,7 @@ class SyncOneOneLocalNoALT(SyncShared):
                 if p != w.process:
                     self.s.next.append(w.process)
                 # Fast remove
-                self.waiting_req = None
+                self.waiting_write = None
                 return (None, msg)
 
         p.setstate(ACTIVE)
@@ -117,17 +142,32 @@ class SyncOneOneLocalNoALT(SyncShared):
         if req.result != SUCCESS:
             self.check_termination()
         
-    def wait(self, req):
-        self.waiting_req = req
-        req.process.wait()
-        
+    def wait_read(self, req):
+        self.waiting_read = req
+        while req.process.state == ACTIVE or req.process.state == NEW_LEVEL:
+            req.process.wait()
+            if req.process.state == NEW_LEVEL:
+                req.process.state = ACTIVE
+                self.waiting_read = None
+                self.post_read(req)
+                
+
+    def wait_write(self, req):
+        self.waiting_write = req
+        while req.process.state == ACTIVE or req.process.state == NEW_LEVEL:
+            req.process.wait()
+            if req.process.state == NEW_LEVEL:
+                req.process.state = ACTIVE
+                self.waiting_write = None
+                self.post_write(req)
+                
 
     def write(self, msg):
         req = self.enter_write(msg)
         if req == None:
             return
         else:
-            self.wait(req)
+            self.wait_write(req)
             self.leave_write(req)
             return
     
@@ -137,8 +177,8 @@ class SyncOneOneLocalNoALT(SyncShared):
         p = self.s.current
 
         # match
-        if self.waiting_req != None:
-            r = self.waiting_req
+        if self.waiting_read != None:
+            r = self.waiting_read
             if r.process.state == ACTIVE:
                 r.msg = msg
                 r.result = SUCCESS
@@ -146,7 +186,7 @@ class SyncOneOneLocalNoALT(SyncShared):
                 if p != r.process:
                     self.s.next.append(r.process)
                 # Fast remove
-                self.waiting_req = None
+                self.waiting_read = None
                 return None
 
         p.setstate(ACTIVE)
@@ -161,9 +201,16 @@ class SyncOneOneLocalNoALT(SyncShared):
     def poison(self):
         if not self.channel.ispoisoned:
             self.channel.ispoisoned = True
-            if self.waiting_req:
-                self.waiting_req.poison()
+            if self.waiting_read:
+                self.waiting_read.poison()
+            if self.waiting_write:
+                self.waiting_write.poison()
 
+    def retire(self):
+        if self.waiting_read:
+            self.waiting_read.retire()
+        if self.waiting_write:
+            self.waiting_write.retire()
 
 
 class SyncAnyAnyLocal(SyncShared):
@@ -171,13 +218,9 @@ class SyncAnyAnyLocal(SyncShared):
         SyncShared.__init__(self, channel)
         self.s = Scheduler()
 
-        # Channel request queues
-        self.readqueue = []
-        self.writequeue = []
-
     def read(self):
         req = self.enter_read()
-        self.wait(req)
+        self.wait_read(req)
         self.leave_read(req)
         return req.msg
 
@@ -202,13 +245,15 @@ class SyncAnyAnyLocal(SyncShared):
         if req.result != SUCCESS:
             self.check_termination()
         
-    def wait(self, req):
+    def wait_read(self, req):
         req.process.wait()
-        
+
+    def wait_write(self, req):
+        req.process.wait()        
 
     def write(self, msg):
         req = self.enter_write(msg)
-        self.wait(req)
+        self.wait_write(req)
         self.leave_write(req)
         return
 
@@ -255,8 +300,8 @@ class SyncAnyAnyLocal(SyncShared):
 
 
 LEVEL = {
-    1:SyncOneOneLocalNoALT,
-    0:SyncAnyAnyLocal,
+    0:SyncOneOneLocalNoALT,
+    1:SyncAnyAnyLocal,
 #    2:SyncOneOneGlobalNoALT,
 #    3:SyncAnyAnyLocal,
 #    4:SyncAnyAnyGlobalNoALT,
@@ -268,10 +313,13 @@ def Sync(level, channel):
     return LEVEL[level](channel)
 
 def transcend(obj, level):
-    oldLevel = obj.level
+    oldLevel = obj.channel.level
     oldClass = obj.__class__
-        
+    
+    obj.change_to_level(level)   
     obj.__class__ = LEVEL[level]
+
+    
 
 
 
