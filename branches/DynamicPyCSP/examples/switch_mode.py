@@ -1,23 +1,35 @@
 from pycsp_import import *
 
-A = Channel()
 
 @process
-def Fun(cin):
+def source1(chan_out):
+    for i in range(10):
+        chan_out("Hello world (%d)\n" % (i))
+
+@process
+def source2(chan_out):
+    for i in range(10):
+        chan_out("Hello world (%d)\n" % (i))
+    retire(chan_out)
+   
+@process
+def sink(chan_in):
     while True:
-        print cin()
+        sys.stdout.write(chan_in())
 
-Spawn(Fun(A.reader()))
+chan = Channel()
+Spawn(sink(+chan))
 
-cout = A.writer()
+print chan.sync
 
-cout('Test')
+Parallel( source1(-chan) )
 
+print chan.sync
 
+Parallel(source2(-chan)*2)
 
-cout2 = A.writer()
+print chan.sync
 
-cout2('Test2')
 
 
 

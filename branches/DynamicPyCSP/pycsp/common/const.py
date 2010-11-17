@@ -23,7 +23,7 @@ READ, WRITE = range(2)
 FAIL, SUCCESS = range(2)
 
 # State of a channel request status (ReqStatus)
-ACTIVE, DONE = range(2)
+ACTIVE, DONE, NEW_LEVEL = range(3)
 
 # Constants used for both ChannelReq results and ReqStatus states.
-POISON, RETIRE = range(2,4)
+POISON, RETIRE = range(3,5)
