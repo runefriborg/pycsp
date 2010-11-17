@@ -67,6 +67,12 @@ class SyncShared(object):
         if self.channel.isretired:
             raise ChannelRetireException()
 
+    def provide_alt_support(self):
+        pass
+
+    def no_alt_support(self):
+        pass
+
 
 class SyncOneOneLocalNoALT(SyncShared):
     def __init__(self, channel):
@@ -81,7 +87,7 @@ class SyncOneOneLocalNoALT(SyncShared):
         if req == None:
             return msg
         else:
-            self.wait_read(req)
+            self.wait(req)
             self.leave_read(req)
             return req.msg
 
@@ -107,13 +113,13 @@ class SyncOneOneLocalNoALT(SyncShared):
         req = ChannelReq(p)
         return (req, None)
             
-    def wait_read(self, req):
-        self.waiting_req = req
-        req.process.wait()
-
     def leave_read(self, req):
         if req.result != SUCCESS:
             self.check_termination()
+        
+    def wait(self, req):
+        self.waiting_req = req
+        req.process.wait()
         
 
     def write(self, msg):
@@ -121,7 +127,7 @@ class SyncOneOneLocalNoALT(SyncShared):
         if req == None:
             return
         else:
-            self.wait_write(req)
+            self.wait(req)
             self.leave_write(req)
             return
     
@@ -147,10 +153,6 @@ class SyncOneOneLocalNoALT(SyncShared):
         req = ChannelReq(p,msg=msg)
         return req
 
-    def wait_write(self, req):
-        self.waiting_req = req
-        req.process.wait()
-
     def leave_write(self, req):
         if req.result != SUCCESS:
             self.check_termination()
@@ -163,46 +165,98 @@ class SyncOneOneLocalNoALT(SyncShared):
                 self.waiting_req.poison()
 
 
-class SyncOneOneLocal(SyncShared):
+
+class SyncAnyAnyLocal(SyncShared):
     def __init__(self, channel):
         SyncShared.__init__(self, channel)
-        
+        self.s = Scheduler()
+
+        # Channel request queues
+        self.readqueue = []
+        self.writequeue = []
+
     def read(self):
-        # Create RequestState
-        self.enter_read()
-        self.wait_read()
-        return self.leave_read()
+        req = self.enter_read()
+        self.wait(req)
+        self.leave_read(req)
+        return req.msg
 
-    def enter_read(self):
-        pass
+    def post_read(self, req):
+        self.check_termination()
+        self.readqueue.append(req)
+        self.match()
 
-    def wait_read(self):
-        pass
-    
-    def leave_read(self):
-        pass
+    def remove_read(self, req):
+        self.readqueue.remove(req)
 
+    def enter_read(self):        
+        p = self.s.current
+        p.setstate(ACTIVE)
+        req = ChannelReq(p)
+
+        self.post_read(req)
+        return req
+            
+    def leave_read(self, req):
+        self.remove_read(req)
+        if req.result != SUCCESS:
+            self.check_termination()
+        
+    def wait(self, req):
+        req.process.wait()
+        
 
     def write(self, msg):
-        # Create RequestState
+        req = self.enter_write(msg)
+        self.wait(req)
+        self.leave_write(req)
+        return
+
+    def post_write(self, req):
+        self.check_termination()
+        self.writequeue.append(req)
+        self.match()
+
+    def remove_write(self, req):
+        self.writequeue.remove(req)
+
+    def enter_write(self, msg):
+        p = self.s.current
+        p.setstate(ACTIVE)
+        req = ChannelReq(p,msg=msg)
+
+        self.post_write(req)
+        return req
+
+    def leave_write(self, req):
+        self.remove_write(req)
+        if req.result != SUCCESS:
+            self.check_termination()
         
-        self.enter_write()
-        self.wait_write()
-        self.leave_write()
-    
-    def enter_write(self):
-        pass
+    def match(self):
+        if self.readqueue and self.writequeue:
+            for w in self.writequeue:
+                for r in self.readqueue:
+                    if w.offer(r):
+                        # Did an offer
+                        # We can guarantee, that there will always be someone to call offer,
+                        # since everything is run in a single thread. Thus we break the loop.
+                        return
 
-    def wait_write(self):
-        pass
+    def poison(self):
+        if not self.channel.ispoisoned:
+            self.channel.ispoisoned = True
+            map(ChannelReq.poison, self.readqueue)
+            map(ChannelReq.poison, self.writequeue)
 
-    def leave_write(self):
-        pass
+    def retire(self):
+        map(ChannelReq.retire, self.readqueue)
+        map(ChannelReq.retire, self.writequeue)
 
 
 LEVEL = {
-    0:SyncOneOneLocalNoALT,
-    1:SyncOneOneLocal,
+    1:SyncOneOneLocalNoALT,
+    0:SyncAnyAnyLocal,
 #    2:SyncOneOneGlobalNoALT,
 #    3:SyncAnyAnyLocal,
 #    4:SyncAnyAnyGlobalNoALT,
@@ -218,4 +272,6 @@ def transcend(obj, level):
     oldClass = obj.__class__
         
     obj.__class__ = LEVEL[level]
+
+
 

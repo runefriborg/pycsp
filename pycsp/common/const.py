@@ -11,6 +11,10 @@ class ChannelPoisonException(Exception):
     def __init__(self):
         pass
 
+class ChannelRetireException(Exception): 
+    def __init__(self):
+        pass
+
 
 # Operation type
 READ, WRITE = range(2)
