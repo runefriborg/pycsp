@@ -23,12 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp.common.const import *
 
-
-# Exceptions
-class ChannelRetireException(Exception): 
-    def __init__(self):
-        pass
-
 # Functions
 def IN(channel):
     """ Join as reader
@@ -56,9 +50,9 @@ def poison(*list_of_channelEnds):
 # Classes
 class ChannelEndWrite():
     def __init__(self, process, channel):
-        self.channel_name = channel.name
-        self.process = process # Unused..
+        self.channel = channel
         self.sync = channel.sync
+        self.process = process # Unused..
         self.op = WRITE
 
         # Prevention against multiple retires
@@ -86,7 +80,7 @@ class ChannelEndWrite():
         raise ChannelRetireException()
 
     def retire(self):
-        if not self.isretired:
+        if not self.channel.isretired:
             self.channel.leave_writer(self)
             self.__call__ = self._retire
             self.post_write = self._retire
@@ -109,7 +103,7 @@ class ChannelEndWrite():
 
 class ChannelEndRead():
     def __init__(self, process, channel):
-        self.channel_name = channel.name
+        self.channel = channel
         self.process = process # Unused..
         self.sync = channel.sync
         self.op = READ
@@ -117,7 +111,6 @@ class ChannelEndRead():
 
         # Prevention against multiple retires
         self.isretired = False
-
 
 
     def __call__(self):

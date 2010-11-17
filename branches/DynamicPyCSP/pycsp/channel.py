@@ -28,7 +28,7 @@ except ImportError, e:
     from py.magic import greenlet
     
 from scheduling import Scheduler, current_process_id
-from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
+from channelend import ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
 from discovery import Discover
 from selection import Sync
@@ -40,10 +40,6 @@ import socket
 #HOST_IP = socket.gethostbyname(socket.gethostname())
 
 
-# Exceptions
-class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
 
 # Classes
 
@@ -207,8 +203,7 @@ class Channel(object):
             if len(self.readers)==0:
                 # Set channel retired
                 self.isretired = True
-                for p in self.writequeue[:]:
-                    p.retire()
+                self.sync.retire()
 
     def leave_writer(self, end):
         if not self.isretired:
@@ -216,8 +211,7 @@ class Channel(object):
             if len(self.writers)==0:
                 # Set channel retired
                 self.isretired = True
-                for p in self.readqueue[:]: # ATOMIC copy
-                    p.retire()
+                self.sync.retire()
 
 
 # Run tests
