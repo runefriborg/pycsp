@@ -4,7 +4,7 @@
 
 = Multiple readers and writers =
 
-Channels may have multiple readers or writers. It is not only legal, but also a very useful feature of CSP. The consistency lies in the model, which dictates that a writer is blocked until his message is received by exactly one reader.
+Channels may have multiple readers or writers. It is not only legal, but also a very useful feature of CSP. The consistency lies in the model, which dictates that the writer is blocked until the message is received by exactly one reader.
 
 {{{
 @process
@@ -35,7 +35,7 @@ cout = BufferC.writer()
 cin = BufferC.reader()
 }}}
 
-This channel has a buffer size of 3 and is semantically equivalent to the following network.
+This channel has a buffer size of 3 and is semantically equivalent to a chain of 3 processes. It could be implemented like this:
 
 {{{
 @process
@@ -54,9 +54,7 @@ cout = BufferC[0].writer()
 cin = BufferC[4].reader()
 }}}
 
-When a channel is buffered, it seems that a writer is now allowed to deliver a message, without the message has been received by one reader. This is not true, which is apparent when we look at the network above. Here a BufferP process actually reads the message for every message delivered. When no BufferP process is able to read, the writer trying to write to the buffered channel is blocked.
-
-The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or alternatively the FairSelect may used to balance the guards.
+The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or as an alternative the FairSelect can be used to balance the guards.
 
 = External Choice (AltSelect, FairSelect) =
 
