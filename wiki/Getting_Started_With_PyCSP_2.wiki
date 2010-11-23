@@ -117,7 +117,9 @@ Received Chan2 from chan2
 Received Chan2 from chan2
 }}}
 
-Next we combine different guard types in a single guard set. Also you will notice that we have introduced the choice / action construct, which provide a means of attaching an action to a guard. This is semantically identical to handling an action in the if-then-else following an AltSelect.
+Next we combine different guard types in a single guard set. Also you will notice that we have introduced the choice / action construct, which provide a means of attaching an action to a guard. This action is called similar to a callback function and may be used to improve the structure of the code.
+
+If it is necessary to modify variables in the namespace of a process calling AltSelect, then we recommend an if-then-else structure following the AltSelect.
 
 {{{
 @choice
