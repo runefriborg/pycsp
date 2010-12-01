@@ -77,7 +77,7 @@ class SyncShared(object):
 
     def provide_any_support(self):
         if self.channel.level == 0:
-            transcend(self, 1)                        
+            transcend(self, 1)
 
     def provide_alt_support(self):
         if self.channel.level == 0:
@@ -100,12 +100,12 @@ class SyncOneOneLocalNoALT(SyncShared):
         if level == 1:
             if self.waiting_read != None and self.waiting_read.process.state == ACTIVE:
                 # Notify process to wake up and reconfigure.
-                self.waiting_read.process.state = NEW_LEVEL
-                self.s.next.append(self.waiting_read.process)
+                self.waiting_read.process.notify(NEW_LEVEL)
             elif self.waiting_write != None and self.waiting_write.process.state == ACTIVE:
-                # Notify process to wake up and reconfigure.
-                self.waiting_write.process.state = NEW_LEVEL
-                self.s.next.append(self.waiting_write.process)
+                # Notify process to wake up and reconfigure
+                self.waiting_write.process.notify(NEW_LEVEL)
+        else:
+            raise Exception('Level is unknown!')
 
     def read(self):
         req, msg = self.enter_read()
@@ -299,15 +299,133 @@ class SyncAnyAnyLocal(SyncShared):
         map(ChannelReq.retire, self.writequeue)
 
 
+class SyncOneOneGlobalNoALT(SyncShared):
+    def __init__(self, channel):
+        SyncShared.__init__(self, channel)
+        self.s = Scheduler()
+        
+    def change_to_level(self, level):
+        if level == 4:
+            if self.waiting_read != None and self.waiting_read.process.state == ACTIVE:
+                # Notify process to wake up and reconfigure.
+                self.waiting_read.process.notify(NEW_LEVEL)
+            elif self.waiting_write != None and self.waiting_write.process.state == ACTIVE:
+                # Notify process to wake up and reconfigure
+                self.waiting_write.process.notify(NEW_LEVEL)
+        else:
+            raise Exception('Level is unknown!')
+
+    def read(self):
+        req, msg = self.enter_read()
+        if req == None:
+            return msg
+        else:
+            self.wait_read(req)
+            self.leave_read(req)
+            return req.msg
+
+    def enter_read(self):
+        self.check_termination()
+        
+        p = self.s.current
+
+        # match
+        if self.waiting_write != None:
+            w = self.waiting_write
+            if w.process.state == ACTIVE:
+                msg = w.msg
+                w.result = SUCCESS
+                w.process.state = DONE
+                if p != w.process:
+                    self.s.next.append(w.process)
+                # Fast remove
+                self.waiting_write = None
+                return (None, msg)
+
+        p.setstate(ACTIVE)
+        req = ChannelReq(p)
+        return (req, None)
+            
+    def leave_read(self, req):
+        if req.result != SUCCESS:
+            self.check_termination()
+        
+    def wait_read(self, req):
+        self.waiting_read = req
+        while req.process.state == ACTIVE or req.process.state == NEW_LEVEL:
+            req.process.wait()
+            if req.process.state == NEW_LEVEL:
+                req.process.state = ACTIVE
+                self.waiting_read = None
+                self.post_read(req)
+                
+
+    def wait_write(self, req):
+        self.waiting_write = req
+        while req.process.state == ACTIVE or req.process.state == NEW_LEVEL:
+            req.process.wait()
+            if req.process.state == NEW_LEVEL:
+                req.process.state = ACTIVE
+                self.waiting_write = None
+                self.post_write(req)
+                
+
+    def write(self, msg):
+        req = self.enter_write(msg)
+        if req == None:
+            return
+        else:
+            self.wait_write(req)
+            self.leave_write(req)
+            return
+    
+    def enter_write(self, msg):
+        self.check_termination()
+        
+        p = self.s.current
+
+        # match
+        if self.waiting_read != None:
+            r = self.waiting_read
+            if r.process.state == ACTIVE:
+                r.msg = msg
+                r.result = SUCCESS
+                r.process.state = DONE
+                if p != r.process:
+                    self.s.next.append(r.process)
+                # Fast remove
+                self.waiting_read = None
+                return None
+
+        p.setstate(ACTIVE)
+        req = ChannelReq(p,msg=msg)
+        return req
+
+    def leave_write(self, req):
+        if req.result != SUCCESS:
+            self.check_termination()
+        
+
+    def poison(self):
+        if not self.channel.ispoisoned:
+            self.channel.ispoisoned = True
+            if self.waiting_read:
+                self.waiting_read.poison()
+            if self.waiting_write:
+                self.waiting_write.poison()
+
+    def retire(self):
+        if self.waiting_read:
+            self.waiting_read.retire()
+        if self.waiting_write:
+            self.waiting_write.retire()
+
 LEVEL = {
-    0:SyncOneOneLocalNoALT,
-    1:SyncAnyAnyLocal,
-#    2:SyncOneOneGlobalNoALT,
-#    3:SyncAnyAnyLocal,
-#    4:SyncAnyAnyGlobalNoALT,
+    0:SyncOneOneLocalNoALT, #00
+    1:SyncAnyAnyLocal,      #01
+    2:SyncOneOneGlobalNoALT,#10
+#    3:SyncAnyAnyGlobal,     #11
     }
-# LEVEL[0] = SyncOneOne (greenlet only)
-# LEVEL[1] = any-any (greenlet only)
 
 def Sync(level, channel):
     return LEVEL[level](channel)

@@ -29,6 +29,10 @@ except ImportError, e:
 
 import threading
 import time
+import uuid
+import os
+
+from communicator import Communicator
 from pycsp.common.const import *
 
 # Decorators
@@ -134,8 +138,10 @@ class MainProcess():
 
     # Reschedule, without putting this process on either the next[] or the blocking[] list.
     def wait(self):
+        self.s.blocking_on_wait += 1
         while self.state == ACTIVE:
             self.s.getNext().greenlet.switch()
+        self.s.blocking_on_wait -= 1
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):
@@ -184,10 +190,33 @@ class Scheduler(object):
             # Timer specific  value = (activation time, process)
             # On update we do a sort based on the activation time
             cls.__instance.timers = []
+            
+            # Event wait set list, that contains processes waiting for events from event threads.
+            cls.__instance.event_wait_set = {}
 
+            # Updated with new events from the event threads. Checked by the scheduler on every
+            # reschedule cyclus.
+            cls.__instance.new_events = []
+
+            # Needed to know, when to quit.
+            cls.__instance.blocking_on_wait = 0
+
+            # Register communicator, to ensure that we listen on PYCSP_PORT            
+            if os.environ.has_key('PYCSP_PORT'):
+                cls.__instance.pycsp_port = int(os.environ['PYCSP_PORT'])
+                cls.__instance.communicator = Communicator(cls.__instance)                
+            else:
+                cls.__instance.pycsp_port = None
+                cls.__instance.communicator = None
+                
             # Io specific
+            cls.__instance.blocking_on_io = 0
+
+
+            # Condition value to ensure that we can wait for io or events, without risking a deadlock.
+            # The Scheduler will go into a wait condition, when the next list is empty. As long as the next list
+            # is not empty, the io / events can be handled without going into a wait condition.
             cls.__instance.cond = threading.Condition()
-            cls.__instance.blocking = 0
 
             # Start scheduler greenlet
             cls.__instance.greenlet = greenlet(cls.__instance.main)
@@ -222,10 +251,36 @@ class Scheduler(object):
         self.cond.notify()
         self.cond.release()
 
+    # Called from scheduler
+    def check_event(self):
+        if self.new_events:
+            id, package = self.new_events[0]
+            p = self.event_wait_set.pop(id, None)
+            if p != None:                
+                self.new_events.pop(0)
+                p.event = package
+                p.notify(DONE, force=True)
+
+    # Called from event thread
+    def new_event(self, id, package):
+        self.cond.acquire()
+        self.new_events.append((id, package))
+        self.cond.notify()
+        self.cond.release()
+        print self.new_events
+
+    # Called from greenlet
+    def event_wait(self):
+        p = self.current
+        self.event_wait_set[p.id] = p
+        p.event = None
+        p.setstate(ACTIVE)
+        p.wait()
+
     # Called from MainThread
     def io_block_prepare(self, p):
         self.cond.acquire()
-        self.blocking += 1
+        self.blocking_on_io += 1
         p.setstate(ACTIVE)
         self.cond.release()
         
@@ -237,7 +292,7 @@ class Scheduler(object):
     def io_unblock(self, p):
         self.cond.acquire()
         p.notify(DONE, force=True)
-        self.blocking -= 1
+        self.blocking_on_io -= 1
         self.cond.notify()
         self.cond.release()
         
@@ -289,9 +344,11 @@ class Scheduler(object):
 
                         # Now go to sleep
                         self.cond.wait()
-
-                elif self.blocking > 0:
-
+                elif self.pycsp_port and self.blocking_on_wait > 0:
+                    # Now go to sleep
+                    self.cond.wait()
+                    self.check_event()
+                elif self.blocking_on_io > 0:
                     # Now go to sleep
                     self.cond.wait()
                 else:
@@ -302,6 +359,11 @@ class Scheduler(object):
                     # Switch to main process and leave the greenlet scheduler
                     # running for continued usage of PyCSP greenlets.
                     self.main_process.greenlet.switch()
+
+                    # If any processes are still blocked, there is a deadlock.
+                    if self.blocking_on_wait > 0:
+                        raise Exception('Deadlock')
+
             self.cond.release()
                 
 
@@ -326,6 +388,11 @@ class Scheduler(object):
 
     # Get next greenlet available for scheduling
     def getNext(self):
+
+        # Check for new event
+        if self.pycsp_port:
+            self.check_event()
+
         if self.new:
             # Returning scheduler, to avoid exceeding the recursion limit.
             # All new greenlets must be started from the scheduler, to have the

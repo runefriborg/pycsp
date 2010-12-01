@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 from greenlet import greenlet
-import time, random
+import uuid
 import types
 from scheduling import Scheduler
 from channel import ChannelPoisonException, ChannelRetireException, Channel
@@ -52,7 +52,10 @@ class Process():
         self.kwargs = kwargs
 
         # Create unique id
-        self.id = str(random.random())+str(time.time())
+        self.id = str(uuid.uuid4())
+
+        # Container for events
+        self.event = None
 
         # Greenlet specific
         self.greenlet = None
@@ -67,8 +70,10 @@ class Process():
 
     # Reschedule, without putting this process on either the next[] or the blocking[] list.
     def wait(self):
+        self.s.blocking_on_wait += 1
         while self.state == ACTIVE:
             self.s.getNext().greenlet.switch()
+        self.s.blocking_on_wait -= 1
 
     # Notify, by activating and setting state.    
     def notify(self, new_state, force=False):

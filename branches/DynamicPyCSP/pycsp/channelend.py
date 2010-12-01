@@ -90,10 +90,7 @@ class ChannelEndWrite():
         pass
 
     def __repr__(self):
-        if self.channel.name == None:
-            return "<ChannelEndWrite wrapping %s>" % self.channel
-        else:
-            return "<ChannelEndWrite wrapping %s named %s>" % (self.channel, self.channel.name)
+        return "<ChannelEndWrite wrapping %s>" % self.channel
 
     def isWriter(self):
         return True
@@ -144,10 +141,7 @@ class ChannelEndRead():
         pass
 
     def __repr__(self):
-        if self.channel.name == None:
-            return "<ChannelEndRead wrapping %s>" % self.channel
-        else:
-            return "<ChannelEndRead wrapping %s named %s>" % (self.channel, self.channel.name)
+        return "<ChannelEndRead wrapping %s>" % self.channel
 
     def isWriter(self):
         return False
