@@ -31,67 +31,72 @@ from scheduling import Scheduler, current_process_id
 from channelend import ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
 
-#+ from discovery import Discover
+from discovery import Discover
 from selection import Sync
+from communicator import *
+from home import ChannelHomeManager
 
-import time, random
+import uuid
 
+# Functions
+def Channel(name=None, buffer=0, connect=None):
+    """
+    Creates a new channel.
+    """
+    if connect == None:
+        # Main channel object.
+        return ChannelHost(name, buffer)
+    else:
+        if name == None:
+            raise Exception("Error! Need name parameter to connect with channel")
 
-#HOST_IP = socket.gethostbyname(socket.gethostname())
-
+        # Connect to other channel object.
+        return ChannelLink(name, connect)
 
 
 # Classes
-
-
-class ChannelHome(object):
-    """ Channel Home class.
-    Not every channel will have a ChannelHome.
-    Only one ChannelHome per unique channel name must exist.
-    """
-    def __init__(self, name, buffer, level):
-        self.name = name
-        self.buffer = buffer
-        self.level = level
-
-        # Channel request queues
-        self.readqueue = []
-        self.writequeue = []
-        
-        # Count, makes sure that all processes knows how many channel ends have retired
-        self.readers = []
-        self.writers = []
-
-
-
-class Channel(object):
+class ChannelHost(object):
     """ Channel class.
 
-    This class main responsibility is to connect the channel ends with eachother, as long
-    as no ChannelHome is created. This means, that as long as we only have one reader and one
-    writer, this class will handle everything.
+    This class main responsibility is to connect the channel ends with each other. A ChannelHome
+    is passed on to the first reader joins the channel. On creation of the ChannelHome
+    , all writers are passed on to the ChannelHome.
+
+    If the channel is local, the ChannelHost simulates a ChannelHome.
     """
-
-    def __init__(self, name=None, buffer=0):
-
+    def __init__(self, name, buffer):
         if name == None:
             # Create unique name
-            self.name = str(random.random())+str(time.time())
+            self.name = str(uuid.uuid4())
         else:
             self.name=name
-        
-        #+ Check if a ChannelHome exists? (yes, later when going distributed)
-        
-        self.readers = []
-        self.writers = []
 
-        self.ispoisoned = False
-        self.isretired = False
+        # Create a channel home
+        self.home = ChannelHome(buffer)
 
-        #- self.s = Scheduler()    
-        self.level = 0
-        self.sync = Sync(self.level, self)
+        # Register channel home
+        ChannelHomeManager().register(name, self.home)
 
+        # Setup methods
+        self.join_reader = self.home.join_reader
+        self.join_writer = self.home.join_writer
+        self.leave_reader = self.home.leave_reader
+        self.leave_writer = self.home.leave_writer                       
+
+    def reader(self):
+        p = current_process_id()
+
+        end = ChannelEndRead(p, self.home)
+        self.join_reader(end)
+        return end
+
+    def writer(self):
+        p = current_process_id()
+
+        end = ChannelEndWrite(p, self.home)
+        self.join_writer(end)
+        return end
+    
     def __pos__(self):
         return self.reader()
 
@@ -101,34 +106,87 @@ class Channel(object):
     def __mul__(self, multiplier):
         new = [self]
         for i in range(multiplier-1):
-            new.append(Channel(name=self.name+str(i+1)))
+            new.append(Channel(name=self.name+str(i+1), buffer=self.buffer))
         return new
 
     def __rmul__(self, multiplier):
         return self.__mul__(multiplier)
 
-    def reader(self):
-        # Test sync level
-        if len(self.readers) > 0:
-            self.sync.provide_any_support()
 
-        end = ChannelEndRead(current_process_id(), self)
+class ChannelLink(object):
+    """
+    The ChannelLink class handles the redirection of channel requests, to the actual Channel home through the channel host.
+
+    """
+    def __init__(self, name, connect):
+        self.name = name
+        self.addr = connect
+
+        self.home_addr = self.__get_channel_home()
+
+        
+
+    def __get_channel_home(self):
+        C = Scheduler().communicator
+        return C.request_channel_home(self.addr, self.name)
+
+    def reader(self):
+        p = current_process_id()
+
+        end = ChannelEndRead(p, self.home)
         self.join_reader(end)
         return end
 
     def writer(self):
+        p = current_process_id()
+
+        end = ChannelEndWrite(p, self.home)
+        self.join_writer(end)
+        return end
+    
+    def __pos__(self):
+        return self.reader()
+
+    def __neg__(self):
+        return self.writer()
+
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1), buffer=self.buffer))
+        return new
+
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+
+
+class ChannelHome(object):
+    def __init__(self, buffer=0):            
+        self.readers = []
+        self.writers = []
+
+        self.ispoisoned = False
+        self.isretired = False
+
+        #- self.s = Scheduler()    
+        self.level = 0
+        self.sync = Sync(self.level, self)
+        
+
+    def join_reader(self, end):
+
+        # Test sync level
+        if len(self.readers) > 0:
+            self.sync.provide_any_support()
+
+        self.readers.append(end)
+
+    def join_writer(self, end):
+
         # Test sync level
         if len(self.writers) > 0:
             self.sync.provide_any_support()
 
-        end = ChannelEndWrite(current_process_id(), self)
-        self.join_writer(end)
-        return end
-
-    def join_reader(self, end):
-        self.readers.append(end)
-
-    def join_writer(self, end):
         self.writers.append(end)
 
     def leave_reader(self, end):
