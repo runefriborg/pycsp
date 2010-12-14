@@ -348,6 +348,17 @@ class Channel:
     def __neg__(self):
         return self.writer()
 
+    # syntactic sugar: Channel() * N
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    # syntactic sugar: N * Channel()
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+
     def reader(self):
         ch_end = self.wrapped.reader()
         sendTrace({'type':'ChannelEndRead', 'chan_name':self.wrapped.name})
