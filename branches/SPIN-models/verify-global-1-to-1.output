@@ -1,0 +1,59 @@
+
+(Spin Version 5.2.5 -- 17 April 2010)
+	+ Partial Order Reduction
+	+ Compression
+
+Full statespace search for:
+	never claim         	- (none specified)
+	assertion violations	+
+	cycle checks       	- (disabled by -DSAFETY)
+	invalid end states	+
+
+State-vector 696 byte, depth reached 151, errors: 0
+    46133 states, stored
+    44127 states, matched
+    90260 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:       682 (resolved)
+
+Stats on memory usage (in Megabytes):
+   31.853	equivalent memory usage for states (stored*(State-vector + overhead))
+    2.115	actual memory usage for states (compression: 6.64%)
+         	state-vector as stored = 20 byte + 28 byte overhead
+    4.000	memory used for hash table (-w19)
+    0.458	memory used for DFS stack (-m10000)
+    6.509	total actual memory usage
+
+nr of templates: [ globals chans procs ]
+collapse counts: [ 665 42 102 19 18 4 ]
+unreached in proctype lockP
+	line 115, state 23, "assert(0)"
+	line 122, state 34, "assert((cmd==9))"
+	(2 of 45 states)
+unreached in proctype channel_home
+	line 134, state 16, "ch_accept_lock_chan[ch_id]?id,r_state"
+	line 135, state 17, "assert((r_pid==id))"
+	line 133, state 18, "proc_acquire_lock_chan[r_pid]!ch_id"
+	line 134, state 20, "ch_accept_lock_chan[ch_id]?id,w_state"
+	line 135, state 21, "assert((w_pid==id))"
+	line 133, state 22, "proc_acquire_lock_chan[w_pid]!ch_id"
+	line 139, state 48, "proc_release_lock_chan[w_pid]!7,ch_id,255"
+	line 134, state 87, "ch_accept_lock_chan[ch_id]?id,r_state"
+	line 135, state 88, "assert((r_pid==id))"
+	line 133, state 89, "proc_acquire_lock_chan[r_pid]!ch_id"
+	line 134, state 91, "ch_accept_lock_chan[ch_id]?id,w_state"
+	line 135, state 92, "assert((w_pid==id))"
+	line 133, state 93, "proc_acquire_lock_chan[w_pid]!ch_id"
+	line 139, state 119, "proc_release_lock_chan[w_pid]!7,ch_id,255"
+	line 306, state 153, "(1)"
+	line 319, state 171, "(1)"
+	(16 of 189 states)
+unreached in proctype PR
+	(0 of 35 states)
+unreached in proctype PW
+	(0 of 34 states)
+unreached in proctype :init:
+	(0 of 6 states)
+
+pan: elapsed time 0.17 seconds
+pan: rate 271370.59 states/second

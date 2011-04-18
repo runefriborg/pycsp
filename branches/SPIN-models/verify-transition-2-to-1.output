@@ -1,0 +1,65 @@
+Depth=     270 States=    1e+06 Transitions= 2.15e+06 Memory=    44.595	t=   2.25 R=   4e+05
+Depth=     333 States=    2e+06 Transitions= 4.29e+06 Memory=    84.536	t=   4.81 R=   4e+05
+pan: resizing hashtable to -w21..  done
+Depth=     345 States=    3e+06 Transitions= 6.44e+06 Memory=   139.403	t=   7.38 R=   4e+05
+Depth=     345 States=    4e+06 Transitions= 8.61e+06 Memory=   178.661	t=   9.79 R=   4e+05
+Depth=     345 States=    5e+06 Transitions= 1.08e+07 Memory=   219.481	t=   12.4 R=   4e+05
+pan: resizing hashtable to -w23..  done
+Depth=     345 States=    6e+06 Transitions=  1.3e+07 Memory=   322.446	t=   15.6 R=   4e+05
+Depth=     345 States=    7e+06 Transitions= 1.52e+07 Memory=   364.145	t=     18 R=   4e+05
+Depth=     345 States=    8e+06 Transitions= 1.75e+07 Memory=   405.161	t=   20.6 R=   4e+05
+
+(Spin Version 5.2.5 -- 17 April 2010)
+	+ Partial Order Reduction
+	+ Compression
+
+Full statespace search for:
+	never claim         	- (none specified)
+	assertion violations	+
+	cycle checks       	- (disabled by -DSAFETY)
+	invalid end states	+
+
+State-vector 128 byte, depth reached 345, errors: 0
+  8046540 states, stored
+  9593668 states, matched
+ 17640208 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:  10115586 (resolved)
+
+Stats on memory usage (in Megabytes):
+ 1197.109	equivalent memory usage for states (stored*(State-vector + overhead))
+  343.000	actual memory usage for states (compression: 28.65%)
+         	state-vector as stored = 17 byte + 28 byte overhead
+   64.000	memory used for hash table (-w23)
+    0.458	memory used for DFS stack (-m10000)
+  407.309	total actual memory usage
+
+nr of templates: [ globals chans procs ]
+collapse counts: [ 155273 1324 1200 108 6 ]
+unreached in proctype P1
+	line 37, state 32, "((proc_lock[w_pid]==0))"
+	line 43, state 62, "proc_lock[r_pid] = 0"
+	line 144, state 116, "(1)"
+	line 37, state 158, "((proc_lock[w_pid]==0))"
+	line 43, state 188, "proc_lock[r_pid] = 0"
+	line 144, state 235, "(1)"
+	line 37, state 279, "((proc_lock[w_pid]==0))"
+	line 43, state 309, "proc_lock[r_pid] = 0"
+	line 144, state 363, "(1)"
+	line 37, state 405, "((proc_lock[w_pid]==0))"
+	line 43, state 435, "proc_lock[r_pid] = 0"
+	line 144, state 482, "(1)"
+	(12 of 495 states)
+unreached in proctype P2
+	line 37, state 32, "((proc_lock[w_pid]==0))"
+	line 43, state 62, "proc_lock[r_pid] = 0"
+	line 37, state 158, "((proc_lock[w_pid]==0))"
+	line 43, state 188, "proc_lock[r_pid] = 0"
+	(4 of 248 states)
+unreached in proctype P3
+	(0 of 54 states)
+unreached in proctype :init:
+	(0 of 6 states)
+
+pan: elapsed time 20.8 seconds
+pan: rate 387038.96 states/second

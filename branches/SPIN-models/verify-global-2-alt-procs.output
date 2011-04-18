@@ -1,0 +1,67 @@
+Depth=     245 States=    1e+06 Transitions= 2.12e+06 Memory=    51.677	t=      5 R=   2e+05
+Depth=     245 States=    2e+06 Transitions= 4.34e+06 Memory=    98.496	t=   10.9 R=   2e+05
+pan: resizing hashtable to -w21..  done
+Depth=     245 States=    3e+06 Transitions= 6.53e+06 Memory=   161.315	t=   16.5 R=   2e+05
+Depth=     245 States=    4e+06 Transitions= 8.69e+06 Memory=   208.534	t=   21.9 R=   2e+05
+Depth=     245 States=    5e+06 Transitions= 1.08e+07 Memory=   256.153	t=   27.2 R=   2e+05
+pan: resizing hashtable to -w23..  done
+Depth=     245 States=    6e+06 Transitions= 1.31e+07 Memory=   364.971	t=   33.4 R=   2e+05
+Depth=     245 States=    7e+06 Transitions= 1.52e+07 Memory=   412.190	t=   38.6 R=   2e+05
+Depth=     245 States=    8e+06 Transitions= 1.74e+07 Memory=   460.610	t=   43.9 R=   2e+05
+Depth=     245 States=    9e+06 Transitions= 1.95e+07 Memory=   507.829	t=   49.2 R=   2e+05
+Depth=     245 States=    1e+07 Transitions= 2.17e+07 Memory=   554.648	t=   54.7 R=   2e+05
+Depth=     245 States=  1.1e+07 Transitions= 2.39e+07 Memory=   603.068	t=   60.2 R=   2e+05
+Depth=     245 States=  1.2e+07 Transitions=  2.6e+07 Memory=   651.487	t=   65.5 R=   2e+05
+
+(Spin Version 6.0.1 -- 16 December 2010)
+	+ Partial Order Reduction
+	+ Compression
+
+Full statespace search for:
+	never claim         	- (none specified)
+	assertion violations	+
+	cycle checks       	- (disabled by -DSAFETY)
+	invalid end states	+
+
+State-vector 896 byte, depth reached 245, errors: 0
+ 12910399 states, stored
+ 15132241 states, matched
+ 28042640 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:  16116022 (resolved)
+
+Stats on memory usage (in Megabytes):
+11376.580	equivalent memory usage for states (stored*(State-vector + overhead))
+  630.607	actual memory usage for states (compression: 5.54%)
+         	state-vector as stored = 23 byte + 28 byte overhead
+   64.000	memory used for hash table (-w23)
+    0.458	memory used for DFS stack (-m10000)
+  694.304	total actual memory usage
+
+nr of templates: [ globals chans procs ]
+collapse counts: [ 94103 100 376 30 30 5 ]
+unreached in proctype lockP
+	code/distributed.p:119, state 23, "assert(0)"
+	code/distributed.p:127, state 34, "assert((cmd==9))"
+	(2 of 45 states)
+unreached in proctype channel_home
+	code/distributed.p:318, state 153, "(1)"
+	code/distributed.p:334, state 171, "(1)"
+	(2 of 189 states)
+unreached in proctype ALTRW
+	code/distributed.p:159, state 9, "ch_cmd_chan[0]!1,pid,255"
+	code/distributed.p:158, state 10, "printf('Process %d posting write to %d\n',pid,0)"
+	code/distributed.p:150, state 15, "ch_cmd_chan[1]!2,pid,255"
+	code/distributed.p:149, state 16, "printf('Process %d posting read to %d\n',pid,1)"
+	(4 of 67 states)
+unreached in proctype ALTWR
+	code/distributed.p:159, state 9, "ch_cmd_chan[1]!1,pid,255"
+	code/distributed.p:158, state 10, "printf('Process %d posting write to %d\n',pid,1)"
+	code/distributed.p:150, state 15, "ch_cmd_chan[0]!2,pid,255"
+	code/distributed.p:149, state 16, "printf('Process %d posting read to %d\n',pid,0)"
+	(4 of 67 states)
+unreached in init
+	(0 of 7 states)
+
+pan: elapsed time 70.5 seconds
+pan: rate 183100.26 states/second
