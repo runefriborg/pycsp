@@ -1,0 +1,41 @@
+
+(Spin Version 5.2.5 -- 17 April 2010)
+	+ Partial Order Reduction
+	+ Compression
+
+Full statespace search for:
+	never claim         	- (none specified)
+	assertion violations	+
+	cycle checks       	- (disabled by -DSAFETY)
+	invalid end states	+
+
+State-vector 500 byte, depth reached 87, errors: 0
+     3817 states, stored
+      902 states, matched
+     4719 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:         6 (resolved)
+
+Stats on memory usage (in Megabytes):
+    1.922	equivalent memory usage for states (stored*(State-vector + overhead))
+    0.375	actual memory usage for states (compression: 19.49%)
+         	state-vector as stored = 75 byte + 28 byte overhead
+    4.000	memory used for hash table (-w19)
+    0.458	memory used for DFS stack (-m10000)
+    4.751	total actual memory usage
+
+nr of templates: [ globals chans procs ]
+collapse counts: [ 59 113 221 13 7 2 ]
+unreached in proctype sender
+	(0 of 38 states)
+unreached in proctype receiver
+	line 88, state 24, "token_chan!ack_tokens"
+	(1 of 62 states)
+unreached in proctype P1
+	(0 of 16 states)
+unreached in proctype P2
+	(0 of 13 states)
+unreached in proctype P3
+	(0 of 2 states)
+
+pan: elapsed time 0 seconds

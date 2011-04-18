@@ -1,0 +1,51 @@
+
+(Spin Version 5.2.5 -- 17 April 2010)
+	+ Partial Order Reduction
+	+ Compression
+
+Full statespace search for:
+	never claim         	- (none specified)
+	assertion violations	+
+	cycle checks       	- (disabled by -DSAFETY)
+	invalid end states	+
+
+State-vector 104 byte, depth reached 162, errors: 0
+    24461 states, stored
+    18816 states, matched
+    43277 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:       258 (resolved)
+
+Stats on memory usage (in Megabytes):
+    3.079	equivalent memory usage for states (stored*(State-vector + overhead))
+    1.303	actual memory usage for states (compression: 42.31%)
+         	state-vector as stored = 28 byte + 28 byte overhead
+    4.000	memory used for hash table (-w19)
+    0.458	memory used for DFS stack (-m10000)
+    5.727	total actual memory usage
+
+nr of templates: [ globals chans procs ]
+collapse counts: [ 1812 270 262 42 5 ]
+unreached in proctype P1
+	line 37, state 32, "((proc_lock[w_pid]==0))"
+	line 43, state 62, "proc_lock[r_pid] = 0"
+	line 144, state 116, "(1)"
+	line 37, state 158, "((proc_lock[w_pid]==0))"
+	line 43, state 188, "proc_lock[r_pid] = 0"
+	line 144, state 235, "(1)"
+	(6 of 248 states)
+unreached in proctype P2
+	line 37, state 32, "((proc_lock[w_pid]==0))"
+	line 43, state 62, "proc_lock[r_pid] = 0"
+	line 174, state 116, "(1)"
+	line 37, state 158, "((proc_lock[w_pid]==0))"
+	line 43, state 188, "proc_lock[r_pid] = 0"
+	line 174, state 235, "(1)"
+	(6 of 248 states)
+unreached in proctype P3
+	(0 of 54 states)
+unreached in proctype :init:
+	(0 of 5 states)
+
+pan: elapsed time 0.03 seconds
+pan: rate 815366.67 states/second
