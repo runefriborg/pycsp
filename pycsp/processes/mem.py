@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Imports
 import multiprocessing as mp
 import ctypes
+import sys
 
 # Constants
 FREE, OCCUPIED = range(2)
@@ -71,7 +72,6 @@ class Memory:
         self.free_len = mp.RawValue(ctypes.c_int, 0)
 
         self.allocated_blocks = mp.RawArray(AllocatedStruct, self.block_count)
-        self.allocated_len = mp.RawValue(ctypes.c_int, 0)
         
         self.lock = lock
         self.mem_size = mem_size
@@ -83,9 +83,6 @@ class Memory:
         self.free_blocks[0].offset = 0
         
 
-    def status(self):
-        print 'Allocated entries:', self.allocated_len.value, 'Free entries:', self.free_len.value
-        
     def alloc(self, size, defragment=True):
 
         blocks = int(size / self.block_size) + 1
@@ -93,9 +90,6 @@ class Memory:
         self.lock.acquire()
         for i in xrange(self.free_len.value):
             if blocks < self.free_blocks[i].blocks:
-                #id = self.allocated_len.value
-                #self.allocated_len.value += 1
-                #self.allocated_blocks[id].offset = self.free_blocks[i].offset
                 offset = self.free_blocks[i].offset
                 self.allocated_blocks[offset].size = size
 
@@ -107,9 +101,6 @@ class Memory:
                 return offset
 
             elif blocks == self.free_blocks[i].blocks:
-                #id = self.allocated_len.value
-                #self.allocated_len.value += 1
-                #self.allocated_blocks[id].offset = self.free_blocks[i].offset
                 offset = self.free_blocks[i].offset
                 self.allocated_blocks[offset].size = size
                 
@@ -124,7 +115,7 @@ class Memory:
 
         # Try to defragmentize the free blocks, by merging neighbour fragments
         if defragment:
-            print "mem.py: Defragmentation", self.free_len.value # Debugging
+            #sys.stderr.write("Debug (mem.py): Defragmentation initialized\n")
             assembled = 0
             i = 0
             while i < self.free_len.value:
@@ -144,13 +135,13 @@ class Memory:
                     j += 1          
                 i += 1
 
-            print 'mem.py: Assembled', assembled # Debugging
+            #sys.stderr.write("Debug (mem.py): Defragmentation done.")
             self.lock.release()
             return self.alloc(size, defragment = False)
 
         self.lock.release()
 
-        raise Exception("No more blocks!")
+        raise Exception("No more memory blocks! Use Configuration() to configure more memory")
     
     def free(self, offset):
         
