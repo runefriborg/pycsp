@@ -3,7 +3,6 @@
 """
 PyCSP implementation of the CSP Core functionality (Channels, Processes, PAR, ALT).
 
-
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 Permission is hereby granted, free of charge, to any person obtaining
@@ -23,93 +22,57 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Versions available: greenlets, threads, processes, net
-Channels can not be used to communicate between versions.
-
-Modules
-> import pycsp.threads
-> import pycsp.greenlets
-> import pycsp.processes
-> import pycsp.net
-
->>> from pycsp.threads import *
-
->>> @process
-... def P():
-...     pass
-
->>> @io
-... def IO():
-...     pass
-
->>> c = Channel('B')
->>> cin = c.reader()
->>> selected, msg = AltSelect( InputGuard(cin, action="print ChannelInput"), SkipGuard(action="print 42"), TimeoutGuard(seconds=1) )
-42
-
->>> print selected # doctest:+ELLIPSIS
-<pycsp.threads.guard.SkipGuard instance at 0x...>
-
->>> cout = c.writer()
->>> _,_ = AltSelect( OutputGuard(cout, 'MSG_DATA', "print 'sent'"), TimeoutGuard(0.01, "print 'abort'") )
-abort
-
->>> retire(cout)
-
->>> cout('FAIL')
-Traceback (most recent call last):
-ChannelRetireException
-
->>> FAIL = cin()
-Traceback (most recent call last):
-ChannelRetireException
-
-
-A reader process
->>> @process
-... def reader(cin):
-...     while True: cin()
-
-A writer process
->>> @process
-... def writer(cout, cnt):
-...     for i in range(cnt): cout(i)
-...     retire(cout)
-
-1-to-1 channel example
->>> c = Channel('A')
->>> Parallel(reader(c.reader()), writer(c.writer(), 10))
-
-any-to-any channel example
->>> c = Channel('A')
->>> Parallel(reader(c.reader()), writer(c.writer(), 10),reader(c.reader()), writer(c.writer(), 10))
 """
 
-# Import threads version
-if not __name__ == '__main__':
-    from threads import *
-else:
-    # Run tests
-    import sys
+# Imports
+from guard import Skip, Timeout, SkipGuard, TimeoutGuard
+from alternation import choice, Alternation
+from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
+from channel import Channel, ChannelPoisonException, ChannelRetireException
+from channelend import retire, poison, IN, OUT
+from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id
+
+version = (0,7,1, 'threads')
+
+# Set current implementation
+import pycsp.current
+pycsp.current.version = version
+pycsp.current.trace = False
+
+pycsp.current.Skip = Skip
+pycsp.current.Timeout = Timeout
+pycsp.current.SkipGuard = SkipGuard
+pycsp.current.TimeoutGuard = TimeoutGuard
+pycsp.current.choice = choice
+pycsp.current.Alternation = Alternation
+pycsp.current.Channel = Channel
+pycsp.current.ChannelPoisonException = ChannelPoisonException
+pycsp.current.ChannelRetireException = ChannelRetireException
+pycsp.current.retire = retire
+pycsp.current.poison = poison
+pycsp.current.IN = IN
+pycsp.current.OUT = OUT
+pycsp.current.io = io
+pycsp.current.Process = Process
+pycsp.current.process = process
+pycsp.current.Sequence = Sequence
+pycsp.current.Parallel = Parallel
+pycsp.current.Spawn = Spawn
+pycsp.current.current_process_id = current_process_id
+pycsp.current.FairSelect = FairSelect
+pycsp.current.AltSelect = AltSelect
+pycsp.current.InputGuard = InputGuard
+pycsp.current.OutputGuard = OutputGuard
+
+
+def test_suite():
     import unittest
     import doctest
-
-
-    sys.path.append("..")
-
-    mods = []
-
-    import pycsp.threads
-    mods.append(pycsp.threads)
+    import alternation, channel, channelend, process, guard, buffer
 
     suite = unittest.TestSuite()
-    for mod in mods:
-        suite.addTest(mod.test_suite())
+    for mod in alternation, channel, channelend, process, guard, buffer:
+        suite.addTest(doctest.DocTestSuite(mod))
     suite.addTest(doctest.DocTestSuite())
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
-
-
-
+    return suite
 

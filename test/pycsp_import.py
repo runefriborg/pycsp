@@ -27,17 +27,19 @@ if len(sys.argv) > 1:
 else:
     mod = ''
 
+from pycsp import *
 if (mod == 'threads'):
-    from pycsp.threads import *
+    pass
 elif (mod == 'processes'):
-    from pycsp.processes import *
+    pass
 elif (mod == 'greenlets'):
-    from pycsp.greenlets import *
+    pass
 elif (mod == 'net'):
-    from pycsp.net import *
+    pass
 else:
     print "python",sys.argv[0],"[ threads | processes | greenlets | net ]"
-    from pycsp.threads import *
+    pass
+
 
 print 'Using version', version
 
