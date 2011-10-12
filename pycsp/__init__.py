@@ -32,7 +32,7 @@ from channel import Channel, ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id
 
-version = (0,7,1, 'threads')
+version = (0,8,0, 'sockets')
 
 # Set current implementation
 import pycsp.current

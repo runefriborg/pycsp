@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import types
-import threading
+import osprocess
 import time, random
 from channel import ChannelPoisonException, ChannelRetireException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
@@ -62,12 +62,12 @@ def io(func):
 
 
 # Classes
-class Process(threading.Thread):
+class Process(osprocess.Proc):
     """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     """
     def __init__(self, fn, *args, **kwargs):
-        threading.Thread.__init__(self)
+        osprocess.Proc.__init__(self)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
