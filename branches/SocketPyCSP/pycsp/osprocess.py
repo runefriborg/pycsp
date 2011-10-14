@@ -4,10 +4,11 @@ import os
 ENVVAL = 'PYCSP_MULTIPROCESSING'
 
 if os.environ.has_key(ENVVAL) and not os.environ[ENVVAL] == '':
-    from multiprocessing import Process as Proc    
+    import multiprocessing
+    from multiprocessing import Process as Proc
 
     def getProcName():
-        p = osprocess.current_process()
+        p = multiprocessing.current_process()
         name = p.name
         if name == 'MainProcess':
             return '__mainproc__'
@@ -15,12 +16,13 @@ if os.environ.has_key(ENVVAL) and not os.environ[ENVVAL] == '':
             return name
         
 else:
+    import threading
     from threading import Thread as Proc
 
     def getProcName():
         try:
             # compatible with Python 2.6+
-            t = osprocess.current_thread()
+            t = threading.current_thread()
             name = t.name
         except AttributeError:
             # compatible with Python 2.5- 

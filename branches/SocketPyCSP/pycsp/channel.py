@@ -1,0 +1,159 @@
+"""
+Channel module
+
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+  
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.  THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+# Imports
+import random, time
+from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
+import protocol
+from pycsp.common.const import *
+
+# Exceptions
+class ChannelPoisonException(Exception): 
+    def __init__(self):
+        pass
+
+# Classes
+class Channel(object):
+    def __init__(self, name=None, buffer=0, connect=None):
+        
+        # Check args
+        if name == None and connect != None:
+            raise Exception("Must provide name when connecting to remote channel")
+
+        # Set name
+        if name == None:
+            # Create unique name
+            self.name = str(random.random())+str(time.time())
+        else:
+            self.name=name
+
+        # Set channel home
+        if connect == None:
+            self.channelhome = connect
+        else:
+            # Get local channel home
+            self.channelhome = ChannelHome().connect
+
+    def check_termination(self):
+        if self.ispoisoned:
+            raise ChannelPoisonException()
+        if self.isretired:
+            raise ChannelRetireException()
+
+    def _read(self):
+        self.check_termination()
+        protocol.post_read(channel)
+        req=ChannelReq(ReqStatus(), name=self.name)
+        self.post_read(req)
+        req.wait()
+        self.remove_read(req)
+        if req.result==SUCCESS:
+            return req.msg
+        self.check_termination()
+
+        print 'We should not get here in read!!!', req.status.state
+        return None
+
+    
+    def _write(self, msg):
+        self.check_termination()
+        req=ChannelReq(ReqStatus(), msg)
+        self.post_write(req)
+        req.wait()
+        self.remove_write(req)
+        if req.result==SUCCESS:
+            return
+        self.check_termination()
+
+        print 'We should not get here in write!!!', req.status
+        return
+
+
+    # syntactic sugar: cin = +chan
+    def __pos__(self):
+        return self.reader()
+    
+    # syntactic sugar: cout = -chan
+    def __neg__(self):
+        return self.writer()
+
+    # syntactic sugar: Channel() * N
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel(name=self.name+str(i+1)))
+        return new
+
+    # syntactic sugar: N * Channel()
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+    
+    def reader(self):
+        """
+        Join as reader
+        
+        >>> C = Channel()
+        >>> cin = C.reader()
+        >>> isinstance(cin, ChannelEndRead)
+        True
+        """
+        self.join_reader()
+        return ChannelEndRead(self)
+
+    def writer(self):
+        """
+        Join as writer
+        
+        >>> C = Channel()
+        >>> cout = C.writer()
+        >>> isinstance(cout, ChannelEndWrite)
+        True
+        """
+        self.join_writer()
+        return ChannelEndWrite(self)
+
+    def join_reader(self):
+        protocol.join_reader(self)
+
+    def join_writer(self):
+        protocol.join_writer(self)
+
+    def leave_reader(self):
+        if not self.isretired:
+            retired = protocol.leave_reader(self)
+            if retired:
+                self.isretired = True
+
+    def leave_writer(self):
+        if not self.isretired:
+            retired = protocol.leave_writer(self)
+            if retired:
+                self.isretired = True
+
+    def poison(self):
+        if not self.ispoisoned:
+            self.ispoisoned = True
+            protocol.poison(self)
+        self.lock.acquire()
+
+    
