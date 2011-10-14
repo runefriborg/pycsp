@@ -26,6 +26,7 @@ import time
 
 @process
 def Prefix(cin, cout, prefixItem=None):
+    print 'Started Prefix'
     t = prefixItem
     while True:
         cout(t)
@@ -33,6 +34,7 @@ def Prefix(cin, cout, prefixItem=None):
 
 @process
 def Delta2(cin, cout1, cout2):
+    print 'Started Delta2'
     while True:
         t = cin()
         cout1(t)
@@ -43,13 +45,15 @@ def Successor(cin, cout):
     """Adds 1 to the value read on the input channel and outputs it on the output channel.
     Infinite loop.
     """
+    print 'Started Successor'
     while True:
         cout(cin()+1)
 
 @process
 def Consumer(cin):
     "Commstime consumer process"
-    N = 15000
+    print 'Started Consumer'
+    N = 5000
     ts = time.time
     t1 = ts()
     cin()
