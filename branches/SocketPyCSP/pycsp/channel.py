@@ -23,18 +23,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 # Imports
 import random, time
-from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
+import osprocess
+from channelend import ChannelEndRead, ChannelEndWrite 
 import protocol
 from pycsp.common.const import *
-
-# Exceptions
-class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
 
 # Classes
 class Channel(object):
     def __init__(self, name=None, buffer=0, connect=None):
+        
+        self.ispoisoned=False
+        self.isretired=False
+
         
         # Check args
         if name == None and connect != None:
@@ -49,10 +49,13 @@ class Channel(object):
 
         # Set channel home
         if connect == None:
-            self.channelhome = connect
-        else:
             # Get local channel home
-            self.channelhome = ChannelHome().connect
+            # These should handle multiple channels in the future
+            self.channelhomethread = protocol.ChannelHomeThread()
+            self.channelhomethread.start()
+            self.channelhome = self.channelhomethread.address
+        else:
+            self.channelhome = connect
 
     def check_termination(self):
         if self.ispoisoned:
@@ -61,33 +64,49 @@ class Channel(object):
             raise ChannelRetireException()
 
     def _read(self):
+        p = osprocess.getProc()
         self.check_termination()
-        protocol.post_read(channel)
-        req=ChannelReq(ReqStatus(), name=self.name)
-        self.post_read(req)
-        req.wait()
-        self.remove_read(req)
-        if req.result==SUCCESS:
-            return req.msg
+        p.state = READY
+        
+        protocol.post_read(self, p)
+        p.wait()
+
+        protocol.remove_read(self, p)
+        
+        if p.state == SUCCESS:
+            return p.result_msg                
+        elif p.state == POISON:
+            self.ispoisoned = True
+        elif p.state == RETIRE:
+            self.isretired = True
+
         self.check_termination()
 
-        print 'We should not get here in read!!!', req.status.state
+        print 'We should not get here in read!!!', p.state
         return None
 
     
     def _write(self, msg):
+        p = osprocess.getProc()
         self.check_termination()
-        req=ChannelReq(ReqStatus(), msg)
-        self.post_write(req)
-        req.wait()
-        self.remove_write(req)
-        if req.result==SUCCESS:
-            return
+        p.state = READY
+        
+        protocol.post_write(self, p, msg)
+        p.wait()
+
+        protocol.remove_write(self, p)
+        
+        if p.state == SUCCESS:
+            return               
+        elif p.state == POISON:
+            self.ispoisoned = True
+        elif p.state == RETIRE:
+            self.isretired = True
+
         self.check_termination()
 
-        print 'We should not get here in write!!!', req.status
-        return
-
+        print 'We should not get here in read!!!', p.state
+        return None
 
     # syntactic sugar: cin = +chan
     def __pos__(self):
@@ -154,6 +173,3 @@ class Channel(object):
         if not self.ispoisoned:
             self.ispoisoned = True
             protocol.poison(self)
-        self.lock.acquire()
-
-    

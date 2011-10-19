@@ -63,11 +63,23 @@ class Process(osprocess.Proc):
         # Create unique id
         self.id = str(random.random())+str(time.time())
 
+        # Channel request state
+        self.state = FAIL
+        self.result_ch = None
+        self.result_msg = None
+        
         # Start lock Thread
         self.cond = threading.Condition()
         self.lockThread = LockThread(self, self.cond)
         self.lockThread.start()
-        
+
+
+    def wait(self):
+        self.cond.acquire()
+        if self.state == READY:
+            self.cond.wait()
+        self.cond.release()
+
     def run(self):
         try:
             # Store the returned value from the process
