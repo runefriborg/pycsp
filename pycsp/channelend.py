@@ -23,11 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp.common.const import *
 
-# Exceptions
-class ChannelRetireException(Exception): 
-    def __init__(self):
-        pass
-
 # Functions
 def IN(channel):
     """ Join as reader
