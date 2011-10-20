@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import os
 import sys
-import socket
+import ossocket
 import threading
 import cPickle as pickle
 import struct
@@ -39,7 +39,7 @@ from pycsp.common.const import *
 LOCKTHREAD_ACQUIRE_LOCK, LOCKTHREAD_ACCEPT_LOCK, LOCKTHREAD_NOTIFY_SUCCESS, LOCKTHREAD_POISON, LOCKTHREAD_RETIRE, LOCKTHREAD_RELEASE_LOCK = range(6)
 CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_POISON = range(10,15)
 CHANTHREAD_POST_READ, CHANTHREAD_REMOVE_READ, CHANTHREAD_POST_WRITE, CHANTHREAD_REMOVE_WRITE = range(20,24)
-PING = 30
+SHUTDOWN = 30
 
 # Header fields:
 H_CMD, H_ID = range(2)
@@ -89,9 +89,8 @@ def send_payload(addr, cmd, id, payload):
     pickle_payload = pickle.dumps(payload, protocol = pickle.HIGHEST_PROTOCOL)
     header = compile_header(cmd, id, len(pickle_payload))
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    sock.connect(addr)
+    sock = ossocket.connect(addr)
+    
     sock.sendall(header)
     sock.sendall(pickle_payload)
     sock.close()
@@ -102,9 +101,7 @@ def send(addr, cmd, id=0, arg=0):
     """
     header = compile_header(cmd, id, arg)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    sock.connect(addr)
+    sock = ossocket.connect(addr)
     sock.sendall(header)
     sock.close()
 
@@ -117,9 +114,7 @@ def compile_header(cmd, id, arg):
 
 
 def remote_acquire_and_get_state(addr, process_id=42):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    sock.connect(addr)
+    sock = ossocket.connect(addr)
     sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, process_id, 0))
 
     compiled_header = sock.recv(header_size)
@@ -155,18 +150,14 @@ class LockThread(threading.Thread):
         self.process = process
         self.cond = cond
 
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        self.s.bind(('', 0))
-        self.address = self.s.getsockname()
-        self.s.listen(5)
+        self.s, self.address = ossocket.start_server()
         
         self.finished = False
 
     def run(self):
         while(not self.finished):            
-            conn, addr = self.s.accept()
-
+            conn, _ = self.s.accept()
+            
             compiled_header = conn.recv(header_size)
             if len(compiled_header) == 0:
                 # connection broken.
@@ -174,7 +165,10 @@ class LockThread(threading.Thread):
 
             header = struct.unpack(header_fmt, compiled_header)
 
-            if header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
+            if header[H_CMD] == SHUTDOWN:
+                self.finished = True
+
+            elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
                 ID = header[H_ID]
                 # The ID is not really necessary, since everything is kept in a local state.
                 # This will change when a lockthread handles multiple processes.
@@ -220,8 +214,7 @@ class LockThread(threading.Thread):
         self.s.close()
 
     def shutdown(self):
-        self.finished = True
-        send(self.address, PING)
+        send(self.address, SHUTDOWN)
 
 
 class ChannelHome(object):
@@ -385,11 +378,7 @@ class ChannelHomeThread(threading.Thread):
 
         self.channel = ChannelHome()
 
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        self.s.bind(('', 0))
-        self.address = self.s.getsockname()
-        self.s.listen(5)
+        self.s, self.address = ossocket.start_server()
 
     def run(self):
         while(True):            

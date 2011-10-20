@@ -68,10 +68,6 @@ class Process(osprocess.Proc):
         self.result_ch = None
         self.result_msg = None
         
-        # Start lock Thread
-        self.cond = threading.Condition()
-        self.lockThread = LockThread(self, self.cond)
-        self.lockThread.start()
 
     def wait(self):
         self.cond.acquire()
@@ -80,6 +76,11 @@ class Process(osprocess.Proc):
         self.cond.release()
 
     def run(self):
+        # Start lock Thread
+        self.cond = threading.Condition()
+        self.lockThread = LockThread(self, self.cond)
+        self.lockThread.start()
+
         try:
             # Store the returned value from the process
             self.fn(*self.args, **self.kwargs)
@@ -92,7 +93,7 @@ class Process(osprocess.Proc):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
         
-        # TODO: Check shutdown of lock thread
+        # Shutdown lock thread
         self.lockThread.shutdown()
 
     def __check_poison(self, args):

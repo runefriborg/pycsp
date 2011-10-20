@@ -53,7 +53,7 @@ def Successor(cin, cout):
 def Consumer(cin):
     "Commstime consumer process"
     print 'Started Consumer'
-    N = 50
+    N = 500
     ts = time.time
     t1 = ts()
     cin()
