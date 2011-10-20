@@ -39,6 +39,7 @@ from pycsp.common.const import *
 LOCKTHREAD_ACQUIRE_LOCK, LOCKTHREAD_ACCEPT_LOCK, LOCKTHREAD_NOTIFY_SUCCESS, LOCKTHREAD_POISON, LOCKTHREAD_RETIRE, LOCKTHREAD_RELEASE_LOCK = range(6)
 CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_POISON = range(10,15)
 CHANTHREAD_POST_READ, CHANTHREAD_REMOVE_READ, CHANTHREAD_POST_WRITE, CHANTHREAD_REMOVE_WRITE = range(20,24)
+PING = 30
 
 # Header fields:
 H_CMD, H_ID = range(2)
@@ -95,7 +96,7 @@ def send_payload(addr, cmd, id, payload):
     sock.sendall(pickle_payload)
     sock.close()
 
-def send(addr, cmd, id, arg=0):
+def send(addr, cmd, id=0, arg=0):
     """
     addr = (host, port)
     """
@@ -159,10 +160,11 @@ class LockThread(threading.Thread):
         self.s.bind(('', 0))
         self.address = self.s.getsockname()
         self.s.listen(5)
-
+        
+        self.finished = False
 
     def run(self):
-        while(True):            
+        while(not self.finished):            
             conn, addr = self.s.accept()
 
             compiled_header = conn.recv(header_size)
@@ -215,11 +217,11 @@ class LockThread(threading.Thread):
                     if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
                         lock_acquired = False
             conn.close()
+        self.s.close()
 
     def shutdown(self):
-        pass
-        #server.shutdown()
-
+        self.finished = True
+        send(self.address, PING)
 
 
 class ChannelHome(object):

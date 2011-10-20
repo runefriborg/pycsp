@@ -73,7 +73,6 @@ class Process(osprocess.Proc):
         self.lockThread = LockThread(self, self.cond)
         self.lockThread.start()
 
-
     def wait(self):
         self.cond.acquire()
         if self.state == READY:
@@ -94,6 +93,7 @@ class Process(osprocess.Proc):
             self.__check_retire(self.kwargs.values())
         
         # TODO: Check shutdown of lock thread
+        self.lockThread.shutdown()
 
     def __check_poison(self, args):
         for arg in args:
