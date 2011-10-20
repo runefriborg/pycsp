@@ -53,7 +53,7 @@ def Successor(cin, cout):
 def Consumer(cin):
     "Commstime consumer process"
     print 'Started Consumer'
-    N = 5000
+    N = 50
     ts = time.time
     t1 = ts()
     cin()
@@ -82,7 +82,7 @@ def CommsTimeBM():
              Successor(+b, -c),               # feeding back to prefix
              Consumer(+d))                         # timing process
 
-N_BM = 2
+N_BM = 1
 for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
