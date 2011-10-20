@@ -37,7 +37,7 @@ from pycsp.common.const import *
 
 # Header CMDs:
 LOCKTHREAD_ACQUIRE_LOCK, LOCKTHREAD_ACCEPT_LOCK, LOCKTHREAD_NOTIFY_SUCCESS, LOCKTHREAD_POISON, LOCKTHREAD_RETIRE, LOCKTHREAD_RELEASE_LOCK = range(6)
-CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER = range(10,14)
+CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_POISON = range(10,15)
 CHANTHREAD_POST_READ, CHANTHREAD_REMOVE_READ, CHANTHREAD_POST_WRITE, CHANTHREAD_REMOVE_WRITE = range(20,24)
 
 # Header fields:
@@ -63,6 +63,9 @@ def leave_reader(channel):
 
 def leave_writer(channel):
     send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, 42)
+
+def poison(channel):
+    send(channel.channelhome, CHANTHREAD_POISON, 42)
 
 def post_read(channel, process):
     # 42 must later be replaced by the number ID of the channel
@@ -252,7 +255,7 @@ class ChannelHome(object):
     def remove_read(self, addr):
         #Optimize!
         for r in self.readqueue:
-            if r.addr == addr:
+            if r.addr == addr and r.done == True:
                 self.readqueue.remove(r)
                 break
 
@@ -272,7 +275,7 @@ class ChannelHome(object):
 
     def remove_write(self, addr):
         for w in self.writequeue:
-            if w.addr == addr:
+            if w.addr == addr and w.done == True:
                 self.writequeue.remove(w)
                 break
 
@@ -406,6 +409,8 @@ class ChannelHomeThread(threading.Thread):
                 self.channel.leave_reader()
             elif header[H_CMD] == CHANTHREAD_LEAVE_WRITER:
                 self.channel.join_writer()
+            elif header[H_CMD] == CHANTHREAD_POISON:
+                self.channel.poison()
 
             elif header[H_CMD] == CHANTHREAD_POST_WRITE:
                 (address, msg) = pickle.loads(conn.recv(header[H_MSG_SIZE]))
