@@ -7,19 +7,24 @@ class DebugSocket():
         self.sock = sock
 
     def accept(self):
-        return self.sock.accept()
+        sock, addr = self.sock.accept()
+        return (DebugSocket(sock), addr)
 
     def sendall(self, val):
-        print("Send(before): %s" % (str(self.sock.getsockname())))
+        #print("Send(before): %s" % (str(self.sock.getsockname())))
         res = self.sock.sendall(val)
-        print("Send(after): %s" % (str(self.sock.getsockname())))
+        #print("Send(after): %s" % (str(self.sock.getsockname())))
         return res
 
     def recv(self, c):
         return self.sock.recv(c)
 
     def close(self):
-        return self.sock.close()
+        addr = self.sock.getsockname()
+        res = self.sock.close()
+        #print("Disconnect: %s" % (str(addr)))
+        return res
+    
 
 
 def start_server(server_addr=('', 0)):
@@ -43,6 +48,8 @@ def start_server(server_addr=('', 0)):
 
 
 def connect(addr):
+    print("Connect: %s" % (str(addr)))
+
     # Create IPv4 TCP socket (TODO: add support for IPv6)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
