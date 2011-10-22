@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
 import sys
 import ossocket
-import threading
+import select, threading
 import cPickle as pickle
 import struct
 from pycsp.common.const import *
@@ -40,6 +40,7 @@ LOCKTHREAD_ACQUIRE_LOCK, LOCKTHREAD_ACCEPT_LOCK, LOCKTHREAD_NOTIFY_SUCCESS, LOCK
 CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_POISON = range(10,15)
 CHANTHREAD_POST_READ, CHANTHREAD_REMOVE_READ, CHANTHREAD_POST_WRITE, CHANTHREAD_REMOVE_WRITE = range(20,24)
 SHUTDOWN = 30
+
 
 # Header fields:
 H_CMD, H_ID = range(2)
@@ -93,7 +94,7 @@ def send_payload(addr, cmd, id, payload):
     
     sock.sendall(header)
     sock.sendall(pickle_payload)
-    sock.close()
+    ossocket.close(sock)
 
 def send(addr, cmd, id=0, arg=0):
     """
@@ -103,7 +104,7 @@ def send(addr, cmd, id=0, arg=0):
 
     sock = ossocket.connect(addr)
     sock.sendall(header)
-    sock.close()
+    ossocket.close(sock)
 
 def compile_header(cmd, id, arg):
     """
@@ -141,7 +142,7 @@ def remote_retire(sock, process_id=42):
 def remote_release(sock, process_id=42):
     # OPTIMIZE: remove sendall and signal release by closing the socket only
     sock.sendall(compile_header(LOCKTHREAD_RELEASE_LOCK, process_id, 0))
-    sock.close()
+    ossocket.close(sock)
     
 class LockThread(threading.Thread):
     def __init__(self, process, cond):
@@ -150,71 +151,85 @@ class LockThread(threading.Thread):
         self.process = process
         self.cond = cond
 
-        self.s, self.address = ossocket.start_server()
+        self.server_socket, self.address = ossocket.start_server()
         
         self.finished = False
 
     def run(self):
-        while(not self.finished):            
-            conn, _ = self.s.accept()
-            
-            compiled_header = conn.recv(header_size)
-            if len(compiled_header) == 0:
-                # connection broken.
-                raise Exception("connection broken")
-
-            header = struct.unpack(header_fmt, compiled_header)
-
-            if header[H_CMD] == SHUTDOWN:
-                self.finished = True
-
-            elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
-                ID = header[H_ID]
-                # The ID is not really necessary, since everything is kept in a local state.
-                # This will change when a lockthread handles multiple processes.
-
-                # Send reply
-                conn.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, ID, self.process.state))
-
-                lock_acquired = True
 
 
-                while (lock_acquired):
-                    compiled_header = conn.recv(header_size)
-                    if len(compiled_header) == 0:
-                        # connection broken.
-                        raise Exception("connection broken")
+        active_socket_list = [self.server_socket]
 
-                    header = struct.unpack(header_fmt, compiled_header)
+        while(not self.finished):
 
-                    if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
-                        self.cond.acquire()
-                        self.process.state = SUCCESS
-                        data = pickle.loads(conn.recv(header[H_MSG_SIZE]))
-                        self.process.result_ch = data['channel']
-                        self.process.result_msg = data['msg']
-                        self.cond.notifyAll()
-                        self.cond.release()
+            ready, _, exceptready = select.select(active_socket_list, [], [])
+            for s in ready:
+                if s == self.server_socket:
+                    conn, _ = self.server_socket.accept()
+                    active_socket_list.append(conn)
+                else:
+                    
+                    recv_data = s.recv(header_size)
+                    if not recv_data:
+                        # connection disconnected
+                        active_socket_list.remove(s)
+                        s.close()
+                        print "close"
+                    else:
 
-                    if header[H_CMD] == LOCKTHREAD_POISON:
-                        self.cond.acquire()
-                        self.process.state = POISON
-                        self.cond.notifyAll()
-                        self.cond.release()
+                        header = struct.unpack(header_fmt, recv_data)
 
-                    if header[H_CMD] == LOCKTHREAD_RETIRE:
-                        self.cond.acquire()
-                        self.process.state = RETIRE
-                        self.cond.notifyAll()
-                        self.cond.release()
+                        #if header[H_CMD] == SHUTDOWN:
+                        #    self.finished = True
+                        #    s.close()
 
-                    if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
-                        lock_acquired = False
-            conn.close()
-        self.s.close()
+                        if header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
+                            ID = header[H_ID]
+                            # The ID is not really necessary, since everything is kept in a local state.
+                            # This will change when a lockthread handles multiple processes.
+
+                            # Send reply
+                            s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, ID, self.process.state))
+
+                            lock_acquired = True
+
+
+                            while (lock_acquired):
+                                compiled_header = s.recv(header_size)
+                                if len(compiled_header) == 0:
+                                    # connection broken.
+                                    raise Exception("connection broken")
+
+                                header = struct.unpack(header_fmt, compiled_header)
+
+                                if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
+                                    self.cond.acquire()
+                                    self.process.state = SUCCESS
+                                    data = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                                    self.process.result_ch = data['channel']
+                                    self.process.result_msg = data['msg']
+                                    self.cond.notifyAll()
+                                    self.cond.release()
+
+                                if header[H_CMD] == LOCKTHREAD_POISON:
+                                    self.cond.acquire()
+                                    self.process.state = POISON
+                                    self.cond.notifyAll()
+                                    self.cond.release()
+
+                                if header[H_CMD] == LOCKTHREAD_RETIRE:
+                                    self.cond.acquire()
+                                    self.process.state = RETIRE
+                                    self.cond.notifyAll()
+                                    self.cond.release()
+
+                                if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
+                                    lock_acquired = False
+        self.server_socket.close()
 
     def shutdown(self):
-        send(self.address, SHUTDOWN)
+        pass
+        #send(self.address, SHUTDOWN)
 
 
 class ChannelHome(object):
@@ -378,70 +393,78 @@ class ChannelHomeThread(threading.Thread):
 
         self.channel = ChannelHome()
 
-        self.s, self.address = ossocket.start_server()
+        self.server_socket, self.address = ossocket.start_server()
 
     def run(self):
-        while(True):            
-            conn, addr = self.s.accept()
-            
-            compiled_header = conn.recv(header_size)
-            if len(compiled_header) == 0:
-                # connection broken.
-                raise Exception("connection broken")
 
-            header = struct.unpack(header_fmt, compiled_header)
 
-            
-            if header[H_CMD] == CHANTHREAD_JOIN_READER:
-                self.channel.join_reader()
-            elif header[H_CMD] == CHANTHREAD_JOIN_WRITER:
-                self.channel.join_writer()
-            elif header[H_CMD] == CHANTHREAD_LEAVE_READER:
-                self.channel.leave_reader()
-            elif header[H_CMD] == CHANTHREAD_LEAVE_WRITER:
-                self.channel.join_writer()
-            elif header[H_CMD] == CHANTHREAD_POISON:
-                self.channel.poison()
+        active_socket_list = [self.server_socket]
 
-            elif header[H_CMD] == CHANTHREAD_POST_WRITE:
-                (address, msg) = pickle.loads(conn.recv(header[H_MSG_SIZE]))
-                try:
-                    self.channel.post_write(ChannelReq(address, msg))
-                except ChannelPoisonException:
-                    s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_poison(s)
-                    remote_release(s)
-                except ChannelRetireException:
-                    s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_retire(s)
-                    remote_release(s)
+        while(True):
 
-            elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
-                address = pickle.loads(conn.recv(header[H_MSG_SIZE]))
-                self.channel.remove_write(address)
+            ready, _, exceptready = select.select(active_socket_list, [], [])
+            for s in ready:
+                if s == self.server_socket:
+                    conn, _ = self.server_socket.accept()
+                    active_socket_list.append(conn)
+                else:
+                    recv_data = s.recv(header_size)
+                    if not recv_data:
+                        # connection disconnected
+                        active_socket_list.remove(s)
+                        s.close()
+                        print "close"
+                    else:
+                        header = struct.unpack(header_fmt, recv_data)
 
-            elif header[H_CMD] == CHANTHREAD_POST_READ:
-                address = pickle.loads(conn.recv(header[H_MSG_SIZE]))
-                try:
-                    self.channel.post_read(ChannelReq(address))
-                except ChannelPoisonException:
-                    s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_poison(s)
-                    remote_release(s)
-                except ChannelRetireException:
-                    s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_retire(s)
-                    remote_release(s)
+                        if header[H_CMD] == CHANTHREAD_JOIN_READER:
+                            self.channel.join_reader()
+                        elif header[H_CMD] == CHANTHREAD_JOIN_WRITER:
+                            self.channel.join_writer()
+                        elif header[H_CMD] == CHANTHREAD_LEAVE_READER:
+                            self.channel.leave_reader()
+                        elif header[H_CMD] == CHANTHREAD_LEAVE_WRITER:
+                            self.channel.join_writer()
+                        elif header[H_CMD] == CHANTHREAD_POISON:
+                            self.channel.poison()
 
-            elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
-                address = pickle.loads(conn.recv(header[H_MSG_SIZE]))
-                self.channel.remove_read(address)
+                        elif header[H_CMD] == CHANTHREAD_POST_WRITE:
+                            (address, msg) = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            try:
+                                self.channel.post_write(ChannelReq(address, msg))
+                            except ChannelPoisonException:
+                                lock_s, state = remote_acquire_and_get_state(addr)
+                                if state == READY:
+                                    remote_poison(lock_s)
+                                remote_release(lock_s)
+                            except ChannelRetireException:
+                                lock_s, state = remote_acquire_and_get_state(addr)
+                                if state == READY:
+                                    remote_retire(lock_s)
+                                remote_release(lock_s)
 
-            conn.close()
+                        elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
+                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            self.channel.remove_write(address)
+
+                        elif header[H_CMD] == CHANTHREAD_POST_READ:
+                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            try:
+                                self.channel.post_read(ChannelReq(address))
+                            except ChannelPoisonException:
+                                lock_s, state = remote_acquire_and_get_state(addr)
+                                if state == READY:
+                                    remote_poison(lock_s)
+                                remote_release(lock_s)
+                            except ChannelRetireException:
+                                lock_s, state = remote_acquire_and_get_state(addr)
+                                if state == READY:
+                                    remote_retire(lock_s)
+                                remote_release(lock_s)
+
+                        elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
+                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            self.channel.remove_read(address)
                 
 
     def shutdown(self):
