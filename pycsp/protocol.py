@@ -31,6 +31,7 @@ import sys
 import ossocket
 import select, threading
 import cPickle as pickle
+import Queue
 import struct
 from pycsp.common.const import *
 
@@ -228,7 +229,7 @@ class LockThread(threading.Thread):
         self.server_socket.close()
 
     def shutdown(self):
-        pass
+
         #send(self.address, SHUTDOWN)
 
 
@@ -393,16 +394,82 @@ class ChannelHomeThread(threading.Thread):
         threading.Thread.__init__(self)
 
         self.channel = ChannelHome()
+        self.fifoqueue = Queue.Queue(100) # Infinite synchronisize FIFO queue                
+        self.server = SocketMailBox(self.fifoqueue)
+        self.server.start()
 
+        self.address = self.server.address
+
+    def run(self):
+
+        while(True):
+            header, payload = self.fifoqueue.get(block=True)
+
+            if header[H_CMD] == CHANTHREAD_JOIN_READER:
+                self.channel.join_reader()
+            elif header[H_CMD] == CHANTHREAD_JOIN_WRITER:
+                self.channel.join_writer()
+            elif header[H_CMD] == CHANTHREAD_LEAVE_READER:
+                self.channel.leave_reader()
+            elif header[H_CMD] == CHANTHREAD_LEAVE_WRITER:
+                self.channel.join_writer()
+            elif header[H_CMD] == CHANTHREAD_POISON:
+                self.channel.poison()
+
+            elif header[H_CMD] == CHANTHREAD_POST_WRITE:
+                (address, msg) = payload
+                try:
+                    self.channel.post_write(ChannelReq(address, msg))
+                except ChannelPoisonException:
+                    lock_s, state = remote_acquire_and_get_state(addr)
+                    if state == READY:
+                        remote_poison(lock_s)
+                    remote_release(lock_s)
+                except ChannelRetireException:
+                    lock_s, state = remote_acquire_and_get_state(addr)
+                    if state == READY:
+                        remote_retire(lock_s)
+                    remote_release(lock_s)
+
+            elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
+                address = payload
+                self.channel.remove_write(address)
+
+            elif header[H_CMD] == CHANTHREAD_POST_READ:
+                address = payload
+                try:
+                    self.channel.post_read(ChannelReq(address))
+                except ChannelPoisonException:
+                    lock_s, state = remote_acquire_and_get_state(addr)
+                    if state == READY:
+                        remote_poison(lock_s)
+                    remote_release(lock_s)
+                except ChannelRetireException:
+                    lock_s, state = remote_acquire_and_get_state(addr)
+                    if state == READY:
+                        remote_retire(lock_s)
+                    remote_release(lock_s)
+
+            elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
+                address = payload
+                self.channel.remove_read(address)
+                
+
+    def shutdown(self):
+        pass
+        #server.shutdown()
+
+
+class SocketMailBox(threading.Thread):
+    def __init__(self, fifoqueue):
+        threading.Thread.__init__(self)
+        self.fifoqueue = fifoqueue
         self.server_socket, self.address = ossocket.start_server()
 
     def run(self):
 
-
         active_socket_list = [self.server_socket]
-
         while(True):
-
             ready, _, exceptready = select.select(active_socket_list, [], [])
             for s in ready:
                 if s == self.server_socket:
@@ -417,57 +484,15 @@ class ChannelHomeThread(threading.Thread):
                         print "close"
                     else:
                         header = struct.unpack(header_fmt, recv_data)
-
-                        if header[H_CMD] == CHANTHREAD_JOIN_READER:
-                            self.channel.join_reader()
-                        elif header[H_CMD] == CHANTHREAD_JOIN_WRITER:
-                            self.channel.join_writer()
-                        elif header[H_CMD] == CHANTHREAD_LEAVE_READER:
-                            self.channel.leave_reader()
-                        elif header[H_CMD] == CHANTHREAD_LEAVE_WRITER:
-                            self.channel.join_writer()
-                        elif header[H_CMD] == CHANTHREAD_POISON:
-                            self.channel.poison()
-
-                        elif header[H_CMD] == CHANTHREAD_POST_WRITE:
-                            (address, msg) = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                            try:
-                                self.channel.post_write(ChannelReq(address, msg))
-                            except ChannelPoisonException:
-                                lock_s, state = remote_acquire_and_get_state(addr)
-                                if state == READY:
-                                    remote_poison(lock_s)
-                                remote_release(lock_s)
-                            except ChannelRetireException:
-                                lock_s, state = remote_acquire_and_get_state(addr)
-                                if state == READY:
-                                    remote_retire(lock_s)
-                                remote_release(lock_s)
-
+                        payload = None
+                        if header[H_CMD] == CHANTHREAD_POST_WRITE:
+                            payload = pickle.loads(s.recv(header[H_MSG_SIZE]))
                         elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
-                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                            self.channel.remove_write(address)
-
+                            payload = pickle.loads(s.recv(header[H_MSG_SIZE]))
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
-                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                            try:
-                                self.channel.post_read(ChannelReq(address))
-                            except ChannelPoisonException:
-                                lock_s, state = remote_acquire_and_get_state(addr)
-                                if state == READY:
-                                    remote_poison(lock_s)
-                                remote_release(lock_s)
-                            except ChannelRetireException:
-                                lock_s, state = remote_acquire_and_get_state(addr)
-                                if state == READY:
-                                    remote_retire(lock_s)
-                                remote_release(lock_s)
-
+                            payload = pickle.loads(s.recv(header[H_MSG_SIZE]))
                         elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
-                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                            self.channel.remove_read(address)
-                
+                            payload = pickle.loads(s.recv(header[H_MSG_SIZE]))
 
-    def shutdown(self):
-        pass
-        #server.shutdown()
+                        self.fifoqueue.put((header, payload), block=True)
+                
