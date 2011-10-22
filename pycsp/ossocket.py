@@ -31,9 +31,9 @@ class DebugSocket():
         #return res
     
 
-def DebugSocket(sock):
-    """ Overwrite Debugsocket class """
-    return sock
+#def DebugSocket(sock):
+#    """ Overwrite Debugsocket class """
+#    return sock
 
 
 def start_server(server_addr=('', 0)):
