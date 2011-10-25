@@ -24,7 +24,8 @@ class DebugSocket():
         return self.sock.recv(c)
 
     def close(self):
-        return self.sock.close()
+        if self.sock:
+            self.sock.close()
 
     def getsockname(self):
         return self.sock.getsockname()
@@ -71,7 +72,7 @@ def connect(addr):
             usage_connections[t_id][addr] += 1
             return DebugSocket(stored_connections[t_id][addr])
     
-    print("Connect: %s" % (str(addr)))
+    #print("Connect: %s" % (str(addr)))
 
     # Create IPv4 TCP socket (TODO: add support for IPv6)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -92,7 +93,8 @@ def connect(addr):
 
     return DebugSocket(sock)
 
-EXPIRATION_LIMIT = 1000
+
+EXPIRATION_LIMIT = 10
 
 def sendall(addr, data):
     global stored_connections
@@ -114,7 +116,7 @@ def close(addr):
         del stored_connections[t_id][addr]
         
         sock.close()
-        print("Disconnect: %s" % (str(addr)))
+        #print("Disconnect: %s" % (str(addr)))
 
 def closeall():
     global stored_connections, usage_connections
@@ -124,8 +126,24 @@ def closeall():
     for addr in stored_connections[t_id]:
         sock = stored_connections[t_id][addr]
         sock.close()
-        print("Disconnect: %s" % (str(addr)))
+        #print("Disconnect: %s" % (str(addr)))
 
     del stored_connections[t_id]
     del usage_connections[t_id]
     
+
+def connectNOcache(addr):
+    # Create IPv4 TCP socket (TODO: add support for IPv6)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Disable Nagle's algorithem, to enable faster send
+    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+    # Connect
+    sock.connect(addr)
+
+    return DebugSocket(sock)
+
+def closeNOcache(sock):
+    sock.close()
+
