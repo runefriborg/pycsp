@@ -97,6 +97,16 @@ def send_payload(addr, cmd, id, payload):
     sock.sendall(pickle_payload)
     ossocket.close(addr)
 
+def sendNOcache(addr, cmd, id=0, arg=0):
+    """
+    addr = (host, port)
+    """
+    header = compile_header(cmd, id, arg)
+
+    sock = ossocket.connectNOcache(addr)
+    sock.sendall(header)
+    ossocket.closeNOcache(sock)
+
 def send(addr, cmd, id=0, arg=0):
     """
     addr = (host, port)
@@ -115,15 +125,25 @@ def compile_header(cmd, id, arg):
 
 
 
-def remote_acquire_and_get_state(addr, process_id=42):
+def remote_acquire_and_get_state(addr, process_id=42):    
+
     sock = ossocket.connect(addr)
     sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, process_id, 0))
 
-    compiled_header = sock.recv(header_size)
+    try:
+        compiled_header = sock.recv(header_size)
+    except socket.error, (value,message): 
+        if sock: 
+            sock.close() 
+        compiled_header = ""
+    
 
     if len(compiled_header) == 0:
         # connection broken.
-        raise Exception("connection broken")
+        # When a channel is unable to acquire the lock for process, the
+        # posted request is disabled.The system is more robust through ignoring, if it can handle that 
+        raise SocketClosedException()
+
     header = struct.unpack(header_fmt, compiled_header)
     
     return (sock, header[H_ARG])
@@ -175,16 +195,14 @@ class LockThread(threading.Thread):
                         # connection disconnected
                         active_socket_list.remove(s)
                         s.close()
-                        print "close"
                     else:
 
                         header = struct.unpack(header_fmt, recv_data)
 
-                        #if header[H_CMD] == SHUTDOWN:
-                        #    self.finished = True
-                        #    s.close()
+                        if header[H_CMD] == SHUTDOWN:
+                            self.finished = True
 
-                        if header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
+                        elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
                             ID = header[H_ID]
                             # The ID is not really necessary, since everything is kept in a local state.
                             # This will change when a lockthread handles multiple processes.
@@ -226,11 +244,25 @@ class LockThread(threading.Thread):
 
                                 if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
                                     lock_acquired = False
+
+        # Close server and spawned sockets
+        for s in active_socket_list:
+            s.close()
         self.server_socket.close()
 
     def shutdown(self):
-        pass
-        #send(self.address, SHUTDOWN)
+
+        sendNOcache(self.address, SHUTDOWN)
+        
+        # This method is called by another thread.
+        # The LockThread of a process may shutdown before all posted requests have been
+        # removed. A channel may therefore try to communicate to this lockthread. A failure
+        # in connecting must be viewed as the posted requests is no longer active.
+
+        # Another concern is if some other process willing to communicate starts a lockthread
+        # on the same port. This must be avoided by using a key as identification. Though this
+        # is probably not a problem when multiple processes will be handled by single lockthread
+        # processes
 
 
 class ChannelHome(object):
@@ -339,24 +371,37 @@ class ChannelReq(object):
         self.done = False
 
     def cancel(self):
-        conn, state = remote_acquire_and_get_state(self.addr)
-        self.done = True
-        remote_cancel(conn)
-        remote_release(self.addr)
+        if self.done == False:
+            try:
+                conn, state = remote_acquire_and_get_state(self.addr)
+                self.done = True
+                remote_cancel(conn)
+                remote_release(self.addr)
+            except SocketClosedException:
+                self.done = True
+                
 
     def poison(self):
-        conn, state = remote_acquire_and_get_state(self.addr)
-        if state == READY:
-            self.done = True
-            remote_poison(conn)
-        remote_release(self.addr)
+        if self.done == False:
+            try:
+                conn, state = remote_acquire_and_get_state(self.addr)
+                if state == READY:
+                    self.done = True
+                remote_poison(conn)
+                remote_release(self.addr)
+            except SocketClosedException:
+                self.done = True
 
     def retire(self):
-        conn, state = remote_acquire_and_get_state(self.addr)
-        if state == READY:
-            self.done = True
-            remote_retire(conn)
-        remote_release(self.addr)
+        if self.done == False:
+            try:
+                conn, state = remote_acquire_and_get_state(self.addr)
+                if state == READY:
+                    self.done = True
+                remote_retire(conn)
+                remote_release(self.addr)
+            except SocketClosedException:
+                self.done = True
     
     def offer(self, reader):
         success = False
@@ -364,26 +409,29 @@ class ChannelReq(object):
         # Check validity
         if self.done == False and reader.done == False:
 
-            if (self.addr < reader.addr):
-                w_conn, w_state = remote_acquire_and_get_state(self.addr)
-                r_conn, r_state = remote_acquire_and_get_state(reader.addr)
-            else:
-                r_conn, r_state = remote_acquire_and_get_state(reader.addr)
-                w_conn, w_state = remote_acquire_and_get_state(self.addr)
+            try:
+                if (self.addr < reader.addr):
+                    w_conn, w_state = remote_acquire_and_get_state(self.addr)
+                    r_conn, r_state = remote_acquire_and_get_state(reader.addr)
+                else:
+                    r_conn, r_state = remote_acquire_and_get_state(reader.addr)
+                    w_conn, w_state = remote_acquire_and_get_state(self.addr)
 
-            if (r_state == READY and w_state == READY):
-                self.done = True
-                reader.done = True
-                remote_notify(r_conn, 42, self.msg)
-                remote_notify(w_conn, 42, None)
-                success = True
+                if (r_state == READY and w_state == READY):
+                    self.done = True
+                    reader.done = True
+                    remote_notify(r_conn, 42, self.msg)
+                    remote_notify(w_conn, 42, None)
+                    success = True
 
-            if (self.addr < reader.addr):
-                remote_release(reader.addr)
-                remote_release(self.addr)
-            else:
-                remote_release(self.addr)
-                remote_release(reader.addr)
+                if (self.addr < reader.addr):
+                    remote_release(reader.addr)
+                    remote_release(self.addr)
+                else:
+                    remote_release(self.addr)
+                    remote_release(reader.addr)
+            except SocketClosedException:
+                pass
 
         return success
 
@@ -421,15 +469,21 @@ class ChannelHomeThread(threading.Thread):
                 try:
                     self.channel.post_write(ChannelReq(address, msg))
                 except ChannelPoisonException:
-                    lock_s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_poison(lock_s)
-                    remote_release(addr)
+                    try:                    
+                        lock_s, state = remote_acquire_and_get_state(address)
+                        if state == READY:
+                            remote_poison(lock_s)
+                        remote_release(address)
+                    except SocketClosedException:
+                        pass
                 except ChannelRetireException:
-                    lock_s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_retire(lock_s)
-                    remote_release(addr)
+                    try:                    
+                        lock_s, state = remote_acquire_and_get_state(address)
+                        if state == READY:
+                            remote_retire(lock_s)
+                        remote_release(address)
+                    except SocketClosedException:
+                        pass
 
             elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
                 address = payload
@@ -440,15 +494,21 @@ class ChannelHomeThread(threading.Thread):
                 try:
                     self.channel.post_read(ChannelReq(address))
                 except ChannelPoisonException:
-                    lock_s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_poison(lock_s)
-                    remote_release(addr)
+                    try:                    
+                        lock_s, state = remote_acquire_and_get_state(address)
+                        if state == READY:
+                            remote_poison(lock_s)
+                        remote_release(address)
+                    except SocketClosedException:
+                        pass
                 except ChannelRetireException:
-                    lock_s, state = remote_acquire_and_get_state(addr)
-                    if state == READY:
-                        remote_retire(lock_s)
-                    remote_release(addr)
+                    try:                    
+                        lock_s, state = remote_acquire_and_get_state(address)
+                        if state == READY:
+                            remote_retire(lock_s)
+                        remote_release(address)
+                    except SocketClosedException:
+                        pass
 
             elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
                 address = payload
@@ -481,7 +541,6 @@ class SocketMailBox(threading.Thread):
                         # connection disconnected
                         active_socket_list.remove(s)
                         s.close()
-                        print "close"
                     else:
                         header = struct.unpack(header_fmt, recv_data)
                         payload = None
