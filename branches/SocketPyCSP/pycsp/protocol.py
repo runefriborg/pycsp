@@ -95,7 +95,7 @@ def send_payload(addr, cmd, id, payload):
     
     sock.sendall(header)
     sock.sendall(pickle_payload)
-    ossocket.close(sock)
+    ossocket.close(addr)
 
 def send(addr, cmd, id=0, arg=0):
     """
@@ -105,7 +105,7 @@ def send(addr, cmd, id=0, arg=0):
 
     sock = ossocket.connect(addr)
     sock.sendall(header)
-    ossocket.close(sock)
+    ossocket.close(addr)
 
 def compile_header(cmd, id, arg):
     """
@@ -140,10 +140,10 @@ def remote_poison(sock, process_id=42):
 def remote_retire(sock, process_id=42):
     sock.sendall(compile_header(LOCKTHREAD_RETIRE, process_id, 0))
 
-def remote_release(sock, process_id=42):
+def remote_release(addr, process_id=42):
     # OPTIMIZE: remove sendall and signal release by closing the socket only
-    sock.sendall(compile_header(LOCKTHREAD_RELEASE_LOCK, process_id, 0))
-    ossocket.close(sock)
+    ossocket.sendall(addr, compile_header(LOCKTHREAD_RELEASE_LOCK, process_id, 0))
+    ossocket.close(addr)
     
 class LockThread(threading.Thread):
     def __init__(self, process, cond):
@@ -229,7 +229,7 @@ class LockThread(threading.Thread):
         self.server_socket.close()
 
     def shutdown(self):
-
+        pass
         #send(self.address, SHUTDOWN)
 
 
@@ -241,7 +241,7 @@ class ChannelHome(object):
         self.isretired=False
         self.readers=0
         self.writers=0
-    
+
     def check_termination(self):
         if self.ispoisoned:
             raise ChannelPoisonException()
@@ -261,7 +261,7 @@ class ChannelHome(object):
             self.match()
         else:
             self.check_termination()
-        
+
 
     def remove_read(self, addr):
         #Optimize!
@@ -342,21 +342,21 @@ class ChannelReq(object):
         conn, state = remote_acquire_and_get_state(self.addr)
         self.done = True
         remote_cancel(conn)
-        remote_release(conn)
+        remote_release(self.addr)
 
     def poison(self):
         conn, state = remote_acquire_and_get_state(self.addr)
         if state == READY:
             self.done = True
             remote_poison(conn)
-        remote_release(conn)
+        remote_release(self.addr)
 
     def retire(self):
         conn, state = remote_acquire_and_get_state(self.addr)
         if state == READY:
             self.done = True
             remote_retire(conn)
-        remote_release(conn)
+        remote_release(self.addr)
     
     def offer(self, reader):
         success = False
@@ -379,11 +379,11 @@ class ChannelReq(object):
                 success = True
 
             if (self.addr < reader.addr):
-                remote_release(r_conn)
-                remote_release(w_conn)
+                remote_release(reader.addr)
+                remote_release(self.addr)
             else:
-                remote_release(w_conn)
-                remote_release(r_conn)
+                remote_release(self.addr)
+                remote_release(reader.addr)
 
         return success
 
@@ -424,12 +424,12 @@ class ChannelHomeThread(threading.Thread):
                     lock_s, state = remote_acquire_and_get_state(addr)
                     if state == READY:
                         remote_poison(lock_s)
-                    remote_release(lock_s)
+                    remote_release(addr)
                 except ChannelRetireException:
                     lock_s, state = remote_acquire_and_get_state(addr)
                     if state == READY:
                         remote_retire(lock_s)
-                    remote_release(lock_s)
+                    remote_release(addr)
 
             elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
                 address = payload
@@ -443,12 +443,12 @@ class ChannelHomeThread(threading.Thread):
                     lock_s, state = remote_acquire_and_get_state(addr)
                     if state == READY:
                         remote_poison(lock_s)
-                    remote_release(lock_s)
+                    remote_release(addr)
                 except ChannelRetireException:
                     lock_s, state = remote_acquire_and_get_state(addr)
                     if state == READY:
                         remote_retire(lock_s)
-                    remote_release(lock_s)
+                    remote_release(addr)
 
             elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
                 address = payload
