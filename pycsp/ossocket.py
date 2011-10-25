@@ -24,16 +24,15 @@ class DebugSocket():
         return self.sock.recv(c)
 
     def close(self):
-        pass
-        #addr = self.sock.getsockname()
-        #res = self.sock.close()
-        #print("Disconnect: %s" % (str(addr)))
-        #return res
-    
+        return self.sock.close()
 
-#def DebugSocket(sock):
-#    """ Overwrite Debugsocket class """
-#    return sock
+    def getsockname(self):
+        return self.sock.getsockname()
+
+
+def DebugSocket(sock):
+    """ Overwrite Debugsocket class """
+    return sock
 
 
 def start_server(server_addr=('', 0)):
@@ -56,11 +55,12 @@ def start_server(server_addr=('', 0)):
     return DebugSocket(s), address
 
 
+
 stored_connections = {}
+usage_connections = {}
 
 def connect(addr):
-    #print("Connect: %s" % (str(addr)))
-    global stored_connections
+    global stored_connections, usage_connections
 
     t_id = osprocess.getProcName()
 
@@ -68,8 +68,10 @@ def connect(addr):
     if stored_connections.has_key(t_id):
         if stored_connections[t_id].has_key(addr):
             #print "REUSE of socket"
+            usage_connections[t_id][addr] += 1
             return DebugSocket(stored_connections[t_id][addr])
     
+    print("Connect: %s" % (str(addr)))
 
     # Create IPv4 TCP socket (TODO: add support for IPv6)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -83,11 +85,47 @@ def connect(addr):
     # Save connection
     if stored_connections.has_key(t_id):
         stored_connections[t_id][addr] = sock
+        usage_connections[t_id][addr] = 1
     else:
         stored_connections[t_id] = {addr:sock}
+        usage_connections[t_id] = {addr:1}
 
     return DebugSocket(sock)
 
+EXPIRATION_LIMIT = 1000
 
-def close(sock):
-    pass
+def sendall(addr, data):
+    global stored_connections
+
+    t_id = osprocess.getProcName()
+    sock = stored_connections[t_id][addr]
+    return sock.sendall(data)
+    
+
+def close(addr):
+    global stored_connections, usage_connections
+
+    t_id = osprocess.getProcName()
+
+    if (usage_connections[t_id][addr] > EXPIRATION_LIMIT):
+        sock = stored_connections[t_id][addr]
+
+        del usage_connections[t_id][addr]
+        del stored_connections[t_id][addr]
+        
+        sock.close()
+        print("Disconnect: %s" % (str(addr)))
+
+def closeall():
+    global stored_connections, usage_connections
+
+    t_id = osprocess.getProcName()
+
+    for addr in stored_connections[t_id]:
+        sock = stored_connections[t_id][addr]
+        sock.close()
+        print("Disconnect: %s" % (str(addr)))
+
+    del stored_connections[t_id]
+    del usage_connections[t_id]
+    
