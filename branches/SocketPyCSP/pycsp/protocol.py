@@ -280,6 +280,21 @@ class ChannelHome(object):
         if self.isretired:
             raise ChannelRetireException()
 
+    def check_shutdown(self):
+        """
+        Only call this method when the channel has been poisoned or retired
+        """
+        if self.ispoisoned or self.isretired:
+            #import inspect
+            
+            #print self.readers,self.writers
+            #import threading
+            import inspect
+            print inspect.getouterframes(inspect.currentframe())[1][3]
+            #print threading.current_thread().name
+            if self.readers == 0 and self.writers == 0:
+                print "shutdown"
+
     def post_read(self, req):
         self.check_termination()
 
@@ -332,9 +347,11 @@ class ChannelHome(object):
         self.ispoisoned=True
         for p in self.readqueue:
             p.poison()
+            self.readers-=1 # counting to shutdown
         for p in self.writequeue:
             p.poison()
-
+            self.writers-=1 # counting to shutdown
+        self.check_shutdown()
 
     def join_reader(self):
         self.readers+=1
@@ -343,7 +360,6 @@ class ChannelHome(object):
         self.writers+=1
 
     def leave_reader(self):
-        self.lock.acquire()
         if not self.isretired:
             self.readers-=1
             if self.readers==0:
@@ -351,10 +367,10 @@ class ChannelHome(object):
                 self.isretired = True
                 for p in self.writequeue:
                     p.retire()
-        self.lock.release()
+                    self.writers-=1 # counting to shutdown
+        self.check_shutdown()
 
     def leave_writer(self):
-        self.lock.acquire()
         if not self.isretired:
             self.writers-=1
             if self.writers==0:
@@ -362,7 +378,8 @@ class ChannelHome(object):
                 self.isretired = True
                 for p in self.readqueue:
                     p.retire()
-        self.lock.release()
+                    self.readers-=1 # counting to shutdown
+        self.check_shutdown()
 
 class ChannelReq(object):
     def __init__(self, process_addr, msg = None):
@@ -473,17 +490,21 @@ class ChannelHomeThread(threading.Thread):
                         lock_s, state = remote_acquire_and_get_state(address)
                         if state == READY:
                             remote_poison(lock_s)
+                            self.channel.writers-=1  # counting to shutdown
                         remote_release(address)
                     except SocketClosedException:
-                        pass
+                        self.channel.writers-=1 # counting to shutdown
+
                 except ChannelRetireException:
                     try:                    
                         lock_s, state = remote_acquire_and_get_state(address)
                         if state == READY:
                             remote_retire(lock_s)
+                            self.channel.writers-=1  # counting to shutdown
                         remote_release(address)
                     except SocketClosedException:
-                        pass
+                        self.channel.writers-=1  # counting to shutdown
+                self.channel.check_shutdown()
 
             elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
                 address = payload
@@ -498,17 +519,20 @@ class ChannelHomeThread(threading.Thread):
                         lock_s, state = remote_acquire_and_get_state(address)
                         if state == READY:
                             remote_poison(lock_s)
+                            self.channel.readers-=1  # counting to shutdown
                         remote_release(address)
                     except SocketClosedException:
-                        pass
+                        self.channel.readers-=1  # counting to shutdown
                 except ChannelRetireException:
                     try:                    
                         lock_s, state = remote_acquire_and_get_state(address)
                         if state == READY:
+                            self.channel.readers-=1  # counting to shutdown
                             remote_retire(lock_s)
                         remote_release(address)
                     except SocketClosedException:
-                        pass
+                        self.channel.readers-=1  # counting to shutdown
+                self.channel.check_shutdown()
 
             elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
                 address = payload
