@@ -74,6 +74,7 @@ class Channel(object):
         protocol.remove_read(self, p)
         
         if p.state == SUCCESS:
+            print "GOT %s" % (str(p.result_msg))
             return p.result_msg                
         elif p.state == POISON:
             self.ispoisoned = True
