@@ -72,9 +72,9 @@ class Process(osprocess.Proc):
     def wait(self):
         self.cond.acquire()
         if self.state == READY:
-            print "WAIT: %s, %d" % (self.fn, self.state)
+            #print "WAIT: %s, %d" % (self.fn, self.state)
             self.cond.wait()
-            print "NOTIFIED: %s, %d" % (self.fn, self.state)
+            #print "NOTIFIED: %s, %d" % (self.fn, self.state)
         self.cond.release()
 
     def run(self):
