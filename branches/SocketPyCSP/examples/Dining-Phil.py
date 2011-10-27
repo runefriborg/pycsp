@@ -111,4 +111,4 @@ def secure_college(steps):
         )
     
 
-Sequence(secure_college(100))
+Sequence(secure_college(1000))

@@ -20,37 +20,41 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
-from random import random
 
 @process
-def producer(job_out, bagsize, bags):
-   for i in range(bags): job_out(bagsize)
-   retire(job_out)
+def producer(cout, cnt):
+    for i in range(2,cnt):
+        cout(i)
+    poison(cout)
+    
+@process
+def worker(cin, cout):
+    try:
+        ccout=None
+        my_prime=cin()
+        cout(my_prime)
+        child_channel=Channel()
+        ccout=child_channel.writer()
+        Spawn(worker(child_channel.reader(), cout))
+        while True:
+            new_prime=cin()
+            if new_prime%my_prime:
+                ccout(new_prime)
+    except ChannelPoisonException:
+        if ccout:
+            poison(ccout)
+        else:
+            poison(cout)
 
 @process
-def worker(job_in, result_out):
-   while True:
-       cnt=job_in()           #Get task
-       sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
-       result_out((4.0*sum)/cnt)  #Forward result   
+def printer(cin):
+    while True:
+        print cin()
 
 
-@process
-def consumer(result_in):
-   cnt=0; sum=result_in()    #Get first result
-   try:
-       while True:
-           cnt+=1
-           print str(cnt) + ' ' + str(sum)
-           sum=(sum*cnt+result_in())/(cnt+1)    #Get result
-   except ChannelRetireException:
-       print 'Result:',sum            #We are done - print result
+first=Channel()
+outc=Channel()
 
-jobs=Channel()
-results=Channel()
-
-
-Parallel(
-   producer( jobs.writer() , 10000, 1000),
-   4 * worker( jobs.reader() ,results.writer()),
-   consumer(results.reader()))
+Parallel(producer(first.writer(),1000),
+         worker(first.reader(), outc.writer()),
+         printer(outc.reader()))

@@ -28,14 +28,6 @@ def producer(job_out, bagsize, bags):
    retire(job_out)
 
 @process
-def worker(job_in, result_out):
-   while True:
-       cnt=job_in()           #Get task
-       sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
-       result_out((4.0*sum)/cnt)  #Forward result   
-
-
-@process
 def consumer(result_in):
    cnt=0; sum=result_in()    #Get first result
    try:
@@ -46,11 +38,13 @@ def consumer(result_in):
    except ChannelRetireException:
        print 'Result:',sum            #We are done - print result
 
-jobs=Channel()
-results=Channel()
+jobs=Channel("jobs")
+results=Channel("results")
+
+print "jobs: %s"  % (str(jobs.channelhome))
+print "results: %s"  % (str(results.channelhome))
 
 
 Parallel(
    producer( jobs.writer() , 10000, 1000),
-   4 * worker( jobs.reader() ,results.writer()),
    consumer(results.reader()))

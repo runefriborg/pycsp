@@ -128,13 +128,13 @@ def compile_header(cmd, id, arg):
 def remote_acquire_and_get_state(addr, process_id=42):    
 
     sock = ossocket.connect(addr)
-    sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, process_id, 0))
 
     try:
+        sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, process_id, 0))
         compiled_header = sock.recv(header_size)
     except socket.error, (value,message): 
         if sock: 
-            sock.close() 
+            sock.close()             
         compiled_header = ""
     
 
