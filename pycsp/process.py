@@ -289,6 +289,7 @@ def Sequence(*plist):
         t.id = t_original_id
 
 def current_process_id():
+    t = osprocess.getProc()
     name = osprocess.getProcName()
 
     if name == '__mainproc__':

@@ -64,8 +64,9 @@ class Channel(object):
             raise ChannelRetireException()
 
     def _read(self):
-        p = osprocess.getProc()
         self.check_termination()
+
+        p = osprocess.getProc()
         p.state = READY
         
         protocol.post_read(self, p)
@@ -88,8 +89,9 @@ class Channel(object):
 
     
     def _write(self, msg):
-        p = osprocess.getProc()
         self.check_termination()
+
+        p = osprocess.getProc()
         p.state = READY
         
         protocol.post_write(self, p, msg)

@@ -1,10 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: latin-1 -*-
 """
-PyCSP implementation of the CSP Core functionality (Channels, Processes, PAR, ALT).
-
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -23,14 +19,38 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+from pycsp_import import *
+from random import random
 
-# Imports
+@process
+def producer(job_out, bagsize, bags):
+   for i in range(bags): job_out(bagsize)
+   retire(job_out)
 
-#from guard import Skip, Timeout, SkipGuard, TimeoutGuard
-from alternation import choice, Alternation
-from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
-from channel import Channel, ChannelPoisonException
-from channelend import retire, poison, ChannelRetireException
-from process import Process, process, Sequence, Parallel, Spawn, current_process_id
+@process
+def worker(job_in, result_out):
+   while True:
+       cnt=job_in()           #Get task
+       sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
+       result_out((4.0*sum)/cnt)  #Forward result
 
-version = (0,8,0, 'sockets')
+
+@process
+def consumer(result_in):
+   cnt=0; sum=result_in()    #Get first result
+   try:
+       while True:
+           cnt+=1
+           print str(cnt) + ' ' + str(sum)
+           sum=(sum*cnt+result_in())/(cnt+1)    #Get result
+   except ChannelRetireException:
+       print 'Result:',sum            #We are done - print result
+
+jobs=Channel()
+results=Channel()
+
+
+Parallel(
+   producer( jobs.writer() , 10000, 1000),
+   10 * worker( jobs.reader() ,results.writer()),
+   consumer(results.reader()))

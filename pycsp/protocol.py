@@ -29,11 +29,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
 import sys
 import ossocket
-import select, threading
+import socket, select, threading
 import cPickle as pickle
-import Queue
 import struct
 from pycsp.common.const import *
+
 
 
 # Header CMDs:
