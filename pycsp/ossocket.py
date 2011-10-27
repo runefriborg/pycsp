@@ -1,8 +1,9 @@
 
+
 import socket
 import osprocess
 
-import threading
+EXPIRATION_LIMIT = 10
 
 class DebugSocket():
     def __init__(self, sock):
@@ -95,7 +96,6 @@ def connect(addr):
     return DebugSocket(sock)
 
 
-EXPIRATION_LIMIT = 10
 
 def sendall(addr, data):
     global stored_connections
