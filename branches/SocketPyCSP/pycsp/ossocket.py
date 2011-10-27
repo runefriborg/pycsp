@@ -2,6 +2,7 @@
 import socket
 import osprocess
 
+import threading
 
 class DebugSocket():
     def __init__(self, sock):
@@ -17,8 +18,8 @@ class DebugSocket():
     def sendall(self, val):
         #print("Send(before): %s" % (str(self.sock.getsockname())))
         res = self.sock.sendall(val)
-        #print("Send(after): %s" % (str(self.sock.getsockname())))
         return res
+        #print("Send(after): %s" % (str(self.sock.getsockname())))
 
     def recv(self, c):
         return self.sock.recv(c)
@@ -51,7 +52,7 @@ def start_server(server_addr=('', 0)):
     address = s.getsockname()
 
     # Initiate listening for connections. Create queue of 5 for unaccepted connections
-    s.listen(5)
+    s.listen(10)
 
     return DebugSocket(s), address
 

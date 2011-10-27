@@ -21,21 +21,10 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+import protocol
 from pycsp.common.const import *
 
 # Functions
-def IN(channel):
-    """ Join as reader
-    """
-    print 'Warning: IN() are deprecated and will be removed'
-    return channel.reader()
-
-def OUT(channel):
-    """ Join as writer
-    """
-    print 'Warning: OUT() are deprecated and will be removed'
-    return channel.writer()
-
 def retire(*list_of_channelEnds):
     """ Retire reader or writer, to do auto-poisoning
     When all readers or writer of a channel have retired. The channel is retired.
@@ -97,6 +86,12 @@ class ChannelEndWrite:
         self.__call__ = self.channel._write
         self.poison = self.channel.poison
 
+    def post_write(self, process, msg):
+        protocol.post_write(self.channel, process, msg)
+
+    def remove_write(self, process):
+        protocol.remove_write(self.channel, process)
+        
     def _retire(self, msg):
         raise ChannelRetireException()
 
@@ -104,9 +99,7 @@ class ChannelEndWrite:
         if not self.isretired:
             self.channel.leave_writer()
             self.__call__ = self._retire
-            self.post_write = self._retire
             self.isretired = True
-
 
     def __repr__(self):
         if self.channel.name == None:
@@ -130,7 +123,13 @@ class ChannelEndRead:
 
         self.__call__ = self.channel._read
         self.poison = self.channel.poison
+        
+    def post_read(self, process):
+        protocol.post_read(self.channel, process)
 
+    def remove_read(self, process):
+        protocol.remove_read(self.channel, process)
+        
     def _retire(self):
         raise ChannelRetireException()
 
@@ -138,7 +137,6 @@ class ChannelEndRead:
         if not self.isretired:
             self.channel.leave_reader()
             self.__call__ = self._retire
-            self.post_read = self._retire
             self.isretired = True
 
     def __repr__(self):
