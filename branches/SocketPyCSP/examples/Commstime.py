@@ -59,8 +59,8 @@ def Consumer(cin):
     cin()
     t1 = ts()
     for i in range(N):
-        #cin()
-        print cin()
+        cin()
+        #print cin()
     t2 = ts()
     dt = t2-t1
     tchan = dt / (4 * N)
