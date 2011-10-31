@@ -22,28 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import sys
 sys.path.append("..")
 
-if len(sys.argv) > 1:
-    mod = sys.argv[1]
-else:
-    mod = ''
-
 from pycsp import *
-if (mod == 'threads'):
-    pass
-elif (mod == 'processes'):
-    pass
-elif (mod == 'greenlets'):
-    pass
-elif (mod == 'net'):
-    pass
-else:
-    print "python",sys.argv[0],"[ threads | processes | greenlets | net ]"
-    pass
-
 
 print 'Using version', version
-
-if sys.platform == 'win32' and (version[3] == 'processes'):
-    print 'The examples are not compatible with PyCSP.processes and win32.'
-    sys.exit(0)
-

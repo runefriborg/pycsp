@@ -70,9 +70,11 @@ class Channel(object):
         p.state = READY
         
         protocol.post_read(self, p)
-        p.wait()
 
-        protocol.remove_read(self, p)
+        if p.state == READY:
+            p.wait()
+
+        #protocol.remove_read(self, p)
         
         if p.state == SUCCESS:
             #print "GOT %s" % (str(p.result_msg))
@@ -95,9 +97,11 @@ class Channel(object):
         p.state = READY
         
         protocol.post_write(self, p, msg)
-        p.wait()
 
-        protocol.remove_write(self, p)
+        if p.state == READY:
+            p.wait()
+
+        #protocol.remove_write(self, p)
         
         if p.state == SUCCESS:
             return               

@@ -140,12 +140,16 @@ class Alternation:
         retire=False
 
         p = osprocess.getProc()
+
         for c in reqs.keys():
             _, op = reqs[c]
-            if op==READ:
-                c.remove_read(p)
-            else:
-                c.remove_write(p)
+
+            #if c.channel.idx == ?? 
+            #if op==READ:
+            #    c.remove_read(p)
+            #else:
+            #    c.remove_write(p)
+
             if p.state==SUCCESS:
                 act=c
             if p.state==POISON:
@@ -174,8 +178,15 @@ class Alternation:
                     c, action = prio_item
                     c.post_read(p)
                     op=READ
+
                 reqs[c]=(idx, op)
+
+                if p.state != READY:
+                    # state has been changed by process lockthread, thus we can abort and read p.state.
+                    break
+
                 idx += 1
+
         except ChannelPoisonException:
             act, poison, retire = self.__result(reqs)
             if not act:
@@ -184,6 +195,9 @@ class Alternation:
             act, poison, retire = self.__result(reqs)
             if not act:
                 raise ChannelRetireException
+
+        if p.state != READY:
+            act, poison, retire = self.__result(reqs)
 
         # If noone have offered a channelrequest, we wait.
         if not act:

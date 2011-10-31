@@ -3,7 +3,7 @@
 import socket
 import osprocess
 
-EXPIRATION_LIMIT = 10
+EXPIRATION_LIMIT = 100
 
 class DebugSocket():
     def __init__(self, sock):
