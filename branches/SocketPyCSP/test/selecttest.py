@@ -23,7 +23,6 @@ from pycsp_import import *
 import time
 import random
 
-@io
 def sleep_random():
     time.sleep(random.random()/10)
 

@@ -171,7 +171,7 @@ def client():
         header = struct.unpack(header_fmt, recv_data)
         if header[H_CMD] == PONG:
             payload = pickle.loads(s.recv(header[H_MSG_SIZE]))
-            print payload
+            #print payload
         else:
             raise Exception("ERROR!")
         close(server_address)

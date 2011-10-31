@@ -56,11 +56,9 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
             InputGuard(cin4, action(assertCheck, 3))
             )
 
-@io
 def sleep_one():
     time.sleep(0.01)
 
-@io
 def sleep_random():
     time.sleep(random.random()/100)
 

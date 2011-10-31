@@ -65,7 +65,7 @@ class Process(osprocess.Proc):
 
         # Channel request state
         self.state = FAIL
-        self.result_ch = None
+        self.result_ch_idx = None
         self.result_msg = None
         
 

@@ -373,6 +373,7 @@ class ChannelHome(object):
 
 
     def remove_read(self, addr):
+        raise Exception("Deprecated!")
         #Optimize!
         for r in self.readqueue:
             if r.addr == addr and r.done == True:
@@ -394,6 +395,7 @@ class ChannelHome(object):
             self.check_termination()
 
     def remove_write(self, addr):
+        raise Exception("Deprecated!")
         for w in self.writequeue:
             if w.addr == addr and w.done == True:
                 self.writequeue.remove(w)
@@ -426,21 +428,34 @@ class ChannelHome(object):
 
         else:
             # Standard matching if no buffer
-            for w in self.writequeue:
-                for r in self.readqueue:
-                    if w.offer(r):
+            for w in self.writequeue[:]:
+                for r in self.readqueue[:]:
+                    remove_write, remove_read, success = w.offer(r)
+                    if remove_write:
+                        self.writequeue.remove(w)
+                    if remove_read:
+                        self.readqueue.remove(r)
+                    if success:
                         return # break match loop on first success
-
 
 
     def poison(self):
         self.ispoisoned=True
+        
+        # counting to shutdown        
+        self.readers -= len(self.readqueue) 
+        self.writers -= len(self.writequeue)
+
         for p in self.readqueue:
             p.poison()
-            self.readers-=1 # counting to shutdown
+
         for p in self.writequeue:
             p.poison()
-            self.writers-=1 # counting to shutdown
+
+        # flush all requests
+        self.readqueue = []
+        self.writequeue = []
+
         self.check_shutdown()
 
     def join_reader(self):
@@ -455,9 +470,12 @@ class ChannelHome(object):
             if self.readers==0:
                 # Set channel retired
                 self.isretired = True
+
+                self.writers-= len(self.writequeue) # counting to shutdown
                 for p in self.writequeue:
-                    p.retire()
-                    self.writers-=1 # counting to shutdown
+                    p.retire()                    
+                self.writequeue = []
+
         self.check_shutdown()
 
     def leave_writer(self):
@@ -466,81 +484,83 @@ class ChannelHome(object):
             if self.writers==0:
                 # Set channel retired
                 self.isretired = True
+                
+                self.readers-= len(self.readqueue) # counting to shutdown
                 for p in self.readqueue:
                     p.retire()
-                    self.readers-=1 # counting to shutdown
+                self.readqueue = []
+
         self.check_shutdown()
 
 class ChannelReq(object):
     def __init__(self, process_addr, msg = None):
         self.addr = process_addr
         self.msg = msg
-        self.done = False
 
     def cancel(self):
-        if self.done == False:
-            try:
-                conn, state = remote_acquire_and_get_state(self.addr)
-                self.done = True
-                remote_cancel(conn)
-                remote_release(self.addr)
-            except SocketClosedException:
-                self.done = True
-                
+        try:
+            conn, state = remote_acquire_and_get_state(self.addr)
+            remote_cancel(conn)
+            remote_release(self.addr)
+        except SocketClosedException:
+            pass
 
     def poison(self):
-        if self.done == False:
-            try:
-                conn, state = remote_acquire_and_get_state(self.addr)
-                if state == READY:
-                    self.done = True
-                remote_poison(conn)
-                remote_release(self.addr)
-            except SocketClosedException:
-                self.done = True
+        try:
+            conn, state = remote_acquire_and_get_state(self.addr)
+            remote_poison(conn)
+            remote_release(self.addr)
+        except SocketClosedException:
+            pass
 
     def retire(self):
-        if self.done == False:
-            try:
-                conn, state = remote_acquire_and_get_state(self.addr)
-                if state == READY:
-                    self.done = True
-                remote_retire(conn)
-                remote_release(self.addr)
-            except SocketClosedException:
-                self.done = True
+        try:
+            conn, state = remote_acquire_and_get_state(self.addr)
+            remote_retire(conn)
+            remote_release(self.addr)
+        except SocketClosedException:
+            pass
     
     def offer(self, reader):
         success = False
+        remove_write = False
+        remove_read = False
 
-        # Check validity
-        if self.done == False and reader.done == False:
+        try:
+            # Acquire double lock
+            if (self.addr < reader.addr):
+                w_conn, w_state = remote_acquire_and_get_state(self.addr)
+                r_conn, r_state = remote_acquire_and_get_state(reader.addr)
+            else:
+                r_conn, r_state = remote_acquire_and_get_state(reader.addr)
+                w_conn, w_state = remote_acquire_and_get_state(self.addr)
 
-            try:
-                if (self.addr < reader.addr):
-                    w_conn, w_state = remote_acquire_and_get_state(self.addr)
-                    r_conn, r_state = remote_acquire_and_get_state(reader.addr)
-                else:
-                    r_conn, r_state = remote_acquire_and_get_state(reader.addr)
-                    w_conn, w_state = remote_acquire_and_get_state(self.addr)
+            # Success?
+            if (r_state == READY and w_state == READY):
+                remote_notify(r_conn, 42, self.msg)
+                remote_notify(w_conn, 42, None)
+                success = True
 
-                if (r_state == READY and w_state == READY):
-                    self.done = True
-                    reader.done = True
-                    remote_notify(r_conn, 42, self.msg)
-                    remote_notify(w_conn, 42, None)
-                    success = True
+                r_state = SUCCESS
+                w_state = SUCCESS
 
-                if (self.addr < reader.addr):
-                    remote_release(reader.addr)
-                    remote_release(self.addr)
-                else:
-                    remote_release(self.addr)
-                    remote_release(reader.addr)
-            except SocketClosedException:
-                pass
+            # Schedule removal of NOT READY requests from channel
+            if (r_state != READY):
+                remove_read = True
+            if (w_state != READY):
+                remove_write = True
 
-        return success
+            # Release double lock
+            if (self.addr < reader.addr):
+                remote_release(reader.addr)
+                remote_release(self.addr)
+            else:
+                remote_release(self.addr)
+                remote_release(reader.addr)
+        except SocketClosedException:
+            pass
+
+        return (remove_write, remove_read, success)
 
 
 
