@@ -113,7 +113,7 @@ H_ARG = 2
 # h : short, CMD
 # l : long, ID
 # l : long, payload size following this header
-header_fmt = "=hll"
+header_fmt = "=h16sl"
 header_size = struct.calcsize(header_fmt)
 
 
@@ -151,7 +151,7 @@ def server():
                     elif header[H_CMD] == PING:
 
                         payload = pickle.dumps("Hello World"+str(cnt), pickle.HIGHEST_PROTOCOL)
-                        s.sendall(compile_header(PONG, 42, len(payload)))
+                        s.sendall(compile_header(PONG, "abcdefgh12345678", len(payload)))
                         s.sendall(payload)
 
                         
@@ -166,7 +166,7 @@ def client():
     for i in xrange(N):
         
         s = connect(server_address)
-        s.sendall(compile_header(PING, 42, 0))        
+        s.sendall(compile_header(PING, "FISKFISKFISKFISK", 0))        
         recv_data = s.recv(header_size)
         header = struct.unpack(header_fmt, recv_data)
         if header[H_CMD] == PONG:
@@ -177,7 +177,7 @@ def client():
         close(server_address)
         
     print 'OK'
-    sendall(server_address, compile_header(SHUTDOWN, 42, 0))
+    sendall(server_address, compile_header(SHUTDOWN, "DADADADADADADADA", 0))
     
 
 
