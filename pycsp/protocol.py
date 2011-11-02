@@ -261,52 +261,63 @@ class Buffer(object):
 
     def insertfrom(self, writer):
         success = False
+        remove_write = False
 
         # Check for available buffer space
         if len(self.items) < self.max:
 
-            # Check validity
-            if writer.done == False:
+            try:
+                w_conn, w_state, w_seq = remote_acquire_and_get_state(writer.process)
 
-                try:
-                    w_conn, w_state, w_seq = remote_acquire_and_get_state(writer.addr)
-                    
+                if w_seq != writer.seq_check:
+                    w_state = FAIL
 
-                    if (w_state == READY):
-                        writer.done = True
-                        self.items.append(writer.msg)
-                        remote_notify(w_conn, 42, None)
-                        success = True
+                if (w_state == READY):
+                    self.items.append(writer.msg)
+                    remote_notify(w_conn, writer.process, writer.ch_id, None)
+                    success = True
 
-                    remote_release(writer.addr)
-                except SocketClosedException:
-                    pass
+                    w_state = SUCCESS
 
-        return success
+                # Schedule removal of NOT READY requests from channel
+                if (w_state != READY):
+                    remove_write = True
+
+                remote_release(writer.process)
+            except SocketClosedException:
+                remove_write = True
+
+        return (remove_write, success)
 
     def putinto(self, reader):
         success = False
+        remove_read = False
 
         # Check for available buffer items
         if self.items:
 
-            # Check validity
-            if reader.done == False:
+            try:
+                r_conn, r_state, r_seq = remote_acquire_and_get_state(reader.process)
+                
+                if r_seq != reader.seq_check:
+                    r_state = FAIL
 
-                try:
-                    r_conn, r_state = remote_acquire_and_get_state(reader.addr)
+                if (r_state == READY):
+                    msg = self.items.pop(0)
+                    remote_notify(r_conn, reader.process, reader.ch_id, msg)
+                    success = True
 
-                    if (r_state == READY):
-                        reader.done = True
-                        msg = self.items.pop(0)
-                        remote_notify(r_conn, 42, msg)
-                        success = True
+                    r_state = SUCCESS
 
-                    remote_release(reader.addr)
-                except SocketClosedException:
-                    pass
+                # Schedule removal of NOT READY requests from channel
+                if (r_state != READY):
+                    remove_read = True
 
-        return success
+                remote_release(reader.process)
+            except SocketClosedException:
+                remove_read = True
+
+        return (remove_read, success)
     
         
 class ChannelHome(object):
@@ -381,23 +392,35 @@ class ChannelHome(object):
             
             if self.buffer.isfull():
                 # Extract item
-                for r in self.readqueue:
-                    if self.buffer.putinto(r):
+                for r in self.readqueue[:]:
+                    remove_read, success = self.buffer.putinto(r)
+                    if remove_read:
+                        self.readqueue.remove(r)
+                    if success:
                         break
                 
                 # Insert item
-                for w in self.writequeue:
-                    if self.buffer.insertfrom(w):
+                for w in self.writequeue[:]:
+                    remove_write, success = self.buffer.insertfrom(w)
+                    if remove_write:
+                        self.writequeue.remove(w)
+                    if success:
                         break
             else:
                 # Insert item
-                for w in self.writequeue:
-                    if self.buffer.insertfrom(w):
+                for w in self.writequeue[:]:
+                    remove_write, success = self.buffer.insertfrom(w)
+                    if remove_write:
+                        self.writequeue.remove(w)
+                    if success:
                         break
 
                 # Extract item
-                for r in self.readqueue:
-                    if self.buffer.putinto(r):
+                for r in self.readqueue[:]:
+                    remove_read, success = self.buffer.putinto(r)
+                    if remove_read:
+                        self.readqueue.remove(r)
+                    if success:
                         break
 
         else:
@@ -405,10 +428,11 @@ class ChannelHome(object):
             for w in self.writequeue[:]:
                 for r in self.readqueue[:]:
                     remove_write, remove_read, success = w.offer(r)
-                    if remove_write:                        
-                        self.writequeue.remove(w)
                     if remove_read:
                         self.readqueue.remove(r)
+                    if remove_write:                        
+                        self.writequeue.remove(w)
+                        break
                     if success:
                         return # break match loop on first success
 
@@ -524,7 +548,6 @@ class ChannelReq(object):
             
             if r_seq != reader.seq_check:
                 r_state = FAIL
-                print("FAIL %d %d" % (r_seq, reader.seq_check))
 
             if w_seq != self.seq_check:
                 w_state = FAIL                
