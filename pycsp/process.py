@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import types
-import time, random
+import uuid
 import threading
 
 import osprocess
@@ -60,14 +60,16 @@ class Process(osprocess.Proc):
         self.args = args
         self.kwargs = kwargs
 
-        # Create unique id
-        self.id = str(random.random())+str(time.time())
+        # Create 16 byte unique id based on network address, sequence number and time sample.
+        self.id = uuid.uuid1().bytes
 
         # Channel request state
         self.state = FAIL
         self.result_ch_idx = None
         self.result_msg = None
         
+        # Used to ensure the validity of the answers by LockThread
+        self.sequence_number = 1L
 
     def wait(self):
         self.cond.acquire()

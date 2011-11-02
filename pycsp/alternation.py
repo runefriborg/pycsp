@@ -141,21 +141,15 @@ class Alternation:
 
         p = osprocess.getProc()
 
-        for c in reqs.keys():
-            _, op = reqs[c]
+        if p.state==SUCCESS:
+            for c in reqs.keys():
+                if c.channel.name == p.result_ch:
+                    act = c
 
-            #if c.channel.idx == ?? 
-            #if op==READ:
-            #    c.remove_read(p)
-            #else:
-            #    c.remove_write(p)
-
-            if p.state==SUCCESS:
-                act=c
-            if p.state==POISON:
-                poison=True
-            if p.state==RETIRE:
-                retire=True
+        elif p.state==POISON:
+            poison=True
+        elif p.state==RETIRE:
+            retire=True
         return (act, poison, retire)
 
     def choose(self):
@@ -166,6 +160,7 @@ class Alternation:
 
         p = osprocess.getProc()
         p.state = READY
+        p.sequence_number += 1
 
         try:
             idx = 0
@@ -191,18 +186,17 @@ class Alternation:
             act, poison, retire = self.__result(reqs)
             if not act:
                 raise ChannelPoisonException
+
         except ChannelRetireException:
             act, poison, retire = self.__result(reqs)
             if not act:
                 raise ChannelRetireException
 
-        if p.state != READY:
-            act, poison, retire = self.__result(reqs)
-
         # If noone have offered a channelrequest, we wait.
-        if not act:
+        if p.state == READY:
             p.wait()
 
+        if not act:
             act, poison, retire = self.__result(reqs)
 
             if not act:

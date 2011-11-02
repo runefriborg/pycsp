@@ -22,7 +22,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 # Imports
-import random, time
+import uuid
 import osprocess
 from channelend import ChannelEndRead, ChannelEndWrite 
 import protocol
@@ -42,16 +42,19 @@ class Channel(object):
 
         # Set name
         if name == None:
-            # Create unique name
-            self.name = str(random.random())+str(time.time())
+            # Create 16 byte unique name based on network address, sequence number and time sample.
+            self.name = uuid.uuid1().bytes
         else:
+            if len(name) > 16:
+                raise Exception("Channel names are limited to 16 characters")
+
             self.name=name
 
         # Set channel home
         if connect == None:
             # Get local channel home
             # These should handle multiple channels in the future
-            self.channelhomethread = protocol.ChannelHomeThread()
+            self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             self.channelhomethread.start()
             self.channelhome = self.channelhomethread.address
         else:
@@ -68,6 +71,7 @@ class Channel(object):
 
         p = osprocess.getProc()
         p.state = READY
+        p.sequence_number += 1
         
         protocol.post_read(self, p)
 
@@ -95,7 +99,8 @@ class Channel(object):
 
         p = osprocess.getProc()
         p.state = READY
-        
+        p.sequence_number += 1
+
         protocol.post_write(self, p, msg)
 
         if p.state == READY:
@@ -127,7 +132,7 @@ class Channel(object):
     def __mul__(self, multiplier):
         new = [self]
         for i in range(multiplier-1):
-            new.append(Channel(name=self.name+str(i+1)))
+            new.append(Channel())
         return new
 
     # syntactic sugar: N * Channel()

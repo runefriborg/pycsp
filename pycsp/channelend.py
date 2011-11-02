@@ -89,9 +89,6 @@ class ChannelEndWrite:
     def post_write(self, process, msg):
         protocol.post_write(self.channel, process, msg)
 
-    def remove_write(self, process):
-        raise Exception("Deprecated!")
-        protocol.remove_write(self.channel, process)
         
     def _retire(self, msg):
         raise ChannelRetireException()
@@ -128,10 +125,6 @@ class ChannelEndRead:
     def post_read(self, process):
         protocol.post_read(self.channel, process)
 
-    def remove_read(self, process):
-        raise Exception("Deprecated!")
-        protocol.remove_read(self.channel, process)
-        
     def _retire(self):
         raise ChannelRetireException()
 

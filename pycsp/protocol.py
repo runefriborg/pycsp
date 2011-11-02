@@ -39,7 +39,7 @@ from pycsp.common.const import *
 # Header CMDs:
 LOCKTHREAD_ACQUIRE_LOCK, LOCKTHREAD_ACCEPT_LOCK, LOCKTHREAD_NOTIFY_SUCCESS, LOCKTHREAD_POISON, LOCKTHREAD_RETIRE, LOCKTHREAD_RELEASE_LOCK = range(6)
 CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_POISON = range(10,15)
-CHANTHREAD_POST_READ, CHANTHREAD_REMOVE_READ, CHANTHREAD_POST_WRITE, CHANTHREAD_REMOVE_WRITE = range(20,24)
+CHANTHREAD_POST_READ, CHANTHREAD_POST_WRITE = range(20,22)
 SHUTDOWN = 30
 
 
@@ -47,90 +47,79 @@ SHUTDOWN = 30
 H_CMD, H_ID = range(2)
 H_MSG_SIZE = 2
 H_ARG = 2
+H_SEQ = 3
 
 # = : Native byte-order, standard size
-# h : short, CMD
-# l : long, ID
-# l : long, payload size following this header
-header_fmt = "=hll"
+# H : short, CMD
+# 16s : string, uuid1 in bytes format
+# L : long, payload size following this header
+# L : long, sequence number used for ignoring channel requests, that was left behind.
+header_fmt = "=H16sLL"
 header_size = struct.calcsize(header_fmt)
 
 def join_reader(channel):
-    send(channel.channelhome, CHANTHREAD_JOIN_READER, 42)
+    send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
 
 def join_writer(channel):
-    send(channel.channelhome, CHANTHREAD_JOIN_WRITER, 42)
+    send(channel.channelhome, CHANTHREAD_JOIN_WRITER, channel.name)
 
 def leave_reader(channel):
-    send(channel.channelhome, CHANTHREAD_LEAVE_READER, 42)
+    send(channel.channelhome, CHANTHREAD_LEAVE_READER, channel.name)
 
 def leave_writer(channel):
-    send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, 42)
+    send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, channel.name)
 
 def poison(channel):
-    send(channel.channelhome, CHANTHREAD_POISON, 42)
+    send(channel.channelhome, CHANTHREAD_POISON, channel.name)
 
 def post_read(channel, process):
-    # 42 must later be replaced by the number ID of the channel
-    send_payload(channel.channelhome, CHANTHREAD_POST_READ, 42, process.lockThread.address)
-
-def remove_read(channel, process):
-    # 42 must later be replaced by the number ID of the channel
-    send_payload(channel.channelhome, CHANTHREAD_REMOVE_READ, 42, process.lockThread.address)
+    send_payload(channel.channelhome, CHANTHREAD_POST_READ, channel.name, AddrID(process.lockThread.address, process.id), process.sequence_number)
 
 def post_write(channel, process, msg):
-    # 42 must later be replaced by the number ID of the channel
-    send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, 42, (process.lockThread.address, msg))
-
-def remove_write(channel, process):
-    # 42 must later be replaced by the number ID of the channel
-    send_payload(channel.channelhome, CHANTHREAD_REMOVE_WRITE, 42, process.lockThread.address)
+    send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, channel.name, (AddrID(process.lockThread.address, process.id), msg), process.sequence_number)
 
 
-def send_payload(addr, cmd, id, payload):
+def send_payload(hostNport, cmd, id, payload, seq=0):
     pickle_payload = pickle.dumps(payload, protocol = pickle.HIGHEST_PROTOCOL)
-    header = compile_header(cmd, id, len(pickle_payload))
+    header = compile_header(cmd, id, len(pickle_payload), seq)
 
-    sock = ossocket.connect(addr)
+    sock = ossocket.connect(hostNport)
     
     sock.sendall(header)
     sock.sendall(pickle_payload)
-    ossocket.close(addr)
+    ossocket.close(hostNport)
 
-def sendNOcache(addr, cmd, id=0, arg=0):
-    """
-    addr = (host, port)
-    """
-    header = compile_header(cmd, id, arg)
+def sendNOcache(dest, cmd, arg=0, seq=0):
+    header = compile_header(cmd, dest.id, arg)
 
-    sock = ossocket.connectNOcache(addr)
+    sock = ossocket.connectNOcache(dest.hostNport)
     sock.sendall(header)
     ossocket.closeNOcache(sock)
 
-def send(addr, cmd, id=0, arg=0):
+def send(hostNport, cmd, id, arg=0):
     """
-    addr = (host, port)
+    hostNport = (host, port)
     """
     header = compile_header(cmd, id, arg)
 
-    sock = ossocket.connect(addr)
+    sock = ossocket.connect(hostNport)
     sock.sendall(header)
-    ossocket.close(addr)
+    ossocket.close(hostNport)
 
-def compile_header(cmd, id, arg):
+def compile_header(cmd, id, arg, seq=0):
     """
     arg is often used as msg_size to indicate the size of the following pickle data section
     """
-    return struct.pack(header_fmt, cmd, id, arg)
+    return struct.pack(header_fmt, cmd, id, arg, seq)
 
 
 
-def remote_acquire_and_get_state(addr, process_id=42):    
+def remote_acquire_and_get_state(dest):
 
-    sock = ossocket.connect(addr)
+    sock = ossocket.connect(dest.hostNport)
 
     try:
-        sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, process_id, 0))
+        sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
         compiled_header = sock.recv(header_size)
     except socket.error, (value,message): 
         if sock: 
@@ -146,24 +135,22 @@ def remote_acquire_and_get_state(addr, process_id=42):
 
     header = struct.unpack(header_fmt, compiled_header)
     
-    return (sock, header[H_ARG])
+    return (sock, header[H_ARG], header[H_SEQ])
 
-def remote_notify(sock, result_ch, result_msg, process_id=42):
-    data = {'channel':result_ch, 'msg':result_msg}
-    pickled_data = pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
-    sock.sendall(compile_header(LOCKTHREAD_NOTIFY_SUCCESS, process_id, len(pickled_data)))
+def remote_notify(sock, dest, result_ch, result_msg):
+    pickled_data = pickle.dumps((result_ch,result_msg), pickle.HIGHEST_PROTOCOL)
+    sock.sendall(compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
     sock.sendall(pickled_data)
 
-def remote_poison(sock, process_id=42):
-    sock.sendall(compile_header(LOCKTHREAD_POISON, process_id, 0))
+def remote_poison(sock, dest):
+    sock.sendall(compile_header(LOCKTHREAD_POISON, dest.id, 0))
 
-def remote_retire(sock, process_id=42):
-    sock.sendall(compile_header(LOCKTHREAD_RETIRE, process_id, 0))
+def remote_retire(sock, dest):
+    sock.sendall(compile_header(LOCKTHREAD_RETIRE, dest.id, 0))
 
-def remote_release(addr, process_id=42):
-    # OPTIMIZE: remove sendall and signal release by closing the socket only
-    ossocket.sendall(addr, compile_header(LOCKTHREAD_RELEASE_LOCK, process_id, 0))
-    ossocket.close(addr)
+def remote_release(dest):
+    ossocket.sendall(dest.hostNport, compile_header(LOCKTHREAD_RELEASE_LOCK, dest.id, 0))
+    ossocket.close(dest.hostNport)
     
 class LockThread(threading.Thread):
     def __init__(self, process, cond):
@@ -176,9 +163,8 @@ class LockThread(threading.Thread):
         
         self.finished = False
 
+
     def run(self):
-
-
         active_socket_list = [self.server_socket]
 
         while(not self.finished):
@@ -203,12 +189,12 @@ class LockThread(threading.Thread):
                             self.finished = True
 
                         elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
-                            ID = header[H_ID]
+                            process_id = header[H_ID]
                             # The ID is not really necessary, since everything is kept in a local state.
                             # This will change when a lockthread handles multiple processes.
 
                             # Send reply
-                            s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, ID, self.process.state))
+                            s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, process_id, self.process.state, seq=self.process.sequence_number))
 
                             lock_acquired = True
 
@@ -223,10 +209,10 @@ class LockThread(threading.Thread):
 
                                 if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
                                     self.cond.acquire()
+                                    result_ch, result_msg = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                                    self.process.result_ch = result_ch
+                                    self.process.result_msg = result_msg
                                     self.process.state = SUCCESS
-                                    data = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                                    self.process.result_ch = data['channel']
-                                    self.process.result_msg = data['msg']
                                     self.cond.notifyAll()
                                     self.cond.release()
 
@@ -252,7 +238,7 @@ class LockThread(threading.Thread):
 
     def shutdown(self):
 
-        sendNOcache(self.address, SHUTDOWN)
+        sendNOcache(AddrID(self.address), SHUTDOWN)
         
         # This method is called by another thread.
         # The LockThread of a process may shutdown before all posted requests have been
@@ -283,7 +269,8 @@ class Buffer(object):
             if writer.done == False:
 
                 try:
-                    w_conn, w_state = remote_acquire_and_get_state(writer.addr)
+                    w_conn, w_state, w_seq = remote_acquire_and_get_state(writer.addr)
+                    
 
                     if (w_state == READY):
                         writer.done = True
@@ -323,13 +310,15 @@ class Buffer(object):
     
         
 class ChannelHome(object):
-    def __init__(self, buffer=0):
+    def __init__(self, name, buffer):
         self.readqueue=[]
         self.writequeue=[]
         self.ispoisoned=False
         self.isretired=False
         self.readers=0
         self.writers=0
+
+        self.name = name
 
         if buffer > 0:
             self.buffer = Buffer(buffer)
@@ -352,7 +341,7 @@ class ChannelHome(object):
             #print self.readers,self.writers
             #import threading
             import inspect
-            print inspect.getouterframes(inspect.currentframe())[1][3]
+            print "check_shutdown: %s" % (inspect.getouterframes(inspect.currentframe())[1][3])
             #print threading.current_thread().name
             if self.readers == 0 and self.writers == 0:
                 print "shutdown"
@@ -372,14 +361,6 @@ class ChannelHome(object):
             self.check_termination()
 
 
-    def remove_read(self, addr):
-        raise Exception("Deprecated!")
-        #Optimize!
-        for r in self.readqueue:
-            if r.addr == addr and r.done == True:
-                self.readqueue.remove(r)
-                break
-
     def post_write(self, req):
         self.check_termination()
 
@@ -393,13 +374,6 @@ class ChannelHome(object):
             self.match()
         else:
             self.check_termination()
-
-    def remove_write(self, addr):
-        raise Exception("Deprecated!")
-        for w in self.writequeue:
-            if w.addr == addr and w.done == True:
-                self.writequeue.remove(w)
-                break
 
     def match(self):
         if self.buffer:
@@ -431,7 +405,7 @@ class ChannelHome(object):
             for w in self.writequeue[:]:
                 for r in self.readqueue[:]:
                     remove_write, remove_read, success = w.offer(r)
-                    if remove_write:
+                    if remove_write:                        
                         self.writequeue.remove(w)
                     if remove_read:
                         self.readqueue.remove(r)
@@ -492,32 +466,45 @@ class ChannelHome(object):
 
         self.check_shutdown()
 
+class AddrID(object):
+    def __init__(self, addr=('',0), id=""):
+        self.hostNport = addr
+        self.id = id
+
 class ChannelReq(object):
-    def __init__(self, process_addr, msg = None):
-        self.addr = process_addr
+    def __init__(self, process_src, process_seq, ch_id, msg = None):
+        self.process = process_src
+        self.ch_id = ch_id
         self.msg = msg
+
+        # check_sequence contains a number which must be equivalent with the sequence
+        # number returned by remote_acquire_and_get_state.
+        self.seq_check = process_seq
 
     def cancel(self):
         try:
-            conn, state = remote_acquire_and_get_state(self.addr)
-            remote_cancel(conn)
-            remote_release(self.addr)
+            conn, state, seq = remote_acquire_and_get_state(self.process)
+            if seq == self.seq_check:
+                remote_cancel(conn, self.process)
+            remote_release(self.process)
         except SocketClosedException:
             pass
 
     def poison(self):
         try:
-            conn, state = remote_acquire_and_get_state(self.addr)
-            remote_poison(conn)
-            remote_release(self.addr)
+            conn, state, seq = remote_acquire_and_get_state(self.process)
+            if seq == self.seq_check:
+                remote_poison(conn, self.process)
+            remote_release(self.process)
         except SocketClosedException:
             pass
 
     def retire(self):
         try:
-            conn, state = remote_acquire_and_get_state(self.addr)
-            remote_retire(conn)
-            remote_release(self.addr)
+            conn, state, seq = remote_acquire_and_get_state(self.process)
+            if seq == self.seq_check:
+                remote_retire(conn, self.process)
+            remote_release(self.process)
         except SocketClosedException:
             pass
     
@@ -528,17 +515,24 @@ class ChannelReq(object):
 
         try:
             # Acquire double lock
-            if (self.addr < reader.addr):
-                w_conn, w_state = remote_acquire_and_get_state(self.addr)
-                r_conn, r_state = remote_acquire_and_get_state(reader.addr)
+            if (self.process.id < reader.process.id):
+                w_conn, w_state, w_seq = remote_acquire_and_get_state(self.process)
+                r_conn, r_state, r_seq = remote_acquire_and_get_state(reader.process)
             else:
-                r_conn, r_state = remote_acquire_and_get_state(reader.addr)
-                w_conn, w_state = remote_acquire_and_get_state(self.addr)
+                r_conn, r_state, r_seq = remote_acquire_and_get_state(reader.process)
+                w_conn, w_state, w_seq = remote_acquire_and_get_state(self.process)
+            
+            if r_seq != reader.seq_check:
+                r_state = FAIL
+                print("FAIL %d %d" % (r_seq, reader.seq_check))
 
+            if w_seq != self.seq_check:
+                w_state = FAIL                
+                
             # Success?
             if (r_state == READY and w_state == READY):
-                remote_notify(r_conn, 42, self.msg)
-                remote_notify(w_conn, 42, None)
+                remote_notify(r_conn, reader.process, reader.ch_id, self.msg)
+                remote_notify(w_conn, self.process, self.ch_id, None)
                 success = True
 
                 r_state = SUCCESS
@@ -551,12 +545,12 @@ class ChannelReq(object):
                 remove_write = True
 
             # Release double lock
-            if (self.addr < reader.addr):
-                remote_release(reader.addr)
-                remote_release(self.addr)
+            if (self.process.id < reader.process.id):
+                remote_release(reader.process)
+                remote_release(self.process)
             else:
-                remote_release(self.addr)
-                remote_release(reader.addr)
+                remote_release(self.process)
+                remote_release(reader.process)
         except SocketClosedException:
             pass
 
@@ -565,10 +559,10 @@ class ChannelReq(object):
 
 
 class ChannelHomeThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, name, buffer):
         threading.Thread.__init__(self)
 
-        self.channel = ChannelHome()
+        self.channel = ChannelHome(name, buffer)
         self.server_socket, self.address = ossocket.start_server()
 
     def run(self):
@@ -604,61 +598,57 @@ class ChannelHomeThread(threading.Thread):
                             self.channel.poison()
 
                         elif header[H_CMD] == CHANTHREAD_POST_WRITE:
-                            (address, msg) = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            (process, msg) = pickle.loads(s.recv(header[H_MSG_SIZE]))
                             try:
-                                self.channel.post_write(ChannelReq(address, msg))
+                                self.channel.post_write(ChannelReq(process, header[H_SEQ], self.channel.name, msg))
                             except ChannelPoisonException:
                                 try:                    
-                                    lock_s, state = remote_acquire_and_get_state(address)
-                                    if state == READY:
-                                        remote_poison(lock_s)
-                                        self.channel.writers-=1  # counting to shutdown
-                                    remote_release(address)
+                                    lock_s, state, seq = remote_acquire_and_get_state(process)
+                                    if seq == header[H_SEQ]:
+                                        if state == READY:
+                                            remote_poison(lock_s, process)
+                                            self.channel.writers-=1  # counting to shutdown
+                                    remote_release(process)
                                 except SocketClosedException:
                                     self.channel.writers-=1 # counting to shutdown
 
                             except ChannelRetireException:
                                 try:                    
-                                    lock_s, state = remote_acquire_and_get_state(address)
-                                    if state == READY:
-                                        remote_retire(lock_s)
-                                        self.channel.writers-=1  # counting to shutdown
-                                    remote_release(address)
+                                    lock_s, state, seq = remote_acquire_and_get_state(process)
+                                    if seq == header[H_SEQ]:
+                                        if state == READY:
+                                            remote_retire(lock_s, process)
+                                            self.channel.writers-=1  # counting to shutdown
+                                    remote_release(process)
                                 except SocketClosedException:
                                     self.channel.writers-=1  # counting to shutdown
                             self.channel.check_shutdown()
 
-                        elif header[H_CMD] == CHANTHREAD_REMOVE_WRITE:
-                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                            self.channel.remove_write(address)
-
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
-                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            process = pickle.loads(s.recv(header[H_MSG_SIZE]))
                             try:
-                                self.channel.post_read(ChannelReq(address))
+                                self.channel.post_read(ChannelReq(process, header[H_SEQ], self.channel.name))
                             except ChannelPoisonException:
                                 try:                    
-                                    lock_s, state = remote_acquire_and_get_state(address)
-                                    if state == READY:
-                                        remote_poison(lock_s)
-                                        self.channel.readers-=1  # counting to shutdown
-                                    remote_release(address)
+                                    lock_s, state, seq = remote_acquire_and_get_state(process)
+                                    if seq == header[H_SEQ]:
+                                        if state == READY:
+                                            remote_poison(lock_s, process)
+                                            self.channel.readers-=1  # counting to shutdown
+                                    remote_release(process)
                                 except SocketClosedException:
                                     self.channel.readers-=1  # counting to shutdown
                             except ChannelRetireException:
                                 try:                    
-                                    lock_s, state = remote_acquire_and_get_state(address)
-                                    if state == READY:
-                                        self.channel.readers-=1  # counting to shutdown
-                                        remote_retire(lock_s)
-                                    remote_release(address)
+                                    lock_s, state = remote_acquire_and_get_state(process)
+                                    if seq == header[H_SEQ]:
+                                        if state == READY:
+                                            self.channel.readers-=1  # counting to shutdown
+                                            remote_retire(lock_s, process)
+                                    remote_release(process)
                                 except SocketClosedException:
                                     self.channel.readers-=1  # counting to shutdown
                             self.channel.check_shutdown()
-
-                        elif header[H_CMD] == CHANTHREAD_REMOVE_READ:
-                            address = pickle.loads(s.recv(header[H_MSG_SIZE]))
-                            self.channel.remove_read(address)
                 
 
     def shutdown(self):
