@@ -77,6 +77,7 @@ def post_read(channel, process):
 
 def post_write(channel, process, msg):
     send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, channel.name, (AddrID(process.lockThread.address, process.id), msg), process.sequence_number)
+    
 
 
 def send_payload(hostNport, cmd, id, payload, seq=0):
@@ -87,6 +88,7 @@ def send_payload(hostNport, cmd, id, payload, seq=0):
     
     sock.sendall(header)
     sock.sendall(pickle_payload)
+    
     ossocket.close(hostNport)
 
 def sendNOcache(dest, cmd, arg=0, seq=0):
@@ -436,7 +438,6 @@ class ChannelHome(object):
                     if success:
                         return # break match loop on first success
 
-
     def poison(self):
         self.ispoisoned=True
         
@@ -546,12 +547,12 @@ class ChannelReq(object):
                 r_conn, r_state, r_seq = remote_acquire_and_get_state(reader.process)
                 w_conn, w_state, w_seq = remote_acquire_and_get_state(self.process)
             
+            # Check sequence numbers
             if r_seq != reader.seq_check:
                 r_state = FAIL
-
             if w_seq != self.seq_check:
-                w_state = FAIL                
-                
+                w_state = FAIL
+
             # Success?
             if (r_state == READY and w_state == READY):
                 remote_notify(r_conn, reader.process, reader.ch_id, self.msg)
@@ -575,7 +576,7 @@ class ChannelReq(object):
                 remote_release(self.process)
                 remote_release(reader.process)
         except SocketClosedException:
-            pass
+            raise Exception("This must be handled!")
 
         return (remove_write, remove_read, success)
 
@@ -587,6 +588,8 @@ class ChannelHomeThread(threading.Thread):
 
         self.channel = ChannelHome(name, buffer)
         self.server_socket, self.address = ossocket.start_server()
+
+        self.id = name
 
     def run(self):
 
@@ -622,7 +625,12 @@ class ChannelHomeThread(threading.Thread):
 
                         elif header[H_CMD] == CHANTHREAD_POST_WRITE:
                             # Read messageparts until entire msg is received
-                            (process, msg) = pickle.loads(ossocket.recvall(s, header[H_MSG_SIZE]))
+                            data = ossocket.recvall(s, header[H_MSG_SIZE])
+                            try:
+                                (process, msg) = pickle.loads(data)
+                            except pickle.UnpicklingError:
+                                print data
+                                raise pickle.UnpicklingError()
                             try:
                                 self.channel.post_write(ChannelReq(process, header[H_SEQ], self.channel.name, msg))
                             except ChannelPoisonException:
@@ -649,7 +657,12 @@ class ChannelHomeThread(threading.Thread):
                             self.channel.check_shutdown()
 
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
-                            process =  pickle.loads(ossocket.recvall(s, header[H_MSG_SIZE]))
+                            data = ossocket.recvall(s, header[H_MSG_SIZE])
+                            try:
+                                process =  pickle.loads(data)
+                            except pickle.UnpicklingError:
+                                print data
+                                raise pickle.UnpicklingError()
                             try:
                                 self.channel.post_read(ChannelReq(process, header[H_SEQ], self.channel.name))
                             except ChannelPoisonException:

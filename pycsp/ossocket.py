@@ -3,7 +3,7 @@
 import socket
 import osprocess
 
-EXPIRATION_LIMIT = 100
+EXPIRATION_LIMIT = 10
 
 class DebugSocket():
     def __init__(self, sock):
@@ -37,6 +37,13 @@ def DebugSocket(sock):
     """ Overwrite Debugsocket class """
     return sock
 
+def getID():
+    t, name = osprocess.getThreadAndName()
+    if name == "MainThread":
+        id = "__mainproc__"
+    else:
+        id = t.id
+    return id
 
 def start_server(server_addr=('', 0)):
     
@@ -53,7 +60,7 @@ def start_server(server_addr=('', 0)):
     address = s.getsockname()
 
     # Initiate listening for connections. Create queue of 5 for unaccepted connections
-    s.listen(10)
+    s.listen(5)
 
     return DebugSocket(s), address
 
@@ -65,7 +72,7 @@ usage_connections = {}
 def connect(addr):
     global stored_connections, usage_connections
 
-    t_id = osprocess.getProcName()
+    t_id = getID()
 
     # Lookup connection
     if stored_connections.has_key(t_id):
@@ -109,11 +116,12 @@ def recvall(sock, msg_len):
         msg_chunks.append(chunk)
         msg_len_received += len(chunk)
     return "".join(msg_chunks)
+    
 
 def sendall(addr, data):
     global stored_connections
 
-    t_id = osprocess.getProcName()
+    t_id = getID()
     sock = stored_connections[t_id][addr]
     return sock.sendall(data)
     
@@ -121,7 +129,7 @@ def sendall(addr, data):
 def close(addr):
     global stored_connections, usage_connections
 
-    t_id = osprocess.getProcName()
+    t_id = getID()
 
     if (usage_connections[t_id][addr] > EXPIRATION_LIMIT):
         sock = stored_connections[t_id][addr]
@@ -135,7 +143,7 @@ def close(addr):
 def closeall():
     global stored_connections, usage_connections
 
-    t_id = osprocess.getProcName()
+    t_id = getID()
 
     for addr in stored_connections[t_id]:
         sock = stored_connections[t_id][addr]

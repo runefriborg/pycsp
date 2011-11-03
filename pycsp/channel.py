@@ -78,10 +78,7 @@ class Channel(object):
         if p.state == READY:
             p.wait()
 
-        #protocol.remove_read(self, p)
-        
         if p.state == SUCCESS:
-            #print "GOT %s" % (str(p.result_msg))
             return p.result_msg                
         elif p.state == POISON:
             self.ispoisoned = True
@@ -105,8 +102,6 @@ class Channel(object):
 
         if p.state == READY:
             p.wait()
-
-        #protocol.remove_write(self, p)
         
         if p.state == SUCCESS:
             return               
