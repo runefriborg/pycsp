@@ -24,8 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from pycsp_import import *
 import time
 
-#200 kb
-DATA = "10CharsNow"*100*100
+#2000 kb
+DATA = "10CharsNow"*100*1000
 
 @process
 def Prefix(cin, cout, prefixItem=None):

@@ -209,7 +209,7 @@ class LockThread(threading.Thread):
 
                                 if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
                                     self.cond.acquire()
-                                    result_ch, result_msg = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                                    result_ch, result_msg = pickle.loads(ossocket.recvall(s, header[H_MSG_SIZE]))
                                     self.process.result_ch = result_ch
                                     self.process.result_msg = result_msg
                                     self.process.state = SUCCESS
@@ -621,7 +621,8 @@ class ChannelHomeThread(threading.Thread):
                             self.channel.poison()
 
                         elif header[H_CMD] == CHANTHREAD_POST_WRITE:
-                            (process, msg) = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            # Read messageparts until entire msg is received
+                            (process, msg) = pickle.loads(ossocket.recvall(s, header[H_MSG_SIZE]))
                             try:
                                 self.channel.post_write(ChannelReq(process, header[H_SEQ], self.channel.name, msg))
                             except ChannelPoisonException:
@@ -648,7 +649,7 @@ class ChannelHomeThread(threading.Thread):
                             self.channel.check_shutdown()
 
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
-                            process = pickle.loads(s.recv(header[H_MSG_SIZE]))
+                            process =  pickle.loads(ossocket.recvall(s, header[H_MSG_SIZE]))
                             try:
                                 self.channel.post_read(ChannelReq(process, header[H_SEQ], self.channel.name))
                             except ChannelPoisonException:
