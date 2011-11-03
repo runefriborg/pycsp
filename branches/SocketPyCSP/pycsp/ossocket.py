@@ -96,6 +96,19 @@ def connect(addr):
     return DebugSocket(sock)
 
 
+def recvall(sock, msg_len):
+    """
+    A fast string concatenation in a loop that continues until the entire msg has been received
+    """
+    msg_len_received = 0
+    msg_chunks = []
+    while msg_len_received < msg_len:
+        chunk = sock.recv(msg_len - msg_len_received)
+        if chunk == '':
+            raise SocketClosedException()
+        msg_chunks.append(chunk)
+        msg_len_received += len(chunk)
+    return "".join(msg_chunks)
 
 def sendall(addr, data):
     global stored_connections
