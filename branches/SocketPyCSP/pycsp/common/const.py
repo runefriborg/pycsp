@@ -5,6 +5,8 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 See LICENSE.txt for licensing details (MIT License). 
 """
+import os
+ENVVAL_DEBUG = "PYCSP_DEBUG"
 
 # Operation type
 READ, WRITE = range(2)
@@ -25,5 +27,3 @@ class ChannelRetireException(Exception):
 class SocketClosedException(Exception):
     def __init__(self):
         pass
-
-

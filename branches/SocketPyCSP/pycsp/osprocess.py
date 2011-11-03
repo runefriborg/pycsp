@@ -1,9 +1,21 @@
 
 import os
+import threading
 
-ENVVAL = 'PYCSP_MULTIPROCESSING'
+ENVVAL_PROCTYPE = 'PYCSP_MULTIPROCESSING'
 
-if os.environ.has_key(ENVVAL) and not os.environ[ENVVAL] == '':
+def getThreadAndName():
+    try:
+        # compatible with Python 2.6+
+        t = threading.current_thread()
+        name = t.name
+    except AttributeError:
+        # compatible with Python 2.5- 
+        t = threading.currentThread()
+        name = t.getName()
+    return (t, name)
+
+if os.environ.has_key(ENVVAL_PROCTYPE) and not os.environ[ENVVAL_PROCTYPE] == '':
     import multiprocessing
     from multiprocessing import Process as Proc
 
@@ -19,28 +31,14 @@ if os.environ.has_key(ENVVAL) and not os.environ[ENVVAL] == '':
             return name
         
 else:
-    import threading
     from threading import Thread as Proc
 
     def getProc():
-        try:
-            # compatible with Python 2.6+
-            t = threading.current_thread()
-        except AttributeError:
-            # compatible with Python 2.5- 
-            t = threading.currentThread()
+        t, _ = getThreadAndName()
         return t
-        
+
     def getProcName():
-        try:
-            # compatible with Python 2.6+
-            t = threading.current_thread()
-            name = t.name
-        except AttributeError:
-            # compatible with Python 2.5- 
-            t = threading.currentThread()
-            name = t.getName()
-    
+        _, name = getThreadAndName()    
         if name == 'MainThread':
             return '__mainproc__'
         else:
