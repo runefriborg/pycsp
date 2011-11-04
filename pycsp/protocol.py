@@ -54,7 +54,7 @@ H_SEQ = 3
 # 16s : string, uuid1 in bytes format
 # L : long, payload size following this header
 # L : long, sequence number used for ignoring channel requests, that was left behind.
-header_fmt = "=H16sLL"
+header_fmt = "=H16sLLxxxxxx"
 header_size = struct.calcsize(header_fmt)
 
 def join_reader(channel):
@@ -81,7 +81,7 @@ def post_write(channel, process, msg):
 
 
 def send_payload(hostNport, cmd, id, payload, seq=0):
-    pickle_payload = pickle.dumps(payload, protocol = pickle.HIGHEST_PROTOCOL)
+    pickle_payload = pickle.dumps(payload, protocol = PICKLE_PROTOCOL)
     header = compile_header(cmd, id, len(pickle_payload), seq)
 
     sock = ossocket.connect(hostNport)
@@ -129,7 +129,8 @@ def remote_acquire_and_get_state(dest):
         compiled_header = ""
     
 
-    if len(compiled_header) == 0:
+    #if len(compiled_header) == 0:
+    if len(compiled_header) != header_size:
         # connection broken.
         # When a channel is unable to acquire the lock for process, the
         # posted request is disabled.
@@ -140,7 +141,7 @@ def remote_acquire_and_get_state(dest):
     return (sock, header[H_ARG], header[H_SEQ])
 
 def remote_notify(sock, dest, result_ch, result_msg):
-    pickled_data = pickle.dumps((result_ch,result_msg), pickle.HIGHEST_PROTOCOL)
+    pickled_data = pickle.dumps((result_ch,result_msg), protocol= PICKLE_PROTOCOL)
     sock.sendall(compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
     sock.sendall(pickled_data)
 
@@ -179,7 +180,8 @@ class LockThread(threading.Thread):
                 else:
                     
                     recv_data = s.recv(header_size)
-                    if not recv_data:
+                    if len(recv_data) != header_size:
+                    #if not recv_data:
                         # connection disconnected
                         active_socket_list.remove(s)
                         s.close()
@@ -203,7 +205,8 @@ class LockThread(threading.Thread):
 
                             while (lock_acquired):
                                 compiled_header = s.recv(header_size)
-                                if len(compiled_header) == 0:
+                                #if len(compiled_header) == 0:
+                                if len(compiled_header) != header_size:
                                     # connection broken.
                                     raise Exception("connection broken")
 
@@ -604,8 +607,9 @@ class ChannelHomeThread(threading.Thread):
                     conn, _ = self.server_socket.accept()
                     active_socket_list.append(conn)
                 else:
-                    recv_data = s.recv(header_size)
-                    if not recv_data:
+                    recv_data = s.recv(header_size)                    
+                    #if not recv_data:
+                    if len(recv_data) != header_size:
                         # connection disconnected
                         active_socket_list.remove(s)
                         s.close()
@@ -626,10 +630,14 @@ class ChannelHomeThread(threading.Thread):
                         elif header[H_CMD] == CHANTHREAD_POST_WRITE:
                             # Read messageparts until entire msg is received
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
+                            #data = s.recv(header[H_MSG_SIZE])
                             try:
                                 (process, msg) = pickle.loads(data)
-                            except pickle.UnpicklingError:
+                            except pickle.UnpicklingError, e:
+                                print "POST_WRITE"
+                                print header[H_MSG_SIZE], len(data)
                                 print data
+                                print e
                                 raise pickle.UnpicklingError()
                             try:
                                 self.channel.post_write(ChannelReq(process, header[H_SEQ], self.channel.name, msg))
@@ -658,10 +666,14 @@ class ChannelHomeThread(threading.Thread):
 
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
+                            #data = s.recv(header[H_MSG_SIZE])
                             try:
                                 process =  pickle.loads(data)
-                            except pickle.UnpicklingError:
+                            except pickle.UnpicklingError, e:
+                                print "POST_READ"
+                                print header[H_MSG_SIZE], len(data)
                                 print data
+                                print e
                                 raise pickle.UnpicklingError()
                             try:
                                 self.channel.post_read(ChannelReq(process, header[H_SEQ], self.channel.name))
