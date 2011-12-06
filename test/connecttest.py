@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: latin-1 -*-
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
@@ -21,19 +19,27 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+
 from pycsp_import import *
 
-@process
-def Successor(cin, cout):
-    """Adds 1 to the value read on the input channel and outputs it on the output channel.
-    Infinite loop.
-    """
-    print 'Started Successor'
-    while True:
-        cout(cin()+1)
+A = Channel("A", connect=("",8888))
+try:
+    cin = A.reader()
+except SocketConnectException:
+    pass
 
 
-b = Channel("b", connect=('', 10000+ord('b')))
-c = Channel("c", server=('', 10000+ord('c')))
+try:
+    A = Channel("A", server=("",9999))
+    cin = A.reader()
+except SocketBindException:
+    pass
 
-Parallel(Successor(+b, -c))
+try:
+    B = Channel("B", server=("",9999))
+    cin = B.reader()
+except SocketBindException:
+    pass
+
+
+

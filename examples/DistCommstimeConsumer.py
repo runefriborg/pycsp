@@ -28,7 +28,7 @@ import time
 def Consumer(cin):
     "Commstime consumer process"
     print 'Started Consumer'
-    N = 5000
+    N = 20000
     ts = time.time
     t1 = ts()
     cin()
@@ -44,7 +44,7 @@ def Consumer(cin):
     poison(cin)
 
 
-d = Channel("d", connect=('', 10000+ord('d')))
+d = Channel("d", server=('', 10000+ord('d')))
 
 
 Parallel(Consumer(+d))                       

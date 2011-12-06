@@ -33,6 +33,7 @@ import socket, select, threading
 import cPickle as pickle
 import base64
 import struct
+from exceptions import *
 from pycsp.common.const import *
 
 

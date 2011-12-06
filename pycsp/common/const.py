@@ -10,8 +10,14 @@ import os
 ENVVAL_PROCTYPE = 'PYCSP_MULTIPROCESSING'
 ENVVAL_PORT = 'PYCSP_PORT'
 
+
 # Setup
 PICKLE_PROTOCOL= 0
+CONNECT_TIMEOUT = 10
+CONNECT_RETRY_DELAY = 0.1
+
+BIND_TIMEOUT = 10
+BIND_RETRY_DELAY = 1
 
 # Operation type
 READ, WRITE = range(2)
@@ -19,16 +25,3 @@ READ, WRITE = range(2)
 # Constants used for both ChannelReq results and ReqStatus states.
 READY, FAIL, SUCCESS, POISON, RETIRE = range(5)
 
-# Exceptions
-class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
-
-class ChannelRetireException(Exception): 
-    def __init__(self):
-        pass
-
-
-class SocketClosedException(Exception):
-    def __init__(self):
-        pass
