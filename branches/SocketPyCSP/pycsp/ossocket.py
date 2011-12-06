@@ -1,7 +1,43 @@
 
-
+import time
+import errno
 import socket
 import threading
+from exceptions import *
+from pycsp.common.const import *
+
+
+def _connect(addr):
+    connected = False
+    t1 = None
+    sock = None
+    while (not connected):
+        try:
+            # Create IPv4 TCP socket (TODO: add support for IPv6)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            # Disable Nagle's algorithem, to enable faster send
+            sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+            # Connect to addr
+            sock.connect(addr)
+            connected = True
+        except socket.error, (value,message):
+            print value, message
+            if sock:
+                sock.close()
+            if value != errno.ECONNREFUSED:            
+                raise Exception("Fatal error: Could not open socket: " + message)
+        if not connected:
+            if t1 == None:
+                t1 = time.time()
+            else:
+                if (time.time()-t1) > CONNECT_TIMEOUT:
+                    raise SocketConnectException()
+            time.sleep(CONNECT_RETRY_DELAY)
+
+    return sock
+
 
 def getThread():
     try:
@@ -49,23 +85,41 @@ class DebugSocket():
 #    return sock
 
 def start_server(server_addr=('', 0)):
-    
-    # Create IPv4 TCP socket (TODO: add support for IPv6)
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ok = False
+    t1 = None
+    sock = None
+    while (not ok):
+        try:
+            # Create IPv4 TCP socket (TODO: add support for IPv6)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Disable Nagle's algorithem, to enable faster send
-    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            # Disable Nagle's algorithem, to enable faster send
+            sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
-    # Bind to address
-    s.bind(server_addr)
+            # Bind to address
+            sock.bind(server_addr)
+            ok = True
+        except socket.error, (value,message):
+            print value, message
+            if sock:
+                sock.close()
+            if value != errno.EADDRINUSE:            
+                raise Exception("Fatal error: Could not bind to socket: " + message)
+        if not ok:
+            if t1 == None:
+                t1 = time.time()
+            else:
+                if (time.time()-t1) > BIND_TIMEOUT:
+                    raise SocketBindException()
+            time.sleep(BIND_RETRY_DELAY)
     
     # Obtain binded addresses
-    address = s.getsockname()
+    address = sock.getsockname()
 
     # Initiate listening for connections. Create queue of 5 for unaccepted connections
-    s.listen(5)
+    sock.listen(5)
 
-    return DebugSocket(s), address
+    return DebugSocket(sock), address
 
 
 def connect(addr):
@@ -77,16 +131,7 @@ def connect(addr):
             t.usage[addr] += 1
             return DebugSocket(t.conn[addr])
     
-    #print("Connect: %s" % (str(addr)))
-
-    # Create IPv4 TCP socket (TODO: add support for IPv6)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Disable Nagle's algorithem, to enable faster send
-    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-
-    # Connect
-    sock.connect(addr)
+    sock = _connect(addr)
 
     # Save connection
     if t.__dict__.has_key("conn"):
@@ -97,6 +142,7 @@ def connect(addr):
         t.usage = {addr:1}
 
     return DebugSocket(sock)
+
 
 
 def recvall(sock, msg_len):
@@ -143,15 +189,7 @@ def closeall():
     t.usage = {}
 
 def connectNOcache(addr):
-    # Create IPv4 TCP socket (TODO: add support for IPv6)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Disable Nagle's algorithem, to enable faster send
-    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-
-    # Connect
-    sock.connect(addr)
-
+    sock = _connect(addr)
     return DebugSocket(sock)
 
 def closeNOcache(sock):

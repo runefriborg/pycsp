@@ -26,6 +26,7 @@ import uuid
 import osprocess
 from channelend import ChannelEndRead, ChannelEndWrite 
 import protocol
+from exceptions import *
 from pycsp.common.const import *
 
 # Classes
