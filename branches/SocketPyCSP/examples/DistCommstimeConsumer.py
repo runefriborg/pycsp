@@ -25,31 +25,6 @@ from pycsp_import import *
 import time
 
 @process
-def Prefix(cin, cout, prefixItem=None):
-    print 'Started Prefix'
-    t = prefixItem
-    while True:
-        cout(t)
-        t = cin()
-
-@process
-def Delta2(cin, cout1, cout2):
-    print 'Started Delta2'
-    while True:
-        t = cin()
-        cout1(t)
-        cout2(t)
-
-@process
-def Successor(cin, cout):
-    """Adds 1 to the value read on the input channel and outputs it on the output channel.
-    Infinite loop.
-    """
-    print 'Started Successor'
-    while True:
-        cout(cin()+1)
-
-@process
 def Consumer(cin):
     "Commstime consumer process"
     print 'Started Consumer'
@@ -68,21 +43,8 @@ def Consumer(cin):
     print "consumer done, posioning channel"
     poison(cin)
 
-def CommsTimeBM():
-    # Create channels
-    a = Channel("a")
-    b = Channel("b")
-    c = Channel("c")
-    d = Channel("d")
 
-    print "Running commstime test"
-    Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
-             Delta2(+a, -b, -d),         # forwarding to two
-             Successor(+b, -c),               # feeding back to prefix
-             Consumer(+d))                         # timing process
+d = Channel("d", connect=('', 10000+ord('d')))
 
-N_BM = 1
-for i in range(N_BM):
-    print "----------- run %d/%d -------------" % (i+1, N_BM)
-    CommsTimeBM()
 
+Parallel(Consumer(+d))                       

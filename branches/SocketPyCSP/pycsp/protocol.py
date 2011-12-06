@@ -31,6 +31,7 @@ import sys
 import ossocket
 import socket, select, threading
 import cPickle as pickle
+import base64
 import struct
 from pycsp.common.const import *
 
@@ -54,8 +55,17 @@ H_SEQ = 3
 # 16s : string, uuid1 in bytes format
 # L : long, payload size following this header
 # L : long, sequence number used for ignoring channel requests, that was left behind.
-header_fmt = "=H16sLLxxxxxx"
+header_fmt = "=H16sLL"
 header_size = struct.calcsize(header_fmt)
+
+def data2bin(s):
+    s = base64.standard_b64encode(pickle.dumps(s, protocol = PICKLE_PROTOCOL))
+    return s
+
+def bin2data(s):
+    s = pickle.loads(base64.standard_b64decode(s))
+    return s
+
 
 def join_reader(channel):
     send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
@@ -81,7 +91,7 @@ def post_write(channel, process, msg):
 
 
 def send_payload(hostNport, cmd, id, payload, seq=0):
-    pickle_payload = pickle.dumps(payload, protocol = PICKLE_PROTOCOL)
+    pickle_payload = data2bin(payload)
     header = compile_header(cmd, id, len(pickle_payload), seq)
 
     sock = ossocket.connect(hostNport)
@@ -141,7 +151,7 @@ def remote_acquire_and_get_state(dest):
     return (sock, header[H_ARG], header[H_SEQ])
 
 def remote_notify(sock, dest, result_ch, result_msg):
-    pickled_data = pickle.dumps((result_ch,result_msg), protocol= PICKLE_PROTOCOL)
+    pickled_data = data2bin((result_ch,result_msg))
     sock.sendall(compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
     sock.sendall(pickled_data)
 
@@ -214,7 +224,7 @@ class LockThread(threading.Thread):
 
                                 if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
                                     self.cond.acquire()
-                                    result_ch, result_msg = pickle.loads(ossocket.recvall(s, header[H_MSG_SIZE]))
+                                    result_ch, result_msg = bin2data(ossocket.recvall(s, header[H_MSG_SIZE]))
                                     self.process.result_ch = result_ch
                                     self.process.result_msg = result_msg
                                     self.process.state = SUCCESS
@@ -583,24 +593,25 @@ class ChannelReq(object):
 
         return (remove_write, remove_read, success)
 
-
-
 class ChannelHomeThread(threading.Thread):
-    def __init__(self, name, buffer):
+    def __init__(self, name, buffer, addr = None):
         threading.Thread.__init__(self)
 
         self.channel = ChannelHome(name, buffer)
-        self.server_socket, self.address = ossocket.start_server()
 
+        if not addr:
+            if os.environ.has_key(ENVVAL_PORT):
+                addr = ('', int(os.environ[ENVVAL_PORT]))
+            else:
+                addr = ('', 0)
+        
+        self.server_socket, self.address = ossocket.start_server(server_addr=addr)
         self.id = name
 
     def run(self):
-
-
         active_socket_list = [self.server_socket]
 
         while(True):
-
             ready, _, exceptready = select.select(active_socket_list, [], [])
             for s in ready:
                 if s == self.server_socket:
@@ -632,13 +643,13 @@ class ChannelHomeThread(threading.Thread):
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
                             #data = s.recv(header[H_MSG_SIZE])
                             try:
-                                (process, msg) = pickle.loads(data)
-                            except pickle.UnpicklingError, e:
+                                (process, msg) = bin2data(data)
+                            except Exception, e:
                                 print "POST_WRITE"
                                 print header[H_MSG_SIZE], len(data)
                                 print data
                                 print e
-                                raise pickle.UnpicklingError()
+                                raise e
                             try:
                                 self.channel.post_write(ChannelReq(process, header[H_SEQ], self.channel.name, msg))
                             except ChannelPoisonException:
@@ -668,13 +679,13 @@ class ChannelHomeThread(threading.Thread):
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
                             #data = s.recv(header[H_MSG_SIZE])
                             try:
-                                process =  pickle.loads(data)
-                            except pickle.UnpicklingError, e:
+                                process =  bin2data(data)
+                            except Exception, e:
                                 print "POST_READ"
                                 print header[H_MSG_SIZE], len(data)
                                 print data
                                 print e
-                                raise pickle.UnpicklingError()
+                                raise e
                             try:
                                 self.channel.post_read(ChannelReq(process, header[H_SEQ], self.channel.name))
                             except ChannelPoisonException:

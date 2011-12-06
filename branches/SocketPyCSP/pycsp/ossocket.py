@@ -1,7 +1,17 @@
 
 
 import socket
-import osprocess
+import threading
+
+def getThread():
+    try:
+        # compatible with Python 2.6+
+        t = threading.current_thread()
+    except AttributeError:
+        # compatible with Python 2.5- 
+        t = threading.currentThread()
+    return t
+
 
 EXPIRATION_LIMIT = 100
 
@@ -23,7 +33,8 @@ class DebugSocket():
         #print("Send(after): %s" % (str(self.sock.getsockname())))
 
     def recv(self, c):
-        return self.sock.recv(c)
+        data = self.sock.recv(c)
+        return data
 
     def close(self):
         if self.sock:
@@ -33,17 +44,9 @@ class DebugSocket():
         return self.sock.getsockname()
 
 
-def DebugSocket(sock):
-    """ Overwrite Debugsocket class """
-    return sock
-
-def getID():
-    t, name = osprocess.getThreadAndName()
-    if name == "MainThread":
-        id = "__mainproc__"
-    else:
-        id = t.id
-    return id
+#def DebugSocket(sock):
+#    """ Overwrite Debugsocket class """
+#    return sock
 
 def start_server(server_addr=('', 0)):
     
@@ -65,21 +68,14 @@ def start_server(server_addr=('', 0)):
     return DebugSocket(s), address
 
 
-
-stored_connections = {}
-usage_connections = {}
-
 def connect(addr):
-    global stored_connections, usage_connections
-
-    t_id = getID()
+    t = getThread()
 
     # Lookup connection
-    if stored_connections.has_key(t_id):
-        if stored_connections[t_id].has_key(addr):
-            #print "REUSE of socket"
-            usage_connections[t_id][addr] += 1
-            return DebugSocket(stored_connections[t_id][addr])
+    if t.__dict__.has_key("conn"):
+        if t.conn.has_key(addr):
+            t.usage[addr] += 1
+            return DebugSocket(t.conn[addr])
     
     #print("Connect: %s" % (str(addr)))
 
@@ -93,12 +89,12 @@ def connect(addr):
     sock.connect(addr)
 
     # Save connection
-    if stored_connections.has_key(t_id):
-        stored_connections[t_id][addr] = sock
-        usage_connections[t_id][addr] = 1
+    if t.__dict__.has_key("conn"):
+        t.conn[addr] = sock
+        t.usage[addr] = 1
     else:
-        stored_connections[t_id] = {addr:sock}
-        usage_connections[t_id] = {addr:1}
+        t.conn = {addr:sock}
+        t.usage = {addr:1}
 
     return DebugSocket(sock)
 
@@ -119,40 +115,32 @@ def recvall(sock, msg_len):
     
 
 def sendall(addr, data):
-    global stored_connections
-
-    t_id = getID()
-    sock = stored_connections[t_id][addr]
-    return sock.sendall(data)
+    t = getThread()
+    return t.conn[addr].sendall(data)
     
 
 def close(addr):
-    global stored_connections, usage_connections
+    t = getThread()
 
-    t_id = getID()
+    if (t.usage[addr] > EXPIRATION_LIMIT):
+        sock = t.conn[addr]
 
-    if (usage_connections[t_id][addr] > EXPIRATION_LIMIT):
-        sock = stored_connections[t_id][addr]
-
-        del usage_connections[t_id][addr]
-        del stored_connections[t_id][addr]
+        del t.conn[addr]
+        del t.usage[addr]
         
         sock.close()
         #print("Disconnect: %s" % (str(addr)))
 
 def closeall():
-    global stored_connections, usage_connections
+    t = getThread()
 
-    t_id = getID()
-
-    for addr in stored_connections[t_id]:
-        sock = stored_connections[t_id][addr]
+    for addr in t.conn:
+        sock = t.conn[addr]
         sock.close()
         #print("Disconnect: %s" % (str(addr)))
 
-    del stored_connections[t_id]
-    del usage_connections[t_id]
-    
+    t.conn = {}
+    t.usage = {}
 
 def connectNOcache(addr):
     # Create IPv4 TCP socket (TODO: add support for IPv6)

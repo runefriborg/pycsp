@@ -22,7 +22,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
-import time
 
 @process
 def Prefix(cin, cout, prefixItem=None):
@@ -32,57 +31,11 @@ def Prefix(cin, cout, prefixItem=None):
         cout(t)
         t = cin()
 
-@process
-def Delta2(cin, cout1, cout2):
-    print 'Started Delta2'
-    while True:
-        t = cin()
-        cout1(t)
-        cout2(t)
 
-@process
-def Successor(cin, cout):
-    """Adds 1 to the value read on the input channel and outputs it on the output channel.
-    Infinite loop.
-    """
-    print 'Started Successor'
-    while True:
-        cout(cin()+1)
+a = Channel("a", server=('', 10000+ord('a')))
+b = Channel("b", server=('', 10000+ord('b')))
+c = Channel("c", server=('', 10000+ord('c')))
+d = Channel("d", server=('', 10000+ord('d')))
 
-@process
-def Consumer(cin):
-    "Commstime consumer process"
-    print 'Started Consumer'
-    N = 5000
-    ts = time.time
-    t1 = ts()
-    cin()
-    t1 = ts()
-    for i in range(N):
-        cin()
-    t2 = ts()
-    dt = t2-t1
-    tchan = dt / (4 * N)
-    print "DT = %f.\nTime per ch : %f/(4*%d) = %f s = %f us" % \
-        (dt, dt, N, tchan, tchan * 1000000)
-    print "consumer done, posioning channel"
-    poison(cin)
 
-def CommsTimeBM():
-    # Create channels
-    a = Channel("a")
-    b = Channel("b")
-    c = Channel("c")
-    d = Channel("d")
-
-    print "Running commstime test"
-    Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
-             Delta2(+a, -b, -d),         # forwarding to two
-             Successor(+b, -c),               # feeding back to prefix
-             Consumer(+d))                         # timing process
-
-N_BM = 1
-for i in range(N_BM):
-    print "----------- run %d/%d -------------" % (i+1, N_BM)
-    CommsTimeBM()
-
+Parallel(Prefix(+c, -a, prefixItem = 0))

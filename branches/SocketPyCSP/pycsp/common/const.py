@@ -7,6 +7,9 @@ See LICENSE.txt for licensing details (MIT License).
 """
 import os
 
+ENVVAL_PROCTYPE = 'PYCSP_MULTIPROCESSING'
+ENVVAL_PORT = 'PYCSP_PORT'
+
 # Setup
 PICKLE_PROTOCOL= 0
 
