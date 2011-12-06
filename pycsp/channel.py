@@ -30,13 +30,15 @@ from pycsp.common.const import *
 
 # Classes
 class Channel(object):
-    def __init__(self, name=None, buffer=0, connect=None):
+    def __init__(self, name=None, buffer=0, connect=None, server=None):
         
         self.ispoisoned=False
         self.isretired=False
 
         
         # Check args
+        if server != None and connect != None:
+            raise Exception("Either connect or server may be set")
         if name == None and connect != None:
             raise Exception("Must provide name when connecting to remote channel")
 
@@ -54,7 +56,10 @@ class Channel(object):
         if connect == None:
             # Get local channel home
             # These should handle multiple channels in the future
-            self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+            if server == None:
+                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+            else:
+                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer, server)
             self.channelhomethread.start()
             self.channelhome = self.channelhomethread.address
         else:

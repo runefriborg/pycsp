@@ -1,8 +1,8 @@
 
 import os
 import threading
+from pycsp.common.const import *
 
-ENVVAL_PROCTYPE = 'PYCSP_MULTIPROCESSING'
 
 def getThreadAndName():
     try:
