@@ -36,3 +36,5 @@ b = Channel("b", server=('', 10000+ord('b')))
 d = Channel("d", connect=('', 10000+ord('d')))
 
 Parallel(Delta2(+a, -b, -d))
+
+close(a,b,d)

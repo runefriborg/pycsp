@@ -29,8 +29,22 @@ import protocol
 from exceptions import *
 from pycsp.common.const import *
 
-# Classes
 
+def close(*channels):
+    """
+    Executes cleanup and shuts down channel home threads nicely
+    """
+
+    # First deregister all channels
+    for x in channels:
+        x.control._deregister()
+
+    # Then wait for threads to finish, thus avoiding deadlocks from
+    # conflicting threads
+    for x in channels:
+        x.control._threadjoin()
+
+# Classes
 class Channel(object):
     """
     This is the frontend class to the ChannelControl object.
@@ -48,7 +62,7 @@ class Channel(object):
         self.poison = self.control.poison
         
         # Register this channel reference at the channel home thread
-        protocol.register(self.control)
+        self.control._register()
 
     # syntactic sugar: cin = +chan
     def __pos__(self):
@@ -78,8 +92,12 @@ class Channel(object):
         the channel home thread to shutdown when all channel references have
         terminated
         """
-        protocol.deregister(self.control)
+        self.control._deregister()
 
+    def close(self):
+        self.control._deregister()
+        self.control._threadjoin()
+        
         
 class ChannelControl(object):
     def __init__(self, name=None, buffer=0, connect=None, server=None):
@@ -104,19 +122,35 @@ class ChannelControl(object):
 
             self.name=name
 
+
         # Set channel home
+        self.channelhomethread = None
+        self.registered = False
         if connect == None:
             # Get local channel home
             # These should handle multiple channels in the future
             if server == None:
-                channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             else:
-                channelhomethread = protocol.ChannelHomeThread(self.name, buffer, server)
-            channelhomethread.start()
-            self.channelhome = channelhomethread.address
+                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer, server)
+            self.channelhomethread.start()
+            self.channelhome = self.channelhomethread.address
         else:
             self.channelhome = connect
 
+    def _threadjoin(self):
+        if self.channelhomethread != None:
+            self.channelhomethread.join()
+
+    def _register(self):
+        if not self.registered:
+            self.registered = True
+            protocol.register(self)
+
+    def _deregister(self):
+        if self.registered:
+            self.registered = False
+            protocol.deregister(self)
     
     def check_termination(self):
         if self.ispoisoned:
