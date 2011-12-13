@@ -27,6 +27,7 @@ import inspect
 import types
 import osprocess
 #from channel import *
+from exceptions import *
 from pycsp.common.const import *
 
 

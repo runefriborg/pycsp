@@ -96,7 +96,7 @@ class ChannelEndWrite:
 
     def retire(self):
         if not self.isretired:
-            self.channel.leave_writer()
+            self.channel.retire_writer()
             self.__call__ = self._retire
             self.isretired = True
 
@@ -122,7 +122,7 @@ class ChannelEndRead:
 
         self.__call__ = self.channel._read
         self.poison = self.channel.poison
-        
+
     def post_read(self, process):
         protocol.post_read(self.channel, process)
 
@@ -131,7 +131,7 @@ class ChannelEndRead:
 
     def retire(self):
         if not self.isretired:
-            self.channel.leave_reader()
+            self.channel.retire_reader()
             self.__call__ = self._retire
             self.isretired = True
 

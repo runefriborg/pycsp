@@ -30,7 +30,58 @@ from exceptions import *
 from pycsp.common.const import *
 
 # Classes
+
 class Channel(object):
+    """
+    This is the frontend class to the ChannelControl object.
+    It's function is to handle the automatic termination of the
+    channel home.
+    """
+    def __init__(self, name=None, buffer=0, connect=None, server=None):
+        self.control = ChannelControl(name, buffer, connect, server)
+
+        # public methods available to the user
+        self.writer = self.control.writer
+        self.reader = self.control.reader
+        self.retire_reader = self.control.retire_reader
+        self.retire_writer = self.control.retire_writer
+        self.poison = self.control.poison
+        
+        # Register this channel reference at the channel home thread
+        protocol.register(self.control)
+
+    # syntactic sugar: cin = +chan
+    def __pos__(self):
+        return self.reader()
+    
+    # syntactic sugar: cout = -chan
+    def __neg__(self):
+        return self.writer()
+
+    # syntactic sugar: Channel() * N
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel())
+        return new
+
+    # syntactic sugar: N * Channel()
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
+
+
+    def __del__(self):
+        """
+        Destructor
+        
+        Deregisters the channel reference from the channel homes and thus allows
+        the channel home thread to shutdown when all channel references have
+        terminated
+        """
+        protocol.deregister(self.control)
+
+        
+class ChannelControl(object):
     def __init__(self, name=None, buffer=0, connect=None, server=None):
         
         self.ispoisoned=False
@@ -58,14 +109,15 @@ class Channel(object):
             # Get local channel home
             # These should handle multiple channels in the future
             if server == None:
-                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+                channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             else:
-                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer, server)
-            self.channelhomethread.start()
-            self.channelhome = self.channelhomethread.address
+                channelhomethread = protocol.ChannelHomeThread(self.name, buffer, server)
+            channelhomethread.start()
+            self.channelhome = channelhomethread.address
         else:
             self.channelhome = connect
 
+    
     def check_termination(self):
         if self.ispoisoned:
             raise ChannelPoisonException()
@@ -120,25 +172,6 @@ class Channel(object):
 
         print 'We should not get here in read!!!', p.state
         return None
-
-    # syntactic sugar: cin = +chan
-    def __pos__(self):
-        return self.reader()
-    
-    # syntactic sugar: cout = -chan
-    def __neg__(self):
-        return self.writer()
-
-    # syntactic sugar: Channel() * N
-    def __mul__(self, multiplier):
-        new = [self]
-        for i in range(multiplier-1):
-            new.append(Channel())
-        return new
-
-    # syntactic sugar: N * Channel()
-    def __rmul__(self, multiplier):
-        return self.__mul__(multiplier)
     
     def reader(self):
         """
@@ -170,15 +203,15 @@ class Channel(object):
     def join_writer(self):
         protocol.join_writer(self)
 
-    def leave_reader(self):
+    def retire_reader(self):
         if not self.isretired:
-            retired = protocol.leave_reader(self)
+            retired = protocol.retire_reader(self)
             if retired:
                 self.isretired = True
 
-    def leave_writer(self):
+    def retire_writer(self):
         if not self.isretired:
-            retired = protocol.leave_writer(self)
+            retired = protocol.retire_writer(self)
             if retired:
                 self.isretired = True
 
