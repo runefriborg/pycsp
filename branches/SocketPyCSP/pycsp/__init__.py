@@ -33,5 +33,6 @@ from channel import Channel, close
 from channelend import retire, poison
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id
 from exceptions import *
+from compat import *
 
 version = (0,8,0, 'sockets')
