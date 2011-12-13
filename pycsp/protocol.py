@@ -592,8 +592,9 @@ class ChannelReq(object):
                 remote_release(self.process)
                 remote_release(reader.process)
         except SocketClosedException:
-            raise Exception("This must be handled!")
-
+            #TODO raise Exception("This must be handled!")
+            pass
+            
         return (remove_write, remove_read, success)
 
 class ChannelHomeThread(threading.Thread):
@@ -721,7 +722,7 @@ class ChannelHomeThread(threading.Thread):
                                         
                             except ChannelRetireException:
                                 try:                    
-                                    lock_s, state = remote_acquire_and_get_state(process)
+                                    lock_s, state, seq = remote_acquire_and_get_state(process)
                                     if seq == header[H_SEQ]:
                                         if state == READY:
                                             remote_retire(lock_s, process)

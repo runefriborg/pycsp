@@ -22,22 +22,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from pycsp_import import *
 
-A = Channel("A", connect=("",8888))
 try:
-    cin = A.reader()
+    A = Channel("A", connect=("",8888))
+    raise Exception("Failed test")
 except SocketConnectException:
     pass
 
 
 try:
     A = Channel("A", server=("",9999))
-    cin = A.reader()
 except SocketBindException:
     pass
 
 try:
     B = Channel("B", server=("",9999))
-    cin = B.reader()
+    raise Exception("Failed test")
 except SocketBindException:
     pass
 
