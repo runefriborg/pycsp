@@ -80,8 +80,10 @@ def CommsTimeBM():
              Delta2(+a, -b, -d),         # forwarding to two
              Successor(+b, -c),               # feeding back to prefix
              Consumer(+d))                         # timing process
+    print "commstime test done"
 
-N_BM = 1
+
+N_BM = 2
 for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
