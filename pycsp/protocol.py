@@ -600,6 +600,12 @@ class ChannelHomeThread(threading.Thread):
     def __init__(self, name, buffer, addr = None):
         threading.Thread.__init__(self)
 
+        # This may cause the thread to terminate unexpectedly and thus
+        # leave processes in an inconsistent state.
+        # To enforce a nice shutdown, the Shutdown function must be called
+        # by the user
+        self.daemon = True
+
         self.channel = ChannelHome(name, buffer)
 
         if not addr:
@@ -650,7 +656,6 @@ class ChannelHomeThread(threading.Thread):
                                 # TODO: Ensure that the channel is unused
                                 for s2 in active_socket_list:
                                     s2.close()
-                                #self.server_socket.shutdown()
                                 self.server_socket.close()
                                 return
                                 

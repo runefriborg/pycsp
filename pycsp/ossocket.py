@@ -80,9 +80,9 @@ class DebugSocket():
         return self.sock.getsockname()
 
 
-#def DebugSocket(sock):
-#    """ Overwrite Debugsocket class """
-#    return sock
+def DebugSocket(sock):
+    """ Overwrite Debugsocket class """
+    return sock
 
 def start_server(server_addr=('', 0)):
     ok = False

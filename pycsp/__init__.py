@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
-from channel import Channel
+from channel import Channel, close
 from channelend import retire, poison
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id
 from exceptions import *

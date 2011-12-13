@@ -48,3 +48,5 @@ d = Channel("d", server=('', 10000+ord('d')))
 
 
 Parallel(Consumer(+d))                       
+
+close(d)

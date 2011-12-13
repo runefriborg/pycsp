@@ -37,3 +37,5 @@ b = Channel("b", connect=('', 10000+ord('b')))
 c = Channel("c", server=('', 10000+ord('c')))
 
 Parallel(Successor(+b, -c))
+
+close(b,c)
