@@ -24,28 +24,49 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 import threading
+import uuid
+
 #from channel import ChannelReq, ReqStatus
 from process import Process
 from pycsp.common.const import *
+from protocol import AddrID, ChannelReq, remote_acquire_and_get_state, remote_notify, remote_release
+from exceptions import *
 
 # Classes
 class Guard:
     """
     The empty interface of a guard.
     """
+    def __init__(self, action=None):
+        self.g = (self, action)
+
+        # Id similar to channel name, to correctly select the chosen guard among the guard set.
+        self.id = uuid.uuid1().bytes
+        
+    def offer(self, req):
+        try:
+            # Acquire lock
+            conn, state, seq = remote_acquire_and_get_state(req.process)
+            
+            # Check sequence number
+            if seq != req.seq_check:
+                state = FAIL
+
+            # Success?
+            if (state == READY):
+                remote_notify(conn, req.process, req.ch_id, None)
+                
+            # Release lock
+            remote_release(req.process)
+        except SocketClosedException:
+            #TODO raise Exception("This must be handled!")
+            pass
+            
+        return
     
-    def post_read(self, req):
+    def cancel(self):
         pass
-
-    def post_write(self, req):
-        pass
-
-    def remove_read(self, req):
-        pass
-
-    def remove_write(self, req):
-        pass
-
+    
 class SkipGuard(Guard):
     """
     SkipGuard will try to accept a read or a write, the moment it is posted.
@@ -59,40 +80,15 @@ class SkipGuard(Guard):
     >>> isinstance(g, Skip) and msg == None
     True
     """
-    def __init__(self, action=None):
-        self.g = (self, action)
-
-    def empty(self):
-        
-
-    # Start process
-    def process(self):
-        c = Channel
-        p = Process(self.empty)
-        p.start()
-        p.setstate(ACTIVE)
-        return p
-        
     # Offer instantly
-    def post_read(self, reader):
-        ChannelReq(self.process(), msg=None).offer(reader)
-        
-    # Offer instantly
-    def post_write(self, writer):
-        writer.offer(ChannelReq(self.process()))
-class SkipGuard(Guard):
-    def __init__(self, action=None):
-        self.g = (self, action)
+    def post_read(self, process):
+        self.offer(ChannelReq(AddrID(process.lockThread.address, process.id),
+                                       process.sequence_number,
+                                       self.id))
 
-    # Offer instantly
-    def post_read(self, reader):
+    def post_write(self, process, msg):
+        raise Exception("Can not use SkipGuard with msg")
         
-        ChannelReq(ReqStatus(), msg=None).offer(reader)
-        
-    # Offer instantly
-    def post_write(self, writer):
-        writer.offer(ChannelReq(ReqStatus()))
-
 
 class TimeoutGuard(Guard):
     """
@@ -119,32 +115,22 @@ class TimeoutGuard(Guard):
     True
     """
     def __init__(self, seconds, action=None):
+        Guard.__init__(self, action)
         self.seconds = seconds
-        self.posted = (None, None)
-        self.g = (self, action)
+        self.posted_req = None
 
     # Timer expired, offer an active Channel Request
     def expire(self):
-        op, req = self.posted
-        if op == READ:
-            ChannelReq(ReqStatus(), msg=None).offer(req)
-        elif op == WRITE:
-            req.offer(ChannelReq(ReqStatus()))
-
-    def post_read(self, reader):
-        self.posted = (READ, reader)
-        self.timer = threading.Timer(self.seconds, self.expire)
-        self.timer.start()
-
-    def post_write(self, writer):
-        self.posted = (WRITE, writer)
+        self.offer(self.posted_req)
+        
+    def post_read(self, process):
+        self.posted_req = ChannelReq(AddrID(process.lockThread.address, process.id),
+                                     process.sequence_number,
+                                     self.id)
         self.timer = threading.Timer(self.seconds, self.expire)
         self.timer.start()
   
-    def remove_read(self, req):
-        self.timer.cancel()
-
-    def remove_write(self, req):
+    def cancel(self):
         self.timer.cancel()
 
 # Backwards compatibility

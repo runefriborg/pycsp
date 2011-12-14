@@ -27,6 +27,7 @@ import inspect
 import types
 import osprocess
 #from channel import *
+from guard import Guard
 from exceptions import *
 from pycsp.common.const import *
 
@@ -144,7 +145,12 @@ class Alternation:
 
         if p.state==SUCCESS:
             for c in reqs.keys():
-                if c.channel.name == p.result_ch:
+                if isinstance(c, Guard):
+                    if c.id == p.result_ch:
+                        act = c
+                    c.cancel()
+                    
+                elif c.channel.name == p.result_ch:
                     act = c
 
         elif p.state==POISON:

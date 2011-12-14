@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Imports
 
-#from guard import Skip, Timeout, SkipGuard, TimeoutGuard
+from guard import Skip, SkipGuard, Timeout, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from channel import Channel, close
