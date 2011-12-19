@@ -284,6 +284,9 @@ class Buffer(object):
         self.max = max
         self.items = []
 
+        self.ispoisoned = False
+        self.isretired = False
+        
     def isfull(self):
         return len(self.items) == self.max
 
@@ -404,7 +407,7 @@ class ChannelHome(object):
 
     def match(self):
         if self.buffer:
-            # If buffering is enabled.
+            # Buffering is enabled.
             
             if self.buffer.isfull():
                 # Extract item
@@ -529,7 +532,7 @@ class ChannelReq(object):
                 remote_cancel(conn, self.process)
             remote_release(self.process)
         except SocketClosedException:
-            pass
+            raise Exception("TODO: Must be handled!")
 
     def poison(self):
         try:
@@ -538,7 +541,7 @@ class ChannelReq(object):
                 remote_poison(conn, self.process)
             remote_release(self.process)
         except SocketClosedException:
-            pass
+            raise Exception("TODO: Must be handled!")
 
     def retire(self):
         try:
@@ -547,7 +550,7 @@ class ChannelReq(object):
                 remote_retire(conn, self.process)
             remote_release(self.process)
         except SocketClosedException:
-            pass
+            raise Exception("TODO: Must be handled!")
     
     def offer(self, reader):
         success = False
@@ -592,8 +595,7 @@ class ChannelReq(object):
                 remote_release(self.process)
                 remote_release(reader.process)
         except SocketClosedException:
-            #TODO raise Exception("This must be handled!")
-            pass
+            raise Exception("TODO: This must be handled!")
             
         return (remove_write, remove_read, success)
 
@@ -685,7 +687,7 @@ class ChannelHomeThread(threading.Thread):
                                             remote_poison(lock_s, process)
                                     remote_release(process)
                                 except SocketClosedException:
-                                    pass
+                                    raise Exception("TODO: Must be handled!")
 
                             except ChannelRetireException:
                                 try:                    
@@ -695,7 +697,7 @@ class ChannelHomeThread(threading.Thread):
                                             remote_retire(lock_s, process)
                                     remote_release(process)
                                 except SocketClosedException:
-                                    pass
+                                    raise Exception("TODO: Must be handled!")
                                         
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
@@ -718,7 +720,7 @@ class ChannelHomeThread(threading.Thread):
                                             remote_poison(lock_s, process)
                                     remote_release(process)
                                 except SocketClosedException:
-                                    pass
+                                    raise Exception("TODO: Must be handled!")
                                         
                             except ChannelRetireException:
                                 try:                    
@@ -728,4 +730,5 @@ class ChannelHomeThread(threading.Thread):
                                             remote_retire(lock_s, process)
                                     remote_release(process)
                                 except SocketClosedException:
-                                    pass
+                                    raise Exception("TODO: Must be handled!")
+

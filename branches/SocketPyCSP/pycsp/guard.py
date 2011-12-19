@@ -59,8 +59,7 @@ class Guard:
             # Release lock
             remote_release(req.process)
         except SocketClosedException:
-            #TODO raise Exception("This must be handled!")
-            pass
+            raise Exception("This must be handled!")
             
         return
     
