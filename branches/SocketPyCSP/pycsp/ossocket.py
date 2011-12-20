@@ -51,39 +51,6 @@ def getThread():
 
 EXPIRATION_LIMIT = 100
 
-class DebugSocket():
-    def __init__(self, sock):
-        self.sock = sock
-
-    def fileno(self):
-        return self.sock.fileno()
-
-    def accept(self):
-        sock, addr = self.sock.accept()
-        return (DebugSocket(sock), addr)
-
-    def sendall(self, val):
-        #print("Send(before): %s" % (str(self.sock.getsockname())))
-        res = self.sock.sendall(val)
-        return res
-        #print("Send(after): %s" % (str(self.sock.getsockname())))
-
-    def recv(self, c):
-        data = self.sock.recv(c)
-        return data
-
-    def close(self):
-        if self.sock:
-            self.sock.close()
-
-    def getsockname(self):
-        return self.sock.getsockname()
-
-
-def DebugSocket(sock):
-    """ Overwrite Debugsocket class """
-    return sock
-
 def start_server(server_addr=('', 0)):
     ok = False
     t1 = None
@@ -119,7 +86,7 @@ def start_server(server_addr=('', 0)):
     # Initiate listening for connections. Create queue of 5 for unaccepted connections
     sock.listen(5)
 
-    return DebugSocket(sock), address
+    return sock, address
 
 
 def connect(addr):
@@ -129,7 +96,7 @@ def connect(addr):
     if t.__dict__.has_key("conn"):
         if t.conn.has_key(addr):
             t.usage[addr] += 1
-            return DebugSocket(t.conn[addr])
+            return t.conn[addr]
     
     sock = _connect(addr)
 
@@ -141,7 +108,7 @@ def connect(addr):
         t.conn = {addr:sock}
         t.usage = {addr:1}
 
-    return DebugSocket(sock)
+    return sock
 
 
 
@@ -190,7 +157,7 @@ def closeall():
 
 def connectNOcache(addr):
     sock = _connect(addr)
-    return DebugSocket(sock)
+    return sock
 
 def closeNOcache(sock):
     sock.close()
