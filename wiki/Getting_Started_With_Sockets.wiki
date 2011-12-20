@@ -1,0 +1,11 @@
+#summary A tutorial on pycsp.sockets (incomplete)
+#sidebar TutorialList
+
+= Introduction =
+
+= Connection Handling =
+
+|| SocketException || ... ||
+|| SocketClosedException || ... ||
+|| SocketConnectException || ... ||
+|| SocketBindException || ... ||
