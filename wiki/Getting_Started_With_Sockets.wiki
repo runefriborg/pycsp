@@ -5,7 +5,7 @@
 
 = Limitations =
 
-* All channel names have been restricted to a length of 16 chars.
+  * All channel names have been restricted to a length of 16 chars.
 
 
 = Connection Handling =
