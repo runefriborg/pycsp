@@ -52,7 +52,12 @@ class Channel(object):
     channel home.
     """
     def __init__(self, name=None, buffer=0, connect=None, server=None):
-        self.control = ChannelControl(name, buffer, connect, server)
+
+        try:
+            self.control = ChannelControl(name, buffer, connect, server)
+        except SocketBindException:
+            self.control = None
+            raise SocketBindException()
 
         # public methods available to the user
         self.writer = self.control.writer
@@ -92,11 +97,13 @@ class Channel(object):
         the channel home thread to shutdown when all channel references have
         terminated
         """
-        self.control._deregister()
+        if self.control:
+            self.control._deregister()
 
     def close(self):
-        self.control._deregister()
-        self.control._threadjoin()
+        if self.control:
+            self.control._deregister()
+            self.control._threadjoin()
         
         
 class ChannelControl(object):

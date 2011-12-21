@@ -7,14 +7,18 @@ class ChannelRetireException(Exception):
     def __init__(self):
         pass
 
-class SocketClosedException(Exception):
+class SocketException(Exception):
+    def __init__(self):
+        pass
+    
+class SocketClosedException(SocketException):
     def __init__(self):
         pass
 
-class SocketConnectException(Exception):
+class SocketConnectException(SocketException):
     def __init__(self):
         pass
 
-class SocketBindException(Exception):
+class SocketBindException(SocketException):
     def __init__(self):
         pass
