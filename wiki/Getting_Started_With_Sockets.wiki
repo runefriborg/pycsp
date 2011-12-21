@@ -3,9 +3,19 @@
 
 = Introduction =
 
+= Limitations =
+
+* All channel names have been restricted to a length of 16 chars.
+
+
 = Connection Handling =
+
+As all CSP communications are using sockets, it may happen that sockets are disconnected unexpectedly. Such situations can be handled through catching the exceptions below.
 
 || SocketException || ... ||
 || SocketClosedException || ... ||
 || SocketConnectException || ... ||
 || SocketBindException || ... ||
+
+
+Whenever a connection is lost, the connection is recreated and retried. If after N tries, the connection still fails, then...
