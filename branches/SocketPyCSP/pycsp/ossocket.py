@@ -1,16 +1,50 @@
+"""
+Socket abstraction module
 
+Allows reusing previously opened sockets.
+
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+  
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.  THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 import time
 import errno
 import socket
+import sys
 import threading
 from exceptions import *
+from configuration import *
 from pycsp.common.const import *
 
+SOCKETS_MAX_REUSE = 100
 
 def _connect(addr):
+    """
+    Make a connection with the Nagle algorithm disabled.
+
+    Retries connecting, if the connection is refused. Aborts after a specified time.
+    """
     connected = False
     t1 = None
     sock = None
+    conf = Configuration()
+    
     while (not connected):
         try:
             # Create IPv4 TCP socket (TODO: add support for IPv6)
@@ -23,7 +57,7 @@ def _connect(addr):
             sock.connect(addr)
             connected = True
         except socket.error, (value,message):
-            print value, message
+            sys.stderr.write("%d %s\n" % (value, message))
             if sock:
                 sock.close()
             if value != errno.ECONNREFUSED:            
@@ -32,9 +66,9 @@ def _connect(addr):
             if t1 == None:
                 t1 = time.time()
             else:
-                if (time.time()-t1) > CONNECT_TIMEOUT:
+                if (time.time()-t1) > conf.get(SOCKETS_CONNECT_TIMEOUT):
                     raise SocketConnectException()
-            time.sleep(CONNECT_RETRY_DELAY)
+            time.sleep(conf.get(SOCKETS_CONNECT_RETRY_DELAY))
 
     return sock
 
@@ -49,12 +83,17 @@ def getThread():
     return t
 
 
-EXPIRATION_LIMIT = 100
-
 def start_server(server_addr=('', 0)):
+    """
+    Bind to address and port with the Nagle algorithm disabled.
+
+    Retries binding, if the address and port is in use. Aborts after a specified time.
+    """
     ok = False
     t1 = None
     sock = None
+    conf = Configuration()
+    
     while (not ok):
         try:
             # Create IPv4 TCP socket (TODO: add support for IPv6)
@@ -67,7 +106,7 @@ def start_server(server_addr=('', 0)):
             sock.bind(server_addr)
             ok = True
         except socket.error, (value,message):
-            print value, message
+            sys.stderr.write("%d %s\n" % (value, message))
             if sock:
                 sock.close()
             if value != errno.EADDRINUSE:            
@@ -76,9 +115,9 @@ def start_server(server_addr=('', 0)):
             if t1 == None:
                 t1 = time.time()
             else:
-                if (time.time()-t1) > BIND_TIMEOUT:
+                if (time.time()-t1) > conf.get(SOCKETS_BIND_TIMEOUT):
                     raise SocketBindException()
-            time.sleep(BIND_RETRY_DELAY)
+            time.sleep(conf.get(SOCKETS_BIND_RETRY_DELAY))
     
     # Obtain binded addresses
     address = sock.getsockname()
@@ -135,7 +174,7 @@ def sendall(addr, data):
 def close(addr):
     t = getThread()
 
-    if (t.usage[addr] > EXPIRATION_LIMIT):
+    if (t.usage[addr] > SOCKETS_MAX_REUSE):
         sock = t.conn[addr]
 
         del t.conn[addr]
