@@ -1,41 +1,22 @@
 """
-Communicator module
+Protocol module
 
-Handles the sharing of TCP connections from host to host. Even though
-these connections support two-way communication, we only use them as
-one-way to avoid possible deadlocks from synchronization conflicts.
+Handles the protocol for the synchronisation model
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-  
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.  THE
-SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+See LICENSE.txt for licensing details (MIT License). 
 """
 
 import os
 import sys
 import ossocket
-import socket, select, threading
+import select, threading
 import cPickle as pickle
-import base64
 import struct
 from exceptions import *
 from pycsp.common.const import *
-
+from configuration import *
 
 
 # Header CMDs:
@@ -60,20 +41,34 @@ H_SEQ = 3
 header_fmt = "=H16sLL"
 header_size = struct.calcsize(header_fmt)
 
+conf = Configuration()
+
 def data2bin(s):
-    s = base64.standard_b64encode(pickle.dumps(s, protocol = PICKLE_PROTOCOL))
+    s = pickle.dumps(s, protocol = PICKLE_PROTOCOL)
     return s
 
 def bin2data(s):
-    s = pickle.loads(base64.standard_b64decode(s))
+    s =  pickle.loads(s)
     return s
 
 def register(channel):
-    send(channel.channelhome, CHANTHREAD_REGISTER, channel.name)
+    """
+    Registers a channel reference at the channel home thread
+    """
+    try:
+        send(channel.channelhome, CHANTHREAD_REGISTER, channel.name)
+    except SocketException:
+        # Unable to register at channel home thread
+        raise FatalException("PyCSP (register channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 def deregister(channel):
-    send(channel.channelhome, CHANTHREAD_DEREGISTER, channel.name)
-
+    try:
+        send(channel.channelhome, CHANTHREAD_DEREGISTER, channel.name)
+    except SocketException:
+        # Unable to deregister at channel home thread
+        # The channel thread may have closed, thus this is an acceptable situation.
+        pass
+    
 def join_reader(channel):
     send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
 
@@ -109,7 +104,7 @@ def send_payload(hostNport, cmd, id, payload, seq=0):
 
     sock = ossocket.connect(hostNport)
     
-    sock.sendall(header)
+    sock = ossocket.sendall(sock, header)
     sock.sendall(pickle_payload)
     
     ossocket.close(hostNport)
@@ -128,8 +123,9 @@ def send(hostNport, cmd, id, arg=0):
     header = compile_header(cmd, id, arg)
 
     sock = ossocket.connect(hostNport)
-    sock.sendall(header)
+    sock = ossocket.sendall(sock, header)
     ossocket.close(hostNport)
+        
 
 def compile_header(cmd, id, arg, seq=0):
     """
@@ -141,23 +137,19 @@ def compile_header(cmd, id, arg, seq=0):
 
 def remote_acquire_and_get_state(dest):
 
-    sock = ossocket.connect(dest.hostNport)
-
     try:
-        sock.sendall(compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
+        sock = ossocket.connect(dest.hostNport)
+        sock = ossocket.sendall(sock, compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
         compiled_header = sock.recv(header_size)
-    except socket.error, (value,message): 
-        if sock: 
-            sock.close()             
+    except SocketException:
+        ossocket.close(dest.hostNport)
         compiled_header = ""
-    
 
-    #if len(compiled_header) == 0:
     if len(compiled_header) != header_size:
         # connection broken.
         # When a channel is unable to acquire the lock for process, the
         # posted request is disabled.
-        raise SocketClosedException()
+        raise AddrUnavailableException(dest)
 
     header = struct.unpack(header_fmt, compiled_header)
     
@@ -165,18 +157,37 @@ def remote_acquire_and_get_state(dest):
 
 def remote_notify(sock, dest, result_ch, result_msg):
     pickled_data = data2bin((result_ch,result_msg))
-    sock.sendall(compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
-    sock.sendall(pickled_data)
+    try:
+        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
+        ossocket.sendallNOreconnect(sock, pickled_data)
+    except SocketException:
+        ossocket.close(dest.hostNport)
+        raise AddrUnavailableException(dest)
 
 def remote_poison(sock, dest):
-    sock.sendall(compile_header(LOCKTHREAD_POISON, dest.id, 0))
+    try:
+        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_POISON, dest.id, 0))
+    except SocketException:
+        ossocket.close(dest.hostNport)
+        raise AddrUnavailableException(dest)
 
 def remote_retire(sock, dest):
-    sock.sendall(compile_header(LOCKTHREAD_RETIRE, dest.id, 0))
+    try:
+        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RETIRE, dest.id, 0))
+    except SocketException:
+        ossocket.close(dest.hostNport)
+        raise AddrUnavailableException(dest)
 
-def remote_release(dest):
-    ossocket.sendall(dest.hostNport, compile_header(LOCKTHREAD_RELEASE_LOCK, dest.id, 0))
-    ossocket.close(dest.hostNport)
+def remote_release(sock, dest):
+    """
+    Ignore socket exceptions on remote_release
+    """
+    try:
+        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RELEASE_LOCK, dest.id, 0))
+        ossocket.close(dest.hostNport)
+    except SocketException:
+        ossocket.close(dest.hostNport)
+
     
 class LockThread(threading.Thread):
     def __init__(self, process, cond):
@@ -188,7 +199,6 @@ class LockThread(threading.Thread):
         self.server_socket, self.address = ossocket.start_server()
         
         self.finished = False
-
 
     def run(self):
         active_socket_list = [self.server_socket]
@@ -315,7 +325,7 @@ class Buffer(object):
                     remove_write = True
 
                 remote_release(writer.process)
-            except SocketClosedException:
+            except AddrUnavailableException:
                 remove_write = True
 
         return (remove_write, success)
@@ -344,8 +354,8 @@ class Buffer(object):
                 if (r_state != READY):
                     remove_read = True
 
-                remote_release(reader.process)
-            except SocketClosedException:
+                remote_release(r_conn, reader.process)
+            except AddrUnavailableException:
                 remove_read = True
 
         return (remove_read, success)
@@ -530,28 +540,41 @@ class ChannelReq(object):
             conn, state, seq = remote_acquire_and_get_state(self.process)
             if seq == self.seq_check:
                 remote_cancel(conn, self.process)
-            remote_release(self.process)
-        except SocketClosedException:
-            raise Exception("TODO: Must be handled!")
-
+            remote_release(conn, self.process)
+        except AddrUnavailableException as e:
+            # Unable to reach process to notify cancel
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise FatalException("PyCSP (cancel notification) unable to reach process (%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP (cancel notification) unable to reach process (%s)" % str(self.process))
+ 
     def poison(self):
         try:
             conn, state, seq = remote_acquire_and_get_state(self.process)
             if seq == self.seq_check:
                 remote_poison(conn, self.process)
-            remote_release(self.process)
-        except SocketClosedException:
-            raise Exception("TODO: Must be handled!")
-
+            remote_release(conn, self.process)
+        except AddrUnavailableException:
+            # Unable to reach process to notify poison
+            if conf.get(SOCKETS_STRICT_NODE):
+                raise FatalException("PyCSP (poison notification) unable to reach process (%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP (poison notification) unable to reach process (%s)" % str(self.process))
+            
     def retire(self):
         try:
             conn, state, seq = remote_acquire_and_get_state(self.process)
             if seq == self.seq_check:
                 remote_retire(conn, self.process)
-            remote_release(self.process)
-        except SocketClosedException:
-            raise Exception("TODO: Must be handled!")
-    
+            remote_release(conn, self.process)
+        except AddrUnavailableException:
+            # Unable to reach process to notify retire
+            if conf.get(SOCKETS_STRICT_NODE):
+                raise FatalException("PyCSP (retire notification) unable to reach process (%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP (retire notification) unable to reach process (%s)" % str(self.process))
+            
+
     def offer(self, reader):
         success = False
         remove_write = False
@@ -589,13 +612,24 @@ class ChannelReq(object):
 
             # Release double lock
             if (self.process.id < reader.process.id):
-                remote_release(reader.process)
-                remote_release(self.process)
+                remote_release(r_conn, reader.process)
+                remote_release(w_conn, self.process)
             else:
-                remote_release(self.process)
-                remote_release(reader.process)
-        except SocketClosedException:
-            raise Exception("TODO: This must be handled!")
+                remote_release(w_conn, self.process)
+                remote_release(r_conn, reader.process)
+        except AddrUnavailableException as e:
+             # Unable to reach process during offer
+            if conf.get(SOCKETS_STRICT_NODE):
+                raise FatalException("PyCSP unable to reach process during offer(%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP unable to reach process during offer(%s)" % str(self.process))
+
+            success = False
+            if e.addr == self.process.hostNport:
+                remote_write = True
+            if e.addr == reader.process.hostNport:
+                remote_read = True
+
             
         return (remove_write, remove_read, success)
 
@@ -668,7 +702,6 @@ class ChannelHomeThread(threading.Thread):
                         elif header[H_CMD] == CHANTHREAD_POST_WRITE:
                             # Read messageparts until entire msg is received
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
-                            #data = s.recv(header[H_MSG_SIZE])
                             try:
                                 (process, msg) = bin2data(data)
                             except Exception, e:
@@ -685,9 +718,13 @@ class ChannelHomeThread(threading.Thread):
                                     if seq == header[H_SEQ]:
                                         if state == READY:
                                             remote_poison(lock_s, process)
-                                    remote_release(process)
-                                except SocketClosedException:
-                                    raise Exception("TODO: Must be handled!")
+                                    remote_release(lock_s, process)
+                                except AddrUnavailableException:
+                                    # Unable to reach process to notify poison
+                                    if conf.get(SOCKETS_STRICT_NODE):
+                                        raise FatalException("PyCSP (poison notification:2) unable to reach process (%s)" % str(process))
+                                    else:
+                                        sys.stderr.write("PyCSP (poison notification:2) unable to reach process (%s)" % str(process))
 
                             except ChannelRetireException:
                                 try:                    
@@ -695,13 +732,16 @@ class ChannelHomeThread(threading.Thread):
                                     if seq == header[H_SEQ]:
                                         if state == READY:
                                             remote_retire(lock_s, process)
-                                    remote_release(process)
-                                except SocketClosedException:
-                                    raise Exception("TODO: Must be handled!")
+                                    remote_release(lock_s, process)
+                                except AddrUnavailableException:
+                                    # Unable to reach process to notify retire
+                                    if conf.get(SOCKETS_STRICT_NODE):
+                                        raise FatalException("PyCSP (retire notification:2) unable to reach process (%s)" % str(process))
+                                    else:
+                                        sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)" % str(process))
                                         
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
-                            #data = s.recv(header[H_MSG_SIZE])
                             try:
                                 process =  bin2data(data)
                             except Exception, e:
@@ -718,9 +758,13 @@ class ChannelHomeThread(threading.Thread):
                                     if seq == header[H_SEQ]:
                                         if state == READY:
                                             remote_poison(lock_s, process)
-                                    remote_release(process)
-                                except SocketClosedException:
-                                    raise Exception("TODO: Must be handled!")
+                                    remote_release(lock_s, process)
+                                except AddrUnavailableException:
+                                    # Unable to reach process to notify poison
+                                    if conf.get(SOCKETS_STRICT_NODE):
+                                        raise FatalException("PyCSP (poison notification:3) unable to reach process (%s)" % str(process))
+                                    else:
+                                        sys.stderr.write("PyCSP (poison notification:3) unable to reach process (%s)" % str(process))
                                         
                             except ChannelRetireException:
                                 try:                    
@@ -728,7 +772,11 @@ class ChannelHomeThread(threading.Thread):
                                     if seq == header[H_SEQ]:
                                         if state == READY:
                                             remote_retire(lock_s, process)
-                                    remote_release(process)
-                                except SocketClosedException:
-                                    raise Exception("TODO: Must be handled!")
+                                    remote_release(lock_s, process)
+                                except AddrUnavailableException:
+                                    # Unable to reach process to notify retire
+                                    if conf.get(SOCKETS_STRICT_NODE):
+                                        raise FatalException("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
+                                    else:
+                                        sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
 

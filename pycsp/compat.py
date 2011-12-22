@@ -1,4 +1,10 @@
+"""
+Constructs added to allow easy switching between PyCSP implementations.
 
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+See LICENSE.txt for licensing details (MIT License). 
+"""
 
 def io(func):
     """
