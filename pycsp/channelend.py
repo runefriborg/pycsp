@@ -85,10 +85,7 @@ class ChannelEndWrite:
             self.isretired = True
 
     def __repr__(self):
-        if self.channel.name == None:
-            return "<ChannelEndWrite wrapping %s>" % self.channel
-        else:
-            return "<ChannelEndWrite wrapping %s named %s>" % (self.channel, self.channel.name)
+        return "<ChannelEndWrite on channel named %s>" % self.channel.name
 
     def isWriter(self):
         return True
@@ -120,10 +117,7 @@ class ChannelEndRead:
             self.isretired = True
 
     def __repr__(self):
-        if self.channel.name == None:
-            return "<ChannelEndRead wrapping %s>" % self.channel
-        else:
-            return "<ChannelEndRead wrapping %s named %s>" % (self.channel, self.channel.name)
+        return "<ChannelEndRead on channel named %s>" % self.channel.name
 
     def isWriter(self):
         return False

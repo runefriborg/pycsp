@@ -57,7 +57,7 @@ class Guard:
                 remote_notify(conn, req.process, req.ch_id, None)
                 
             # Release lock
-            remote_release(req.process)
+            remote_release(conn, req.process)
         except SocketClosedException:
             raise Exception("This must be handled!")
             
@@ -86,7 +86,7 @@ class SkipGuard(Guard):
                                        self.id))
 
     def post_write(self, process, msg):
-        raise Exception("Can not use SkipGuard with msg")
+        raise InfoException("Can not use SkipGuard with msg")
         
 
 class TimeoutGuard(Guard):

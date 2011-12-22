@@ -7,6 +7,8 @@ from pycsp_import import *
 import time
 import random
 
+Configuration().set(SOCKETS_STRICT_MODE, True)
+
 @io
 def sleep_long():
     time.sleep(2)

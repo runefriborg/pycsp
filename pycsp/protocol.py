@@ -59,7 +59,7 @@ def register(channel):
         send(channel.channelhome, CHANTHREAD_REGISTER, channel.name)
     except SocketException:
         # Unable to register at channel home thread
-        raise FatalException("PyCSP (register channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        raise ChannelSocketException(channel.channelhome, "PyCSP (register channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 def deregister(channel):
     try:
@@ -70,32 +70,83 @@ def deregister(channel):
         pass
     
 def join_reader(channel):
-    send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
+    except SocketException:
+        # Unable to join channel
+        raise ChannelSocketException(channel.channelhome, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 def join_writer(channel):
-    send(channel.channelhome, CHANTHREAD_JOIN_WRITER, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_JOIN_WRITER, channel.name)
+    except SocketException:
+        # Unable to join channel
+        raise ChannelSocketException(channel.channelhome, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 def leave_reader(channel):
-    send(channel.channelhome, CHANTHREAD_LEAVE_READER, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_LEAVE_READER, channel.name)
+    except SocketException:
+        # Unable to decrement reader count on channel
+        if conf.get(SOCKETS_STRICT_MODE):
+            raise ChannelSocketException(channel.channelhome, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        else:
+            sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
 def leave_writer(channel):
-    send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, channel.name)
+    except SocketException:
+        # Unable to decrement writer count on channel
+        if conf.get(SOCKETS_STRICT_MODE):
+            raise ChannelSocketException(channel.channelhome, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        else:
+            sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
 def retire_reader(channel):
-    send(channel.channelhome, CHANTHREAD_RETIRE_READER, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_RETIRE_READER, channel.name)
+    except SocketException:
+        # Unable to retire from channel
+        if conf.get(SOCKETS_STRICT_MODE):
+            raise ChannelSocketException(channel.channelhome, "PyCSP (retire from channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        else:
+            sys.stderr.write("PyCSP (retire from channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
 def retire_writer(channel):
-    send(channel.channelhome, CHANTHREAD_RETIRE_WRITER, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_RETIRE_WRITER, channel.name)
+    except SocketException:
+        # Unable to retire from channel
+        if conf.get(SOCKETS_STRICT_MODE):
+            raise ChannelSocketException(channel.channelhome, "PyCSP (retire from channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        else:
+            sys.stderr.write("PyCSP (retire from channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
 def poison(channel):
-    send(channel.channelhome, CHANTHREAD_POISON, channel.name)
+    try:
+        send(channel.channelhome, CHANTHREAD_POISON, channel.name)
+    except SocketException:
+        # Unable to poison channel
+        if conf.get(SOCKETS_STRICT_MODE):
+            raise ChannelSocketException(channel.channelhome, "PyCSP (poison channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        else:
+            sys.stderr.write("PyCSP (poison channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
 def post_read(channel, process):
-    send_payload(channel.channelhome, CHANTHREAD_POST_READ, channel.name, AddrID(process.lockThread.address, process.id), process.sequence_number)
+    try:
+        send_payload(channel.channelhome, CHANTHREAD_POST_READ, channel.name, AddrID(process.lockThread.address, process.id), process.sequence_number)
+    except SocketException:
+        # Unable to post read request to channel home thread
+        raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 def post_write(channel, process, msg):
-    send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, channel.name, (AddrID(process.lockThread.address, process.id), msg), process.sequence_number)
-    
+    try:
+        send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, channel.name, (AddrID(process.lockThread.address, process.id), msg), process.sequence_number)
+    except SocketException:
+        # Unable to post read request to channel home thread
+        raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+
 
 
 def send_payload(hostNport, cmd, id, payload, seq=0):
@@ -140,7 +191,7 @@ def remote_acquire_and_get_state(dest):
     try:
         sock = ossocket.connect(dest.hostNport)
         sock = ossocket.sendall(sock, compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
-        compiled_header = sock.recv(header_size)
+        compiled_header = ossocket.recvall(sock, header_size)
     except SocketException:
         ossocket.close(dest.hostNport)
         compiled_header = ""
@@ -461,6 +512,8 @@ class ChannelHome(object):
                         self.readqueue.remove(r)
                     if remove_write:                        
                         self.writequeue.remove(w)
+                        if success:
+                            return # break match loop on first success
                         break
                     if success:
                         return # break match loop on first success
@@ -524,6 +577,10 @@ class AddrID(object):
     def __init__(self, addr=('',0), id=""):
         self.hostNport = addr
         self.id = id
+        
+    def __str__(self):
+        return repr("%s %s" % (self.hostNport, self.id))
+
 
 class ChannelReq(object):
     def __init__(self, process_src, process_seq, ch_id, msg = None):
@@ -546,7 +603,7 @@ class ChannelReq(object):
             if conf.get(SOCKETS_STRICT_MODE):
                 raise FatalException("PyCSP (cancel notification) unable to reach process (%s)" % str(self.process))
             else:
-                sys.stderr.write("PyCSP (cancel notification) unable to reach process (%s)" % str(self.process))
+                sys.stderr.write("PyCSP (cancel notification) unable to reach process (%s)\n" % str(self.process))
  
     def poison(self):
         try:
@@ -556,10 +613,10 @@ class ChannelReq(object):
             remote_release(conn, self.process)
         except AddrUnavailableException:
             # Unable to reach process to notify poison
-            if conf.get(SOCKETS_STRICT_NODE):
+            if conf.get(SOCKETS_STRICT_MODE):
                 raise FatalException("PyCSP (poison notification) unable to reach process (%s)" % str(self.process))
             else:
-                sys.stderr.write("PyCSP (poison notification) unable to reach process (%s)" % str(self.process))
+                sys.stderr.write("PyCSP (poison notification) unable to reach process (%s)\n" % str(self.process))
             
     def retire(self):
         try:
@@ -569,10 +626,10 @@ class ChannelReq(object):
             remote_release(conn, self.process)
         except AddrUnavailableException:
             # Unable to reach process to notify retire
-            if conf.get(SOCKETS_STRICT_NODE):
+            if conf.get(SOCKETS_STRICT_MODE):
                 raise FatalException("PyCSP (retire notification) unable to reach process (%s)" % str(self.process))
             else:
-                sys.stderr.write("PyCSP (retire notification) unable to reach process (%s)" % str(self.process))
+                sys.stderr.write("PyCSP (retire notification) unable to reach process (%s)\n" % str(self.process))
             
 
     def offer(self, reader):
@@ -618,17 +675,18 @@ class ChannelReq(object):
                 remote_release(w_conn, self.process)
                 remote_release(r_conn, reader.process)
         except AddrUnavailableException as e:
-             # Unable to reach process during offer
-            if conf.get(SOCKETS_STRICT_NODE):
-                raise FatalException("PyCSP unable to reach process during offer(%s)" % str(self.process))
-            else:
-                sys.stderr.write("PyCSP unable to reach process during offer(%s)" % str(self.process))
+            # Unable to reach process during offer
+            # The primary reason is probably because a request were part of an alting and the process have exited.
+            #if conf.get(SOCKETS_STRICT_MODE):
+            #    raise FatalException("PyCSP unable to reach process during offer(%s)" % str(self.process))
+            #else:
+            #    sys.stderr.write("PyCSP unable to reach process during offer(%s)\n" % str(self.process))
 
             success = False
             if e.addr == self.process.hostNport:
-                remote_write = True
+                remove_write = True
             if e.addr == reader.process.hostNport:
-                remote_read = True
+                remove_read = True
 
             
         return (remove_write, remove_read, success)
@@ -721,10 +779,10 @@ class ChannelHomeThread(threading.Thread):
                                     remote_release(lock_s, process)
                                 except AddrUnavailableException:
                                     # Unable to reach process to notify poison
-                                    if conf.get(SOCKETS_STRICT_NODE):
+                                    if conf.get(SOCKETS_STRICT_MODE):
                                         raise FatalException("PyCSP (poison notification:2) unable to reach process (%s)" % str(process))
                                     else:
-                                        sys.stderr.write("PyCSP (poison notification:2) unable to reach process (%s)" % str(process))
+                                        sys.stderr.write("PyCSP (poison notification:2) unable to reach process (%s)\n" % str(process))
 
                             except ChannelRetireException:
                                 try:                    
@@ -735,10 +793,10 @@ class ChannelHomeThread(threading.Thread):
                                     remote_release(lock_s, process)
                                 except AddrUnavailableException:
                                     # Unable to reach process to notify retire
-                                    if conf.get(SOCKETS_STRICT_NODE):
+                                    if conf.get(SOCKETS_STRICT_MODE):
                                         raise FatalException("PyCSP (retire notification:2) unable to reach process (%s)" % str(process))
                                     else:
-                                        sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)" % str(process))
+                                        sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
                                         
                         elif header[H_CMD] == CHANTHREAD_POST_READ:
                             data = ossocket.recvall(s, header[H_MSG_SIZE])
@@ -761,10 +819,10 @@ class ChannelHomeThread(threading.Thread):
                                     remote_release(lock_s, process)
                                 except AddrUnavailableException:
                                     # Unable to reach process to notify poison
-                                    if conf.get(SOCKETS_STRICT_NODE):
+                                    if conf.get(SOCKETS_STRICT_MODE):
                                         raise FatalException("PyCSP (poison notification:3) unable to reach process (%s)" % str(process))
                                     else:
-                                        sys.stderr.write("PyCSP (poison notification:3) unable to reach process (%s)" % str(process))
+                                        sys.stderr.write("PyCSP (poison notification:3) unable to reach process (%s)\n" % str(process))
                                         
                             except ChannelRetireException:
                                 try:                    
@@ -775,8 +833,8 @@ class ChannelHomeThread(threading.Thread):
                                     remote_release(lock_s, process)
                                 except AddrUnavailableException:
                                     # Unable to reach process to notify retire
-                                    if conf.get(SOCKETS_STRICT_NODE):
+                                    if conf.get(SOCKETS_STRICT_MODE):
                                         raise FatalException("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
                                     else:
-                                        sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
+                                        sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
 

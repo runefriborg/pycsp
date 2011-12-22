@@ -146,12 +146,17 @@ def recvall(sock, msg_len):
     """
     msg_len_received = 0
     msg_chunks = []
-    while msg_len_received < msg_len:
-        chunk = sock.recv(msg_len - msg_len_received)
-        if chunk == '':
-            raise SocketClosedException()
-        msg_chunks.append(chunk)
-        msg_len_received += len(chunk)
+    try:
+        while msg_len_received < msg_len:
+            chunk = sock.recv(msg_len - msg_len_received)
+            if chunk == '':
+                raise SocketClosedException()
+            msg_chunks.append(chunk)
+            msg_len_received += len(chunk)
+    except socket.error, (value,message):
+        sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+        raise SocketClosedException()
+        
     return "".join(msg_chunks)
     
 def sendallNOreconnect(sock, data):
