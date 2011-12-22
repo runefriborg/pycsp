@@ -5,23 +5,7 @@ Allows reusing previously opened sockets.
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-  
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.  THE
-SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+See LICENSE.txt for licensing details (MIT License). 
 """
 import time
 import errno
@@ -33,6 +17,8 @@ from configuration import *
 from pycsp.common.const import *
 
 SOCKETS_MAX_REUSE = 100
+conf = Configuration()
+
 
 def _connect(addr):
     """
@@ -43,7 +29,6 @@ def _connect(addr):
     connected = False
     t1 = None
     sock = None
-    conf = Configuration()
     
     while (not connected):
         try:
@@ -57,7 +42,7 @@ def _connect(addr):
             sock.connect(addr)
             connected = True
         except socket.error, (value,message):
-            sys.stderr.write("%d %s\n" % (value, message))
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             if sock:
                 sock.close()
             if value != errno.ECONNREFUSED:            
@@ -92,7 +77,6 @@ def start_server(server_addr=('', 0)):
     ok = False
     t1 = None
     sock = None
-    conf = Configuration()
     
     while (not ok):
         try:
@@ -106,7 +90,7 @@ def start_server(server_addr=('', 0)):
             sock.bind(server_addr)
             ok = True
         except socket.error, (value,message):
-            sys.stderr.write("%d %s\n" % (value, message))
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             if sock:
                 sock.close()
             if value != errno.EADDRINUSE:            
@@ -129,12 +113,17 @@ def start_server(server_addr=('', 0)):
 
 
 def connect(addr):
+    """
+    Retrieve old connection or acquire new connection
+    """
+    
     t = getThread()
 
     # Lookup connection
     if t.__dict__.has_key("conn"):
         if t.conn.has_key(addr):
-            t.usage[addr] += 1
+            sock = t.conn[addr]
+            t.usage[sock] += 1
             return t.conn[addr]
     
     sock = _connect(addr)
@@ -142,10 +131,10 @@ def connect(addr):
     # Save connection
     if t.__dict__.has_key("conn"):
         t.conn[addr] = sock
-        t.usage[addr] = 1
+        t.usage[sock] = 1
     else:
         t.conn = {addr:sock}
-        t.usage = {addr:1}
+        t.usage = {sock:1}
 
     return sock
 
@@ -165,39 +154,119 @@ def recvall(sock, msg_len):
         msg_len_received += len(chunk)
     return "".join(msg_chunks)
     
+def sendallNOreconnect(sock, data):
+    """
+    Send all data on socket. Do not reconnect on error.
+    """
+    try:
+        sock.sendall(data)
+    except socket.error, (value,message):
+        sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+        # TODO make exceptions depending on the error value
 
-def sendall(addr, data):
-    t = getThread()
-    return t.conn[addr].sendall(data)
+        # Expire socket
+        addr = None
+        for item in t.conn.items():
+            if (item[1] == sock):
+                addr = item[0]
+                forceclose(addr)
+
+        if addr == None:
+            raise Exception("Fatal error: Could not find cached socket" + str(addr))
+
+        raise SocketSendException()
+
+
+def sendall(sock, data):
+    """
+    Send all data on socket. Reconnect once if socket fails and the socket was cached.
+
+    Warning: Provided socket may be invalidated and replaced, thus use like this:
+    sock = sendall(sock, shipped_data)
     
+    """
+    ok = False
+    
+    while (not ok):
+        try:
+            sock.sendall(data)
+            ok = True
+        except socket.error, (value,message):
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+            # TODO make exceptions depending on the error value
 
+            t = getThread()
+            if t.usage[sock] == 1:
+                # The socket was new, thus no reconnection
+                raise SocketSendException()
+            else:
+                # Expire socket
+                addr = None
+                for item in t.conn.items():
+                    if (item[1] == sock):
+                        addr = item[0]
+                        forceclose(addr)
+
+                if addr == None:
+                    raise Exception("Fatal error: Could not find cached socket" + str(addr))
+
+                # Reconnect
+                sock = connect(addr)
+
+    # Return "possibly new" socket
+    return sock
+
+        
 def close(addr):
+    """
+    Check thread sockets use value and close if socket is expired.
+    """
     t = getThread()
+    if t.conn.has_key(addr):
+        sock = t.conn[addr]
+    
+        if (t.usage[sock] > SOCKETS_MAX_REUSE):
 
-    if (t.usage[addr] > SOCKETS_MAX_REUSE):
+            del t.conn[addr]
+            del t.usage[sock]
+        
+            sock.close()
+
+def forceclose(addr):
+    """
+    Close socket and remove cached socket
+    """
+    t = getThread()
+    if t.conn.has_key(addr):
         sock = t.conn[addr]
 
         del t.conn[addr]
-        del t.usage[addr]
+        del t.usage[sock]
         
         sock.close()
-        #print("Disconnect: %s" % (str(addr)))
-
+    
 def closeall():
+    """
+    Close all sockets owned by thread
+    """
     t = getThread()
 
     for addr in t.conn:
         sock = t.conn[addr]
         sock.close()
-        #print("Disconnect: %s" % (str(addr)))
 
     t.conn = {}
     t.usage = {}
 
 def connectNOcache(addr):
+    """
+    Connect to addr circumventing the cached sockets
+    """
     sock = _connect(addr)
     return sock
 
 def closeNOcache(sock):
+    """
+    Close socket created with connectNOcache
+    """
     sock.close()
-

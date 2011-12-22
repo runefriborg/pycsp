@@ -1,43 +1,34 @@
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-  
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.  THE
-SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+See LICENSE.txt for licensing details (MIT License). 
 """
 
 from pycsp_import import *
 
+
+Configuration().set(SOCKETS_CONNECT_TIMEOUT, 2)
+Configuration().set(SOCKETS_BIND_TIMEOUT, 2)
+print "test A"
 try:
     A = Channel("A", connect=("",8888))
     raise Exception("Failed test")
-except SocketConnectException:
+except ChannelSocketException as e:
     pass
 
 
+print "test B"
 try:
     A = Channel("A", server=("",9999))
-except SocketBindException:
-    pass
+except ChannelSocketException as e:
+    raise Exception("Failed test")
 
+
+print "test C"
 try:
     B = Channel("B", server=("",9999))
     raise Exception("Failed test")
-except SocketBindException:
+except ChannelSocketException as e:
     pass
 
 
