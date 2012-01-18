@@ -17,10 +17,12 @@ from configuration import *
 from pycsp.common.const import *
 
 SOCKETS_MAX_REUSE = 100
+STDERR_OUTPUT = True
+
 conf = Configuration()
 
 
-def _connect(addr):
+def _connect(addr, reconnect=True):
     """
     Make a connection with the Nagle algorithm disabled.
 
@@ -42,7 +44,11 @@ def _connect(addr):
             sock.connect(addr)
             connected = True
         except socket.error, (value,message):
-            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+            if not reconnect:
+                return False
+            
+            if STDERR_OUTPUT:
+                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             if sock:
                 sock.close()
             if value != errno.ECONNREFUSED:            
@@ -90,7 +96,8 @@ def start_server(server_addr=('', 0)):
             sock.bind(server_addr)
             ok = True
         except socket.error, (value,message):
-            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+            if STDERR_OUTPUT:
+                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             if sock:
                 sock.close()
             if value != errno.EADDRINUSE:            
@@ -112,9 +119,11 @@ def start_server(server_addr=('', 0)):
     return sock, address
 
 
-def connect(addr):
+def connect(addr, reconnect=True):
     """
     Retrieve old connection or acquire new connection
+
+    If reconnect = False, connect returns False instead of socket, when unable to connect to host.
     """
     
     t = getThread()
@@ -125,8 +134,8 @@ def connect(addr):
             sock = t.conn[addr]
             t.usage[sock] += 1
             return t.conn[addr]
-    
-    sock = _connect(addr)
+
+    sock = _connect(addr, reconnect)
 
     # Save connection
     if t.__dict__.has_key("conn"):
@@ -154,7 +163,8 @@ def recvall(sock, msg_len):
             msg_chunks.append(chunk)
             msg_len_received += len(chunk)
     except socket.error, (value,message):
-        sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+        if STDERR_OUTPUT:
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
         raise SocketClosedException()
         
     return "".join(msg_chunks)
@@ -166,7 +176,8 @@ def sendallNOreconnect(sock, data):
     try:
         sock.sendall(data)
     except socket.error, (value,message):
-        sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+        if STDERR_OUTPUT:
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
         # TODO make exceptions depending on the error value
 
         # Expire socket
@@ -197,7 +208,8 @@ def sendall(sock, data):
             sock.sendall(data)
             ok = True
         except socket.error, (value,message):
-            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+            if STDERR_OUTPUT:
+                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             # TODO make exceptions depending on the error value
 
             t = getThread()

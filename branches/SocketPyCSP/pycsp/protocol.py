@@ -188,56 +188,68 @@ def compile_header(cmd, id, arg, seq=0):
 
 def remote_acquire_and_get_state(dest):
 
+    if not dest.active:
+        return (None, FAIL, 0)
+        
     try:
-        sock = ossocket.connect(dest.hostNport)
-        sock = ossocket.sendall(sock, compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
-        compiled_header = ossocket.recvall(sock, header_size)
+        sock = ossocket.connect(dest.hostNport, reconnect=False)
+        if sock:
+            ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
+            compiled_header = ossocket.recvall(sock, header_size)
+        else:
+            compiled_header = ""
     except SocketException:
-        ossocket.close(dest.hostNport)
+        ossocket.forceclose(dest.hostNport)
         compiled_header = ""
 
     if len(compiled_header) != header_size:
         # connection broken.
         # When a channel is unable to acquire the lock for process, the
         # posted request is disabled.
-        raise AddrUnavailableException(dest)
 
+        dest.active = False
+        return (None, FAIL, 0)
+    
     header = struct.unpack(header_fmt, compiled_header)
     
     return (sock, header[H_ARG], header[H_SEQ])
 
 def remote_notify(sock, dest, result_ch, result_msg):
-    pickled_data = data2bin((result_ch,result_msg))
-    try:
-        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
-        ossocket.sendallNOreconnect(sock, pickled_data)
-    except SocketException:
-        ossocket.close(dest.hostNport)
-        raise AddrUnavailableException(dest)
+    if dest.active:
+        pickled_data = data2bin((result_ch,result_msg))
+        try:
+            ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id, len(pickled_data)))
+            ossocket.sendallNOreconnect(sock, pickled_data)
+        except SocketException:
+            ossocket.forceclose(dest.hostNport)
+            raise AddrUnavailableException(dest)
 
 def remote_poison(sock, dest):
-    try:
-        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_POISON, dest.id, 0))
-    except SocketException:
-        ossocket.close(dest.hostNport)
-        raise AddrUnavailableException(dest)
+    if dest.active:
+        try:
+            ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_POISON, dest.id, 0))
+        except SocketException:
+            ossocket.forceclose(dest.hostNport)
+            raise AddrUnavailableException(dest)
 
 def remote_retire(sock, dest):
-    try:
-        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RETIRE, dest.id, 0))
-    except SocketException:
-        ossocket.close(dest.hostNport)
-        raise AddrUnavailableException(dest)
+    if dest.active:
+        try:
+            ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RETIRE, dest.id, 0))
+        except SocketException:
+            ossocket.forceclose(dest.hostNport)
+            raise AddrUnavailableException(dest)
 
 def remote_release(sock, dest):
     """
     Ignore socket exceptions on remote_release
     """
-    try:
-        ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RELEASE_LOCK, dest.id, 0))
-        ossocket.close(dest.hostNport)
-    except SocketException:
-        ossocket.close(dest.hostNport)
+    if dest.active:
+        try:
+            ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RELEASE_LOCK, dest.id, 0))
+            ossocket.close(dest.hostNport)
+        except SocketException:
+            ossocket.forceclose(dest.hostNport)
 
     
 class LockThread(threading.Thread):
@@ -246,6 +258,8 @@ class LockThread(threading.Thread):
 
         self.process = process
         self.cond = cond
+
+        self.daemon = False
 
         self.server_socket, self.address = ossocket.start_server()
         
@@ -510,7 +524,7 @@ class ChannelHome(object):
                     remove_write, remove_read, success = w.offer(r)
                     if remove_read:
                         self.readqueue.remove(r)
-                    if remove_write:                        
+                    if remove_write:
                         self.writequeue.remove(w)
                         if success:
                             return # break match loop on first success
@@ -577,6 +591,7 @@ class AddrID(object):
     def __init__(self, addr=('',0), id=""):
         self.hostNport = addr
         self.id = id
+        self.active = True
         
     def __str__(self):
         return repr("%s %s" % (self.hostNport, self.id))
@@ -651,14 +666,14 @@ class ChannelReq(object):
                 r_state = FAIL
             if w_seq != self.seq_check:
                 w_state = FAIL
-
+            
             # Success?
             if (r_state == READY and w_state == READY):
                 remote_notify(r_conn, reader.process, reader.ch_id, self.msg)
                 remote_notify(w_conn, self.process, self.ch_id, None)
                 success = True
 
-                r_state = SUCCESS
+                r_state = SUCCESS 
                 w_state = SUCCESS
 
             # Schedule removal of NOT READY requests from channel
@@ -677,10 +692,10 @@ class ChannelReq(object):
         except AddrUnavailableException as e:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
-            #if conf.get(SOCKETS_STRICT_MODE):
-            #    raise FatalException("PyCSP unable to reach process during offer(%s)" % str(self.process))
-            #else:
-            #    sys.stderr.write("PyCSP unable to reach process during offer(%s)\n" % str(self.process))
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise FatalException("PyCSP unable to reach process during offer(%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP unable to reach process during offer(%s)\n" % str(self.process))
 
             success = False
             if e.addr == self.process.hostNport:
@@ -837,4 +852,8 @@ class ChannelHomeThread(threading.Thread):
                                         raise FatalException("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
                                     else:
                                         sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
+
+
+def shutdown():
+    pass
 
