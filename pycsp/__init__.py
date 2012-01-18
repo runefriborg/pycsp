@@ -17,5 +17,6 @@ from process import Process, process, Sequence, Parallel, Spawn, current_process
 from exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException
 from configuration import *
 from compat import *
+from protocol import shutdown
 
 version = (0,8,0, 'sockets')

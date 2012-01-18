@@ -49,10 +49,10 @@ class Configuration(object):
             cls.__instance = object.__new__(cls)
             
             cls.__conf = {
-                SOCKETS_CONNECT_TIMEOUT:10,
+                SOCKETS_CONNECT_TIMEOUT:2,
                 SOCKETS_CONNECT_RETRY_DELAY:0.1,
-                SOCKETS_BIND_TIMEOUT:10,
-                SOCKETS_BIND_RETRY_DELAY:1,
+                SOCKETS_BIND_TIMEOUT:2,
+                SOCKETS_BIND_RETRY_DELAY:0.2,
                 SOCKETS_STRICT_MODE:False
                 }
             

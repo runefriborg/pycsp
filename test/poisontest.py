@@ -24,6 +24,9 @@ import check
 import time
 import random
 
+
+Configuration().set(SOCKETS_STRICT_MODE, True)
+
 @choice
 def action(assertCheck, id, channel_input=None):
     if assertCheck:
@@ -135,9 +138,9 @@ def poisontest():
 
             if not rsleep==wsleep==sleep_one:
                 One2One_Test(rsleep, wsleep)
-                Any2One_Alting_Test(rsleep, wsleep)
+                #Any2One_Alting_Test(rsleep, wsleep)
                 Any2Any_Test(rsleep, wsleep)
-                Any_Alting2Any_Alting_Test(None,None)
+                #Any_Alting2Any_Alting_Test(None,None)
 
 if __name__ == '__main__':
     poisontest()
