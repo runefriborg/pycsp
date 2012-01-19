@@ -1,4 +1,5 @@
-#summary Frequently Asked Questions focused on troubleshooting PyCSP applications
+#summary Frequently Asked Questions focused on troubleshooting PyCSP applications (todo)
+#sidebar TutorialList
 
 = pycsp.threads =
 
