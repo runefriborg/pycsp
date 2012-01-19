@@ -3,7 +3,7 @@
 
 = pycsp.threads =
 
-= pycsp.multiprocessing =
+= pycsp.processes =
 
 = pycsp.greenlets =
 
