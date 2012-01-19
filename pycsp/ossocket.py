@@ -17,7 +17,7 @@ from configuration import *
 from pycsp.common.const import *
 
 SOCKETS_MAX_REUSE = 100
-STDERR_OUTPUT = True
+STDERR_OUTPUT = False
 
 conf = Configuration()
 
@@ -182,6 +182,7 @@ def sendallNOreconnect(sock, data):
 
         # Expire socket
         addr = None
+        t = getThread()
         for item in t.conn.items():
             if (item[1] == sock):
                 addr = item[0]

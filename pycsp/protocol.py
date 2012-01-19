@@ -156,7 +156,7 @@ def send_payload(hostNport, cmd, id, payload, seq=0):
     sock = ossocket.connect(hostNport)
     
     sock = ossocket.sendall(sock, header)
-    sock.sendall(pickle_payload)
+    ossocket.sendallNOreconnect(sock, pickle_payload)
     
     ossocket.close(hostNport)
 
@@ -259,17 +259,17 @@ class LockThread(threading.Thread):
         self.process = process
         self.cond = cond
 
+        # All pycsp processes calls shutdown, thus it will receive a shutdown message before it is terminated.
         self.daemon = False
 
         self.server_socket, self.address = ossocket.start_server()
         
         self.finished = False
-
+        
     def run(self):
         active_socket_list = [self.server_socket]
 
         while(not self.finished):
-
             ready, _, exceptready = select.select(active_socket_list, [], [])
             for s in ready:
                 if s == self.server_socket:
@@ -288,7 +288,10 @@ class LockThread(threading.Thread):
                         header = struct.unpack(header_fmt, recv_data)
 
                         if header[H_CMD] == LOCKTHREAD_SHUTDOWN:
+                            self.cond.acquire()
                             self.finished = True
+                            self.cond.notify()
+                            self.cond.release()
 
                         elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
                             process_id = header[H_ID]
@@ -312,6 +315,10 @@ class LockThread(threading.Thread):
 
                                 if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
                                     self.cond.acquire()
+
+                                    if self.process.state != READY:
+                                        raise Exception("PyCSP Panic")
+                                    
                                     result_ch, result_msg = bin2data(ossocket.recvall(s, header[H_MSG_SIZE]))
                                     self.process.result_ch = result_ch
                                     self.process.result_msg = result_msg
@@ -321,19 +328,23 @@ class LockThread(threading.Thread):
 
                                 if header[H_CMD] == LOCKTHREAD_POISON:
                                     self.cond.acquire()
-                                    self.process.state = POISON
-                                    self.cond.notifyAll()
+                                    
+                                    if self.process.state == READY:
+                                        self.process.state = POISON
+                                        self.cond.notifyAll()
                                     self.cond.release()
 
                                 if header[H_CMD] == LOCKTHREAD_RETIRE:
                                     self.cond.acquire()
-                                    self.process.state = RETIRE
-                                    self.cond.notifyAll()
+                                    
+                                    if self.process.state == READY:
+                                        self.process.state = RETIRE
+                                        self.cond.notifyAll()
                                     self.cond.release()
 
                                 if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
                                     lock_acquired = False
-
+                  
         # Close server and spawned sockets
         for s in active_socket_list:
             s.close()
@@ -671,6 +682,7 @@ class ChannelReq(object):
             if (r_state == READY and w_state == READY):
                 remote_notify(r_conn, reader.process, reader.ch_id, self.msg)
                 remote_notify(w_conn, self.process, self.ch_id, None)
+                
                 success = True
 
                 r_state = SUCCESS 
@@ -714,7 +726,7 @@ class ChannelHomeThread(threading.Thread):
         # leave processes in an inconsistent state.
         # To enforce a nice shutdown, the Shutdown function must be called
         # by the user
-        self.daemon = True
+        self.daemon = False
 
         self.channel = ChannelHome(name, buffer)
 
@@ -723,7 +735,7 @@ class ChannelHomeThread(threading.Thread):
                 addr = ('', int(os.environ[ENVVAL_PORT]))
             else:
                 addr = ('', 0)
-        
+
         self.server_socket, self.address = ossocket.start_server(server_addr=addr)
         self.id = name
 
@@ -767,6 +779,7 @@ class ChannelHomeThread(threading.Thread):
                                 for s2 in active_socket_list:
                                     s2.close()
                                 self.server_socket.close()
+
                                 return
                                 
                         elif header[H_CMD] == CHANTHREAD_POISON:
@@ -856,4 +869,3 @@ class ChannelHomeThread(threading.Thread):
 
 def shutdown():
     pass
-

@@ -55,6 +55,8 @@ def printer(cin):
 first=Channel()
 outc=Channel()
 
-Parallel(producer(first.writer(),1000),
+Parallel(producer(first.writer(),40),
          worker(first.reader(), outc.writer()),
          printer(outc.reader()))
+
+close(first, outc)
