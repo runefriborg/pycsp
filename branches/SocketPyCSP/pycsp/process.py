@@ -95,8 +95,13 @@ class Process(osprocess.Proc):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
         
-        # Shutdown lock thread
+        # Initiate shutdown of lock thread
+        self.cond.acquire()
         self.lockThread.shutdown()
+
+        # Wait for termination of lock thread
+        self.cond.wait()
+        self.cond.release()
 
     def __check_poison(self, args):
         for arg in args:

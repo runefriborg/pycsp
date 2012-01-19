@@ -21,12 +21,14 @@ def close(*channels):
 
     # First deregister all channels
     for x in channels:
-        x.control._deregister()
+        if x.control:
+            x.control._deregister()
 
     # Then wait for threads to finish, thus avoiding deadlocks from
     # conflicting threads
     for x in channels:
-        x.control._threadjoin()
+        if x.control:
+            x.control._threadjoin()
 
 # Classes
 class Channel(object):
@@ -41,8 +43,8 @@ class Channel(object):
             self.control = ChannelControl(name, buffer, connect, server)
         except SocketBindException:
             self.control = None
-            raise SocketBindException()
-
+            raise ChannelSocketException(server, "PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (name, str(server)))
+        
         # public methods available to the user
         self.writer = self.control.writer
         self.reader = self.control.reader
