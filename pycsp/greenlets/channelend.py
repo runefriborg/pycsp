@@ -66,7 +66,7 @@ class ChannelEndWrite():
         self.remove_write = self.channel.remove_write
         self.poison = self.channel.poison
 
-    def _retire(self, msg):
+    def _retire(self, *ignore):
         raise ChannelRetireException()
 
     def retire(self):
@@ -101,7 +101,7 @@ class ChannelEndRead():
         self.remove_read = self.channel.remove_read
         self.poison = self.channel.poison
 
-    def _retire(self):
+    def _retire(self, *ignore):
         raise ChannelRetireException()
 
     def retire(self):
