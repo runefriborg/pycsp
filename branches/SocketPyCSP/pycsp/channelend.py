@@ -75,7 +75,7 @@ class ChannelEndWrite:
         protocol.post_write(self.channel, process, msg)
 
         
-    def _retire(self, msg):
+    def _retire(self, *ignore):
         raise ChannelRetireException()
 
     def retire(self):
@@ -107,7 +107,7 @@ class ChannelEndRead:
     def post_read(self, process):
         protocol.post_read(self.channel, process)
 
-    def _retire(self):
+    def _retire(self, *ignore):
         raise ChannelRetireException()
 
     def retire(self):

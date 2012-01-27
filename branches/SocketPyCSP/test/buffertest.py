@@ -78,17 +78,17 @@ def sleep_one():
 
 def Buffer_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Buffer_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=range(10)))
-
+    
     cnt = 10
     c=Channel(buffer=cnt)
     Parallel(writer(-c,0,cnt, write_sleeper))
-    Parallel(reader(+c, 0, read_sleeper, x.writer()))
+    Parallel(check.Assert(x.reader(), "Buffer_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=range(10)),
+             reader(+c, 0, read_sleeper, x.writer()))
 
 
 def One2One_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+    
 
     c1=Channel(buffer=1)
     c2=Channel(buffer=5)
@@ -97,20 +97,21 @@ def One2One_Test(read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(reader(+c1,0, read_sleeper, x.writer()), writer(-c1,0,cnt, write_sleeper),
+    Parallel(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]),
+             reader(+c1,0, read_sleeper, x.writer()), writer(-c1,0,cnt, write_sleeper),
              reader(+c2,1, read_sleeper, x.writer()), writer(-c2,1,cnt, write_sleeper),
              reader(+c3,2, read_sleeper, x.writer()), writer(-c3,2,cnt, write_sleeper),
              reader(+c4,3, read_sleeper, x.writer()), writer(-c4,3,cnt, write_sleeper))
 
 def Any2One_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any2One_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0]))
-
+    
     c1=Channel(buffer=20)
 
     cnt = 10
     
-    Parallel(reader(c1.reader(),0, read_sleeper, x.writer()),
+    Parallel(check.Assert(x.reader(), "Any2One_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0]),
+             reader(c1.reader(),0, read_sleeper, x.writer()),
              writer(c1.writer(),0,cnt, write_sleeper),
              writer(c1.writer(),1,cnt, write_sleeper),
              writer(c1.writer(),2,cnt, write_sleeper),
@@ -118,13 +119,14 @@ def Any2One_Test(read_sleeper, write_sleeper):
 
 def One2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "One2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+    
 
     c1=Channel(buffer=20)
 
     cnt = 10
     
-    Parallel(writer(c1.writer(),0,cnt*4, write_sleeper),
+    Parallel(check.Assert(x.reader(), "One2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]),
+             writer(c1.writer(),0,cnt*4, write_sleeper),
              reader(c1.reader(),0, read_sleeper, x.writer()),
              reader(c1.reader(),1, read_sleeper, x.writer()),
              reader(c1.reader(),2, read_sleeper, x.writer()),
@@ -133,8 +135,7 @@ def One2Any_Test(read_sleeper, write_sleeper):
 
 def One_Alting2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "One_Alting2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
-
+    
     c1=Channel(buffer=1)
     c2=Channel(buffer=5)
     c3=Channel(buffer=10)
@@ -142,7 +143,8 @@ def One_Alting2Any_Test(read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(par_writer(c1.writer(),c2.writer(),c3.writer(),c4.writer(),cnt, write_sleeper),
+    Parallel(check.Assert(x.reader(), "One_Alting2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]),
+             par_writer(c1.writer(),c2.writer(),c3.writer(),c4.writer(),cnt, write_sleeper),
              reader(c1.reader(),0, read_sleeper, x.writer()),
              reader(c2.reader(),1, read_sleeper, x.writer()),
              reader(c3.reader(),2, read_sleeper, x.writer()),
@@ -150,19 +152,18 @@ def One_Alting2Any_Test(read_sleeper, write_sleeper):
 
 def Any2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
-
+   
     c1=Channel(buffer=20)
     cnt = 10
 
-    Parallel(reader(+c1,0, read_sleeper, x.writer()), writer(-c1,0,cnt, write_sleeper),
+    Parallel(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]),
+             reader(+c1,0, read_sleeper, x.writer()), writer(-c1,0,cnt, write_sleeper),
              reader(+c1,1, read_sleeper, x.writer()), writer(-c1,1,cnt, write_sleeper),
              reader(+c1,2, read_sleeper, x.writer()), writer(-c1,2,cnt, write_sleeper),
              reader(+c1,3, read_sleeper, x.writer()), writer(-c1,3,cnt, write_sleeper))
 
 def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any_Alting2Any_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=160, minimum=40, vocabulary=[0,1,2,3]))
 
     c1=Channel(buffer=1)
     c2=Channel(buffer=5)
@@ -171,7 +172,8 @@ def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
 
     cnt = 10
     
-    Parallel(par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
+    Parallel(check.Assert(x.reader(), "Any_Alting2Any_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=160, minimum=40, vocabulary=[0,1,2,3]),
+             par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
              par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
              par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
              par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),

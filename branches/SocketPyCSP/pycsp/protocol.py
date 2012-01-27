@@ -400,7 +400,7 @@ class Buffer(object):
                 if (w_state != READY):
                     remove_write = True
 
-                remote_release(writer.process)
+                remote_release(w_conn, writer.process)
             except AddrUnavailableException:
                 remove_write = True
 
