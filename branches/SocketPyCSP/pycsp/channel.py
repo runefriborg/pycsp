@@ -48,8 +48,7 @@ class Channel(object):
         # public methods available to the user
         self.writer = self.control.writer
         self.reader = self.control.reader
-        self.retire_reader = self.control.retire_reader
-        self.retire_writer = self.control.retire_writer
+        self.retire = self.control.retire
         self.poison = self.control.poison
         
         # Register this channel reference at the channel home thread
@@ -209,7 +208,7 @@ class ChannelControl(object):
         >>> isinstance(cin, ChannelEndRead)
         True
         """
-        self.join_reader()
+        self.join(direction=READ)
         return ChannelEndRead(self)
 
     def writer(self):
@@ -221,28 +220,22 @@ class ChannelControl(object):
         >>> isinstance(cout, ChannelEndWrite)
         True
         """
-        self.join_writer()
+        self.join(direction=WRITE)
         return ChannelEndWrite(self)
 
-    def join_reader(self):
-        protocol.join_reader(self)
 
-    def join_writer(self):
-        protocol.join_writer(self)
+    def join(self, direction):
+        protocol.join(self, direction)
 
-    def retire_reader(self):
+    def retire(self, direction):
         if not self.isretired:
-            retired = protocol.retire_reader(self)
+            retired = protocol.retire(self, direction)
             if retired:
                 self.isretired = True
 
-    def retire_writer(self):
-        if not self.isretired:
-            retired = protocol.retire_writer(self)
-            if retired:
-                self.isretired = True
 
-    def poison(self):
+    def poison(self, direction):
         if not self.ispoisoned:
             self.ispoisoned = True
-            protocol.poison(self)
+            
+            protocol.poison(self, direction)
