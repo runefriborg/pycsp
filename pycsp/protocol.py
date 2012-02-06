@@ -364,6 +364,9 @@ class Buffer(object):
     def isfull(self):
         return len(self.items) == self.max
 
+    def isempty(self):
+        return len(self.items) == 0
+
     def insertfrom(self, writer):
         success = False
         remove_write = False
@@ -431,7 +434,6 @@ class ChannelHome(object):
         self.writequeue=[]
         self.ispoisoned=False
         self.isretired=False
-        self.retiring=False
         self.readers=0
         self.writers=0
 
@@ -445,6 +447,26 @@ class ChannelHome(object):
             self.buffer = None
 
     def check_termination(self):
+        """
+        This method is invoked on the initial posting of a request.
+
+        It checks the buffer for any poison / retire pill, which has
+        been prosponed because of buffered messages. If buffer is now
+        empty, then the channel is poisoned / retired.
+        """
+        if self.buffer:
+            # Buffer enabled
+            if self.buffer.ispoisoned:
+                if self.buffer.isempty():
+                    self.poison_writer()
+
+            if self.buffer.isretired:
+                if self.buffer.isempty():
+                    self.isretired= True
+                    for p in self.readqueue:
+                        p.retire()                    
+                    self.readqueue = []
+        
         if self.ispoisoned:
             raise ChannelPoisonException()
         if self.isretired:
@@ -531,6 +553,16 @@ class ChannelHome(object):
                     if success:
                         return # break match loop on first success
 
+    # The method for poisoning non-buffered channels is identical
+    # for both the reading and writing end, while the method differs
+    # for buffered channels.
+    # In buffered channels the poison pill must be propagated through
+    # the buffer slots before the other end is poisoned.
+
+    # An exception has been made for the reading end:
+    # To allow poisoning to skip
+    # buffer slots and instantly poison the writing end.
+
     def poison_reader(self):
         self.ispoisoned=True
         
@@ -545,22 +577,32 @@ class ChannelHome(object):
         self.writequeue = []
 
     def poison_writer(self):
-        self.ispoisoned=True
-        
-        for p in self.readqueue:
-            p.poison()
+        if self.buffer and not self.buffer.isempty():
+            # Buffer is enabled and has content
+            self.buffer.ispoisoned = True
 
-        for p in self.writequeue:
-            p.poison()
+            for p in self.writequeue:
+                p.poison()
+    
+            # flush all write requests
+            self.writequeue = []
 
-        # flush all requests
-        self.readqueue = []
-        self.writequeue = []
+        else:
+            self.ispoisoned=True
+
+            for p in self.readqueue:
+                p.poison()
+
+            for p in self.writequeue:
+                p.poison()
+
+            # flush all requests
+            self.readqueue = []
+            self.writequeue = []
 
     def retire_reader(self):
         self.leave_reader()
         if not self.isretired:
-            self.retiring = True
             if self.readers==0:
                 self.isretired= True
                 for p in self.writequeue:
@@ -570,12 +612,17 @@ class ChannelHome(object):
     def retire_writer(self):
         self.leave_writer()
         if not self.isretired:
-            self.retiring = True
             if self.writers==0:
-                self.isretired= True
-                for p in self.readqueue:
-                    p.retire()                    
-                self.readqueue = []
+
+                if self.buffer and not self.buffer.isempty():
+                    # Buffer is enabled and has content
+                    self.buffer.isretired = True
+                    
+                else:
+                    self.isretired= True
+                    for p in self.readqueue:
+                        p.retire()                    
+                    self.readqueue = []
                 
     def join_reader(self):
         self.readers+=1
