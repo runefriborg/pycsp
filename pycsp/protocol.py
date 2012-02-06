@@ -21,8 +21,8 @@ from configuration import *
 
 # Header CMDs:
 LOCKTHREAD_ACQUIRE_LOCK, LOCKTHREAD_ACCEPT_LOCK, LOCKTHREAD_NOTIFY_SUCCESS, LOCKTHREAD_POISON, LOCKTHREAD_RETIRE, LOCKTHREAD_RELEASE_LOCK, LOCKTHREAD_SHUTDOWN = range(7)
-CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_RETIRE_READER, CHANTHREAD_RETIRE_WRITER, CHANTHREAD_POISON = range(10,17)
-CHANTHREAD_REGISTER, CHANTHREAD_DEREGISTER = range(17,19)
+CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHREAD_LEAVE_WRITER, CHANTHREAD_RETIRE_READER, CHANTHREAD_RETIRE_WRITER, CHANTHREAD_POISON_READER, CHANTHREAD_POISON_WRITER = range(10,18)
+CHANTHREAD_REGISTER, CHANTHREAD_DEREGISTER = range(18,20)
 CHANTHREAD_POST_READ, CHANTHREAD_POST_WRITE = range(20,22)
 
 
@@ -69,33 +69,23 @@ def deregister(channel):
         # The channel thread may have closed, thus this is an acceptable situation.
         pass
     
-def join_reader(channel):
+def join(channel, direction):
     try:
-        send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
+        if direction == READ:
+            send(channel.channelhome, CHANTHREAD_JOIN_READER, channel.name)
+        elif direction == WRITE:
+            send(channel.channelhome, CHANTHREAD_JOIN_WRITER, channel.name)
     except SocketException:
         # Unable to join channel
         raise ChannelSocketException(channel.channelhome, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
-def join_writer(channel):
+def leave(channel, direction):
     try:
-        send(channel.channelhome, CHANTHREAD_JOIN_WRITER, channel.name)
-    except SocketException:
-        # Unable to join channel
-        raise ChannelSocketException(channel.channelhome, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+        if direction == READ:
+            send(channel.channelhome, CHANTHREAD_LEAVE_READER, channel.name)
+        elif direction == WRITE:
+            send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, channel.name)
 
-def leave_reader(channel):
-    try:
-        send(channel.channelhome, CHANTHREAD_LEAVE_READER, channel.name)
-    except SocketException:
-        # Unable to decrement reader count on channel
-        if conf.get(SOCKETS_STRICT_MODE):
-            raise ChannelSocketException(channel.channelhome, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
-        else:
-            sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
-
-def leave_writer(channel):
-    try:
-        send(channel.channelhome, CHANTHREAD_LEAVE_WRITER, channel.name)
     except SocketException:
         # Unable to decrement writer count on channel
         if conf.get(SOCKETS_STRICT_MODE):
@@ -103,9 +93,13 @@ def leave_writer(channel):
         else:
             sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
-def retire_reader(channel):
+def retire(channel, direction):
     try:
-        send(channel.channelhome, CHANTHREAD_RETIRE_READER, channel.name)
+        if direction == READ:
+            send(channel.channelhome, CHANTHREAD_RETIRE_READER, channel.name)
+        elif direction == WRITE:
+            send(channel.channelhome, CHANTHREAD_RETIRE_WRITER, channel.name)
+
     except SocketException:
         # Unable to retire from channel
         if conf.get(SOCKETS_STRICT_MODE):
@@ -113,19 +107,13 @@ def retire_reader(channel):
         else:
             sys.stderr.write("PyCSP (retire from channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
-def retire_writer(channel):
+def poison(channel, direction):
     try:
-        send(channel.channelhome, CHANTHREAD_RETIRE_WRITER, channel.name)
-    except SocketException:
-        # Unable to retire from channel
-        if conf.get(SOCKETS_STRICT_MODE):
-            raise ChannelSocketException(channel.channelhome, "PyCSP (retire from channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
-        else:
-            sys.stderr.write("PyCSP (retire from channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
+        if direction == READ:
+            send(channel.channelhome, CHANTHREAD_POISON_READER, channel.name)
+        elif direction == WRITE:
+            send(channel.channelhome, CHANTHREAD_POISON_WRITER, channel.name)
 
-def poison(channel):
-    try:
-        send(channel.channelhome, CHANTHREAD_POISON, channel.name)
     except SocketException:
         # Unable to poison channel
         if conf.get(SOCKETS_STRICT_MODE):
@@ -543,7 +531,20 @@ class ChannelHome(object):
                     if success:
                         return # break match loop on first success
 
-    def poison(self):
+    def poison_reader(self):
+        self.ispoisoned=True
+        
+        for p in self.readqueue:
+            p.poison()
+
+        for p in self.writequeue:
+            p.poison()
+
+        # flush all requests
+        self.readqueue = []
+        self.writequeue = []
+
+    def poison_writer(self):
         self.ispoisoned=True
         
         for p in self.readqueue:
@@ -782,8 +783,11 @@ class ChannelHomeThread(threading.Thread):
 
                                 return
                                 
-                        elif header[H_CMD] == CHANTHREAD_POISON:
-                            self.channel.poison()
+                        elif header[H_CMD] == CHANTHREAD_POISON_READER:
+                            self.channel.poison_reader()
+
+                        elif header[H_CMD] == CHANTHREAD_POISON_WRITER:
+                            self.channel.poison_writer()
 
                         elif header[H_CMD] == CHANTHREAD_POST_WRITE:
                             # Read messageparts until entire msg is received

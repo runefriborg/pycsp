@@ -69,7 +69,6 @@ class ChannelEndWrite:
         self.isretired = False
 
         self.__call__ = self.channel._write
-        self.poison = self.channel.poison
 
     def post_write(self, process, msg):
         protocol.post_write(self.channel, process, msg)
@@ -78,9 +77,12 @@ class ChannelEndWrite:
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
+    def poison(self):
+        self.channel.poison(direction=WRITE)
+
     def retire(self):
         if not self.isretired:
-            self.channel.retire_writer()
+            self.channel.retire(direction=WRITE)
             self.__call__ = self._retire
             self.isretired = True
 
@@ -102,7 +104,6 @@ class ChannelEndRead:
         self.isretired = False
 
         self.__call__ = self.channel._read
-        self.poison = self.channel.poison
 
     def post_read(self, process):
         protocol.post_read(self.channel, process)
@@ -110,9 +111,12 @@ class ChannelEndRead:
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
+    def poison(self):
+        self.channel.poison(direction=READ)
+
     def retire(self):
         if not self.isretired:
-            self.channel.retire_reader()
+            self.channel.retire(direction=READ)
             self.__call__ = self._retire
             self.isretired = True
 
