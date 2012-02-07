@@ -1,0 +1,1741 @@
+{'chan_name': 'Dot', 'type': 'Channel'}
+{'chan_name': 'Dot2file', 'type': 'Channel'}
+{'chan_name': 'Image', 'type': 'Channel'}
+{'chan_name': 'DotGenSetup', 'type': 'Channel'}
+{'chan_name': 'DotCmdSetup', 'type': 'Channel'}
+{'chan_name': 'TraceFile', 'type': 'Channel'}
+{'chan_name': 'TraceObjects', 'type': 'Channel'}
+{'chan_name': 'NodeData', 'type': 'Channel'}
+{'chan_name': 'TraceFile', 'type': 'ChannelEndWrite'}
+{'chan_name': 'TraceFile', 'type': 'ChannelEndRead'}
+{'chan_name': 'TraceObjects', 'type': 'ChannelEndRead'}
+{'chan_name': 'TraceObjects', 'type': 'ChannelEndWrite'}
+{'chan_name': 'TraceObjects', 'type': 'ChannelEndRead'}
+{'chan_name': 'TraceObjects', 'type': 'ChannelEndWrite'}
+{'chan_name': 'Dot', 'type': 'ChannelEndWrite'}
+{'chan_name': 'DotGenSetup', 'type': 'ChannelEndRead'}
+{'chan_name': 'NodeData', 'type': 'ChannelEndWrite'}
+{'chan_name': 'Dot', 'type': 'ChannelEndRead'}
+{'chan_name': 'Image', 'type': 'ChannelEndWrite'}
+{'chan_name': 'DotCmdSetup', 'type': 'ChannelEndRead'}
+{'chan_name': 'Dot2file', 'type': 'ChannelEndRead'}
+{'processes': [{'func_name': 'file_r', 'process_id': '0.1467212493641266390572.8'}, {'func_name': 'UpdateTrace', 'process_id': '0.4359110444121266390572.8'}, {'func_name': 'GenerateDotFiles', 'process_id': '0.9115195546631266390572.8'}, {'func_name': 'RunDot2gifParser', 'process_id': '0.4606425716111266390572.8'}, {'func_name': 'RunDot2fileParser', 'process_id': '0.4823479532331266390572.8'}], 'process_id': '__main__', 'type': 'Spawn'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 0}
+{'func_name': 'UpdateTrace', 'process_id': '0.4359110444121266390572.8', 'type': 'StartProcess'}
+{'func_name': 'GenerateDotFiles', 'process_id': '0.9115195546631266390572.8', 'type': 'StartProcess'}
+{'func_name': 'RunDot2fileParser', 'process_id': '0.4823479532331266390572.8', 'type': 'StartProcess'}
+{'func_name': 'RunDot2gifParser', 'process_id': '0.4606425716111266390572.8', 'type': 'StartProcess'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 0}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4823479532331266390572.8', 'chan_name': 'Dot2file', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 0}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 0}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 1}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 1}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 2}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 2}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 2}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 2}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 3}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 3}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 3}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 3}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 4}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 4}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 4}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 4}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 4}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 5}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 5}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 5}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 5}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 6}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 6}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 6}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 6}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 7}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 7}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 7}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 7}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 8}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 8}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 8}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 8}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 9}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 9}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 9}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 10}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 10}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 10}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 10}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 10}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 11}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 11}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 11}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 11}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 11}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 12}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 12}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 12}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 12}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 12}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 13}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 13}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 13}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 13}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 14}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 14}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 14}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 14}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 15}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 15}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 15}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 15}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 15}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 16}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 16}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 16}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 16}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 16}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 17}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 17}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 17}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 17}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 17}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 17}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 19}
+{'chan_name': 'Image', 'type': 'ChannelEndRead'}
+{'chan_name': 'DotGenSetup', 'type': 'ChannelEndWrite'}
+{'chan_name': 'DotCmdSetup', 'type': 'ChannelEndWrite'}
+{'chan_name': 'Dot2file', 'type': 'ChannelEndWrite'}
+{'chan_name': 'NodeData', 'type': 'ChannelEndRead'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 1}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 18}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 18}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 18}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 18}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 19}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 19}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 19}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 20}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 19}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 19}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 19}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 19}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 20}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 20}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 21}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 20}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 20}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 20}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 20}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 21}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 21}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 21}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 21}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 22}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 21}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 21}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 21}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 21}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 21}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 22}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 22}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 22}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 22}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 22}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 22}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 22}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 22}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 22}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 23}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 23}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 24}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 0}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 0}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 1}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 2}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 2}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 2}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 23}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 24}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 23}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 24}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 24}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 24}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 25}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 24}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 24}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 24}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 24}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 24}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 25}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 25}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 25}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 25}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 26}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 3}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 3}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 25}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 25}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 25}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 25}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 25}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 26}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 26}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 26}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 26}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 27}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 26}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 26}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 26}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 26}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 26}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 27}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 27}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 27}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 27}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 28}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 4}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 4}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 27}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 27}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 27}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 27}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 27}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 28}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 28}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 28}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 28}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 29}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 28}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 28}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 28}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 28}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 28}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 29}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 29}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 29}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 30}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 29}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 29}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 29}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 29}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 29}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 29}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 30}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 30}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 30}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 30}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 31}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 30}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 30}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 30}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 30}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 30}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 31}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 31}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 31}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 31}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 32}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 5}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 5}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 31}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 31}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 31}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 31}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 31}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 32}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 32}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 32}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 33}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 32}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 32}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 32}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 32}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 32}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 32}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 33}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 33}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 33}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 34}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 33}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 33}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 33}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 33}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 33}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 33}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 34}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 34}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 34}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 34}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 35}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 34}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 34}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 34}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 34}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 34}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 35}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 35}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 35}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 35}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 36}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 35}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 35}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 35}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 35}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 35}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 36}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 36}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 36}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 36}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 37}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 36}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 36}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 36}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 36}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 36}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 37}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 37}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 37}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 37}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 38}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 6}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 6}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 37}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 37}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 37}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 37}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 37}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 38}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 38}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 38}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 38}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 39}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 38}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 38}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 38}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 38}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 38}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 39}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 39}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 39}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 39}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 40}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'Dot2file', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '__main__', 'chan_name': 'Dot2file', 'type': 'DoneWrite', 'id': 0}
+{'process_id': '0.4823479532331266390572.8', 'chan_name': 'Dot2file', 'type': 'DoneRead', 'id': 0}
+{'process_id': '0.4823479532331266390572.8', 'chan_name': 'Dot2file', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 3}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 3}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 4}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 4}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 5}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 5}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 6}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 6}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 7}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 7}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 39}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 39}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 39}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 39}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 40}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 39}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 40}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 40}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 40}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 41}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 40}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 40}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 40}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 40}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 40}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 41}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 41}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 41}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 42}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 41}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 8}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 8}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 41}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 41}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 41}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 41}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 41}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 42}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 42}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 42}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 42}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 43}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'DotCmdSetup', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '__main__', 'chan_name': 'DotCmdSetup', 'type': 'DoneWrite', 'id': 0}
+{'guard': {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 9}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 9}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 42}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 42}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 42}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 42}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 42}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 43}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 43}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 43}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 44}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 43}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 43}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 43}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 43}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 43}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 43}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 44}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 44}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 44}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 44}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 45}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 10}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 10}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 44}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 44}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 44}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 44}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 44}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 45}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 45}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 45}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 45}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 46}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 7}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 7}
+{'process_id': '__main__', 'chan_name': 'NodeData', 'type': 'BlockOnRead', 'id': 0}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'NodeData', 'type': 'BlockOnWrite', 'id': 0}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'NodeData', 'type': 'DoneWrite', 'id': 0}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'NodeData', 'type': 'DoneRead', 'id': 0}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 8}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 8}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotCmdSetup', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '__main__', 'chan_name': 'DotCmdSetup', 'type': 'DoneWrite', 'id': 1}
+{'guard': {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 11}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 11}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 45}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 45}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 45}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 45}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 45}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 46}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 46}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 46}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 46}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 46}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 46}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 46}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 46}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 47}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 46}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 47}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 47}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 47}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 47}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 48}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 12}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 12}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 47}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 47}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 47}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 47}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 47}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 48}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 48}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 48}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 48}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 49}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 13}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 13}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 48}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 48}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 48}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 48}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 48}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 49}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 49}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 49}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 49}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 50}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 14}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 14}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 49}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 49}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 49}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 49}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 50}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 49}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 50}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 50}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 50}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 51}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 15}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 15}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 50}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 50}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 50}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 50}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 50}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 51}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 51}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 51}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 51}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 52}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 16}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 16}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 51}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 51}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 51}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 51}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 51}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 52}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 52}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 52}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 52}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 53}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 17}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 17}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 52}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 52}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 52}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 52}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 52}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 53}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 53}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 53}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 53}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 54}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 18}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 18}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 53}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 53}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 53}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 53}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 53}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 54}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 54}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 54}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 54}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 55}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 19}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 19}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 54}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 54}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 54}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 54}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 54}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 55}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 55}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 55}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 56}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 55}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 20}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 20}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 55}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 55}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 55}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 55}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 55}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 56}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 56}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 56}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 57}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 56}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'DotCmdSetup', 'type': 'BlockOnWrite', 'id': 2}
+{'process_id': '__main__', 'chan_name': 'DotCmdSetup', 'type': 'DoneWrite', 'id': 2}
+{'guard': {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 21}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 21}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 56}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 56}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 56}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 56}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 56}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 57}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 57}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 57}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 57}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 58}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 57}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 57}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 57}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 57}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 57}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 58}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 58}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 58}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 58}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 59}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 22}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 22}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 58}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 58}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 58}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 58}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 58}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 59}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 59}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 59}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 59}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 60}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 23}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 23}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 59}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 59}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 59}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 59}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 60}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 59}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 60}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 60}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 60}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 61}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 24}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 24}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 60}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 60}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 60}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 60}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 60}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 61}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 61}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 61}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 61}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 62}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 25}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 25}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 61}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 61}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 61}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 61}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 61}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 62}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 62}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 62}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 62}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 63}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 26}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 26}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 62}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 62}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 62}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 62}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 62}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 63}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 63}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 63}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 63}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 64}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 27}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 27}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 63}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 63}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 63}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 63}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 63}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 64}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 64}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 64}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 64}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 65}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 28}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 28}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 64}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 64}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 64}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 64}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 64}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 65}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 65}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 65}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 65}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 66}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 9}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 9}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'NodeData', 'type': 'BlockOnWrite', 'id': 1}
+{'process_id': '__main__', 'chan_name': 'NodeData', 'type': 'BlockOnRead', 'id': 1}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'NodeData', 'type': 'DoneWrite', 'id': 1}
+{'process_id': '__main__', 'chan_name': 'NodeData', 'type': 'DoneRead', 'id': 1}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 10}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 10}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 11}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 11}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 12}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 12}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 29}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 29}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 65}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 65}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 65}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 65}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 66}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 65}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 66}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 66}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 67}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 66}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 30}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 30}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 66}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 66}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 66}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 66}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 66}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 67}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 67}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 67}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 67}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 68}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 31}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 31}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 67}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 67}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 67}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 67}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 67}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 68}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 68}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 68}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 68}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 69}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 32}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 32}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 68}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 68}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 68}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 68}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 68}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 69}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 69}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 69}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 69}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 70}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 33}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 33}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 69}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 69}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 69}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 69}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 69}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 70}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 70}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 70}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 70}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 71}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 34}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 34}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 70}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 70}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 70}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 70}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 71}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 70}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 71}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 71}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 71}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 72}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 71}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 71}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 71}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 71}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 71}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 72}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 72}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 72}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 72}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 73}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 35}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 35}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 72}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 72}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 72}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 72}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 72}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 73}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 73}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 73}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 73}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 74}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 36}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 36}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 73}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 73}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 73}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 73}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 73}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 74}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 74}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 74}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 74}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 75}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 37}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 37}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 74}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 74}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 74}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 74}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 75}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 74}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 75}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 75}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 75}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 76}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 38}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 38}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 75}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 75}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 75}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 75}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 75}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 76}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 76}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 76}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 76}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 77}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 39}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 39}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 76}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 76}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 76}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 76}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 76}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 77}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 77}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 77}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 77}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 78}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 40}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 40}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 77}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 77}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 77}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 77}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 77}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 78}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 78}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 78}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 78}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 79}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 41}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 41}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 78}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 78}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 78}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 78}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 78}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 79}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 79}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 79}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 79}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 80}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 79}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 79}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 79}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 79}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 79}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 80}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 80}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 80}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 80}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 81}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 80}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 80}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 80}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 80}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 80}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 81}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 81}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 81}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 81}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 82}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 42}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 42}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 81}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 81}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 81}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 81}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 81}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 82}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 82}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 82}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 82}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 83}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'ReadGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guard': {'chan_name': 'Image', 'type': 'WriteGuard'}, 'process_id': '0.4606425716111266390572.8', 'type': 'DoneAlternation.select'}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'BlockOnRead', 'id': 43}
+{'process_id': '0.4606425716111266390572.8', 'chan_name': 'Dot', 'type': 'DoneRead', 'id': 43}
+{'guard': {'chan_name': 'Dot', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 82}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 82}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 82}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 82}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 82}
+{'guards': [{'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 83}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 83}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 83}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 83}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 84}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 83}
+{'guard': {'chan_name': 'TraceObjects', 'type': 'WriteGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnWrite', 'id': 83}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 83}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneWrite', 'id': 83}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnRead', 'id': 84}
+{'process_id': '0.9115195546631266390572.8', 'chan_name': 'TraceObjects', 'type': 'DoneRead', 'id': 83}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneRead', 'id': 84}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'DoneWrite', 'id': 84}
+{'guards': [{'chan_name': 'Image', 'type': 'ReadGuard'}, {'type': 'SkipGuard'}], 'process_id': '__main__', 'type': 'Alternation'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4359110444121266390572.8', 'chan_name': 'TraceObjects', 'type': 'BlockOnRead', 'id': 84}
+{'process_id': '0.1467212493641266390572.8', 'chan_name': 'TraceFile', 'type': 'BlockOnWrite', 'id': 85}
+{'process_id': '__main__', 'type': 'BlockOnAlternation.select'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'guard': {'type': 'SkipGuard'}, 'process_id': '__main__', 'type': 'DoneAlternation.select'}
+{'guards': [{'chan_name': 'Image', 'type': 'WriteGuard'}, {'chan_name': 'DotCmdSetup', 'type': 'ReadGuard'}], 'process_id': '0.4606425716111266390572.8', 'type': 'Alternation'}
+{'process_id': '0.4606425716111266390572.8', 'type': 'BlockOnAlternation.select'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 13}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 13}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'BlockOnWrite', 'id': 14}
+{'process_id': '__main__', 'chan_name': 'DotGenSetup', 'type': 'DoneWrite', 'id': 14}
+{'guard': {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}, 'process_id': '0.9115195546631266390572.8', 'type': 'DoneAlternation.execute'}
+{'guards': [{'chan_name': 'Dot', 'type': 'WriteGuard'}, {'chan_name': 'DotGenSetup', 'type': 'ReadGuard'}], 'process_id': '0.9115195546631266390572.8', 'type': 'Alternation'}
+{'process_id': '0.9115195546631266390572.8', 'type': 'BlockOnAlternation.execute'}
+{'chan_name': 'Image', 'type': 'Poison'}
+{'chan_name': 'Dot2file', 'type': 'Poison'}
+{'func_name': 'RunDot2gifParser', 'process_id': '0.4606425716111266390572.8', 'type': 'QuitProcess'}
+{'func_name': 'RunDot2fileParser', 'process_id': '0.4823479532331266390572.8', 'type': 'QuitProcess'}
+{'func_name': 'GenerateDotFiles', 'process_id': '0.9115195546631266390572.8', 'type': 'QuitProcess'}
+{'func_name': 'UpdateTrace', 'process_id': '0.4359110444121266390572.8', 'type': 'QuitProcess'}
