@@ -1,7 +1,7 @@
 #!/bin/sh
 
-python DistCommsTimeConsumer.py &
-python DistCommsTimeDelta2.py &
-python DistCommsTimePrefix.py &
-python DistCommsTimeSuccessor.py
+python DistCommstimeConsumer.py &
+python DistCommstimeDelta2.py &
+python DistCommstimePrefix.py &
+python DistCommstimeSuccessor.py
 
