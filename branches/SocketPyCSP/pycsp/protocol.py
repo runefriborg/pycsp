@@ -248,7 +248,7 @@ class LockThread(threading.Thread):
         self.cond = cond
 
         # All pycsp processes calls shutdown, thus it will receive a shutdown message before it is terminated.
-        self.daemon = False
+        self.daemon = True
 
         self.server_socket, self.address = ossocket.start_server()
         
@@ -918,5 +918,3 @@ class ChannelHomeThread(threading.Thread):
                                         sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
 
 
-def shutdown():
-    pass
