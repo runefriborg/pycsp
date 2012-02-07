@@ -1,0 +1,22 @@
+0.5.1 - 0.5.2
+* Added doctest items to classes and functions.
+* Fixed Sequence(*plist) to accept list of processes.
+
+0.5.0 - 0.5.1
+----------
+* Fixed race condition with poisoning.
+* Optimized ChannelEnd implementation.
+* Added Spawn for starting background CSP processes.
+* Added Skip and Timeout guards.
+* Added @choice decorator to clearify where actions are defined. Usage is optional.
+* Added @io decorator for compatibility with PyCSP coroutine implementation.
+* A nameless Channel requests a name using uuid.uuid1().
+
+
+all versions - 0.5.0
+----------
+The PyCSP library has been completely rewritten.
+
+There is no backwards compatibility.
+
+For now please look at the examples for documentation on how to use the library.
