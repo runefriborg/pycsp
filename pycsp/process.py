@@ -49,6 +49,8 @@ def process(func):
         return Process(func, *args, **kwargs)
     return _call
 
+
+
 # Classes
 class Process(osprocess.Proc):
     """ Process(func, *args, **kwargs)
@@ -303,3 +305,60 @@ def current_process_id():
         except NameError:            
             return '__main__'
     return t.id
+
+
+
+# Update Main Thread/Process with necessary state variables
+# All channel communications require the active process to have a running
+# LockThread and have the necessary state variables initialised
+#
+# To accomondate channel communications made from the main thread, the following
+# code initialises state variables and creates a LockThread.
+#
+# This approach has the unfortunate effect that any import of pycsp will always
+# cause this an extra thread, that often may be unused.
+#
+main_proc = osprocess.getProc()
+
+def init():
+    """
+    Initialising state variables for channel communication made from the
+    main thread/process.
+    """
+    main_proc.id = uuid.uuid1().bytes
+    main_proc.state = FAIL
+    main_proc.result_ch_idx = None
+    main_proc.result_msg = None
+    main_proc.sequence_number = 1L
+    main_proc.cond = threading.Condition()
+    main_proc.lockThread = LockThread(main_proc, main_proc.cond)
+    main_proc.lockThread.start()
+    def wait():
+        main_proc.cond.acquire()
+        if main_proc.state == READY:
+            main_proc.cond.wait()
+        main_proc.cond.release()
+        main_proc.wait = wait
+
+# To simplify usage of PyCSP, init() is executed on import and thus not
+# required to be activated by the user.
+init()
+
+def shutdown():
+    """
+    Activates a nice shutdown of the main lock thread created by init()
+
+    The LockThread thread is a daemon thread and will be terminated hard
+    if not nicely through this function. It is only necessary to call shutdown()
+    if channel communications have been made from the main thread/process
+    otherwise a hard termination is stable.
+    """
+
+    # Initiate shutdown of lock thread
+    main_proc.cond.acquire()
+    main_proc.lockThread.shutdown()
+
+    # Wait for termination of lock thread
+    main_proc.cond.wait()
+    main_proc.cond.release()
+    
