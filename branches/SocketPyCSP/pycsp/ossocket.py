@@ -21,6 +21,8 @@ STDERR_OUTPUT = False
 
 conf = Configuration()
 
+cacheSockets = threading.local()
+cacheUsage = threading.local()
 
 def _connect(addr, reconnect=True):
     """
@@ -62,16 +64,6 @@ def _connect(addr, reconnect=True):
             time.sleep(conf.get(SOCKETS_CONNECT_RETRY_DELAY))
 
     return sock
-
-
-def getThread():
-    try:
-        # compatible with Python 2.6+
-        t = threading.current_thread()
-    except AttributeError:
-        # compatible with Python 2.5- 
-        t = threading.currentThread()
-    return t
 
 
 def start_server(server_addr=('', 0)):
@@ -126,24 +118,17 @@ def connect(addr, reconnect=True):
     If reconnect = False, connect returns False instead of socket, when unable to connect to host.
     """
     
-    t = getThread()
-
     # Lookup connection
-    if t.__dict__.has_key("conn"):
-        if t.conn.has_key(addr):
-            sock = t.conn[addr]
-            t.usage[sock] += 1
-            return t.conn[addr]
+    if cacheSockets.__dict__.has_key(addr):
+        sock = cacheSockets.__dict__[addr]
+        cacheUsage.__dict__[sock] += 1
+        return sock
 
     sock = _connect(addr, reconnect)
 
     # Save connection
-    if t.__dict__.has_key("conn"):
-        t.conn[addr] = sock
-        t.usage[sock] = 1
-    else:
-        t.conn = {addr:sock}
-        t.usage = {sock:1}
+    cacheSockets.__dict__[addr] = sock
+    cacheUsage.__dict__[sock] = 1
 
     return sock
 
@@ -182,14 +167,13 @@ def sendallNOreconnect(sock, data):
 
         # Expire socket
         addr = None
-        t = getThread()
-        for item in t.conn.items():
+        for item in cacheSockets.__dict__.items():
             if (item[1] == sock):
                 addr = item[0]
                 forceclose(addr)
 
         if addr == None:
-            raise Exception("Fatal error: Could not find cached socket" + str(addr))
+            raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
         raise SocketSendException()
 
@@ -213,20 +197,19 @@ def sendall(sock, data):
                 sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             # TODO make exceptions depending on the error value
 
-            t = getThread()
-            if t.usage[sock] == 1:
+            if cacheUsage.__dict__[sock] == 1:
                 # The socket was new, thus no reconnection
                 raise SocketSendException()
             else:
                 # Expire socket
                 addr = None
-                for item in t.conn.items():
+                for item in cacheSockets.__dict__.items():
                     if (item[1] == sock):
                         addr = item[0]
                         forceclose(addr)
 
                 if addr == None:
-                    raise Exception("Fatal error: Could not find cached socket" + str(addr))
+                    raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
                 # Reconnect
                 sock = connect(addr)
@@ -239,14 +222,13 @@ def close(addr):
     """
     Check thread sockets use value and close if socket is expired.
     """
-    t = getThread()
-    if t.conn.has_key(addr):
-        sock = t.conn[addr]
+    if cacheSockets.__dict__.has_key(addr):
+        sock = cacheSockets.__dict__[addr]
     
-        if (t.usage[sock] > SOCKETS_MAX_REUSE):
+        if (cacheUsage.__dict__[sock] > SOCKETS_MAX_REUSE):
 
-            del t.conn[addr]
-            del t.usage[sock]
+            del cacheSockets.__dict__[addr]
+            del cacheUsage.__dict__[sock]
         
             sock.close()
 
@@ -254,12 +236,11 @@ def forceclose(addr):
     """
     Close socket and remove cached socket
     """
-    t = getThread()
-    if t.conn.has_key(addr):
-        sock = t.conn[addr]
+    if cacheSockets.__dict__.has_key(addr):
+        sock = cacheSockets.__dict__[addr]
 
-        del t.conn[addr]
-        del t.usage[sock]
+        del cacheSockets.__dict__[addr]
+        del cacheUsage.__dict__[sock]
         
         sock.close()
     
@@ -267,14 +248,13 @@ def closeall():
     """
     Close all sockets owned by thread
     """
-    t = getThread()
-
-    for addr in t.conn:
-        sock = t.conn[addr]
+    for addr in cacheSockets.__dict__:
+        sock = cacheSockets.__dict__[addr]
         sock.close()
 
-    t.conn = {}
-    t.usage = {}
+    
+    cacheSockets.__dict__ = {}
+    cacheUsage.__dict__ = {}
 
 def connectNOcache(addr):
     """
