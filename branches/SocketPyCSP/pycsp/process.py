@@ -28,7 +28,7 @@ import uuid
 import threading
 
 import osprocess
-from protocol import LockThread
+from protocol import LockThreadConnector
 from channel import ChannelPoisonException, Channel
 from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
@@ -82,8 +82,8 @@ class Process(osprocess.Proc):
     def run(self):
         # Start lock Thread
         self.cond = threading.Condition()
-        self.lockThread = LockThread(self, self.cond)
-        self.lockThread.start()
+        self.lockThreadConnection = LockThreadConnector(self)
+        self.address = self.lockThreadConnection.getAddress()
 
         try:
             # Store the returned value from the process
@@ -96,14 +96,9 @@ class Process(osprocess.Proc):
             # look for channel ends
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
-        
-        # Initiate shutdown of lock thread
-        self.cond.acquire()
-        self.lockThread.shutdown()
 
-        # Wait for termination of lock thread
-        self.cond.wait()
-        self.cond.release()
+        # Disconnect from lock thread
+        self.lockThreadConnection.disconnect(self)
 
     def __check_poison(self, args):
         for arg in args:
@@ -331,8 +326,7 @@ def init():
     main_proc.result_msg = None
     main_proc.sequence_number = 1L
     main_proc.cond = threading.Condition()
-    main_proc.lockThread = LockThread(main_proc, main_proc.cond)
-    main_proc.lockThread.start()
+    main_proc.lockThreadConnection = LockThreadConnector(main_proc)
     def wait():
         main_proc.cond.acquire()
         if main_proc.state == READY:
@@ -354,11 +348,6 @@ def shutdown():
     otherwise a hard termination is stable.
     """
 
-    # Initiate shutdown of lock thread
-    main_proc.cond.acquire()
-    main_proc.lockThread.shutdown()
-
-    # Wait for termination of lock thread
-    main_proc.cond.wait()
-    main_proc.cond.release()
+    # Disconnect from lock thread
+    main_proc.lockThreadConnection.disconnect(main_proc)
     
