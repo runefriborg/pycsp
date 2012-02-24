@@ -41,6 +41,8 @@ class Channel(object):
 
         try:
             self.control = ChannelControl(name, buffer, connect, server)
+            self.address = self.control.channelhome
+
         except SocketBindException:
             self.control = None
             raise ChannelSocketException(server, "PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (name, str(server)))
