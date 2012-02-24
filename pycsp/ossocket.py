@@ -16,8 +16,8 @@ from exceptions import *
 from configuration import *
 from pycsp.common.const import *
 
-SOCKETS_MAX_REUSE = 100
-STDERR_OUTPUT = False
+SOCKETS_MAX_REUSE = 2
+STDERR_OUTPUT = True
 
 conf = Configuration()
 
@@ -171,6 +171,7 @@ def sendallNOreconnect(sock, data):
             if (item[1] == sock):
                 addr = item[0]
                 forceclose(addr)
+
 
         if addr == None:
             raise Exception("Fatal error: Could not find cached socket " + str(sock))

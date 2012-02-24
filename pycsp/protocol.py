@@ -123,14 +123,14 @@ def poison(channel, direction):
 
 def post_read(channel, process):
     try:
-        send_payload(channel.channelhome, CHANTHREAD_POST_READ, channel.name, AddrID(process.lockThread.address, process.id), process.sequence_number)
+        send_payload(channel.channelhome, CHANTHREAD_POST_READ, channel.name, AddrID(process.address, process.id), process.sequence_number)
     except SocketException:
         # Unable to post read request to channel home thread
         raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 def post_write(channel, process, msg):
     try:
-        send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, channel.name, (AddrID(process.lockThread.address, process.id), msg), process.sequence_number)
+        send_payload(channel.channelhome, CHANTHREAD_POST_WRITE, channel.name, (AddrID(process.address, process.id), msg), process.sequence_number)
     except SocketException:
         # Unable to post read request to channel home thread
         raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
@@ -232,7 +232,7 @@ def remote_release(sock, dest):
     """
     Ignore socket exceptions on remote_release
     """
-    if dest.active:
+    if sock != None and dest.active:
         try:
             ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_RELEASE_LOCK, dest.id, 0))
             ossocket.close(dest.hostNport)
@@ -240,20 +240,135 @@ def remote_release(sock, dest):
             ossocket.forceclose(dest.hostNport)
 
     
+
+
+class LockThreadConnector(object):
+    """
+    Singleton
+
+    This class searches for an existing LockThread and creates a connection. Whenever
+    this class is instantiated, a call to disconnect must also be invoked before termination.
+
+    If a disconnect is missing, then the LockThread may be forcefully terminated and leave
+    a channel thread in an unstable state.
+
+    """
+    __condObj = threading.Condition() # lock object
+    __instance = None  # the unique instance
+    def __new__(cls, *args, **kargs):
+        return cls.getInstance(cls, *args, **kargs)
+
+    def __init__(self, process):
+        pass
+
+    def getInstance(cls, *args, **kwargs):
+        '''Static method to have a reference to **THE UNIQUE** instance'''
+
+        if len(args) == 2:
+            _, process = args
+        else:
+            raise Exception("LockThreadConnector() takes exactly 1 argument (%d given)" % (len(args)-1))
+
+        #  Check that this is not a stale singleton from another interpreter. Using the multiprocessing
+        #  module to create new subprocesses with individual interpreters, has such a side-effect.
+        #  If the singleton is from another interpreter, then recreate a new singleton for this interpreter.
+
+        # Critical section start
+        cls.__condObj.acquire()
+        try:
+            try:
+                import multiprocessing 
+                if cls.__instance is not None:
+                    subprocess = multiprocessing.current_process()
+                    if cls.__instance.interpreter != subprocess:
+                        cls.__instance = None
+            except ImportError:
+                pass
+
+            if cls.__instance is not None:
+                if cls.__instance.lockthread.finished:
+                    # Lockthread has been terminated.
+                    # Forcing reinitialisation
+                    print "REINIT"
+                    cls.__instance = None
+
+            if cls.__instance is None:
+                # Initialize **the unique** instance
+                cls.__instance = object.__new__(cls)
+
+                cls.__instance.condObj = cls.__condObj
+
+                # Record interpreter subprocess if multiprocessing is available
+                try:
+                    import multiprocessing
+                    cls.__instance.interpreter = multiprocessing.current_process()
+                except ImportError:
+                    pass
+
+                # Start LockThread
+                cls.__instance.lockthread = LockThread(cls.__instance.condObj)
+                cls.__instance.lockthread.start()
+
+            cls.__instance.lockthread.add(process)
+
+        finally:
+            #  Exit from critical section whatever happens
+            cls.__condObj.release()
+        # Critical section end
+
+        return cls.__instance
+    getInstance = classmethod(getInstance)
+
+    def getAddress(self):
+        return self.lockthread.address
+
+    def disconnect(self, process):
+        self.lockthread.remove(process.id)
+        
+
 class LockThread(threading.Thread):
-    def __init__(self, process, cond):
+    def __init__(self, condObj):
         threading.Thread.__init__(self)
 
-        self.process = process
-        self.cond = cond
+        self.lock = condObj
+
+        self.processes = {}
+        self.locked = {}
+        self.lockqueue = {}
 
         # All pycsp processes calls shutdown, thus it will receive a shutdown message before it is terminated.
         self.daemon = True
 
         self.server_socket, self.address = ossocket.start_server()
-        
         self.finished = False
         
+    def add(self, process):
+        self.lock.acquire()
+        
+        self.processes[process.id] = process
+        self.locked[process.id] = None
+        self.lockqueue[process.id] = []
+
+        self.lock.release()
+
+    def remove(self, process_id):
+        self.lock.acquire()
+
+        del self.processes[process_id]
+        del self.locked[process_id]
+        del self.lockqueue[process_id]
+
+        print len(self.processes)
+        if len(self.processes) == 0: 
+
+            self.shutdown()
+            # Wait for confirmation from lock thread
+            print "wait"
+            self.lock.wait()
+
+        # Shutdown of lock thread completed
+        self.lock.release()
+
     def run(self):
         active_socket_list = [self.server_socket]
 
@@ -264,6 +379,7 @@ class LockThread(threading.Thread):
                     conn, _ = self.server_socket.accept()
                     active_socket_list.append(conn)
                 else:
+                    self.lock.acquire()
                     
                     recv_data = s.recv(header_size)
                     if len(recv_data) != header_size:
@@ -276,63 +392,101 @@ class LockThread(threading.Thread):
                         header = struct.unpack(header_fmt, recv_data)
 
                         if header[H_CMD] == LOCKTHREAD_SHUTDOWN:
-                            self.cond.acquire()
+
+                            print "shutdown", self.lockqueue, self.locked, self.processes
                             self.finished = True
-                            self.cond.notify()
-                            self.cond.release()
+                            self.lock.notify()
+                            self.lock.release()
+                            break
+                        
 
+                        process_id = header[H_ID]
+                        if not self.processes.has_key(process_id):
+                            # Process has already left.
+                            if header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
+                                # Give valid response and let the channel remove the request
+                                s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, "", FAIL, seq=0))
+                            else:
+                                #ignore
+                                pass
+                            
                         elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
+
+                            if self.locked[process_id] == None:
+                                # Lock is free and may be acquired
+                                self.locked[process_id] = s
+                                
+                                # Send reply
+                                process = self.processes[process_id]                            
+                                s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, process_id, process.state, seq=process.sequence_number))
+                            else:
+                                # Lock is not available
+                                self.lockqueue[process_id].append(s)
+                                #active_socket_list.remove(s) # Remove s temporarily from active_socket_list
+
+
+                        elif header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
+                            
+                            if self.locked[process_id] != s:
+                                raise Exception("Fatal error: Notify called with lock has been acquired!")
+
+                            process = self.processes[process_id]
+                            process.cond.acquire()
+
+                            if process.state != READY:
+                                raise Exception("PyCSP Panic")
+
+                            result_ch, result_msg = bin2data(ossocket.recvall(s, header[H_MSG_SIZE]))
+                            process.result_ch = result_ch
+                            process.result_msg = result_msg
+                            process.state = SUCCESS
+                            process.cond.notifyAll()
+                            process.cond.release()
+
+                        elif header[H_CMD] == LOCKTHREAD_POISON:
+                            
+                            if self.locked[process_id] != s:
+                                raise Exception("Fatal error: Poison called with lock has been acquired!")
+
+                            process = self.processes[process_id]
+                            process.cond.acquire()
+                            if process.state == READY:
+                                process.state = POISON
+                                process.cond.notifyAll()
+                            process.cond.release()
+
+                        elif header[H_CMD] == LOCKTHREAD_RETIRE:
                             process_id = header[H_ID]
-                            # The ID is not really necessary, since everything is kept in a local state.
-                            # This will change when a lockthread handles multiple processes.
+                            
+                            if self.locked[process_id] != s:
+                                raise Exception("Fatal error: Retire called with lock has been acquired!")
 
-                            # Send reply
-                            s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, process_id, self.process.state, seq=self.process.sequence_number))
+                            process = self.processes[process_id]
+                            process.cond.acquire()
+                            if process.state == READY:
+                                process.state = RETIRE
+                                process.cond.notifyAll()
+                            process.cond.release()
 
-                            lock_acquired = True
+                        elif header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
+                            
+                            if self.locked[process_id] != s:
+                                raise Exception("Fatal error: Release called with lock has been acquired!")
 
+                            if self.lockqueue[process_id]:
+                                new_s = self.lockqueue[process_id].pop(0)
+                                self.locked[process_id] = new_s
+                                #active_socket_list.append(new_s)
+                                
+                                # Send reply
+                                process = self.processes[process_id]                 
+                                new_s.sendall(compile_header(LOCKTHREAD_ACCEPT_LOCK, process_id, process.state, seq=process.sequence_number))
+                            else:
+                                self.locked[process_id] = None
 
-                            while (lock_acquired):
-                                compiled_header = s.recv(header_size)
-                                #if len(compiled_header) == 0:
-                                if len(compiled_header) != header_size:
-                                    # connection broken.
-                                    raise Exception("connection broken")
+                    self.lock.release()
 
-                                header = struct.unpack(header_fmt, compiled_header)
-
-                                if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
-                                    self.cond.acquire()
-
-                                    if self.process.state != READY:
-                                        raise Exception("PyCSP Panic")
-                                    
-                                    result_ch, result_msg = bin2data(ossocket.recvall(s, header[H_MSG_SIZE]))
-                                    self.process.result_ch = result_ch
-                                    self.process.result_msg = result_msg
-                                    self.process.state = SUCCESS
-                                    self.cond.notifyAll()
-                                    self.cond.release()
-
-                                if header[H_CMD] == LOCKTHREAD_POISON:
-                                    self.cond.acquire()
-                                    
-                                    if self.process.state == READY:
-                                        self.process.state = POISON
-                                        self.cond.notifyAll()
-                                    self.cond.release()
-
-                                if header[H_CMD] == LOCKTHREAD_RETIRE:
-                                    self.cond.acquire()
-                                    
-                                    if self.process.state == READY:
-                                        self.process.state = RETIRE
-                                        self.cond.notifyAll()
-                                    self.cond.release()
-
-                                if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
-                                    lock_acquired = False
-                  
+                         
         # Close server and spawned sockets
         for s in active_socket_list:
             s.close()
@@ -770,8 +924,6 @@ class ChannelHomeThread(threading.Thread):
     def __init__(self, name, buffer, addr = None):
         threading.Thread.__init__(self)
 
-        # This may cause the thread to terminate unexpectedly and thus
-        # leave processes in an inconsistent state.
         # To enforce a nice shutdown, the Shutdown function must be called
         # by the user
         self.daemon = False
