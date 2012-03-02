@@ -29,8 +29,8 @@ def worker(job_in, result_out):
        sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
        result_out((4.0*sum)/cnt)  #Forward result
 
-jobs=Channel("jobs", connect=('0.0.0.0', 53412))
-results=Channel("results", connect=('0.0.0.0', 53413))
+jobs=Channel("jobs", connect=('0.0.0.0', 12222))
+results=Channel("results", connect=('0.0.0.0', 12223))
 
 
 Parallel(

@@ -38,11 +38,8 @@ def consumer(result_in):
    except ChannelRetireException:
        print 'Result:',sum            #We are done - print result
 
-jobs=Channel("jobs")
-results=Channel("results")
-
-print "jobs: %s"  % (str(jobs.channelhome))
-print "results: %s"  % (str(results.channelhome))
+jobs=Channel("jobs", server=("",12222))
+results=Channel("results", server=("",12223))
 
 
 Parallel(
