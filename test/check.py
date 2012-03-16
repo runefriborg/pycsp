@@ -65,3 +65,4 @@ def Assert(cin, name = "", count = 0, minimum = 0, vocabulary = [], ordered = Fa
         print_state(received, poison, retire)
     else:
         sys.stdout.write("OK - "+ name+ "\n")
+

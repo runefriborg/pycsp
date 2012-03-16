@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: latin-1 -*-
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
@@ -22,41 +24,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from pycsp_import import *
 
 @process
-def producer(cout, cnt):
-    for i in range(2,cnt):
-        cout(i)
-    poison(cout)
-    
-@process
-def worker(cin, cout):
-    try:
-        ccout=None
-        my_prime=cin()
-        cout(my_prime)
-        child_channel=Channel()
-        ccout=child_channel.writer()
-        Spawn(worker(child_channel.reader(), cout))
-        while True:
-            new_prime=cin()
-            if new_prime%my_prime:
-                ccout(new_prime)
-    except ChannelPoisonException:
-        if ccout:
-            poison(ccout)
-        else:
-            poison(cout)
-
-@process
-def printer(cin):
+def Prefix(cin, cout, prefixItem=None):
+    print 'Started Prefix'
+    t = prefixItem
     while True:
-        print cin()
+        cout(t)
+        t = cin()
 
 
-first=Channel()
-outc=Channel()
+a = Channel("a", server=('', 10000+ord('a')))
+c = Channel("c", connect=('', 10000+ord('c')))
 
-Parallel(producer(first.writer(),40),
-         worker(first.reader(), outc.writer()),
-         printer(outc.reader()))
 
-close(first, outc)
+Parallel(Prefix(+c, -a, prefixItem = 0))
+
+close(a,c)

@@ -20,43 +20,19 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
+from random import random
 
 @process
-def producer(cout, cnt):
-    for i in range(2,cnt):
-        cout(i)
-    poison(cout)
-    
-@process
-def worker(cin, cout):
-    try:
-        ccout=None
-        my_prime=cin()
-        cout(my_prime)
-        child_channel=Channel()
-        ccout=child_channel.writer()
-        Spawn(worker(child_channel.reader(), cout))
-        while True:
-            new_prime=cin()
-            if new_prime%my_prime:
-                ccout(new_prime)
-    except ChannelPoisonException:
-        if ccout:
-            poison(ccout)
-        else:
-            poison(cout)
+def worker(job_in, result_out):
+   while True:
+       cnt=job_in()           #Get task
+       sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
+       result_out((4.0*sum)/cnt)  #Forward result
 
-@process
-def printer(cin):
-    while True:
-        print cin()
+jobs=Channel("jobs", connect=('0.0.0.0', 12222))
+results=Channel("results", connect=('0.0.0.0', 12223))
 
 
-first=Channel()
-outc=Channel()
-
-Parallel(producer(first.writer(),40),
-         worker(first.reader(), outc.writer()),
-         printer(outc.reader()))
-
-close(first, outc)
+Parallel(
+   worker( jobs.reader() ,results.writer())
+)

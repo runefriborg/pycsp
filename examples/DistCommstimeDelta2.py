@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: latin-1 -*-
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
@@ -22,41 +24,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from pycsp_import import *
 
 @process
-def producer(cout, cnt):
-    for i in range(2,cnt):
-        cout(i)
-    poison(cout)
-    
-@process
-def worker(cin, cout):
-    try:
-        ccout=None
-        my_prime=cin()
-        cout(my_prime)
-        child_channel=Channel()
-        ccout=child_channel.writer()
-        Spawn(worker(child_channel.reader(), cout))
-        while True:
-            new_prime=cin()
-            if new_prime%my_prime:
-                ccout(new_prime)
-    except ChannelPoisonException:
-        if ccout:
-            poison(ccout)
-        else:
-            poison(cout)
-
-@process
-def printer(cin):
+def Delta2(cin, cout1, cout2):
+    print 'Started Delta2'
     while True:
-        print cin()
+        t = cin()
+        cout1(t)
+        cout2(t)
 
+a = Channel("a", connect=('', 10000+ord('a')))
+b = Channel("b", server=('', 10000+ord('b')))
+d = Channel("d", connect=('', 10000+ord('d')))
 
-first=Channel()
-outc=Channel()
+Parallel(Delta2(+a, -b, -d))
 
-Parallel(producer(first.writer(),40),
-         worker(first.reader(), outc.writer()),
-         printer(outc.reader()))
-
-close(first, outc)
+close(a,b,d)

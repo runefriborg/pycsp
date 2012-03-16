@@ -10,6 +10,7 @@ import random
 
 Configuration().set(SOCKETS_STRICT_MODE, True)
 
+
 @choice
 def action(assertCheck, id, channel_input=None):
     if assertCheck:
@@ -53,8 +54,9 @@ def One2One_Test(read_sleeper, write_sleeper):
     x = Channel()
 
     c1=Channel()
-    Parallel(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]),
-             reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
+    Spawn(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
+
+    Parallel(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
 
     close(x, c1)
     
@@ -68,12 +70,13 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
     cnt = 10
 
-    Parallel(check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True),
-             par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
-             writer(c1.writer(),0,cnt, write_sleeper),
+    Spawn(   par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()))
+
+    Parallel(writer(c1.writer(),0,cnt, write_sleeper),
              writer(c2.writer(),1,cnt, write_sleeper),
              writer(c3.writer(),2,cnt, write_sleeper),
-             writer(c4.writer(),3,cnt, write_sleeper))
+             writer(c4.writer(),3,cnt, write_sleeper),
+             check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
 
     close(x, c1, c2, c3, c4)
     
@@ -84,11 +87,13 @@ def Any2Any_Test(read_sleeper, write_sleeper):
     c1=Channel()    
     cnt = 10
 
-    Parallel(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]),
-             reader(c1.reader(),0, read_sleeper, x.writer()), writer(c1.writer(),0,cnt, write_sleeper),
+    Spawn(   reader(c1.reader(),0, read_sleeper, x.writer()), writer(c1.writer(),0,cnt, write_sleeper),
              reader(c1.reader(),1, read_sleeper, x.writer()), writer(c1.writer(),1,cnt, write_sleeper),
              reader(c1.reader(),2, read_sleeper, x.writer()), writer(c1.writer(),2,cnt, write_sleeper),
              reader(c1.reader(),3, read_sleeper, x.writer()), writer(c1.writer(),3,cnt, write_sleeper))
+
+    Parallel(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+
     close(x, c1)
     
 
@@ -105,4 +110,6 @@ def autotest():
 
 if __name__ == '__main__':
     autotest()
+
+    shutdown()
 

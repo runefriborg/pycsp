@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: latin-1 -*-
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
@@ -20,43 +22,31 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
+import time
 
 @process
-def producer(cout, cnt):
-    for i in range(2,cnt):
-        cout(i)
-    poison(cout)
-    
-@process
-def worker(cin, cout):
-    try:
-        ccout=None
-        my_prime=cin()
-        cout(my_prime)
-        child_channel=Channel()
-        ccout=child_channel.writer()
-        Spawn(worker(child_channel.reader(), cout))
-        while True:
-            new_prime=cin()
-            if new_prime%my_prime:
-                ccout(new_prime)
-    except ChannelPoisonException:
-        if ccout:
-            poison(ccout)
-        else:
-            poison(cout)
-
-@process
-def printer(cin):
-    while True:
-        print cin()
+def Consumer(cin):
+    "Commstime consumer process"
+    print 'Started Consumer'
+    N = 20000
+    ts = time.time
+    t1 = ts()
+    cin()
+    t1 = ts()
+    for i in range(N):
+        cin()
+    t2 = ts()
+    dt = t2-t1
+    tchan = dt / (4 * N)
+    print "DT = %f.\nTime per ch : %f/(4*%d) = %f s = %f us" % \
+        (dt, dt, N, tchan, tchan * 1000000)
+    print "consumer done, posioning channel"
+    poison(cin)
 
 
-first=Channel()
-outc=Channel()
+d = Channel("d", server=('', 10000+ord('d')))
 
-Parallel(producer(first.writer(),40),
-         worker(first.reader(), outc.writer()),
-         printer(outc.reader()))
 
-close(first, outc)
+Parallel(Consumer(+d))                       
+
+close(d)
