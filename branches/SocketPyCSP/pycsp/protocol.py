@@ -13,7 +13,7 @@ import sys
 import ossocket
 import select, threading
 import cPickle as pickle
-import struct
+import ctypes
 from exceptions import *
 from pycsp.common.const import *
 from configuration import *
@@ -25,21 +25,20 @@ CHANTHREAD_JOIN_READER, CHANTHREAD_JOIN_WRITER, CHANTHREAD_LEAVE_READER, CHANTHR
 CHANTHREAD_REGISTER, CHANTHREAD_DEREGISTER = range(18,20)
 CHANTHREAD_POST_READ, CHANTHREAD_POST_WRITE = range(20,22)
 
+class Header(ctypes.Structure):
+    """
+    cmd : type of package
+    id : string, uuid1 in bytes format
+    payload_size : payload size following this header
+    seq_number : sequence number used for ignoring channel requests, that was left behind.
+    """
+    _fields_ = [
+        ("cmd", ctypes.c_int),
+        ("id", ctypes.c_char * 16),
+        ("arg", ctypes.c_long),
+        ("seq_number", ctypes.c_long)
+        ]
 
-
-# Header fields:
-H_CMD, H_ID = range(2)
-H_MSG_SIZE = 2
-H_ARG = 2
-H_SEQ = 3
-
-# = : Native byte-order, standard size
-# H : short, CMD
-# 16s : string, uuid1 in bytes format
-# L : long, payload size following this header
-# L : long, sequence number used for ignoring channel requests, that was left behind.
-header_fmt = "=H16sLL"
-header_size = struct.calcsize(header_fmt)
 
 conf = Configuration()
 
@@ -170,7 +169,8 @@ def compile_header(cmd, id, arg, seq=0):
     """
     arg is often used as msg_size to indicate the size of the following pickle data section
     """
-    return struct.pack(header_fmt, cmd, id, arg, seq)
+    
+    return Header(cmd, id, arg, seq)
 
 
 
@@ -179,28 +179,28 @@ def remote_acquire_and_get_state(dest):
     if not dest.active:
         return (None, FAIL, 0)
         
+
+    header = Header()
     try:
         sock = ossocket.connect(dest.hostNport, reconnect=False)
+        header.cmd = 401
         if sock:
             ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
-            compiled_header = ossocket.recvall(sock, header_size)
-        else:
-            compiled_header = ""
+            
+            sock.recv_into(header)
     except SocketException:
         ossocket.forceclose(dest.hostNport)
-        compiled_header = ""
+        header.cmd = 401
 
-    if len(compiled_header) != header_size:
+    if header.cmd == 401:
         # connection broken.
         # When a channel is unable to acquire the lock for process, the
         # posted request is disabled.
 
         dest.active = False
         return (None, FAIL, 0)
-    
-    header = struct.unpack(header_fmt, compiled_header)
-    
-    return (sock, header[H_ARG], header[H_SEQ])
+        
+    return (sock, header.arg, header.seq_number)
 
 def remote_notify(sock, dest, result_ch, result_msg):
     if dest.active:
@@ -240,6 +240,8 @@ def remote_release(sock, dest):
             ossocket.forceclose(dest.hostNport)
 
     
+
+
 class LockThread(threading.Thread):
     def __init__(self, process, cond):
         threading.Thread.__init__(self)
@@ -265,24 +267,22 @@ class LockThread(threading.Thread):
                     active_socket_list.append(conn)
                 else:
                     
-                    recv_data = s.recv(header_size)
-                    if len(recv_data) != header_size:
-                    #if not recv_data:
+                    header = Header()
+                    header.cmd = 401
+                    s.recv_into(header)
+                    if header.cmd == 401:
                         # connection disconnected
                         active_socket_list.remove(s)
                         s.close()
                     else:
-
-                        header = struct.unpack(header_fmt, recv_data)
-
-                        if header[H_CMD] == LOCKTHREAD_SHUTDOWN:
+                        if header.cmd == LOCKTHREAD_SHUTDOWN:
                             self.cond.acquire()
                             self.finished = True
                             self.cond.notify()
                             self.cond.release()
 
-                        elif header[H_CMD] == LOCKTHREAD_ACQUIRE_LOCK:
-                            process_id = header[H_ID]
+                        elif header.cmd == LOCKTHREAD_ACQUIRE_LOCK:
+                            process_id = header.id
                             # The ID is not really necessary, since everything is kept in a local state.
                             # This will change when a lockthread handles multiple processes.
 
@@ -293,28 +293,27 @@ class LockThread(threading.Thread):
 
 
                             while (lock_acquired):
-                                compiled_header = s.recv(header_size)
-                                #if len(compiled_header) == 0:
-                                if len(compiled_header) != header_size:
+                                header = Header()
+                                header.cmd = 401
+                                s.recv_into(header)
+                                if header.cmd == 401:
                                     # connection broken.
                                     raise Exception("connection broken")
 
-                                header = struct.unpack(header_fmt, compiled_header)
-
-                                if header[H_CMD] == LOCKTHREAD_NOTIFY_SUCCESS:
+                                if header.cmd == LOCKTHREAD_NOTIFY_SUCCESS:
                                     self.cond.acquire()
 
                                     if self.process.state != READY:
                                         raise Exception("PyCSP Panic")
                                     
-                                    result_ch, result_msg = bin2data(ossocket.recvall(s, header[H_MSG_SIZE]))
+                                    result_ch, result_msg = bin2data(ossocket.recvall(s, header.arg))
                                     self.process.result_ch = result_ch
                                     self.process.result_msg = result_msg
                                     self.process.state = SUCCESS
                                     self.cond.notifyAll()
                                     self.cond.release()
 
-                                if header[H_CMD] == LOCKTHREAD_POISON:
+                                if header.cmd == LOCKTHREAD_POISON:
                                     self.cond.acquire()
                                     
                                     if self.process.state == READY:
@@ -322,7 +321,7 @@ class LockThread(threading.Thread):
                                         self.cond.notifyAll()
                                     self.cond.release()
 
-                                if header[H_CMD] == LOCKTHREAD_RETIRE:
+                                if header.cmd == LOCKTHREAD_RETIRE:
                                     self.cond.acquire()
                                     
                                     if self.process.state == READY:
@@ -330,7 +329,7 @@ class LockThread(threading.Thread):
                                         self.cond.notifyAll()
                                     self.cond.release()
 
-                                if header[H_CMD] == LOCKTHREAD_RELEASE_LOCK:
+                                if header.cmd == LOCKTHREAD_RELEASE_LOCK:
                                     lock_acquired = False
                   
         # Close server and spawned sockets
@@ -766,6 +765,8 @@ class ChannelReq(object):
             
         return (remove_write, remove_read, success)
 
+
+
 class ChannelHomeThread(threading.Thread):
     def __init__(self, name, buffer, addr = None):
         threading.Thread.__init__(self)
@@ -797,30 +798,29 @@ class ChannelHomeThread(threading.Thread):
                     conn, _ = self.server_socket.accept()
                     active_socket_list.append(conn)
                 else:
-                    recv_data = s.recv(header_size)                    
-                    #if not recv_data:
-                    if len(recv_data) != header_size:
+                    header = Header()
+                    header.cmd = 401
+                    s.recv_into(header)
+                    if header.cmd == 401:
                         # connection disconnected
                         active_socket_list.remove(s)
                         s.close()
                     else:
-                        header = struct.unpack(header_fmt, recv_data)
-
-                        if header[H_CMD] == CHANTHREAD_JOIN_READER:
+                        if header.cmd == CHANTHREAD_JOIN_READER:
                             self.channel.join_reader()
-                        elif header[H_CMD] == CHANTHREAD_JOIN_WRITER:
+                        elif header.cmd == CHANTHREAD_JOIN_WRITER:
                             self.channel.join_writer()
-                        elif header[H_CMD] == CHANTHREAD_LEAVE_READER:
+                        elif header.cmd == CHANTHREAD_LEAVE_READER:
                             self.channel.leave_reader()
-                        elif header[H_CMD] == CHANTHREAD_LEAVE_WRITER:
+                        elif header.cmd == CHANTHREAD_LEAVE_WRITER:
                             self.channel.leave_writer()
-                        elif header[H_CMD] == CHANTHREAD_RETIRE_READER:
+                        elif header.cmd == CHANTHREAD_RETIRE_READER:
                             self.channel.retire_reader()
-                        elif header[H_CMD] == CHANTHREAD_RETIRE_WRITER:
+                        elif header.cmd == CHANTHREAD_RETIRE_WRITER:
                             self.channel.retire_writer()
-                        elif header[H_CMD] == CHANTHREAD_REGISTER:
+                        elif header.cmd == CHANTHREAD_REGISTER:
                             self.channel.register()
-                        elif header[H_CMD] == CHANTHREAD_DEREGISTER:
+                        elif header.cmd == CHANTHREAD_DEREGISTER:
                             if self.channel.deregister():
                                 # Force shutdown
                                 # TODO: Ensure that the channel is unused
@@ -830,29 +830,29 @@ class ChannelHomeThread(threading.Thread):
 
                                 return
                                 
-                        elif header[H_CMD] == CHANTHREAD_POISON_READER:
+                        elif header.cmd == CHANTHREAD_POISON_READER:
                             self.channel.poison_reader()
 
-                        elif header[H_CMD] == CHANTHREAD_POISON_WRITER:
+                        elif header.cmd == CHANTHREAD_POISON_WRITER:
                             self.channel.poison_writer()
 
-                        elif header[H_CMD] == CHANTHREAD_POST_WRITE:
+                        elif header.cmd == CHANTHREAD_POST_WRITE:
                             # Read messageparts until entire msg is received
-                            data = ossocket.recvall(s, header[H_MSG_SIZE])
+                            data = ossocket.recvall(s, header.arg)
                             try:
                                 (process, msg) = bin2data(data)
                             except Exception, e:
                                 print "POST_WRITE"
-                                print header[H_MSG_SIZE], len(data)
+                                print header.arg, len(data)
                                 print data
                                 print e
                                 raise e
                             try:
-                                self.channel.post_write(ChannelReq(process, header[H_SEQ], self.channel.name, msg))
+                                self.channel.post_write(ChannelReq(process, header.seq_number, self.channel.name, msg))
                             except ChannelPoisonException:
                                 try:                    
                                     lock_s, state, seq = remote_acquire_and_get_state(process)
-                                    if seq == header[H_SEQ]:
+                                    if seq == header.seq_number:
                                         if state == READY:
                                             remote_poison(lock_s, process)
                                     remote_release(lock_s, process)
@@ -866,7 +866,7 @@ class ChannelHomeThread(threading.Thread):
                             except ChannelRetireException:
                                 try:                    
                                     lock_s, state, seq = remote_acquire_and_get_state(process)
-                                    if seq == header[H_SEQ]:
+                                    if seq == header.seq_number:
                                         if state == READY:
                                             remote_retire(lock_s, process)
                                     remote_release(lock_s, process)
@@ -877,22 +877,22 @@ class ChannelHomeThread(threading.Thread):
                                     else:
                                         sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
                                         
-                        elif header[H_CMD] == CHANTHREAD_POST_READ:
-                            data = ossocket.recvall(s, header[H_MSG_SIZE])
+                        elif header.cmd == CHANTHREAD_POST_READ:
+                            data = ossocket.recvall(s, header.arg)
                             try:
                                 process =  bin2data(data)
                             except Exception, e:
                                 print "POST_READ"
-                                print header[H_MSG_SIZE], len(data)
+                                print header.arg, len(data)
                                 print data
                                 print e
                                 raise e
                             try:
-                                self.channel.post_read(ChannelReq(process, header[H_SEQ], self.channel.name))
+                                self.channel.post_read(ChannelReq(process, header.seq_number, self.channel.name))
                             except ChannelPoisonException:
                                 try:                    
                                     lock_s, state, seq = remote_acquire_and_get_state(process)
-                                    if seq == header[H_SEQ]:
+                                    if seq == header.seq_number:
                                         if state == READY:
                                             remote_poison(lock_s, process)
                                     remote_release(lock_s, process)
@@ -906,7 +906,7 @@ class ChannelHomeThread(threading.Thread):
                             except ChannelRetireException:
                                 try:                    
                                     lock_s, state, seq = remote_acquire_and_get_state(process)
-                                    if seq == header[H_SEQ]:
+                                    if seq == header.seq_number:
                                         if state == READY:
                                             remote_retire(lock_s, process)
                                     remote_release(lock_s, process)
