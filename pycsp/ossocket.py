@@ -133,7 +133,6 @@ def connect(addr, reconnect=True):
     return sock
 
 
-
 def recvall(sock, msg_len):
     """
     A fast string concatenation in a loop that continues until the entire msg has been received
