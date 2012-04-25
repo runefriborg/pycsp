@@ -10,6 +10,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 import os
 import sys
+import socket
 import ossocket
 import select, threading
 import cPickle as pickle
@@ -186,8 +187,11 @@ def remote_acquire_and_get_state(dest):
         header.cmd = 401
         if sock:
             ossocket.sendallNOreconnect(sock, compile_header(LOCKTHREAD_ACQUIRE_LOCK, dest.id, 0))
-            
-            sock.recv_into(header)
+    
+            try:
+                sock.recv_into(header)
+            except socket.error, (value,message):
+                raise SocketClosedException()
     except SocketException:
         ossocket.forceclose(dest.hostNport)
         header.cmd = 401
