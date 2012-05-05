@@ -42,6 +42,10 @@ class AddrUnavailableException(Exception):
 class SocketException(Exception):
     def __init__(self):
         pass
+
+class SocketDispatchException(SocketException):
+    def __init__(self):
+        pass
     
 class SocketClosedException(SocketException):
     def __init__(self):
@@ -52,8 +56,10 @@ class SocketConnectException(SocketException):
         pass
 
 class SocketBindException(SocketException):
-    def __init__(self):
-        pass
+    def __init__(self, addr):
+        self.addr = addr
+    def __str__(self):
+        return repr(self.addr)
 
 class SocketSendException(SocketException):
     def __init__(self):

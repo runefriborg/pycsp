@@ -101,6 +101,7 @@ class Process(osprocess.Proc):
         self.cond.acquire()
         self.lockThread.shutdown()
 
+
         # Wait for termination of lock thread
         self.cond.wait()
         self.cond.release()

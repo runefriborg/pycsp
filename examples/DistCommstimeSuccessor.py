@@ -33,8 +33,8 @@ def Successor(cin, cout):
         cout(cin()+1)
 
 
-b = Channel("b", connect=('', 10000+ord('b')))
-c = Channel("c", server=('', 10000+ord('c')))
+b = Channel("b", connect=('', 10012))
+c = Channel("c")
 
 Parallel(Successor(+b, -c))
 

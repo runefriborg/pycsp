@@ -8,9 +8,9 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 
-from guard import Skip, SkipGuard, Timeout, TimeoutGuard
-from alternation import choice, Alternation
-from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
+#from guard import Skip, SkipGuard, Timeout, TimeoutGuard
+#from alternation import choice, Alternation
+#from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from channel import Channel, close
 from channelend import retire, poison
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
