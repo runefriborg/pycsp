@@ -8,13 +8,8 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-import os
 import sys
-import socket
-import ossocket
-import select, threading
-import cPickle as pickle
-import ctypes
+import threading
 from exceptions import *
 
 from header import *
