@@ -44,7 +44,7 @@ def Consumer(cin):
     poison(cin)
 
 
-d = Channel("d", server=('', 10000+ord('d')))
+d = Channel("d")
 
 
 Parallel(Consumer(+d))                       

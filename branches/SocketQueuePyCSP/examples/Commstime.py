@@ -60,6 +60,9 @@ def CommsTimeBM():
     c = Channel("c")
     d = Channel("d")
 
+    print a.address
+    print b.address
+
     print "Running commstime test"
     Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
              Delta2(+a, -b, -d),         # forwarding to two
@@ -68,8 +71,10 @@ def CommsTimeBM():
     print "commstime test done"
 
 
-N_BM = 2
+N_BM = 1
 for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
 
+
+print "The end"

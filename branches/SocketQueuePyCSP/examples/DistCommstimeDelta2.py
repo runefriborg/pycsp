@@ -31,9 +31,9 @@ def Delta2(cin, cout1, cout2):
         cout1(t)
         cout2(t)
 
-a = Channel("a", connect=('', 10000+ord('a')))
-b = Channel("b", server=('', 10000+ord('b')))
-d = Channel("d", connect=('', 10000+ord('d')))
+a = Channel("a", connect=('', 10013))
+b = Channel("b")
+d = Channel("d", connect=('', 10011))
 
 Parallel(Delta2(+a, -b, -d))
 

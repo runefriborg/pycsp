@@ -32,8 +32,8 @@ def Prefix(cin, cout, prefixItem=None):
         t = cin()
 
 
-a = Channel("a", server=('', 10000+ord('a')))
-c = Channel("c", connect=('', 10000+ord('c')))
+a = Channel("a")
+c = Channel("c", connect=('', 10014))
 
 
 Parallel(Prefix(+c, -a, prefixItem = 0))

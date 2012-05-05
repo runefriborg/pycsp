@@ -42,7 +42,7 @@ class Guard:
 
         # Id similar to channel name, to correctly select the chosen guard among the guard set.
         self.id = uuid.uuid1().bytes
-        
+
     def offer(self, req):
         try:
             # Acquire lock
@@ -58,9 +58,14 @@ class Guard:
                 
             # Release lock
             remote_release(conn, req.process)
-        except SocketClosedException:
-            raise Exception("This must be handled!")
-            
+        except AddrUnavailableException as e:
+            # Unable to reach process during offer
+            # The primary reason is probably because a request were part of an alting and the process have exited.
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise FatalException("PyCSP unable to reach process during Guard.offer(%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP unable to reach process during Guard.offer(%s)\n" % str(self.process))
+
         return
     
     def cancel(self):

@@ -35,17 +35,17 @@ class Channel(object):
     """
     This is the frontend class to the ChannelControl object.
     It's function is to handle the automatic termination of the
-    channel home.
+    channel home by updating the reference count.
     """
-    def __init__(self, name=None, buffer=0, connect=None, server=None):
+    def __init__(self, name=None, buffer=0, connect=None):
 
         try:
-            self.control = ChannelControl(name, buffer, connect, server)
+            self.control = ChannelControl(name, buffer, connect)
             self.address = self.control.channelhome
 
-        except SocketBindException:
+        except SocketBindException as e:
             self.control = None
-            raise ChannelSocketException(server, "PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (name, str(server)))
+            raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
         
         # public methods available to the user
         self.writer = self.control.writer
@@ -94,15 +94,13 @@ class Channel(object):
         
         
 class ChannelControl(object):
-    def __init__(self, name=None, buffer=0, connect=None, server=None):
+    def __init__(self, name=None, buffer=0, connect=None):
         
         self.ispoisoned=False
         self.isretired=False
 
         
         # Check args
-        if server != None and connect != None:
-            raise Exception("Either connect or server may be set")
         if name == None and connect != None:
             raise Exception("Must provide name when connecting to remote channel")
 
@@ -116,19 +114,18 @@ class ChannelControl(object):
 
             self.name=name
 
+        self.CM = protocol.ChannelMessenger()
 
         # Set channel home
         self.channelhomethread = None
         self.registered = False
+
         if connect == None:
             # Get local channel home
             # These should handle multiple channels in the future
-            if server == None:
-                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
-            else:
-                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer, server)
+            self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             self.channelhomethread.start()
-            self.channelhome = self.channelhomethread.address
+            self.channelhome = self.channelhomethread.addr
         else:
             self.channelhome = connect
 
@@ -139,12 +136,12 @@ class ChannelControl(object):
     def _register(self):
         if not self.registered:
             self.registered = True
-            protocol.register(self)
+            self.CM.register(self)
 
     def _deregister(self):
         if self.registered:
             self.registered = False
-            protocol.deregister(self)
+            self.CM.deregister(self)
     
     def check_termination(self):
         if self.ispoisoned:
@@ -159,7 +156,7 @@ class ChannelControl(object):
         p.state = READY
         p.sequence_number += 1
         
-        protocol.post_read(self, p)
+        self.CM.post_read(self, p)
 
         if p.state == READY:
             p.wait()
@@ -184,7 +181,7 @@ class ChannelControl(object):
         p.state = READY
         p.sequence_number += 1
 
-        protocol.post_write(self, p, msg)
+        self.CM.post_write(self, p, msg)
 
         if p.state == READY:
             p.wait()
@@ -227,17 +224,15 @@ class ChannelControl(object):
 
 
     def join(self, direction):
-        protocol.join(self, direction)
+        self.CM.join(self, direction)
 
     def retire(self, direction):
         if not self.isretired:
-            retired = protocol.retire(self, direction)
-            if retired:
-                self.isretired = True
+            self.isretired = True
+            self.CM.retire(self, direction)
 
 
     def poison(self, direction):
         if not self.ispoisoned:
-            self.ispoisoned = True
-            
-            protocol.poison(self, direction)
+            self.ispoisoned = True        
+            self.CM.poison(self, direction)
