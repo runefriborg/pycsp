@@ -729,6 +729,8 @@ class ChannelHomeThread(threading.Thread):
         self.channel = ChannelHome(name, buffer)
 
     def run(self):
+        LM = self.channel.LM
+
         while(True):
             msg = self.new_input.get()
             header = msg.header
@@ -764,15 +766,16 @@ class ChannelHomeThread(threading.Thread):
             elif header.cmd == CHANTHREAD_POST_WRITE:
                 (process, msg) = msg.payload
 
+                
                 try:
-                    self.channel.post_write(ChannelReq(self.channel.LM, process, header.seq_number, self.channel.name, msg))
+                    self.channel.post_write(ChannelReq(LM, process, header.seq_number, self.channel.name, msg))
                 except ChannelPoisonException:
                     try:                    
-                        lock_s, state, seq = remote_acquire_and_get_state(process)
+                        lock_s, state, seq = LM.remote_acquire_and_get_state(process)
                         if seq == header.seq_number:
                             if state == READY:
-                                remote_poison(lock_s, process)
-                        remote_release(lock_s, process)
+                                LM.remote_poison(lock_s, process)
+                        LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify poison
                         if conf.get(SOCKETS_STRICT_MODE):
@@ -782,11 +785,11 @@ class ChannelHomeThread(threading.Thread):
 
                 except ChannelRetireException:
                     try:                    
-                        lock_s, state, seq = remote_acquire_and_get_state(process)
+                        lock_s, state, seq = LM.remote_acquire_and_get_state(process)
                         if seq == header.seq_number:
                             if state == READY:
-                                remote_retire(lock_s, process)
-                        remote_release(lock_s, process)
+                                LM.remote_retire(lock_s, process)
+                        LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify retire
                         if conf.get(SOCKETS_STRICT_MODE):
@@ -798,14 +801,14 @@ class ChannelHomeThread(threading.Thread):
                 process = msg.payload
 
                 try:
-                    self.channel.post_read(ChannelReq(self.channel.LM, process, header.seq_number, self.channel.name))
+                    self.channel.post_read(ChannelReq(LM, process, header.seq_number, self.channel.name))
                 except ChannelPoisonException:
                     try:                    
-                        lock_s, state, seq = remote_acquire_and_get_state(process)
+                        lock_s, state, seq = LM.remote_acquire_and_get_state(process)
                         if seq == header.seq_number:
                             if state == READY:
-                                remote_poison(lock_s, process)
-                        remote_release(lock_s, process)
+                                LM.remote_poison(lock_s, process)
+                        LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify poison
                         if conf.get(SOCKETS_STRICT_MODE):
@@ -815,11 +818,11 @@ class ChannelHomeThread(threading.Thread):
 
                 except ChannelRetireException:
                     try:                    
-                        lock_s, state, seq = remote_acquire_and_get_state(process)
+                        lock_s, state, seq = LM.remote_acquire_and_get_state(process)
                         if seq == header.seq_number:
                             if state == READY:
-                                remote_retire(lock_s, process)
-                        remote_release(lock_s, process)
+                                LM.remote_retire(lock_s, process)
+                        LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify retire
                         if conf.get(SOCKETS_STRICT_MODE):
