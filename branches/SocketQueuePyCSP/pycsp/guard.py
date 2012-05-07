@@ -95,7 +95,7 @@ class SkipGuard(Guard):
 
     # Offer instantly
     def post_read(self, process):
-        self.offer(ChannelReq(self.LM, AddrID(process.lockThread.addr, process.id),
+        self.offer(ChannelReq(self.LM, AddrID(process.addr, process.id),
                                        process.sequence_number,
                                        self.id))
 
@@ -137,7 +137,7 @@ class TimeoutGuard(Guard):
         self.offer(self.posted_req)
         
     def post_read(self, process):
-        self.posted_req = ChannelReq(self.LM, AddrID(process.lockThread.addr, process.id),
+        self.posted_req = ChannelReq(self.LM, AddrID(process.addr, process.id),
                                      process.sequence_number,
                                      self.id)
         self.timer = threading.Timer(self.seconds, self.expire)
