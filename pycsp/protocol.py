@@ -109,7 +109,7 @@ class ChannelMessenger(object):
         try:
             self.dispatch.send(channel.channelhome,
                                         Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number),
-                                        AddrID(process.lockThread.addr, process.id))
+                                        AddrID(process.addr, process.id))
         except SocketException:
             # Unable to post read request to channel home thread
             raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
@@ -118,7 +118,7 @@ class ChannelMessenger(object):
         try:
             self.dispatch.send(channel.channelhome,
                                         Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number),
-                                        (AddrID(process.lockThread.addr, process.id), msg))
+                                        (AddrID(process.addr, process.id), msg))
         except SocketException:
             # Unable to post read request to channel home thread
             raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
@@ -166,21 +166,27 @@ class LockMessenger(object):
     def remote_notify(self, source_header, dest, result_ch, result_msg):
         if dest.active:
             try:
-                self.dispatch.reply(source_header, Header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id), payload=(result_ch,result_msg))
+                h = Header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id)
+                h._source_id = self.channel_id
+                self.dispatch.reply(source_header, h, payload=(result_ch,result_msg))
             except SocketException:
                 raise AddrUnavailableException(dest)
 
     def remote_poison(self, source_header, dest):
         if dest.active:
             try:
-                self.dispatch.reply(source_header, Header(LOCKTHREAD_POISON, dest.id))
+                h = Header(LOCKTHREAD_POISON, dest.id)
+                h._source_id = self.channel_id
+                self.dispatch.reply(source_header, h)
             except SocketException:
                 raise AddrUnavailableException(dest)
 
     def remote_retire(self, source_header, dest):
         if dest.active:
             try:
-                self.dispatch.reply(source_header, Header(LOCKTHREAD_RETIRE, dest.id))
+                h = Header(LOCKTHREAD_RETIRE, dest.id)
+                h._source_id = self.channel_id                
+                self.dispatch.reply(source_header, h)
             except SocketException:
                 raise AddrUnavailableException(dest)
 
@@ -190,102 +196,84 @@ class LockMessenger(object):
         """
         if dest.active:
             try:
-                self.dispatch.reply(source_header, Header(LOCKTHREAD_RELEASE_LOCK, dest.id))
+                h = Header(LOCKTHREAD_RELEASE_LOCK, dest.id)
+                h._source_id = self.channel_id
+                self.dispatch.reply(source_header, h)
             except SocketException:
                 pass
     
 
 
-class LockThread(threading.Thread):
-    def __init__(self, process, cond):
-        threading.Thread.__init__(self)
-
+class RemoteLock:
+    def __init__(self, process):
         self.process = process
-        self.cond = cond
-
-        # All pycsp processes calls shutdown, thus it will receive a shutdown message before it is terminated.
-        self.daemon = True
+        self.cond = process.cond
 
         self.dispatch = SocketDispatcher().getThread()
-        self.addr = self.dispatch.server_addr
 
-        # Returns synchronized Queue object where messages are retrieved from.
-        self.input = self.dispatch.registerProcess(self.process.id)
+        self.waiting = []
+        self.lock_acquired = None
 
-        self.finished = False
-        
+    def handle(self, message):        
+        header = message.header
 
-    def run(self):
-        while(not self.finished):
-            msg = self.input.normal.get()
-            header = msg.header
-
-            if header.cmd == LOCKTHREAD_SHUTDOWN:
-                self.cond.acquire()
-                self.finished = True
-                self.cond.notify()
-                self.cond.release()
-
-            elif header.cmd == LOCKTHREAD_ACQUIRE_LOCK:
+        # Check id
+        if not (self.process.id == header.id):
+            raise Exception("Fatal error!, wrong process ID!")
                 
-                # Check id
-                if not (self.process.id == header.id):
-                    raise Exception("Fatal error!, wrong process ID!")
-
+        if header.cmd == LOCKTHREAD_ACQUIRE_LOCK:
+            if not self.lock_acquired == None:
+                self.waiting.append(message)
+            else:
+                self.lock_acquired = header._source_id
+                
                 # Send reply
                 self.dispatch.reply(header, Header(LOCKTHREAD_ACCEPT_LOCK, header._source_id, self.process.sequence_number, self.process.state))
-                lock_acquired = True
+                
 
-                while (lock_acquired):
-                    msg = self.input.reply.get()
-                    header = msg.header
-
-                    if header.cmd == LOCKTHREAD_NOTIFY_SUCCESS:
-                        self.cond.acquire()
-
-                        if self.process.state != READY:
-                            raise Exception("PyCSP Panic")
+        elif header.cmd == LOCKTHREAD_NOTIFY_SUCCESS:
+            if self.lock_acquired == header._source_id:
+                self.cond.acquire()
+                if self.process.state != READY:
+                    raise Exception("PyCSP Panic")
                         
-                        self.process.result_ch, self.process.result_msg = msg.payload
-                        self.process.state = SUCCESS
-                        self.cond.notifyAll()
-                        self.cond.release()
+                self.process.result_ch, self.process.result_msg = message.payload
+                self.process.state = SUCCESS
+                self.cond.notifyAll()
+                self.cond.release()        
+            else:
+                print "'%s','%s'" %(self.lock_acquired, ) 
+                raise Exception("Fatal error!, Remote lock has not been acquired!")
 
-                    if header.cmd == LOCKTHREAD_POISON:
-                        self.cond.acquire()
+        elif header.cmd == LOCKTHREAD_POISON:
+            if self.lock_acquired == header._source_id:
+                self.cond.acquire()
+                
+                if self.process.state == READY:
+                    self.process.state = POISON
+                    self.cond.notifyAll()
+                self.cond.release()
+            else:
+                raise Exception("Fatal error!, Remote lock has not been acquired!")
 
-                        if self.process.state == READY:
-                            self.process.state = POISON
-                            self.cond.notifyAll()
-                        self.cond.release()
+        elif header.cmd == LOCKTHREAD_RETIRE:
+            if self.lock_acquired == header._source_id:
+                self.cond.acquire()
+                
+                if self.process.state == READY:
+                    self.process.state = RETIRE
+                    self.cond.notifyAll()
+                self.cond.release()
+            else:
+                raise Exception("Fatal error!, Remote lock has not been acquired!")
 
-                    if header.cmd == LOCKTHREAD_RETIRE:
-                        self.cond.acquire()
-
-                        if self.process.state == READY:
-                            self.process.state = RETIRE
-                            self.cond.notifyAll()
-                        self.cond.release()
-
-                    if header.cmd == LOCKTHREAD_RELEASE_LOCK:
-                        lock_acquired = False
-                  
-        # Deregister
-        self.dispatch.deregisterProcess(self.process.id)
-
-    def shutdown(self):
-
-        self.dispatch.send(self.dispatch.server_addr, Header(LOCKTHREAD_SHUTDOWN, self.process.id))
-        
-        # This method is called by another thread.
-        # The LockThread of a process may shutdown before all posted requests have been
-        # removed. A channel may therefore try to communicate to this lockthread. A failure
-        # in connecting must be viewed as the posted requests is no longer active.
-
-        # Another concern is if some other process willing to communicate starts a lockthread
-        # on the same port. This must be avoided by using a key as identification. Though this
-        # is probably not a problem when multiple processes will be handled by single lockthread
-        # processes
+        elif header.cmd == LOCKTHREAD_RELEASE_LOCK:
+            if self.lock_acquired == header._source_id:
+                self.lock_acquired = None
+                if self.waiting:
+                    self.handle(self.waiting.pop(0))
+            else:
+                raise Exception("Fatal error!, Remote lock has not been acquired!")
 
 
 class Buffer(object):

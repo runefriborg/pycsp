@@ -28,7 +28,9 @@ import uuid
 import threading
 
 import osprocess
-from protocol import LockThread
+
+from dispatch import SocketDispatcher
+from protocol import RemoteLock
 from channel import ChannelPoisonException, Channel
 from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
@@ -70,7 +72,7 @@ class Process(osprocess.Proc):
         self.result_ch_idx = None
         self.result_msg = None
         
-        # Used to ensure the validity of the answers by LockThread
+        # Used to ensure the validity of the remote answers
         self.sequence_number = 1L
 
     def wait(self):
@@ -80,10 +82,11 @@ class Process(osprocess.Proc):
         self.cond.release()
 
     def run(self):
-        # Start lock Thread
-        self.cond = threading.Condition()
-        self.lockThread = LockThread(self, self.cond)
-        self.lockThread.start()
+        # Create remote lock
+        self.cond = threading.Condition()        
+        dispatch = SocketDispatcher().getThread()
+        self.addr = dispatch.server_addr
+        dispatch.registerProcess(self.id, RemoteLock(self))
 
         try:
             # Store the returned value from the process
@@ -96,15 +99,9 @@ class Process(osprocess.Proc):
             # look for channel ends
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
-        
-        # Initiate shutdown of lock thread
-        self.cond.acquire()
-        self.lockThread.shutdown()
 
-
-        # Wait for termination of lock thread
-        self.cond.wait()
-        self.cond.release()
+        # Initiate clean up and waiting for channels to finish outstanding operations.
+        dispatch.deregisterProcess(self.id)
 
     def __check_poison(self, args):
         for arg in args:
@@ -332,8 +329,10 @@ def init():
     main_proc.result_msg = None
     main_proc.sequence_number = 1L
     main_proc.cond = threading.Condition()
-    main_proc.lockThread = LockThread(main_proc, main_proc.cond)
-    main_proc.lockThread.start()
+    dispatch = SocketDispatcher().getThread()
+    main_proc.addr = dispatch.server_addr
+    dispatch.registerProcess(main_proc.id, RemoteLock(main_proc))
+
     def wait():
         main_proc.cond.acquire()
         if main_proc.state == READY:
@@ -355,11 +354,5 @@ def shutdown():
     otherwise a hard termination is stable.
     """
 
-    # Initiate shutdown of lock thread
-    main_proc.cond.acquire()
-    main_proc.lockThread.shutdown()
-
-    # Wait for termination of lock thread
-    main_proc.cond.wait()
-    main_proc.cond.release()
-    
+    dispatch = SocketDispatcher().getThread()
+    dispatch.deregisterProcess(main_proc.id)

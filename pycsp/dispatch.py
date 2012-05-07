@@ -20,8 +20,6 @@ from header import *
 from exceptions import *
 from pycsp.common.const import *
 from configuration import *
-
-
         
 conf = Configuration()
 
@@ -194,27 +192,28 @@ class SocketThread(threading.Thread):
 
                         m = Message(header, payload)
 
+                        self.cond.acquire()
                         if (header.cmd & PROCESS_CMD):
                             if self.processes.has_key(header.id):
-                                destination_queue = self.processes
+                                self.processes[header.id].handle(m)
                             else:
                                 if not self.processes_unknown.has_key(header.id):
-                                    self.processes_unknown = QueueBuffer()
-                                destination_queue = self.processes_unknown
+                                    self.processes_unknown[header.id] = []
+                                self.processes_unknown[header.id].append(m)
                                     
                         else:
-                            if self.channels.has_key(header.id):
-                                destination_queue = self.channels
+                            if self.channels.has_key(header.id):                                
+                                channel_queue = self.channels
                             else:
                                 if not self.channels_unknown.has_key(header.id):
-                                    self.channels_unknown = QueueBuffer()
-                                destination_queue = self.channels_unknown
+                                    self.channels_unknown[header.id] = QueueBuffer()
+                                channel_queue = self.channels_unknown[header.id]
                             
-                        if (header.cmd & IS_REPLY):
-                            destination_queue[header.id].reply.put(m)
-                        else:
-                            destination_queue[header.id].normal.put(m)
-
+                            if (header.cmd & IS_REPLY):
+                                channel_queue[header.id].reply.put(m)
+                            else:
+                                channel_queue[header.id].normal.put(m)
+                        self.cond.release()
     """
     q_primary is the queue containing messages for new actions
     q_replys is the queue containing replys for current actions and must be prioritised over q_primary
@@ -223,35 +222,42 @@ class SocketThread(threading.Thread):
     """
     def registerChannel(self, name_id):
 
+        self.cond.acquire()
         if self.channels_unknown.has_key(name_id):
             q = self.channels_unknown.pop(name_id)
         else:
             q = QueueBuffer()
 
         self.channels[name_id] = q
-        return q
+        self.cond.release()
 
-    def registerProcess(self, name_id):
-
-        if self.processes_unknown.has_key(name_id):
-            q = self.processes_unknown.pop(name_id)
-        else:
-            q = QueueBuffer()
-
-        self.processes[name_id] = q
         return q
 
     def getChannelQueue(self, name_id):
-        return self.channels[name_id]
-
-    def getProcessQueue(self, name_id):
-        return self.processes[name_id]
+        self.cond.acquire()
+        q = self.channels[name_id]
+        self.cond.release()
+        return q
 
     def deregisterChannel(self, name_id):
+        self.cond.acquire()
         del self.channels[name_id]
+        self.cond.release()
+
+    def registerProcess(self, name_id, remotelock):
+        self.cond.acquire()
+        if self.processes_unknown.has_key(name_id):
+            for m in self.processes_unknown[name_id]:
+                remotelock.handle(m)
+            del self.processes_unknown[name_id]
+
+        self.processes[name_id] = remotelock
+        self.cond.release()
 
     def deregisterProcess(self, name_id):
+        self.cond.acquire()
         del self.processes[name_id]
+        self.cond.release()
 
 
     """
@@ -266,13 +272,14 @@ class SocketThread(threading.Thread):
         # is address the same as my own address? 
         if addr == self.server_addr:
 
+            self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
-                    self.processes[header.id].normal.put(m)
+                    self.processes[header.id].handle(m)
                 else:
                     if not self.processes_unknown.has_key(header.id):
-                        self.processes_unknown[header.id] = QueueBuffer()
-                    self.processes_unknown[header.id].normal.put(m)
+                        self.processes_unknown[header.id] = []
+                    self.processes_unknown[header.id].append(m)
             else:
                 if self.channels.has_key(header.id):
                     self.channels[header.id].normal.put(m)
@@ -280,7 +287,7 @@ class SocketThread(threading.Thread):
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].normal.put(m)
-                
+            self.cond.release()
         else:            
             m.transmit(addr)
 
@@ -298,13 +305,14 @@ class SocketThread(threading.Thread):
     
         # is address the same as my own address? 
         if addr == self.server_addr:
+            self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
-                    self.processes[header.id].reply.put(m)
+                    self.processes[header.id].handle(m)
                 else:
                     if not self.processes_unknown.has_key(header.id):
-                        self.processes_unknown[header.id] = QueueBuffer()
-                    self.processes_unknown[header.id].reply.put(m)
+                        self.processes_unknown[header.id] = []
+                    self.processes_unknown[header.id].append(m)
             else:
                 if self.channels.has_key(header.id):
                     self.channels[header.id].reply.put(m)
@@ -312,6 +320,7 @@ class SocketThread(threading.Thread):
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].reply.put(m)                
+            self.cond.release()
         else:            
             m.transmit(addr)
         
