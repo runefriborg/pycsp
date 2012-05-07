@@ -5,7 +5,6 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 See LICENSE.txt for licensing details (MIT License). 
 """
-import protocol
 from exceptions import *
 from pycsp.common.const import *
 
@@ -71,7 +70,7 @@ class ChannelEndWrite:
         self.__call__ = self.channel._write
 
     def post_write(self, process, msg):
-        protocol.post_write(self.channel, process, msg)
+        self.channel.CM.post_write(self.channel, process, msg)
 
         
     def _retire(self, *ignore):
@@ -106,7 +105,7 @@ class ChannelEndRead:
         self.__call__ = self.channel._read
 
     def post_read(self, process):
-        protocol.post_read(self.channel, process)
+        self.channel.CM.post_read(self.channel, process)
 
     def _retire(self, *ignore):
         raise ChannelRetireException()

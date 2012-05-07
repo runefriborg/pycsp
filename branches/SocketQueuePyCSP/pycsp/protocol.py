@@ -132,7 +132,7 @@ class LockMessenger(object):
     def __init__(self, channel_id):
         self.dispatch = SocketDispatcher().getThread()
         self.channel_id = channel_id
-        _ , self.response_queue = self.dispatch.getChannelQueue(channel_id)
+        self.input = self.dispatch.getChannelQueue(channel_id)
 
     def remote_acquire_and_get_state(self, dest):
         if not dest.active:
@@ -144,7 +144,7 @@ class LockMessenger(object):
             h._source_id = self.channel_id
             self.dispatch.send(dest.hostNport, h)
 
-            msg = self.response_queue.get()
+            msg = self.input.reply.get()
             
             header = msg.header
         except SocketException:
@@ -210,14 +210,14 @@ class LockThread(threading.Thread):
         self.addr = self.dispatch.server_addr
 
         # Returns synchronized Queue object where messages are retrieved from.
-        (self.new_input, self.response) = self.dispatch.registerProcess(self.process.id)
+        self.input = self.dispatch.registerProcess(self.process.id)
 
         self.finished = False
         
 
     def run(self):
         while(not self.finished):
-            msg = self.new_input.get()
+            msg = self.input.normal.get()
             header = msg.header
 
             if header.cmd == LOCKTHREAD_SHUTDOWN:
@@ -237,7 +237,7 @@ class LockThread(threading.Thread):
                 lock_acquired = True
 
                 while (lock_acquired):
-                    msg = self.response.get()
+                    msg = self.input.reply.get()
                     header = msg.header
 
                     if header.cmd == LOCKTHREAD_NOTIFY_SUCCESS:
@@ -724,7 +724,7 @@ class ChannelHomeThread(threading.Thread):
         self.addr = self.dispatch.server_addr
 
         # Returns synchronized Queue object where messages are retrieved from.
-        self.new_input, _ = self.dispatch.registerChannel(self.id)
+        self.input = self.dispatch.registerChannel(self.id)
 
         self.channel = ChannelHome(name, buffer)
 
@@ -732,7 +732,7 @@ class ChannelHomeThread(threading.Thread):
         LM = self.channel.LM
 
         while(True):
-            msg = self.new_input.get()
+            msg = self.input.normal.get()
             header = msg.header
 
             if header.cmd == CHANTHREAD_JOIN_READER:

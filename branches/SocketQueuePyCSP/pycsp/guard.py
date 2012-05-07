@@ -29,7 +29,8 @@ import uuid
 #from channel import ChannelReq, ReqStatus
 from process import Process
 from pycsp.common.const import *
-from protocol import AddrID, ChannelReq, remote_acquire_and_get_state, remote_notify, remote_release
+from protocol import AddrID, ChannelReq, LockMessenger
+from dispatch import SocketDispatcher
 from exceptions import *
 
 # Classes
@@ -43,10 +44,15 @@ class Guard:
         # Id similar to channel name, to correctly select the chosen guard among the guard set.
         self.id = uuid.uuid1().bytes
 
+        # Necessary to allow for correct locking
+        dispatch = SocketDispatcher().getThread()
+        dispatch.registerChannel(self.id)
+        self.LM = LockMessenger(self.id)
+
     def offer(self, req):
         try:
             # Acquire lock
-            conn, state, seq = remote_acquire_and_get_state(req.process)
+            conn, state, seq = self.LM.remote_acquire_and_get_state(req.process)
             
             # Check sequence number
             if seq != req.seq_check:
@@ -54,10 +60,10 @@ class Guard:
 
             # Success?
             if (state == READY):
-                remote_notify(conn, req.process, req.ch_id, None)
+                self.LM.remote_notify(conn, req.process, req.ch_id, None)
                 
             # Release lock
-            remote_release(conn, req.process)
+            self.LM.remote_release(conn, req.process)
         except AddrUnavailableException as e:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
@@ -84,9 +90,12 @@ class SkipGuard(Guard):
     >>> isinstance(g, Skip) and msg == None
     True
     """
+    def __init__(self, action=None):
+        Guard.__init__(self, action)
+
     # Offer instantly
     def post_read(self, process):
-        self.offer(ChannelReq(AddrID(process.lockThread.address, process.id),
+        self.offer(ChannelReq(self.LM, AddrID(process.lockThread.addr, process.id),
                                        process.sequence_number,
                                        self.id))
 
@@ -128,7 +137,7 @@ class TimeoutGuard(Guard):
         self.offer(self.posted_req)
         
     def post_read(self, process):
-        self.posted_req = ChannelReq(AddrID(process.lockThread.address, process.id),
+        self.posted_req = ChannelReq(self.LM, AddrID(process.lockThread.addr, process.id),
                                      process.sequence_number,
                                      self.id)
         self.timer = threading.Timer(self.seconds, self.expire)

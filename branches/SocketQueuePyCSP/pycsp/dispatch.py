@@ -136,6 +136,11 @@ class SocketDispatcher(object):
 
 
 
+class QueueBuffer:
+    def __init__(self):
+        self.normal = Queue.Queue()
+        self.reply = Queue.Queue()
+
 
 class SocketThread(threading.Thread):
     def __init__(self, cond):
@@ -143,6 +148,11 @@ class SocketThread(threading.Thread):
 
         self.channels = {}
         self.processes = {}
+
+        # Unknown messages, which is moved to known messages, if a channel or processes with a matching name registers.
+        # TODO: This must be capped.
+        self.channels_unknown = {}
+        self.processes_unknown = {}
 
         self.cond = cond
         self.daemon = False
@@ -154,6 +164,7 @@ class SocketThread(threading.Thread):
             addr = ('', 0)
 
         self.server_socket, self.server_addr = ossocket.start_server(addr)
+        print "D",self.server_addr
 
         self.finished = False
 
@@ -182,16 +193,27 @@ class SocketThread(threading.Thread):
                             payload = None
 
                         m = Message(header, payload)
+
                         if (header.cmd & PROCESS_CMD):
-                            if (header.cmd & IS_REPLY):
-                                self.processes[header.id][1].put(m)
+                            if self.processes.has_key(header.id):
+                                destination_queue = self.processes
                             else:
-                                self.processes[header.id][0].put(m)
+                                if not self.processes_unknown.has_key(header.id):
+                                    self.processes_unknown = QueueBuffer()
+                                destination_queue = self.processes_unknown
+                                    
                         else:
-                            if (header.cmd & IS_REPLY):
-                                self.channels[header.id][1].put(m)
+                            if self.channels.has_key(header.id):
+                                destination_queue = self.channels
                             else:
-                                self.channels[header.id][0].put(m)
+                                if not self.channels_unknown.has_key(header.id):
+                                    self.channels_unknown = QueueBuffer()
+                                destination_queue = self.channels_unknown
+                            
+                        if (header.cmd & IS_REPLY):
+                            destination_queue[header.id].reply.put(m)
+                        else:
+                            destination_queue[header.id].normal.put(m)
 
     """
     q_primary is the queue containing messages for new actions
@@ -200,14 +222,24 @@ class SocketThread(threading.Thread):
     TODO: q_primary / q_replys should be replaced by a priority_queue which uses the FIFO principle but priorities reply over the FIFO principle
     """
     def registerChannel(self, name_id):
-        q_primary, q_replys = Queue.Queue(), Queue.Queue()
-        self.channels[name_id] = (q_primary, q_replys)
-        return (q_primary, q_replys)
+
+        if self.channels_unknown.has_key(name_id):
+            q = self.channels_unknown.pop(name_id)
+        else:
+            q = QueueBuffer()
+
+        self.channels[name_id] = q
+        return q
 
     def registerProcess(self, name_id):
-        q_primary, q_replys = Queue.Queue(), Queue.Queue()
-        self.processes[name_id] = (q_primary, q_replys)
-        return (q_primary, q_replys)
+
+        if self.processes_unknown.has_key(name_id):
+            q = self.processes_unknown.pop(name_id)
+        else:
+            q = QueueBuffer()
+
+        self.processes[name_id] = q
+        return q
 
     def getChannelQueue(self, name_id):
         return self.channels[name_id]
@@ -236,14 +268,18 @@ class SocketThread(threading.Thread):
 
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
-                    self.processes[header.id][0].put(m)
+                    self.processes[header.id].normal.put(m)
                 else:
-                    raise SocketDispatchException()
+                    if not self.processes_unknown.has_key(header.id):
+                        self.processes_unknown[header.id] = QueueBuffer()
+                    self.processes_unknown[header.id].normal.put(m)
             else:
                 if self.channels.has_key(header.id):
-                    self.channels[header.id][0].put(m)
+                    self.channels[header.id].normal.put(m)
                 else:
-                    raise SocketDispatchException()
+                    if not self.channels_unknown.has_key(header.id):
+                        self.channels_unknown[header.id] = QueueBuffer()
+                    self.channels_unknown[header.id].normal.put(m)
                 
         else:            
             m.transmit(addr)
@@ -264,15 +300,18 @@ class SocketThread(threading.Thread):
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
-                    self.processes[header.id][1].put(m)
+                    self.processes[header.id].reply.put(m)
                 else:
-                    raise SocketDispatchException()
+                    if not self.processes_unknown.has_key(header.id):
+                        self.processes_unknown[header.id] = QueueBuffer()
+                    self.processes_unknown[header.id].reply.put(m)
             else:
                 if self.channels.has_key(header.id):
-                    self.channels[header.id][1].put(m)
+                    self.channels[header.id].reply.put(m)
                 else:
-                    raise SocketDispatchException()
-                
+                    if not self.channels_unknown.has_key(header.id):
+                        self.channels_unknown[header.id] = QueueBuffer()
+                    self.channels_unknown[header.id].reply.put(m)                
         else:            
             m.transmit(addr)
         
