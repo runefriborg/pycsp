@@ -82,6 +82,12 @@ class Process(osprocess.Proc):
         self.cond.release()
 
     def run(self):
+        
+        if osprocess.OSPROCESSES:
+            # Reset SocketDispatcher Singleton object
+            SocketDispatcher.__condObj = threading.Condition()
+            SocketDispatcher.__instance = None
+
         # Create remote lock
         self.cond = threading.Condition()        
         dispatch = SocketDispatcher().getThread()
@@ -340,9 +346,6 @@ def init():
         main_proc.cond.release()
         main_proc.wait = wait
 
-# To simplify usage of PyCSP, init() is executed on import and thus not
-# required to be activated by the user.
-init()
 
 def shutdown():
     """

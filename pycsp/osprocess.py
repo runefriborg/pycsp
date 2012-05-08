@@ -3,6 +3,7 @@ import os
 import threading
 from pycsp.common.const import *
 
+OSPROCESSES = False
 
 def getThreadAndName():
     try:
@@ -29,7 +30,7 @@ if os.environ.has_key(ENVVAL_PROCTYPE) and not os.environ[ENVVAL_PROCTYPE] == ''
             return '__mainproc__'
         else:
             return name
-        
+    OSPROCESSES = True
 else:
     from threading import Thread as Proc
 

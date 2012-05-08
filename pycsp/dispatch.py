@@ -94,13 +94,6 @@ class SocketDispatcher(object):
             except ImportError:
                 pass
 
-            if cls.__instance is not None:
-                if cls.__instance.socketthread.finished:
-                    # Socket thread has been terminated.
-                    # Forcing reinitialisation
-                    print "REINIT"
-                    cls.__instance = None
-
             if cls.__instance is None:
                 # Initialize **the unique** instance
                 cls.__instance = object.__new__(cls)
@@ -113,10 +106,8 @@ class SocketDispatcher(object):
                 except ImportError:
                     pass
 
-                # Start SocketThread
-                cls.__instance.socketthread = SocketThread(cls.__instance.condObj)
-                cls.__instance.socketthread.start()
-
+                # Init SocketThreadData                
+                cls.__instance.socketthreaddata = SocketThreadData(cls.__instance.condObj)
         finally:
             #  Exit from critical section whatever happens
             cls.__condObj.release()
@@ -127,10 +118,7 @@ class SocketDispatcher(object):
 
 
     def getThread(self):
-        if self.socketthread == None:
-            raise Exception("Fatal error: No socket thread running!")
-        
-        return self.socketthread
+        return self.socketthreaddata
 
 
 
@@ -139,50 +127,37 @@ class QueueBuffer:
         self.normal = Queue.Queue()
         self.reply = Queue.Queue()
 
-
 class SocketThread(threading.Thread):
-    def __init__(self, cond):
+    def __init__(self, data):
         threading.Thread.__init__(self)
 
-        self.channels = {}
-        self.processes = {}
+        self.channels = data.channels
+        self.processes = data.processes
+        self.data = data
+        self.cond = self.data.cond
 
-        # Unknown messages, which is moved to known messages, if a channel or processes with a matching name registers.
-        # TODO: This must be capped.
-        self.channels_unknown = {}
-        self.processes_unknown = {}
-
-        self.cond = cond
         self.daemon = False
-
-
-        if os.environ.has_key(ENVVAL_PORT):
-            addr = ('', int(os.environ[ENVVAL_PORT]))
-        else:
-            addr = ('', 0)
-
-        self.server_socket, self.server_addr = ossocket.start_server(addr)
-        print "D",self.server_addr
 
         self.finished = False
 
-
+        
     def run(self):
-        active_socket_list = [self.server_socket]
 
-        while(True):
-            ready, _, exceptready = select.select(active_socket_list, [], [])
+        print "Starting SocketThread"
+
+        while(not self.finished):
+            ready, _, exceptready = select.select(self.data.active_socket_list, [], [])
             for s in ready:
-                if s == self.server_socket:
-                    conn, _ = self.server_socket.accept()
-                    active_socket_list.append(conn)
+                if s == self.data.server_socket:
+                    conn, _ = self.data.server_socket.accept()
+                    self.data.active_socket_list.append(conn)
                 else:
                     header = Header()
                     header.cmd = ERROR_CMD
                     s.recv_into(header)
                     if header.cmd == ERROR_CMD:
                         # connection disconnected
-                        active_socket_list.remove(s)
+                        self.data.active_socket_list.remove(s)
                         s.close()
                     else:
                         if (header.cmd & HAS_PAYLOAD):
@@ -193,27 +168,83 @@ class SocketThread(threading.Thread):
                         m = Message(header, payload)
 
                         self.cond.acquire()
-                        if (header.cmd & PROCESS_CMD):
+                        if (header.cmd == SOCKETTHREAD_SHUTDOWN):
+                            if self.channels or self.processes:
+                                raise Exception("Fatal error: socketthread not allowed to terminate!")
+                            self.finished = True
+                            
+                            print "Terminating SocketThread"
+                            # Do not close sockets as the socketthread may be restarted at a later time
+
+                        elif (header.cmd & PROCESS_CMD):
                             if self.processes.has_key(header.id):
                                 self.processes[header.id].handle(m)
                             else:
-                                if not self.processes_unknown.has_key(header.id):
-                                    self.processes_unknown[header.id] = []
-                                self.processes_unknown[header.id].append(m)
+                                if not self.data.processes_unknown.has_key(header.id):
+                                    self.data.processes_unknown[header.id] = []
+                                self.data.processes_unknown[header.id].append(m)
                                     
                         else:
                             if self.channels.has_key(header.id):                                
                                 channel_queue = self.channels
                             else:
-                                if not self.channels_unknown.has_key(header.id):
-                                    self.channels_unknown[header.id] = QueueBuffer()
-                                channel_queue = self.channels_unknown[header.id]
+                                if not self.data.channels_unknown.has_key(header.id):
+                                    self.data.channels_unknown[header.id] = QueueBuffer()
+                                channel_queue = self.data.channels_unknown
                             
                             if (header.cmd & IS_REPLY):
                                 channel_queue[header.id].reply.put(m)
                             else:
                                 channel_queue[header.id].normal.put(m)
                         self.cond.release()
+
+        
+        
+class SocketThreadData:
+    def __init__(self, cond):
+
+        self.channels = {}
+        self.processes = {}
+
+        # Unknown messages, which is moved to known messages, if a channel or processes with a matching name registers.
+        # TODO: This must be capped.
+        self.channels_unknown = {}
+        self.processes_unknown = {}
+
+        self.cond = cond
+
+        if os.environ.has_key(ENVVAL_PORT):
+            addr = ('', int(os.environ[ENVVAL_PORT]))
+        else:
+            addr = ('', 0)
+
+        self.server_socket, self.server_addr = ossocket.start_server(addr)
+        self.active_socket_list = [self.server_socket]
+        print "D",self.server_addr
+
+        self.thread = None
+
+
+    def startThread(self):
+        self.cond.acquire()
+        if self.thread == None:
+            self.thread = SocketThread(self)
+            self.thread.start()
+        self.cond.release()
+
+            
+    def stopThread(self):
+        self.cond.acquire()
+        h = Header(SOCKETTHREAD_SHUTDOWN)
+        sock = ossocket.connectNOcache(self.server_addr)
+        sock.sendall(h)
+        ossocket.closeNOcache(sock)
+
+        self.thread = None
+
+        self.cond.release()
+                
+    
     """
     q_primary is the queue containing messages for new actions
     q_replys is the queue containing replys for current actions and must be prioritised over q_primary
@@ -223,14 +254,18 @@ class SocketThread(threading.Thread):
     def registerChannel(self, name_id):
 
         self.cond.acquire()
+
         if self.channels_unknown.has_key(name_id):
             q = self.channels_unknown.pop(name_id)
         else:
             q = QueueBuffer()
 
-        self.channels[name_id] = q
-        self.cond.release()
 
+        self.channels[name_id] = q
+        if self.thread == None:
+            self.startThread()
+
+        self.cond.release()
         return q
 
     def getChannelQueue(self, name_id):
@@ -242,6 +277,8 @@ class SocketThread(threading.Thread):
     def deregisterChannel(self, name_id):
         self.cond.acquire()
         del self.channels[name_id]
+        if len(self.channels) == 0 and len(self.processes) == 0:
+            self.stopThread()            
         self.cond.release()
 
     def registerProcess(self, name_id, remotelock):
@@ -251,12 +288,19 @@ class SocketThread(threading.Thread):
                 remotelock.handle(m)
             del self.processes_unknown[name_id]
 
+
         self.processes[name_id] = remotelock
+
+        if self.thread == None:
+            self.startThread()
+
         self.cond.release()
 
     def deregisterProcess(self, name_id):
         self.cond.acquire()
         del self.processes[name_id]
+        if len(self.channels) == 0 and len(self.processes) == 0:
+            self.stopThread()
         self.cond.release()
 
 
