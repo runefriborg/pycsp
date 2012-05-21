@@ -32,6 +32,9 @@ class ChannelPoisonException(Exception):
     def __init__(self):
         pass
 
+class ChannelFailstopException(Exception):
+    def __init__(self):
+        pass
 
 # Classes
 class ReqStatus:
@@ -68,6 +71,14 @@ class ChannelReq:
             self.result=RETIRE
             self.status.cond.notifyAll()
         self.status.cond.release()        
+
+    def failstop(self):
+        self.status.cond.acquire()
+        if self.result == FAIL and self.status.state == ACTIVE:
+            self.status.state=FAILSTOP
+            self.result=FAILSTOP
+            self.status.cond.notifyAll()
+        self.status.cond.release()
 
     def wait(self):
         self.status.cond.acquire()
@@ -139,8 +150,9 @@ class Channel(object):
     def __init__(self, name=None, buffer=0):
         self.readqueue=[]
         self.writequeue=[]
-        self.ispoisoned=False
-        self.isretired=False
+        
+        self.status = NONE
+        
         self.readers=0
         self.writers=0
 
@@ -155,10 +167,12 @@ class Channel(object):
         self.lock = threading.RLock()
     
     def check_termination(self):
-        if self.ispoisoned:
+        if self.status == POISON:
             raise ChannelPoisonException()
-        if self.isretired:
+        if self.status == RETIRE:
             raise ChannelRetireException()
+        if self.status == FAILSTOP:
+            raise ChannelFailstopException()
 
     def _read(self):
         self.check_termination()
@@ -192,7 +206,7 @@ class Channel(object):
 
         success = True
         self.lock.acquire()
-        if self.isretired or self.ispoisoned:
+        if self.status != NONE:
             success = False
         else:
             self.readqueue.append(req)
@@ -214,7 +228,7 @@ class Channel(object):
 
         success = True
         self.lock.acquire()
-        if self.isretired or self.ispoisoned:
+        if self.status != NONE:
             success = False
         else:
             self.writequeue.append(req)
@@ -240,11 +254,20 @@ class Channel(object):
 
     def poison(self):
         self.lock.acquire()
-        self.ispoisoned=True
+        self.status=POISON
         for p in self.readqueue:
             p.poison()
         for p in self.writequeue:
             p.poison()
+        self.lock.release()
+
+    def failstop(self):
+        self.lock.acquire()
+        self.status=FAILSTOP
+        for p in self.readqueue:
+            p.failstop()
+        for p in self.writequeue:
+            p.failstop()
         self.lock.release()
 
     # syntactic sugar: cin = +chan
@@ -303,22 +326,22 @@ class Channel(object):
 
     def leave_reader(self):
         self.lock.acquire()
-        if not self.isretired:
+        if self.status != RETIRE:
             self.readers-=1
             if self.readers==0:
                 # Set channel retired
-                self.isretired = True
+                self.status = RETIRE
                 for p in self.writequeue:
                     p.retire()
         self.lock.release()
 
     def leave_writer(self):
         self.lock.acquire()
-        if not self.isretired:
+        if self.status != RETIRE:
             self.writers-=1
             if self.writers==0:
                 # Set channel retired
-                self.isretired = True
+                self.status = RETIRE
                 for p in self.readqueue:
                     p.retire()
         self.lock.release()        

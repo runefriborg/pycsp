@@ -90,6 +90,10 @@ def poison(*list_of_channelEnds):
     for channelEnd in list_of_channelEnds:
         channelEnd.poison()
 
+def failstop(*list_of_channelEnds):
+    for channelEnd in list_of_channelEnds:
+        channelEnd.failstop()
+
 # Classes
 class ChannelEndWrite:
     def __init__(self, channel):
@@ -103,6 +107,7 @@ class ChannelEndWrite:
         self.post_write = self.channel.post_write
         self.remove_write = self.channel.remove_write
         self.poison = self.channel.poison
+        self.failstop = self.channel.failstop
 
     def _retire(self, *ignore):
         raise ChannelRetireException()
@@ -139,6 +144,7 @@ class ChannelEndRead:
         self.post_read = self.channel.post_read
         self.remove_read = self.channel.remove_read
         self.poison = self.channel.poison
+        self.failstop = self.channel.failstop
 
     def _retire(self, *ignore):
         raise ChannelRetireException()

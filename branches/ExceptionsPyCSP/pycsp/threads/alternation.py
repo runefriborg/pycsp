@@ -134,8 +134,8 @@ class Alternation:
 
     def __result(self, reqs):
         act=None
-        poison=False
-        retire=False
+        status=NONE
+        
         for req in reqs.keys():
             _, c, op = reqs[req]
             if op==READ:
@@ -145,17 +145,18 @@ class Alternation:
             if req.result==SUCCESS:
                 act=req
             if req.result==POISON:
-                poison=True
+                status=POISON
             if req.result==RETIRE:
-                retire=True
-        return (act, poison, retire)
+                status=RETIRE
+            if req.result==FAILSTOP:
+                status=FAILSTOP
+        return (act, status)
 
     def choose(self):
         req_status=ReqStatus()
         reqs={}
         act = None
-        poison = False
-        retire = False
+        
         try:
             idx = 0
             for prio_item in self.guards:
@@ -172,13 +173,17 @@ class Alternation:
                 reqs[req]=(idx, c, op)
                 idx += 1
         except ChannelPoisonException:
-            act, poison, retire = self.__result(reqs)
+            act, _ = self.__result(reqs)
             if not act:
                 raise ChannelPoisonException
         except ChannelRetireException:
-            act, poison, retire = self.__result(reqs)
+            act, _ = self.__result(reqs)
             if not act:
                 raise ChannelRetireException
+        except ChannelFailstopException:
+            act, _ = self.__result(reqs)
+            if not act:
+                raise ChannelFailstopException
 
         # If noone have offered a channelrequest, we wait.
         if not act:
@@ -188,13 +193,15 @@ class Alternation:
             req_status.cond.release()
 
         if not act:
-            act, poison, retire = self.__result(reqs)
+            act, status = self.__result(reqs)
 
             if not act:
-                if poison:
+                if status == POISON:
                     raise ChannelPoisonException()
-                if retire:
+                if status == RETIRE:
                     raise ChannelRetireException()
+                if status == FAILSTOP:
+                    raise ChannelFailstopException()
 
                 print 'We should not get here in choice!!!'
 

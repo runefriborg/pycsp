@@ -16,4 +16,4 @@ FAIL, SUCCESS = range(2)
 ACTIVE, DONE = range(2)
 
 # Constants used for both ChannelReq results and ReqStatus states.
-POISON, RETIRE = range(2,4)
+NONE, POISON, RETIRE, FAILSTOP = range(1,5)
