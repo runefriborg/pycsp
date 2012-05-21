@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 import sys
 sys.path.append("..")
+from pycsp.common.const import *
 
 if len(sys.argv) > 1:
     mod = sys.argv[1]

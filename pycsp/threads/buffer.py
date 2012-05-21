@@ -26,10 +26,11 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from channel import Channel, ChannelPoisonException, ChannelRetireException
-from channelend import poison, retire
+from channel import Channel, ChannelPoisonException, ChannelRetireException, ChannelFailstopException
+from channelend import poison, retire, failstop
 from process import process, Spawn
 from alternation import Alternation
+from pycsp.common.const import *
 
 import pycsp.current
 if pycsp.current.trace:
@@ -111,11 +112,14 @@ class BufferedChannel:
         self.__inChan.poison()
         self.__outChan.poison()
 
+    def failstop(self):
+        self.__inChan.failstop()
+        self.__outChan.failstop()
+
     @process
     def Buffer(self, cin, cout, N):
         queue = deque()
-        poisoned = False
-        retired = False
+        status = NONE
         while True:
             try:
                 import pycsp.current
@@ -123,21 +127,25 @@ class BufferedChannel:
                     TraceMsg(len(queue))
 
                 # Handling poison / retire
-                if (poisoned or retired):
+                if status != NONE:
                     if len(queue):
                         try:
                             cout(queue.popleft())
                         except:
-                            if poisoned:
+                            if status == POISON:
                                 poison(cin, cout)
-                            if retired:
+                            if status == RETIRE:
                                 retire(cin, cout)
+                            if status == FAILSTOP:
+                                failstop(cin, cout)
                     else:
                         try:
-                            if poisoned:
+                            if status == POISON:
                                 poison(cin, cout)
-                            if retired:
+                            if status == RETIRE:
                                 retire(cin, cout)
+                            if status == FAILSTOP:
+                                failstop(cin, cout)
                         except:
                             pass
                         return # quit
@@ -158,9 +166,11 @@ class BufferedChannel:
                 else:
                     cout(queue.popleft())
             except ChannelPoisonException, e:
-                poisoned = True
+                status = POISON
             except ChannelRetireException, e:
-                retired = True
+                status = RETIRE
+            except ChannelFailstopException, e:
+                status = FAILSTOP
 
 # Run tests
 if __name__ == '__main__':

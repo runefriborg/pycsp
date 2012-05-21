@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import types
 import threading
 import time, random
-from channel import ChannelPoisonException, ChannelRetireException, Channel
+from channel import ChannelPoisonException, ChannelRetireException, ChannelFailstopException, Channel
 from channelend import ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
 
@@ -91,6 +91,13 @@ class Process(threading.Thread):
             # look for channel ends
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
+        except ChannelFailstopException:
+            self.__check_failstop(self.args)
+            self.__check_failstop(self.kwargs.values())
+        except Exception as e:
+            print e
+            self.__check_failstop(self.args)
+            self.__check_failstop(self.kwargs.values())
 
     def __check_poison(self, args):
         for arg in args:
@@ -119,6 +126,19 @@ class Process(threading.Thread):
                         arg.retire()
                     except ChannelRetireException:
                         pass
+            except AttributeError:
+                pass
+
+    def __check_failstop(self, args):
+        for arg in args:
+            try:
+                if types.ListType == type(arg) or types.TupleType == type(arg):
+                    self.__check_failstop(arg)
+                elif types.DictType == type(arg):
+                    self.__check_failstop(arg.keys())
+                    self.__check_failstop(arg.values())
+                elif type(arg.failstop) == types.UnboundMethodType:
+                    arg.failstop()
             except AttributeError:
                 pass
 
