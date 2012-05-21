@@ -79,6 +79,10 @@ class Process(threading.Thread):
         try:
             # Store the returned value from the process
             self.fn(*self.args, **self.kwargs)
+            # The process is done
+            # It should auto retire all of its channels
+            self.__check_retire(self.args)
+            self.__check_retire(self.kwargs.values())
         except ChannelPoisonException, e:
             # look for channels and channel ends
             self.__check_poison(self.args)
@@ -124,7 +128,7 @@ class Process(threading.Thread):
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return self.__mul__(multiplier)
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
