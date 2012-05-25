@@ -26,13 +26,15 @@ from pycsp_import import *
 @process
 def Delta2(cin, cout1, cout2):
     print 'Started Delta2'
+
     while True:
         t = cin()
         cout1(t)
         cout2(t)
 
-a = Channel("a", connect=('', 10013))
 b = Channel("b")
+
+a = Channel("a", connect=('', 10013))
 d = Channel("d", connect=('', 10011))
 
 Parallel(Delta2(+a, -b, -d))

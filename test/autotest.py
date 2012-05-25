@@ -99,10 +99,10 @@ def autotest():
             wname, wsleep = write_sleep
 
             if not rsleep==wsleep==sleep_one:
-                One2One_Test(rsleep, wsleep)
+                #One2One_Test(rsleep, wsleep)
                 Any2One_Alting_Test(rsleep, wsleep)
-                Any2Any_Test(rsleep, wsleep)
+                #Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':
     autotest()
-
+    shutdown()

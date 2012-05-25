@@ -60,3 +60,6 @@ Parallel(producer(first.writer(),40),
          printer(outc.reader()))
 
 close(first, outc)
+
+shutdown()
+

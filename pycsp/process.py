@@ -65,7 +65,8 @@ class Process(osprocess.Proc):
         self.kwargs = kwargs
 
         # Create 16 byte unique id based on network address, sequence number and time sample.
-        self.id = uuid.uuid1().bytes
+        self.id = uuid.uuid1().hex
+        
 
         # Channel request state
         self.state = FAIL
@@ -78,7 +79,9 @@ class Process(osprocess.Proc):
     def wait(self):
         self.cond.acquire()
         if self.state == READY:
+            print "W1"
             self.cond.wait()
+            print "W2,"+str(self.state)
         self.cond.release()
 
     def run(self):
@@ -107,6 +110,7 @@ class Process(osprocess.Proc):
             self.__check_retire(self.kwargs.values())
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
+        print("Deregister %s %s\n" % (self.id, self.fn))
         dispatch.deregisterProcess(self.id)
 
     def __check_poison(self, args):
@@ -329,7 +333,8 @@ def init():
     Initialising state variables for channel communication made from the
     main thread/process.
     """
-    main_proc.id = uuid.uuid1().bytes
+    main_proc.id = uuid.uuid1().hex
+    main_proc.fn = None
     main_proc.state = FAIL
     main_proc.result_ch_idx = None
     main_proc.result_msg = None
@@ -347,11 +352,13 @@ def init():
         main_proc.wait = wait
 
 
+init()
+
 def shutdown():
     """
     Activates a nice shutdown of the main lock thread created by init()
 
-    The LockThread thread is a daemon thread and will be terminated hard
+    The SocketThread thread is a daemon thread and will be terminated hard
     if not nicely through this function. It is only necessary to call shutdown()
     if channel communications have been made from the main thread/process
     otherwise a hard termination is stable.
