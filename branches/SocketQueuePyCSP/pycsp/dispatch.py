@@ -23,15 +23,6 @@ from configuration import *
         
 conf = Configuration()
 
-def data2bin(s):
-
-    return s
-
-def bin2data(s):
-    s =  pickle.loads(s)
-    return s
-
-
 class Message:
     """
     Message object which is used to exchange messages to both local and remote hosts
@@ -58,6 +49,9 @@ class Message:
             sock = ossocket.sendall(sock, self.header)
             ossocket.sendallNOreconnect(sock, payload_bin_data)
             ossocket.close(addr)
+
+    def __repr__(self):
+        return repr("<pycsp.dispatch.Message cmd:%s>" % (cmd2str(self.header.cmd)))
 
 class SocketDispatcher(object):
     """
@@ -124,8 +118,12 @@ class SocketDispatcher(object):
 
 class QueueBuffer:
     def __init__(self):
-        self.normal = Queue.Queue()
-        self.reply = Queue.Queue()
+        self.normal = Queue.Queue(20)
+        self.reply = Queue.Queue(20)
+
+    def __repr__(self):
+        return repr("<pycsp.dispatch.QueueBuffer containing normal:%s reply:%s messages>" % (self.normal.qsize(), self.reply.qsize()))
+
 
 class SocketThread(threading.Thread):
     def __init__(self, data):
@@ -179,6 +177,10 @@ class SocketThread(threading.Thread):
                         elif (header.cmd & PROCESS_CMD):
                             if self.processes.has_key(header.id):
                                 self.processes[header.id].handle(m)
+                            elif (header.cmd & REQ_REPLY):
+                                self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
+                            elif (header.cmd & IGN_UNKNOWN):
+                                pass
                             else:
                                 if not self.data.processes_unknown.has_key(header.id):
                                     self.data.processes_unknown[header.id] = []
@@ -186,16 +188,20 @@ class SocketThread(threading.Thread):
                                     
                         else:
                             if self.channels.has_key(header.id):                                
-                                channel_queue = self.channels
-                            else:
+                                if (header.cmd & IS_REPLY):
+                                    self.channels[header.id].reply.put(m)
+                                else:
+                                    self.channels[header.id].normal.put(m)
+                            elif (header.cmd & IGN_UNKNOWN):
+                                pass
+                            else:                                
                                 if not self.data.channels_unknown.has_key(header.id):
                                     self.data.channels_unknown[header.id] = QueueBuffer()
-                                channel_queue = self.data.channels_unknown
-                            
-                            if (header.cmd & IS_REPLY):
-                                channel_queue[header.id].reply.put(m)
-                            else:
-                                channel_queue[header.id].normal.put(m)
+
+                                if (header.cmd & IS_REPLY):
+                                    self.data.channels_unknown[header.id].reply.put(m)
+                                else:
+                                    self.data.channels_unknown[header.id].normal.put(m)
                         self.cond.release()
 
         
@@ -224,6 +230,18 @@ class SocketThreadData:
 
         self.thread = None
 
+
+        def test(d):
+            import time
+            for i in range(2):
+                print "channels_unknown",d.channels_unknown
+                print "processes_unknown",d.processes_unknown
+                print "channels",d.channels
+                print "processes",d.processes
+                time.sleep(2)
+
+        t = threading.Thread(target=test, args=(self,))
+        t.start()
 
     def startThread(self):
         self.cond.acquire()
@@ -256,6 +274,7 @@ class SocketThreadData:
         self.cond.acquire()
 
         if self.channels_unknown.has_key(name_id):
+            print "GOT UNKNOWN MESSAGE"
             q = self.channels_unknown.pop(name_id)
         else:
             q = QueueBuffer()
@@ -314,12 +333,16 @@ class SocketThreadData:
         m = Message(header, payload)
         
         # is address the same as my own address? 
-        if addr == self.server_addr:
-
+        #if addr == self.server_addr:
+        if True:
             self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
+                elif (header.cmd & REQ_REPLY):
+                    self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
+                elif (header.cmd & IGN_UNKNOWN):
+                    pass
                 else:
                     if not self.processes_unknown.has_key(header.id):
                         self.processes_unknown[header.id] = []
@@ -327,6 +350,8 @@ class SocketThreadData:
             else:
                 if self.channels.has_key(header.id):
                     self.channels[header.id].normal.put(m)
+                elif (header.cmd & IGN_UNKNOWN):
+                    pass
                 else:
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
@@ -348,11 +373,14 @@ class SocketThreadData:
         m = Message(header, payload)
     
         # is address the same as my own address? 
-        if addr == self.server_addr:
+        #if addr == self.server_addr:
+        if True:
             self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
+                elif (header.cmd & IGN_UNKNOWN):
+                    pass
                 else:
                     if not self.processes_unknown.has_key(header.id):
                         self.processes_unknown[header.id] = []
@@ -360,6 +388,8 @@ class SocketThreadData:
             else:
                 if self.channels.has_key(header.id):
                     self.channels[header.id].reply.put(m)
+                elif (header.cmd & IGN_UNKNOWN):
+                    pass
                 else:
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()

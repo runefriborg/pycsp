@@ -107,7 +107,7 @@ class ChannelControl(object):
         # Set name
         if name == None:
             # Create 16 byte unique name based on network address, sequence number and time sample.
-            self.name = uuid.uuid1().bytes
+            self.name = uuid.uuid1().hex
         else:
             if len(name) > 16:
                 raise Exception("Channel names are limited to 16 characters")
@@ -228,9 +228,7 @@ class ChannelControl(object):
 
     def retire(self, direction):
         if not self.isretired:
-            self.isretired = True
             self.CM.retire(self, direction)
-
 
     def poison(self, direction):
         if not self.ispoisoned:

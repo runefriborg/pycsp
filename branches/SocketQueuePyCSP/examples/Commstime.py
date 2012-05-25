@@ -76,5 +76,4 @@ for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
 
-
 print "The end"
