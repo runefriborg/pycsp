@@ -195,7 +195,7 @@ class ChannelControl(object):
 
         self.check_termination()
 
-        print 'We should not get here in read!!!', p.state
+        print 'We should not get here in write!!!', p.state, msg
         return None
     
     def reader(self):

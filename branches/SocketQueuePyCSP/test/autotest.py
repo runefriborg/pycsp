@@ -34,7 +34,7 @@ def writer(cout, id, cnt, sleeper):
 def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
     while True:
         if sleeper: sleeper()
-        
+
         AltSelect(
             InputGuard(cin1, action(assertCheck, 0)),
             InputGuard(cin2, action(assertCheck, 1)),
@@ -59,12 +59,12 @@ def One2One_Test(read_sleeper, write_sleeper):
     close(x, c1)
     
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
-    x = Channel()
+    x = Channel("x")
 
-    c1=Channel()
-    c2=Channel()
-    c3=Channel()
-    c4=Channel()
+    c1=Channel("c1")
+    c2=Channel("c2")
+    c3=Channel("c3")
+    c4=Channel("c4")
 
     cnt = 10
 
@@ -99,9 +99,9 @@ def autotest():
             wname, wsleep = write_sleep
 
             if not rsleep==wsleep==sleep_one:
-                #One2One_Test(rsleep, wsleep)
+                One2One_Test(rsleep, wsleep)
                 Any2One_Alting_Test(rsleep, wsleep)
-                #Any2Any_Test(rsleep, wsleep)
+                Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':
     autotest()

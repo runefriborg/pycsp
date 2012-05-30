@@ -79,9 +79,7 @@ class Process(osprocess.Proc):
     def wait(self):
         self.cond.acquire()
         if self.state == READY:
-            print "W1"
             self.cond.wait()
-            print "W2,"+str(self.state)
         self.cond.release()
 
     def run(self):

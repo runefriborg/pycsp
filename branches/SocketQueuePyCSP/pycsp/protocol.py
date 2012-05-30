@@ -74,7 +74,7 @@ class ChannelMessenger(object):
 
     def retire(self, channel, direction):
         try:
-            print "CM RETIRE"
+            #print("CM RETIRE %s" % channel.name)
             if direction == READ:
                 self.dispatch.send(channel.channelhome,
                                             Header(CHANTHREAD_RETIRE_READER, channel.name))
@@ -147,14 +147,11 @@ class LockMessenger(object):
 
             msg = self.input.reply.get()
             
-            if msg.header == LOCKTHREAD_UNAVAILABLE:
-                header.cmd = 401
-
             header = msg.header
         except SocketException:
-            header.cmd = 401
+            header.cmd = LOCKTHREAD_UNAVAILABLE
 
-        if header.cmd == 401:
+        if header.cmd == LOCKTHREAD_UNAVAILABLE:
             # connection broken.
             # When a channel is unable to acquire the lock for process, the
             # posted request is disabled.
@@ -217,9 +214,18 @@ class RemoteLock:
 
         self.waiting = []
         self.lock_acquired = None
+        self.closing = False
 
     def __repr__(self):
-        return repr("<pycsp.protocol.RemoteLock for process id:%s fn:%s>" % (self.process.id, self.process.fn))
+        return repr("<pycsp.protocol.RemoteLock for process id:%s acquired:%s waiting:%s, fn:%s>" % (self.process.id, self.lock_acquired, str(self.waiting), self.process.fn))
+
+    def close(self):
+        self.cond.acquire()
+        self.closing = True
+        while (self.lock_acquired or self.waiting):
+            self.cond.wait()        
+        self.cond.release()
+    
 
     def handle(self, message):        
         header = message.header
@@ -227,20 +233,20 @@ class RemoteLock:
         # Check id
         if not (self.process.id == header.id):
             raise Exception("Fatal error!, wrong process ID!")
-         
+
+
         if header.cmd == LOCKTHREAD_ACQUIRE_LOCK:
-            print("%s ACQUIRE\n" % (self.process.id))
+            #print("%s ACQUIRE\n" % (self.process.id))
+
             if not self.lock_acquired == None:
                 self.waiting.append(message)
             else:
-                self.lock_acquired = header._source_id
-                
+                self.lock_acquired = header._source_id                
                 # Send reply
                 self.dispatch.reply(header, Header(LOCKTHREAD_ACCEPT_LOCK, header._source_id, self.process.sequence_number, self.process.state))
                 
-
         elif header.cmd == LOCKTHREAD_NOTIFY_SUCCESS:
-            print("%s NOTIFY\n" % (self.process.id))
+            #print("%s NOTIFY\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
                 if self.process.state != READY:
@@ -255,7 +261,7 @@ class RemoteLock:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
         elif header.cmd == LOCKTHREAD_POISON:
-            print("%s POISON\n" % (self.process.id))
+            #print("%s POISON\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
                 
@@ -267,7 +273,7 @@ class RemoteLock:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
         elif header.cmd == LOCKTHREAD_RETIRE:
-            print("%s RETIRE\n" % (self.process.id))
+            #print("%s RETIRE\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
                 
@@ -279,13 +285,18 @@ class RemoteLock:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
         elif header.cmd == LOCKTHREAD_RELEASE_LOCK:
-            print("%s RELEASE\n" % (self.process.id))
+            #print("%s RELEASE\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.lock_acquired = None
                 if self.waiting:
                     self.handle(self.waiting.pop(0))
             else:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
+
+            if self.closing:
+                self.cond.acquire()
+                self.cond.notify()
+                self.cond.release()
 
 
 class Buffer(object):
@@ -540,16 +551,18 @@ class ChannelHome(object):
 
     def retire_reader(self):
         self.leave_reader()
+        #print("%s READERS LEFT %d (retired:%s)" % (self.name, self.readers, str(self.isretired)))
         if not self.isretired:
             if self.readers==0:
                 self.isretired= True
-                print "WRITEQUEUE",self.writequeue
+                #print "WRITEQUEUE",self.writequeue
                 for p in self.writequeue:
                     p.retire()                                        
                 self.writequeue = []
                 
     def retire_writer(self):
         self.leave_writer()
+        #print("%s WRITERS LEFT %d (retired:%s)" % (self.name, self.writers, str(self.isretired)))
         if not self.isretired:
             if self.writers==0:
 
@@ -559,7 +572,7 @@ class ChannelHome(object):
                     
                 else:
                     self.isretired= True
-                    print "READQUEUE",self.readqueue
+                    #print "READQUEUE",self.readqueue
                     for p in self.readqueue:
                         p.retire()                    
                     self.readqueue = []
@@ -626,6 +639,7 @@ class ChannelReq(object):
             conn, state, seq = self.LM.remote_acquire_and_get_state(self.process)
             if seq == self.seq_check:
                 self.LM.remote_poison(conn, self.process)
+            #Ignore if sequence is incorrect
             self.LM.remote_release(conn, self.process)
         except AddrUnavailableException:
             # Unable to reach process to notify poison
@@ -637,11 +651,10 @@ class ChannelReq(object):
     def retire(self):
         try:
             conn, state, seq = self.LM.remote_acquire_and_get_state(self.process)
-            print "remote retire"
+            #print "remote retire"
             if seq == self.seq_check:
                 self.LM.remote_retire(conn, self.process)
-            else:
-                raise FatalException("Sequence incorrect!")
+            #Ignore if sequence is incorrect
             self.LM.remote_release(conn, self.process)
         except AddrUnavailableException:
             # Unable to reach process to notify retire
@@ -740,6 +753,8 @@ class ChannelHomeThread(threading.Thread):
             msg = self.input.normal.get()
             header = msg.header
 
+            #print("GOT %s for %s" % (cmd2str(header.cmd), self.id))
+
             if header.cmd == CHANTHREAD_JOIN_READER:
                 self.channel.join_reader()
             elif header.cmd == CHANTHREAD_JOIN_WRITER:
@@ -781,8 +796,8 @@ class ChannelHomeThread(threading.Thread):
                         if seq == header.seq_number:
                             if state == READY:
                                 LM.remote_poison(lock_s, process)
-                        else:
-                            raise FatalException("Wrong sequence number (temporary fatal)")
+                        # Ignore if wrong sequence number
+
                         LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify poison
@@ -797,8 +812,8 @@ class ChannelHomeThread(threading.Thread):
                         if seq == header.seq_number:
                             if state == READY:
                                 LM.remote_retire(lock_s, process)
-                        else:
-                            raise FatalException("Wrong sequence number (temporary fatal)")
+                        # Ignore if wrong sequence number
+
                         LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify retire
@@ -818,8 +833,8 @@ class ChannelHomeThread(threading.Thread):
                         if seq == header.seq_number:
                             if state == READY:
                                 LM.remote_poison(lock_s, process)
-                        else:
-                            raise FatalException("Wrong sequence number (temporary fatal)")
+                        # Ignore if wrong sequence number
+
                         LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify poison
@@ -834,8 +849,8 @@ class ChannelHomeThread(threading.Thread):
                         if seq == header.seq_number:
                             if state == READY:
                                 LM.remote_retire(lock_s, process)
-                        else:
-                            raise FatalException("Wrong sequence number (temporary fatal)")
+                        # Ignore if wrong sequence number
+
                         LM.remote_release(lock_s, process)
                     except AddrUnavailableException:
                         # Unable to reach process to notify retire
