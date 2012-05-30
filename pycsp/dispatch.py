@@ -122,7 +122,7 @@ class QueueBuffer:
         self.reply = Queue.Queue(20)
 
     def __repr__(self):
-        return repr("<pycsp.dispatch.QueueBuffer containing normal:%s reply:%s messages>" % (self.normal.qsize(), self.reply.qsize()))
+        return repr("<pycsp.dispatch.QueueBuffer containing normal:%s reply:%s messages>" % (str(self.normal.queue), str(self.reply.queue)))
 
 
 class SocketThread(threading.Thread):
@@ -141,7 +141,7 @@ class SocketThread(threading.Thread):
         
     def run(self):
 
-        print "Starting SocketThread"
+        #print "Starting SocketThread"
 
         while(not self.finished):
             ready, _, exceptready = select.select(self.data.active_socket_list, [], [])
@@ -171,7 +171,7 @@ class SocketThread(threading.Thread):
                                 raise Exception("Fatal error: socketthread not allowed to terminate!")
                             self.finished = True
                             
-                            print "Terminating SocketThread"
+                            #print "Terminating SocketThread"
                             # Do not close sockets as the socketthread may be restarted at a later time
 
                         elif (header.cmd & PROCESS_CMD):
@@ -316,12 +316,22 @@ class SocketThreadData:
         self.cond.release()
 
     def deregisterProcess(self, name_id):
-        self.cond.acquire()
-        del self.processes[name_id]
-        if len(self.channels) == 0 and len(self.processes) == 0:
-            self.stopThread()
-        self.cond.release()
+        ok = False
+        rl = self.processes[name_id]
 
+        while (not ok):
+            self.cond.acquire()
+            if rl.lock_acquired or rl.waiting:
+                self.cond.release()
+                rl.close()
+                self.cond.acquire()
+            else:
+                ok = True
+                del self.processes[name_id]
+                if len(self.channels) == 0 and len(self.processes) == 0:
+                    self.stopThread()
+
+            self.cond.release()
 
     """
     NOTICE! TODO These send methods might have to be synchronized for other interpreters than the standard CPYTHON interpreter.
@@ -340,6 +350,7 @@ class SocketThreadData:
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
+                    #print("%s UNAVAILABLE for channel %s!" % (str(header.id), str(header._source_id)))
                     self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
