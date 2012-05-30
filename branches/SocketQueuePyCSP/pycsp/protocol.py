@@ -771,7 +771,7 @@ class ChannelHomeThread(threading.Thread):
                 self.channel.register()
             elif header.cmd == CHANTHREAD_DEREGISTER:
                 if self.channel.deregister():
-                    print "SHUTDOWN"
+                    #print "SHUTDOWN"
                     # Force shutdown
                     # TODO: Ensure that the channel is unused
                     # TODO: Check if any unread messages is left in channel?

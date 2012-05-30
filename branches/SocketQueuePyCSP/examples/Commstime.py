@@ -77,3 +77,4 @@ for i in range(N_BM):
     CommsTimeBM()
 
 print "The end"
+shutdown()

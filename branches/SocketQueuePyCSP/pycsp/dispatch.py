@@ -231,17 +231,6 @@ class SocketThreadData:
         self.thread = None
 
 
-        def test(d):
-            import time
-            for i in range(2):
-                print "channels_unknown",d.channels_unknown
-                print "processes_unknown",d.processes_unknown
-                print "channels",d.channels
-                print "processes",d.processes
-                time.sleep(2)
-
-        t = threading.Thread(target=test, args=(self,))
-        t.start()
 
     def startThread(self):
         self.cond.acquire()
@@ -343,8 +332,7 @@ class SocketThreadData:
         m = Message(header, payload)
         
         # is address the same as my own address? 
-        #if addr == self.server_addr:
-        if True:
+        if addr == self.server_addr:
             self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
@@ -384,8 +372,7 @@ class SocketThreadData:
         m = Message(header, payload)
     
         # is address the same as my own address? 
-        #if addr == self.server_addr:
-        if True:
+        if addr == self.server_addr:
             self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):

@@ -144,3 +144,5 @@ def poisontest():
 
 if __name__ == '__main__':
     poisontest()
+
+shutdown()
