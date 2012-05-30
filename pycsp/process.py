@@ -108,7 +108,7 @@ class Process(osprocess.Proc):
             self.__check_retire(self.kwargs.values())
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
-        print("Deregister %s %s\n" % (self.id, self.fn))
+        #print("Deregister %s %s\n" % (self.id, self.fn))
         dispatch.deregisterProcess(self.id)
 
     def __check_poison(self, args):

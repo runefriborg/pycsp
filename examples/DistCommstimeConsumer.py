@@ -50,3 +50,5 @@ d = Channel("d")
 Parallel(Consumer(+d))                       
 
 close(d)
+
+shutdown()

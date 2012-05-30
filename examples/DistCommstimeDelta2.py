@@ -40,3 +40,5 @@ d = Channel("d", connect=('', 10011))
 Parallel(Delta2(+a, -b, -d))
 
 close(a,b,d)
+
+shutdown()

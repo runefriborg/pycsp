@@ -41,3 +41,5 @@ b = Channel("b", connect=('', 10012))
 Parallel(Successor(+b, -c))
 
 close(b,c)
+
+shutdown()

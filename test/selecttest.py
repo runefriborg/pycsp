@@ -81,3 +81,5 @@ if __name__ == '__main__':
     print "Any2One_Alting_Test - FairSelect"
     Any2One_Alting_Test(par_reader_fair, sleep_random, sleep_random)
         
+
+shutdown()

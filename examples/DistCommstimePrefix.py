@@ -40,3 +40,5 @@ c = Channel("c", connect=('', 10014))
 Parallel(Prefix(+c, -a, prefixItem = 0))
 
 close(a,c)
+
+shutdown()
