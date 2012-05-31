@@ -331,23 +331,31 @@ def init():
     Initialising state variables for channel communication made from the
     main thread/process.
     """
-    main_proc.id = uuid.uuid1().hex
-    main_proc.fn = None
-    main_proc.state = FAIL
-    main_proc.result_ch_idx = None
-    main_proc.result_msg = None
-    main_proc.sequence_number = 1L
-    main_proc.cond = threading.Condition()
-    dispatch = SocketDispatcher().getThread()
-    main_proc.addr = dispatch.server_addr
-    dispatch.registerProcess(main_proc.id, RemoteLock(main_proc))
+    run = False
+    try:
+        if main_proc.id != None:
+            run = True
+    except AttributeError:
+        pass
 
-    def wait():
-        main_proc.cond.acquire()
-        if main_proc.state == READY:
-            main_proc.cond.wait()
-        main_proc.cond.release()
-        main_proc.wait = wait
+    if run:
+        main_proc.id = uuid.uuid1().hex
+        main_proc.fn = None
+        main_proc.state = FAIL
+        main_proc.result_ch_idx = None
+        main_proc.result_msg = None
+        main_proc.sequence_number = 1L
+        main_proc.cond = threading.Condition()
+        dispatch = SocketDispatcher().getThread()
+        main_proc.addr = dispatch.server_addr
+        dispatch.registerProcess(main_proc.id, RemoteLock(main_proc))
+
+        def wait():
+            main_proc.cond.acquire()
+            if main_proc.state == READY:
+                main_proc.cond.wait()
+            main_proc.cond.release()
+            main_proc.wait = wait
 
 
 init()
@@ -361,6 +369,9 @@ def shutdown():
     if channel communications have been made from the main thread/process
     otherwise a hard termination is stable.
     """
-
-    dispatch = SocketDispatcher().getThread()
-    dispatch.deregisterProcess(main_proc.id)
+    try:
+        dispatch = SocketDispatcher().getThread()
+        dispatch.deregisterProcess(main_proc.id)
+        main_proc.id = None
+    except AttributeError:
+        pass
