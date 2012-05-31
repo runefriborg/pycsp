@@ -155,7 +155,8 @@ class SocketThread(threading.Thread):
                     s.recv_into(header)
                     if header.cmd == ERROR_CMD:
                         # connection disconnected
-                        self.data.active_socket_list.remove(s)
+                        if s in self.data.active_socket_list:
+                            self.data.active_socket_list.remove(s)
                         s.close()
                     else:
                         if (header.cmd & HAS_PAYLOAD):
@@ -168,10 +169,14 @@ class SocketThread(threading.Thread):
                         self.cond.acquire()
                         if (header.cmd == SOCKETTHREAD_SHUTDOWN):
                             if self.channels or self.processes:
-                                raise Exception("Fatal error: socketthread not allowed to terminate!")
-                            self.finished = True
-                            
-                            #print "Terminating SocketThread"
+                                # Socketthread is still busy. Thus ignore and expect a later call to deregister to invoke stopThread.
+                                pass
+                            else:
+                                self.finished = True
+                                
+                                # Remove thread reference
+                                self.data.thread = None
+                        
                             # Do not close sockets as the socketthread may be restarted at a later time
 
                         elif (header.cmd & PROCESS_CMD):
@@ -226,7 +231,6 @@ class SocketThreadData:
 
         self.server_socket, self.server_addr = ossocket.start_server(addr)
         self.active_socket_list = [self.server_socket]
-        print "D",self.server_addr
 
         self.thread = None
 
@@ -242,12 +246,11 @@ class SocketThreadData:
             
     def stopThread(self):
         self.cond.acquire()
-        h = Header(SOCKETTHREAD_SHUTDOWN)
-        sock = ossocket.connectNOcache(self.server_addr)
-        sock.sendall(h)
-        ossocket.closeNOcache(sock)
-
-        self.thread = None
+        if not self.thread == None:
+            h = Header(SOCKETTHREAD_SHUTDOWN)
+            sock = ossocket.connectNOcache(self.server_addr)
+            sock.sendall(h)
+            ossocket.closeNOcache(sock)
 
         self.cond.release()
                 

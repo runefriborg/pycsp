@@ -13,7 +13,7 @@ from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from channel import Channel, close
 from channelend import retire, poison
-from process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
+from process import Process, process, Sequence, Parallel, Spawn, current_process_id, init, shutdown
 from exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException
 from configuration import *
 from compat import *

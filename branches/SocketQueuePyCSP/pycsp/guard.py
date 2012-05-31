@@ -64,7 +64,7 @@ class Guard:
                 
             # Release lock
             self.LM.remote_release(conn, req.process)
-        except AddrUnavailableException as e:
+        except AddrUnavailableException:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
             if conf.get(SOCKETS_STRICT_MODE):
