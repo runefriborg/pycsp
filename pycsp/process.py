@@ -338,6 +338,7 @@ def init():
     except AttributeError:
         pass
 
+
     if run:
         main_proc.id = uuid.uuid1().hex
         main_proc.fn = None

@@ -13,7 +13,6 @@ import os
 import sys
 import ossocket
 import select, threading
-import Queue
 import cPickle as pickle
 import struct
 from header import *
@@ -118,11 +117,60 @@ class SocketDispatcher(object):
 
 class QueueBuffer:
     def __init__(self):
-        self.normal = Queue.Queue(20)
-        self.reply = Queue.Queue(20)
+        self.normal = []
+        self.reply = []
+
+        self.lock = threading.Condition()
+        self.waiting = False
 
     def __repr__(self):
-        return repr("<pycsp.dispatch.QueueBuffer containing normal:%s reply:%s messages>" % (str(self.normal.queue), str(self.reply.queue)))
+        return repr("<pycsp.dispatch.QueueBuffer containing normal:%s reply:%s messages>" % (str(self.normal), str(self.reply)))
+
+    def pop_normal(self):
+
+        # Pre test
+        if self.normal:
+            return self.normal.pop(0)
+
+        self.lock.acquire()
+        while not self.normal:
+            self.waiting = True
+            self.lock.wait()
+        obj = self.normal.pop(0)
+        self.waiting = False
+        self.lock.release()
+
+        return obj        
+
+    def pop_reply(self):
+
+        # Pre test
+        if self.reply:
+            return self.reply.pop(0)
+
+        self.lock.acquire()
+        while not self.reply:
+            self.waiting = True
+            self.lock.wait()
+        obj = self.reply.pop(0)
+        self.waiting = False
+        self.lock.release()
+
+        return obj
+
+    def put_normal(self, obj):
+        self.lock.acquire()
+        self.normal.append(obj)
+        if self.waiting:
+            self.lock.notify()
+        self.lock.release()
+    
+    def put_reply(self, obj):
+        self.lock.acquire()
+        self.reply.append(obj)
+        if self.waiting:
+            self.lock.notify()
+        self.lock.release()
 
 
 class SocketThread(threading.Thread):
@@ -194,9 +242,9 @@ class SocketThread(threading.Thread):
                         else:
                             if self.channels.has_key(header.id):                                
                                 if (header.cmd & IS_REPLY):
-                                    self.channels[header.id].reply.put(m)
+                                    self.channels[header.id].put_reply(m)
                                 else:
-                                    self.channels[header.id].normal.put(m)
+                                    self.channels[header.id].put_normal(m)
                             elif (header.cmd & IGN_UNKNOWN):
                                 pass
                             else:                                
@@ -204,9 +252,9 @@ class SocketThread(threading.Thread):
                                     self.data.channels_unknown[header.id] = QueueBuffer()
 
                                 if (header.cmd & IS_REPLY):
-                                    self.data.channels_unknown[header.id].reply.put(m)
+                                    self.data.channels_unknown[header.id].put_reply(m)
                                 else:
-                                    self.data.channels_unknown[header.id].normal.put(m)
+                                    self.data.channels_unknown[header.id].put_normal(m)
                         self.cond.release()
 
         
@@ -256,10 +304,10 @@ class SocketThreadData:
                 
     
     """
-    q_primary is the queue containing messages for new actions
-    q_replys is the queue containing replys for current actions and must be prioritised over q_primary
+    QueueBuffer contains two queues.
+    normal is the queue containing messages for new actions
+    reply is the queue containing replys for current actions and must be prioritised over normal
 
-    TODO: q_primary / q_replys should be replaced by a priority_queue which uses the FIFO principle but priorities reply over the FIFO principle
     """
     def registerChannel(self, name_id):
 
@@ -325,9 +373,6 @@ class SocketThreadData:
 
             self.cond.release()
 
-    """
-    NOTICE! TODO These send methods might have to be synchronized for other interpreters than the standard CPYTHON interpreter.
-    """
     def send(self, addr, header, payload=None):
         # Update message source
         header._source_host, header._source_port = self.server_addr
@@ -351,13 +396,13 @@ class SocketThreadData:
                     self.processes_unknown[header.id].append(m)
             else:
                 if self.channels.has_key(header.id):
-                    self.channels[header.id].normal.put(m)
+                    self.channels[header.id].put_normal(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
-                    self.channels_unknown[header.id].normal.put(m)
+                    self.channels_unknown[header.id].put_normal(m)
             self.cond.release()
         else:            
             m.transmit(addr)
@@ -388,13 +433,13 @@ class SocketThreadData:
                     self.processes_unknown[header.id].append(m)
             else:
                 if self.channels.has_key(header.id):
-                    self.channels[header.id].reply.put(m)
+                    self.channels[header.id].put_reply(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
-                    self.channels_unknown[header.id].reply.put(m)                
+                    self.channels_unknown[header.id].put_reply(m)                
             self.cond.release()
         else:            
             m.transmit(addr)

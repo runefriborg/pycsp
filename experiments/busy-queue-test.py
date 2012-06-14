@@ -1,21 +1,23 @@
 
-import Queue
 import threading
+import time
 
 N = 1000
 K = 1000
 
 def get(l):
     #return l.pop(0)
-    return l.get()
+    while (not l):
+        time.sleep(0.001)
+    return l.pop(0)
 
 def put(l, item):
     #l.append(item)
-    l.put(item)
+    l.append(item)
 
 def init(buf):
     #return []
-    return Queue.Queue(buf)
+    return []
 
 def writeThread(qlist):
     for i in xrange(N):
