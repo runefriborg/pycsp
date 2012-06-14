@@ -122,7 +122,6 @@ class ChannelControl(object):
 
         if connect == None:
             # Get local channel home
-            # These should handle multiple channels in the future
             self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             self.channelhomethread.start()
             self.channelhome = self.channelhomethread.addr

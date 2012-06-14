@@ -13,6 +13,8 @@ random_port = random.randint(9999,19999)
 Configuration().set(SOCKETS_CONNECT_TIMEOUT, 2)
 Configuration().set(SOCKETS_BIND_TIMEOUT, 2)
 
+
+
 sys.stdout.write("test A - ")
 try:
     A = Channel("A", connect=("",8888))

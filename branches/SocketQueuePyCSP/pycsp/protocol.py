@@ -145,7 +145,7 @@ class LockMessenger(object):
             h._source_id = self.channel_id
             self.dispatch.send(dest.hostNport, h)
 
-            msg = self.input.reply.get()
+            msg = self.input.pop_reply()
             
             header = msg.header
         except SocketException:
@@ -254,7 +254,7 @@ class RemoteLock:
                         
                 self.process.result_ch, self.process.result_msg = message.payload
                 self.process.state = SUCCESS
-                self.cond.notifyAll()
+                self.cond.notify()
                 self.cond.release()        
             else:
                 print "'%s','%s'" %(self.lock_acquired, ) 
@@ -267,7 +267,7 @@ class RemoteLock:
                 
                 if self.process.state == READY:
                     self.process.state = POISON
-                    self.cond.notifyAll()
+                    self.cond.notify()
                 self.cond.release()
             else:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
@@ -279,7 +279,7 @@ class RemoteLock:
                 
                 if self.process.state == READY:
                     self.process.state = RETIRE
-                    self.cond.notifyAll()
+                    self.cond.notify()
                 self.cond.release()
             else:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
@@ -750,7 +750,7 @@ class ChannelHomeThread(threading.Thread):
         LM = self.channel.LM
 
         while(True):
-            msg = self.input.normal.get()
+            msg = self.input.pop_normal()
             header = msg.header
 
             #print("GOT %s for %s" % (cmd2str(header.cmd), self.id))
