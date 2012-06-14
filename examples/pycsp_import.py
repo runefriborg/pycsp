@@ -24,4 +24,4 @@ sys.path.append("..")
 
 from pycsp import *
 
-print 'Using version', version
+print("Using version " + str(version))
