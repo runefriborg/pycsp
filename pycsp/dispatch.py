@@ -3,7 +3,6 @@ Dispatch module
 
 Handles all socket and inter-process communication by dispatching messages onto queues
 
-
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
 See LICENSE.txt for licensing details (MIT License). 
@@ -114,6 +113,7 @@ class SocketDispatcher(object):
         return self.socketthreaddata
 
 
+
 class QueueBuffer:
     def __init__(self):
         self.normal = []
@@ -127,7 +127,7 @@ class QueueBuffer:
 
     def pop_normal(self):
 
-        # Pre test - made safe by GIL
+        # Pre test
         if self.normal:
             return self.normal.pop(0)
 
@@ -143,7 +143,7 @@ class QueueBuffer:
 
     def pop_reply(self):
 
-        # Pre test - made safe by GIL
+        # Pre test
         if self.reply:
             return self.reply.pop(0)
 
@@ -213,9 +213,8 @@ class SocketThread(threading.Thread):
 
                         m = Message(header, payload)
 
-                        #self.cond.acquire() - made safe by GIL 
+                        self.cond.acquire()
                         if (header.cmd == SOCKETTHREAD_SHUTDOWN):
-                            self.cond.acquire()
                             if self.channels or self.processes:
                                 # Socketthread is still busy. Thus ignore and expect a later call to deregister to invoke stopThread.
                                 pass
@@ -226,44 +225,28 @@ class SocketThread(threading.Thread):
                                 self.data.thread = None
                         
                             # Do not close sockets as the socketthread may be restarted at a later time
-                            self.cond.release()
-                                
+
                         elif (header.cmd & PROCESS_CMD):
-
-                            r = None
-                            try:
-                                r = self.processes[header.id]
-                            except KeyError:
-                                r = None
-
-                            if r:
-                                r.handle(m)
+                            if self.processes.has_key(header.id):
+                                self.processes[header.id].handle(m)
                             elif (header.cmd & REQ_REPLY):
                                 self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
                             elif (header.cmd & IGN_UNKNOWN):
                                 pass
                             else:
-                                self.cond.acquire()
                                 if not self.data.processes_unknown.has_key(header.id):
                                     self.data.processes_unknown[header.id] = []
                                 self.data.processes_unknown[header.id].append(m)
-                                self.cond.release()
+                                    
                         else:
-                            c = None
-                            try:
-                                c = self.channels[header.id]
-                            except KeyError:
-                                c = None
-                                
-                            if c:
+                            if self.channels.has_key(header.id):                                
                                 if (header.cmd & IS_REPLY):
-                                    c.put_reply(m)
+                                    self.channels[header.id].put_reply(m)
                                 else:
-                                    c.put_normal(m)
+                                    self.channels[header.id].put_normal(m)
                             elif (header.cmd & IGN_UNKNOWN):
                                 pass
-                            else:
-                                self.cond.acquire()
+                            else:                                
                                 if not self.data.channels_unknown.has_key(header.id):
                                     self.data.channels_unknown[header.id] = QueueBuffer()
 
@@ -271,8 +254,7 @@ class SocketThread(threading.Thread):
                                     self.data.channels_unknown[header.id].put_reply(m)
                                 else:
                                     self.data.channels_unknown[header.id].put_normal(m)
-                                self.cond.release()
-                        #self.cond.release() - made safe by GIL
+                        self.cond.release()
 
         
         
@@ -345,7 +327,10 @@ class SocketThreadData:
         return q
 
     def getChannelQueue(self, name_id):
-        return self.channels[name_id]
+        self.cond.acquire()
+        q = self.channels[name_id]
+        self.cond.release()
+        return q
 
     def deregisterChannel(self, name_id):
         self.cond.acquire()
@@ -395,43 +380,29 @@ class SocketThreadData:
         
         # is address the same as my own address? 
         if addr == self.server_addr:
-            #self.cond.acquire() - made safe by GIL
+            self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
-                r = None
-                try:
-                    r = self.processes[header.id]
-                except KeyError:
-                    r = None
-                if r:
-                    r.handle(m)
+                if self.processes.has_key(header.id):
+                    self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
                     #print("%s UNAVAILABLE for channel %s!" % (str(header.id), str(header._source_id)))
                     self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    self.cond.acquire()
                     if not self.processes_unknown.has_key(header.id):
                         self.processes_unknown[header.id] = []
                     self.processes_unknown[header.id].append(m)
-                    self.cond.release()
             else:
-                c = None
-                try:
-                    c = self.channels[header.id]
-                except KeyError:
-                    c = None
-                if c:
-                    c.put_normal(m)
+                if self.channels.has_key(header.id):
+                    self.channels[header.id].put_normal(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    self.cond.acquire()
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_normal(m)
-                    self.cond.release()
-            #self.cond.release() - made safe by GIL
+            self.cond.release()
         else:            
             m.transmit(addr)
 
@@ -449,40 +420,26 @@ class SocketThreadData:
     
         # is address the same as my own address? 
         if addr == self.server_addr:
-            #self.cond.acquire() - made safe by GIL
+            self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
-                r = None
-                try:
-                    r = self.processes[header.id]
-                except KeyError:
-                    r = None
-                if r:
-                    r.handle(m)
+                if self.processes.has_key(header.id):
+                    self.processes[header.id].handle(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    self.cond.acquire()
                     if not self.processes_unknown.has_key(header.id):
                         self.processes_unknown[header.id] = []
                     self.processes_unknown[header.id].append(m)
-                    self.cond.release()
             else:
-                c = None
-                try:
-                    c = self.channels[header.id]
-                except KeyError:
-                    c = None
-                if c:
-                    c.put_reply(m)
+                if self.channels.has_key(header.id):
+                    self.channels[header.id].put_reply(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    self.cond.acquire()
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_reply(m)                
-                    self.cond.release()
-            #self.cond.release() - made safe by GIL
+            self.cond.release()
         else:            
             m.transmit(addr)
         
