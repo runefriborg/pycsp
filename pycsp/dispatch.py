@@ -33,7 +33,6 @@ class Message:
 
     def transmit(self, addr):
 
-        
         if not (self.header.cmd & HAS_PAYLOAD):
             sock = ossocket.connect(addr)
             sock = ossocket.sendall(sock, self.header)
@@ -43,10 +42,20 @@ class Message:
             payload_bin_data = pickle.dumps(self.payload, protocol = PICKLE_PROTOCOL)
             self.header.arg = len(payload_bin_data)
             
+            
+            # Connect or fetch connected socket
             sock = ossocket.connect(addr)
+
+            # FIREWALL HACK Update SocketThread with new sock
+            if (self.header.cmd == CHANTHREAD_POST_READ or
+                self.header.cmd == CHANTHREAD_POST_WRITE):
+                SocketDispatcher().getThread().add_socket_for_input(sock)
+            
+            # Send header and payload
             sock = ossocket.sendall(sock, self.header)
             ossocket.sendallNOreconnect(sock, payload_bin_data)
             ossocket.close(addr)
+            
 
     def __repr__(self):
         return repr("<pycsp.dispatch.Message cmd:%s>" % (cmd2str(self.header.cmd)))
@@ -208,13 +217,24 @@ class SocketThread(threading.Thread):
                     else:
                         if (header.cmd & HAS_PAYLOAD):
                             payload =  pickle.loads(ossocket.recvall(s, header.arg))
+
+                            # FIREWALL HACK!
+                            if (header.cmd == CHANTHREAD_POST_READ):
+                                payload.reverse_socket= s
+                            elif (header.cmd == CHANTHREAD_POST_WRITE):
+                                payload[0].reverse_socket = s
                         else:
                             payload = None
 
                         m = Message(header, payload)
 
                         self.cond.acquire()
-                        if (header.cmd == SOCKETTHREAD_SHUTDOWN):
+                        if (header.cmd == SOCKETTHREAD_PING):
+                            if self.data.active_socket_list_add:
+                                self.data.active_socket_list.extend(self.data.active_socket_list_add)
+
+                            
+                        elif (header.cmd == SOCKETTHREAD_SHUTDOWN):
                             if self.channels or self.processes:
                                 # Socketthread is still busy. Thus ignore and expect a later call to deregister to invoke stopThread.
                                 pass
@@ -278,10 +298,23 @@ class SocketThreadData:
 
         self.server_socket, self.server_addr = ossocket.start_server(addr)
         self.active_socket_list = [self.server_socket]
+        self.active_socket_list_add = []
 
         self.thread = None
 
-
+    def add_reverse_socket(self, addr, sock):
+        ossocket.updateCache(addr, sock)
+        
+    def add_socket_for_input(self, sock):
+        if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
+            self.cond.acquire()
+            self.active_socket_list_add.append(sock)
+            h = Header(SOCKETTHREAD_PING)
+            sock = ossocket.connect(self.server_addr)
+            sock.sendall(h)
+            ossocket.close(sock)
+            print(str(threading.currentThread())+" added socket")
+            self.cond.release()
 
     def startThread(self):
         self.cond.acquire()
