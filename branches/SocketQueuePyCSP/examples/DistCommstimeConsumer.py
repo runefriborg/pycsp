@@ -28,7 +28,7 @@ import time
 def Consumer(cin):
     "Commstime consumer process"
     print 'Started Consumer'
-    N = 20000
+    N = 10
     ts = time.time
     t1 = ts()
     cin()

@@ -22,6 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from pycsp_import import *
 from random import random
 
+import sys
+server_port = int(sys.argv[-1])
+
 @process
 def worker(job_in, result_out):
    while True:
@@ -29,8 +32,8 @@ def worker(job_in, result_out):
        sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
        result_out((4.0*sum)/cnt)  #Forward result
 
-jobs=Channel("jobs", connect=('0.0.0.0', 12222))
-results=Channel("results", connect=('0.0.0.0', 12223))
+jobs=Channel("jobs", connect=('0.0.0.0', server_port))
+results=Channel("results", connect=('0.0.0.0', server_port))
 
 
 Parallel(

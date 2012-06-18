@@ -38,10 +38,10 @@ def consumer(result_in):
    except ChannelRetireException:
        print 'Result:',sum            #We are done - print result
 
-jobs=Channel("jobs", server=("",12222))
-results=Channel("results", server=("",12223))
+jobs=Channel("jobs")
+results=Channel("results")
 
 
 Parallel(
-   producer( jobs.writer() , 10000, 1000),
+   producer( jobs.writer() , 100, 10),
    consumer(results.reader()))

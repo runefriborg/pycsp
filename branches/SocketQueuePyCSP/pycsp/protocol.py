@@ -135,6 +135,9 @@ class LockMessenger(object):
         self.channel_id = channel_id
         self.input = self.dispatch.getChannelQueue(channel_id)
 
+    def set_reverse_socket(self, process):
+        self.dispatch.add_reverse_socket(process.hostNport, process.reverse_socket)
+
     def remote_acquire_and_get_state(self, dest):
         if not dest.active:
             return (None, FAIL, 0)
@@ -604,10 +607,8 @@ class AddrID(object):
         self.hostNport = addr
         self.id = id
         self.active = True
-        
-    def __str__(self):
-        return repr("%s %s" % (self.hostNport, self.id))
-
+        self.reverse_socket = None
+    
 
 class ChannelReq(object):
     def __init__(self, LM, process_src, process_seq, ch_id, msg = None):
@@ -787,6 +788,7 @@ class ChannelHomeThread(threading.Thread):
             elif header.cmd == CHANTHREAD_POST_WRITE:
                 (process, msg) = msg.payload
 
+                LM.set_reverse_socket(process)
                 
                 try:
                     self.channel.post_write(ChannelReq(LM, process, header.seq_number, self.channel.name, msg))
@@ -824,6 +826,8 @@ class ChannelHomeThread(threading.Thread):
 
             elif header.cmd == CHANTHREAD_POST_READ:
                 process = msg.payload
+
+                LM.set_reverse_socket(process)
 
                 try:
                     self.channel.post_read(ChannelReq(LM, process, header.seq_number, self.channel.name))
