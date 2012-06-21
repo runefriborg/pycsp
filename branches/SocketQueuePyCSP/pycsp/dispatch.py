@@ -49,8 +49,9 @@ class Message:
             # FIREWALL HACK Update SocketThread with new sock
             if (self.header.cmd == CHANTHREAD_POST_READ or
                 self.header.cmd == CHANTHREAD_POST_WRITE):
-                SocketDispatcher().getThread().add_socket_for_input(sock)
+                SocketDispatcher().getThread().add_to_active_socket_list(sock)
             
+
             # Send header and payload
             sock = ossocket.sendall(sock, self.header)
             ossocket.sendallNOreconnect(sock, payload_bin_data)
@@ -232,6 +233,7 @@ class SocketThread(threading.Thread):
                         if (header.cmd == SOCKETTHREAD_PING):
                             if self.data.active_socket_list_add:
                                 self.data.active_socket_list.extend(self.data.active_socket_list_add)
+                                self.data.active_socket_list_add = []
 
                             
                         elif (header.cmd == SOCKETTHREAD_SHUTDOWN):
@@ -305,7 +307,7 @@ class SocketThreadData:
     def add_reverse_socket(self, addr, sock):
         ossocket.updateCache(addr, sock)
         
-    def add_socket_for_input(self, sock):
+    def add_to_active_socket_list(self, sock):
         if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
             self.cond.acquire()
             self.active_socket_list_add.append(sock)
@@ -436,7 +438,7 @@ class SocketThreadData:
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_normal(m)
             self.cond.release()
-        else:            
+        else:   
             m.transmit(addr)
 
 
