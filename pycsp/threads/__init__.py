@@ -28,9 +28,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
-from channel import Channel, ChannelPoisonException, ChannelRetireException, ChannelFailstopException
-from channelend import retire, poison, failstop, IN, OUT
-from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id
+from channel import Channel, ChannelPoisonException, ChannelRetireException, ChannelFailstopException, ChannelRetireLikeFailstopException, ChannelRollBackException
+from channelend import retire, poison, IN, OUT
+from process import io, Process, process, Sequence, Parallel, Spawn, current_process_id, load_variables, load
 
 version = (0,7,1, 'threads')
 
@@ -49,9 +49,10 @@ pycsp.current.Channel = Channel
 pycsp.current.ChannelPoisonException = ChannelPoisonException
 pycsp.current.ChannelRetireException = ChannelRetireException
 pycsp.current.ChannelFailstopException = ChannelFailstopException
+pycsp.current.ChannelRetireLikeFailstopException = ChannelRetireLikeFailstopException
+pycsp.current.ChannelRollBackException = ChannelRollBackException
 pycsp.current.retire = retire
 pycsp.current.poison = poison
-pycsp.current.failstop = failstop
 pycsp.current.IN = IN
 pycsp.current.OUT = OUT
 pycsp.current.io = io
@@ -65,7 +66,8 @@ pycsp.current.FairSelect = FairSelect
 pycsp.current.AltSelect = AltSelect
 pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
-
+pycsp.current.load_variables = load_variables
+pycsp.current.load = load
 
 def test_suite():
     import unittest
@@ -77,4 +79,3 @@ def test_suite():
         suite.addTest(doctest.DocTestSuite(mod))
     suite.addTest(doctest.DocTestSuite())
     return suite
-

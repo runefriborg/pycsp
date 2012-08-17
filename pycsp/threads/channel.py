@@ -23,8 +23,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 # Imports
 import threading
+import inspect
 import time, random
-from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite 
+from channelend import ChannelRetireException, ChannelRetireLikeFailstopException, ChannelEndRead, ChannelEndWrite 
 from pycsp.common.const import *
 
 # Exceptions
@@ -36,6 +37,10 @@ class ChannelFailstopException(Exception):
     def __init__(self):
         pass
 
+class ChannelRollBackException(Exception):
+    def __init__(self):
+        pass
+
 # Classes
 class ReqStatus:
     def __init__(self, state=ACTIVE):
@@ -43,7 +48,7 @@ class ReqStatus:
         self.cond = threading.Condition()
 
 class ChannelReq:
-    def __init__(self,  status, msg=None, signal=None, name=None):
+    def __init__(self, status, msg=None, signal=None, name=None):
         self.status=status
         self.msg=msg
         self.signal=signal
@@ -77,6 +82,14 @@ class ChannelReq:
         if self.result == FAIL and self.status.state == ACTIVE:
             self.status.state=FAILSTOP
             self.result=FAILSTOP
+            self.status.cond.notifyAll()
+        self.status.cond.release()
+
+    def retirelike(self):
+        self.status.cond.acquire()
+        if self.result == FAIL and self.status.state == ACTIVE:
+            self.status.state=RETIRELIKE
+            self.result=RETIRELIKE
             self.status.cond.notifyAll()
         self.status.cond.release()
 
@@ -148,13 +161,14 @@ class Channel(object):
             return object.__new__(cls)
 
     def __init__(self, name=None, buffer=0):
-        self.readqueue=[]
-        self.writequeue=[]
+        self.readqueue  = []
+        self.writequeue = []
         
         self.status = NONE
-        
-        self.readers=0
-        self.writers=0
+        self.old_status = NONE
+
+        self.readers = 0
+        self.writers = 0
 
         if name == None:
             # Create unique name
@@ -165,14 +179,30 @@ class Channel(object):
         # This lock is used to ensure atomic updates of the channelend
         # reference counting and to protect the read/write queue operations. 
         self.lock = threading.RLock()
-    
+
+    def save_variables(self):
+        stack = inspect.stack()
+        
+        try:
+            locals_ = stack[2][0].f_locals
+            process_ = stack[3][0].f_locals
+        finally:
+            del stack
+        
+        process_['self'].vars = locals_
+
     def check_termination(self):
         if self.status == POISON:
             raise ChannelPoisonException()
-        if self.status == RETIRE:
+        elif self.status == RETIRE:
             raise ChannelRetireException()
-        if self.status == FAILSTOP:
+        elif self.status == FAILSTOP:
             raise ChannelFailstopException()
+        elif self.status == RETIRELIKE:
+            raise ChannelRetireLikeFailstopException()
+        elif self.status == CHECKPOINT:
+            self.status = self.old_status
+            raise ChannelRollBackException()
 
     def _read(self):
         self.check_termination()
@@ -181,12 +211,12 @@ class Channel(object):
         req.wait()
         self.remove_read(req)
         if req.result==SUCCESS:
+            self.save_variables()
             return req.msg
         self.check_termination()
 
         print 'We should not get here in read!!!', req.status.state
         return None
-
     
     def _write(self, msg):
         self.check_termination()
@@ -195,6 +225,7 @@ class Channel(object):
         req.wait()
         self.remove_write(req)
         if req.result==SUCCESS:
+            self.save_variables()
             return
         self.check_termination()
 
@@ -217,7 +248,6 @@ class Channel(object):
         else:
             self.check_termination()
         
-
     def remove_read(self, req):
         self.lock.acquire()
         self.readqueue.remove(req)
@@ -251,7 +281,6 @@ class Channel(object):
                 w.offer(r)
         self.lock.release()
 
-
     def poison(self):
         self.lock.acquire()
         self.status=POISON
@@ -268,6 +297,15 @@ class Channel(object):
             p.failstop()
         for p in self.writequeue:
             p.failstop()
+        self.lock.release()
+
+    def rollback(self):
+        self.lock.acquire()
+        
+        if self.status != CHECKPOINT:
+            self.old_status = self.status
+            self.status = CHECKPOINT
+
         self.lock.release()
 
     # syntactic sugar: cin = +chan
@@ -324,28 +362,33 @@ class Channel(object):
         self.writers+=1
         self.lock.release()
 
-    def leave_reader(self):
+    def leave_reader(self, status=RETIRE):
         self.lock.acquire()
-        if self.status != RETIRE:
+        if self.status != RETIRE or self.status != RETIRELIKE:
             self.readers-=1
             if self.readers==0:
                 # Set channel retired
-                self.status = RETIRE
+                self.status = status
                 for p in self.writequeue:
-                    p.retire()
+                    if status == RETIRELIKE:
+                        p.retirelike()
+                    else:
+                        p.retire()
         self.lock.release()
 
-    def leave_writer(self):
+    def leave_writer(self, status=RETIRE):
         self.lock.acquire()
-        if self.status != RETIRE:
+        if self.status != RETIRE or self.status != RETIRELIKE:
             self.writers-=1
             if self.writers==0:
                 # Set channel retired
-                self.status = RETIRE
+                self.status = status
                 for p in self.readqueue:
-                    p.retire()
-        self.lock.release()        
-
+                    if status == RETIRELIKE:
+                        p.retirelike()
+                    else:
+                        p.retire()
+        self.lock.release()   
 
 # Run tests
 if __name__ == '__main__':

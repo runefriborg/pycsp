@@ -28,6 +28,10 @@ class ChannelRetireException(Exception):
     def __init__(self):
         pass
 
+class ChannelRetireLikeFailstopException(Exception):
+    def __init__(self):
+        pass
+
 # Functions
 def IN(channel):
     """ Join as reader
@@ -94,6 +98,10 @@ def failstop(*list_of_channelEnds):
     for channelEnd in list_of_channelEnds:
         channelEnd.failstop()
 
+def retirelike(*list_of_channelEnds):
+    for channelEnd in list_of_channelEnds:
+        channelEnd.retirelike()
+
 # Classes
 class ChannelEndWrite:
     def __init__(self, channel):
@@ -108,17 +116,27 @@ class ChannelEndWrite:
         self.remove_write = self.channel.remove_write
         self.poison = self.channel.poison
         self.failstop = self.channel.failstop
+        self.rollback = self.channel.rollback
 
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
+    def _retirelike(self, *ignore):
+        raise ChannelRetireLikeFailstopException()
+
     def retire(self):
-        if not self.isretired:
+        if not self.isretired and self.channel.status != POISON and self.channel.status != FAILSTOP:
             self.channel.leave_writer()
             self.__call__ = self._retire
             self.post_write = self._retire
             self.isretired = True
 
+    def retirelike(self):
+        if not self.isretired and self.channel.status != POISON and self.channel.status != FAILSTOP:
+            self.channel.leave_writer(RETIRELIKE)
+            self.__call__ = self._retirelike
+            self.post_write = self._retirelike
+            self.isretired = True
 
     def __repr__(self):
         if self.channel.name == None:
@@ -145,15 +163,26 @@ class ChannelEndRead:
         self.remove_read = self.channel.remove_read
         self.poison = self.channel.poison
         self.failstop = self.channel.failstop
+        self.rollback = self.channel.rollback
 
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
+    def _retirelike(self, *ignore):
+        raise ChannelRetireLikeFailstopException()
+
     def retire(self):
-        if not self.isretired:
+        if not self.isretired and self.channel.status != POISON and self.channel.status != FAILSTOP:
             self.channel.leave_reader()
             self.__call__ = self._retire
             self.post_read = self._retire
+            self.isretired = True
+
+    def retirelike(self):
+        if not self.isretired and self.channel.status != POISON and self.channel.status != FAILSTOP:
+            self.channel.leave_reader(RETIRELIKE)
+            self.__call__ = self._retirelike
+            self.post_read = self._retirelike
             self.isretired = True
 
     def __repr__(self):
