@@ -26,8 +26,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from channel import Channel, ChannelPoisonException, ChannelRetireException, ChannelFailstopException
-from channelend import poison, retire, failstop
+from channel import Channel, ChannelPoisonException, ChannelRetireException, ChannelFailstopException, ChannelRetireLikeFailstopException
+from channelend import poison, retire, failstop, retirelike
 from process import process, Spawn
 from alternation import Alternation
 from pycsp.common.const import *
@@ -88,8 +88,8 @@ class BufferedChannel:
         self.__inChan = Channel(name=name+'inChan')
         self.__outChan = Channel(name=name+'outChan')
         self.__bufferProcess = self.Buffer(self.__inChan.reader(),
-                                       self.__outChan.writer(),
-                                       N=buffer)
+                                           self.__outChan.writer(),
+                                           N=buffer)
 
         # Retrieve channel ends
         self.reader = self.__outChan.reader
@@ -134,18 +134,22 @@ class BufferedChannel:
                         except:
                             if status == POISON:
                                 poison(cin, cout)
-                            if status == RETIRE:
+                            elif status == RETIRE:
                                 retire(cin, cout)
-                            if status == FAILSTOP:
+                            elif status == FAILSTOP:
                                 failstop(cin, cout)
+                            elif status == RETIRELIKE:
+                                retirelike(cin, cout)
                     else:
                         try:
                             if status == POISON:
                                 poison(cin, cout)
-                            if status == RETIRE:
+                            elif status == RETIRE:
                                 retire(cin, cout)
-                            if status == FAILSTOP:
+                            elif status == FAILSTOP:
                                 failstop(cin, cout)
+                            elif status == RETIRELIKE:
+                                retirelike(cin, cout)
                         except:
                             pass
                         return # quit
@@ -171,6 +175,8 @@ class BufferedChannel:
                 status = RETIRE
             except ChannelFailstopException, e:
                 status = FAILSTOP
+            except ChannelRetireLikeFailstopException, e:
+                stats = RETIRELIKE
 
 # Run tests
 if __name__ == '__main__':

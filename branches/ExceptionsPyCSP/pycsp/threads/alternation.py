@@ -142,14 +142,17 @@ class Alternation:
                 c.remove_read(req)
             else:
                 c.remove_write(req)
+            
             if req.result==SUCCESS:
                 act=req
-            if req.result==POISON:
+            elif req.result==POISON:
                 status=POISON
-            if req.result==RETIRE:
+            elif req.result==RETIRE:
                 status=RETIRE
-            if req.result==FAILSTOP:
+            elif req.result==FAILSTOP:
                 status=FAILSTOP
+            elif req.result==RETIRELIKE:
+                status=RETIRELIKE
         return (act, status)
 
     def choose(self):
@@ -184,6 +187,10 @@ class Alternation:
             act, _ = self.__result(reqs)
             if not act:
                 raise ChannelFailstopException
+        except ChannelRetireLikeFailstopException:
+            act, _ = self.__result(reqs)
+            if not act:
+                raise ChannelRetireLikeFailstopException
 
         # If noone have offered a channelrequest, we wait.
         if not act:
@@ -198,10 +205,12 @@ class Alternation:
             if not act:
                 if status == POISON:
                     raise ChannelPoisonException()
-                if status == RETIRE:
+                elif status == RETIRE:
                     raise ChannelRetireException()
-                if status == FAILSTOP:
+                elif status == FAILSTOP:
                     raise ChannelFailstopException()
+                elif status == RETIRELIKE:
+                    raise ChannelRetireLikeFailstopException()
 
                 print 'We should not get here in choice!!!'
 

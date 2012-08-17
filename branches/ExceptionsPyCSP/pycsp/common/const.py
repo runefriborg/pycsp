@@ -16,4 +16,7 @@ FAIL, SUCCESS = range(2)
 ACTIVE, DONE = range(2)
 
 # Constants used for both ChannelReq results and ReqStatus states.
-NONE, POISON, RETIRE, FAILSTOP = range(1,5)
+NONE, POISON, RETIRE, FAILSTOP, RETIRELIKE, CHECKPOINT = range(1,7)
+
+# Checkpoint retries
+CHECKPOINT_RETRIES = 2

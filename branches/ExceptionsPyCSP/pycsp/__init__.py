@@ -95,7 +95,6 @@ else:
     import unittest
     import doctest
 
-
     sys.path.append("..")
 
     mods = []
@@ -109,7 +108,3 @@ else:
     suite.addTest(doctest.DocTestSuite())
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-
-
-
-
