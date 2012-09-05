@@ -140,56 +140,57 @@ class Process(threading.Thread):
                 self.fail_type_after_retries = self.__check_failstop
 
     def run(self):
-        try:
-            # Store the returned value from the process
-            self.fn(*self.args, **self.kwargs)
-            # The process is done
-            # It should auto retire all of its channels
-            self.__check_retire(self.args)
-            self.__check_retire(self.kwargs.values())
-        except ChannelPoisonException:
-            # look for channels and channel ends
-            self.__check_poison(self.args)
-            self.__check_poison(self.kwargs.values())
-        except ChannelRetireException:
-            # look for channel ends
-            self.__check_retire(self.args)
-            self.__check_retire(self.kwargs.values())
-        except ChannelFailstopException:
-            self.__check_failstop(self.args)
-            self.__check_failstop(self.kwargs.values())
-        except ChannelRetireLikeFailstopException:
-            self.__check_retirelike(self.args)
-            self.__check_retirelike(self.kwargs.values())
-        except ChannelRollBackException:
-            # Another process sharing a channel with this one
-            # has rolled back, so we must as well.
-            self.run()
-        except Exception as e:
-            if self.print_error:
-                print e
-            
-            fail_type_fn = None
+        while True:
             rerun = False
-            
-            if self.fail_type == FAILSTOP:
-                fail_type_fn = self.__check_failstop
-            elif self.fail_type == RETIRELIKE:
-                fail_type_fn = self.__check_retirelike
-            elif self.fail_type == CHECKPOINT:
-                if self.max_retries != -1 and self.retries >= self.max_retries:
-                    fail_type_fn = self.fail_type_after_retries
-                else:
-                    rerun = True
-                    fail_type_fn = self.__check_checkpointing
+            try:
+                # Store the returned value from the process
+                self.fn(*self.args, **self.kwargs)
+                # The process is done
+                # It should auto retire all of its channels
+                self.__check_retire(self.args)
+                self.__check_retire(self.kwargs.values())
+            except ChannelPoisonException:
+                # look for channels and channel ends
+                self.__check_poison(self.args)
+                self.__check_poison(self.kwargs.values())
+            except ChannelRetireException:
+                # look for channel ends
+                self.__check_retire(self.args)
+                self.__check_retire(self.kwargs.values())
+            except ChannelFailstopException:
+                self.__check_failstop(self.args)
+                self.__check_failstop(self.kwargs.values())
+            except ChannelRetireLikeFailstopException:
+                self.__check_retirelike(self.args)
+                self.__check_retirelike(self.kwargs.values())
+            except ChannelRollBackException:
+                # Another process sharing a channel with this one
+                # has rolled back, so we must as well.
+                rerun = True
+            except Exception as e:
+                if self.print_error:
+                    print e
+                
+                fail_type_fn = None
+                
+                if self.fail_type == FAILSTOP:
+                    fail_type_fn = self.__check_failstop
+                elif self.fail_type == RETIRELIKE:
+                    fail_type_fn = self.__check_retirelike
+                elif self.fail_type == CHECKPOINT:
+                    if self.max_retries != -1 and self.retries >= self.max_retries:
+                        fail_type_fn = self.fail_type_after_retries
+                    else:
+                        rerun = True
+                        self.retries += 1
+                        fail_type_fn = self.__check_checkpointing
 
-            if fail_type_fn is not None:
-                fail_type_fn(self.args)
-                fail_type_fn(self.kwargs.values())
+                if fail_type_fn is not None:
+                    fail_type_fn(self.args)
+                    fail_type_fn(self.kwargs.values())
 
-            if rerun:
-                self.retries += 1
-                self.run()      
+            if not rerun:
+                break
 
     def __check_poison(self, args):
         for arg in args:
