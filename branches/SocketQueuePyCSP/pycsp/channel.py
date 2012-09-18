@@ -7,7 +7,6 @@ See LICENSE.txt for licensing details (MIT License).
 """
 # Imports
 import uuid
-import osprocess
 from channelend import ChannelEndRead, ChannelEndWrite 
 import protocol
 from exceptions import *
@@ -151,7 +150,7 @@ class ChannelControl(object):
     def _read(self):
         self.check_termination()
 
-        p = osprocess.getProc()
+        p,_ = getThreadAndName()
         p.state = READY
         p.sequence_number += 1
         
@@ -176,7 +175,7 @@ class ChannelControl(object):
     def _write(self, msg):
         self.check_termination()
 
-        p = osprocess.getProc()
+        p,_ = getThreadAndName()
         p.state = READY
         p.sequence_number += 1
 

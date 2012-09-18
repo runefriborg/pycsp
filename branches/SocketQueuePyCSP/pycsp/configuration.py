@@ -11,6 +11,8 @@ SOCKETS_CONNECT_TIMEOUT = 0
 SOCKETS_CONNECT_RETRY_DELAY = 1
 SOCKETS_BIND_TIMEOUT = 2
 SOCKETS_BIND_RETRY_DELAY = 3
+PYCSP_PORT = 5
+SOCKETS_PORT = 5
 
 SOCKETS_STRICT_MODE = 4
 # Classes
@@ -53,6 +55,7 @@ class Configuration(object):
                 SOCKETS_CONNECT_RETRY_DELAY:0.1,
                 SOCKETS_BIND_TIMEOUT:2,
                 SOCKETS_BIND_RETRY_DELAY:0.2,
+                SOCKETS_PORT:0,
                 SOCKETS_STRICT_MODE:False
                 }
             

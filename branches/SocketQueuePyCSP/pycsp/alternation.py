@@ -9,7 +9,6 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import inspect
 import types
-import osprocess
 #from channel import *
 from guard import Guard
 from exceptions import *
@@ -125,7 +124,8 @@ class Alternation:
         poison=False
         retire=False
 
-        p = osprocess.getProc()
+        p, _ = getThreadAndName()
+        
 
         if p.state==SUCCESS:
             for c in reqs.keys():
@@ -149,7 +149,7 @@ class Alternation:
         poison = False
         retire = False
 
-        p = osprocess.getProc()
+        p, _ = getThreadAndName()
         p.state = READY
         p.sequence_number += 1
 

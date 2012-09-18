@@ -293,7 +293,9 @@ class SocketThreadData:
 
         self.cond = cond
 
-        if os.environ.has_key(ENVVAL_PORT):
+        if conf.get(PYCSP_PORT) != 0:
+            addr = ('', conf.get(PYCSP_PORT))
+        elif os.environ.has_key(ENVVAL_PORT):
             addr = ('', int(os.environ[ENVVAL_PORT]))
         else:
             addr = ('', 0)
