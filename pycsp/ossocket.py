@@ -37,7 +37,7 @@ def _connect(addr, reconnect=True):
     while (not connected):
         try:
             
-            print(str(threading.currentThread())+"Creating connection to "+str(addr))
+            #print(str(threading.currentThread())+"Creating connection to "+str(addr))
 
             # Create IPv4 TCP socket (TODO: add support for IPv6)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -131,7 +131,8 @@ def connect(addr, reconnect=True):
         sock = cacheSockets.__dict__[addr]
         return sock
     else:
-        print(str(threading.currentThread())+"cache failed for "+str(addr))
+        pass
+        #print(str(threading.currentThread())+"cache failed for "+str(addr))
 
     sock = _connect(addr, reconnect)
 

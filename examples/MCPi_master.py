@@ -43,5 +43,5 @@ results=Channel("results")
 
 
 Parallel(
-   producer( jobs.writer() , 100, 10),
+   producer( jobs.writer() , 1000, 100),
    consumer(results.reader()))

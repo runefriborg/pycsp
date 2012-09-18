@@ -27,8 +27,6 @@ import types
 import uuid
 import threading
 
-import osprocess
-
 from dispatch import SocketDispatcher
 from protocol import RemoteLock
 from channel import ChannelPoisonException, Channel
@@ -54,12 +52,12 @@ def process(func):
 
 
 # Classes
-class Process(osprocess.Proc):
+class Process(threading.Thread):
     """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     """
     def __init__(self, fn, *args, **kwargs):
-        osprocess.Proc.__init__(self)
+        threading.Thread.__init__(self)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
@@ -84,11 +82,6 @@ class Process(osprocess.Proc):
 
     def run(self):
         
-        if osprocess.OSPROCESSES:
-            # Reset SocketDispatcher Singleton object
-            SocketDispatcher.__condObj = threading.Condition()
-            SocketDispatcher.__instance = None
-
         # Create remote lock
         self.cond = threading.Condition()        
         dispatch = SocketDispatcher().getThread()
@@ -281,10 +274,10 @@ def Sequence(*plist):
             processes.append(p)
 
     # For every process we simulate a new process_id. When executing
-    # in Main thread/process we set the new id in a global variable.
-    name = osprocess.getProcName()
+    # in Main thread we set the new id in a global variable.
+    _, name = getThreadAndName()
 
-    if name == '__mainproc__':
+    if name == 'MainThread':
         global MAINTHREAD_ID
         for p in processes:
             MAINTHREAD_ID = p.id
@@ -301,17 +294,16 @@ def Sequence(*plist):
             p.run()
         t.id = t_original_id
 
-def current_process_id():
-    t = osprocess.getProc()
-    name = osprocess.getProcName()
 
-    if name == '__mainproc__':
+def current_process_id():
+    t, name = getThreadAndName()
+
+    if name == 'MainThread':
         try:
             return MAINTHREAD_ID
         except NameError:            
             return '__main__'
     return t.id
-
 
 
 # Update Main Thread/Process with necessary state variables
@@ -324,7 +316,7 @@ def current_process_id():
 # This approach has the unfortunate effect that any import of pycsp will always
 # cause this an extra thread, that often may be unused.
 #
-main_proc = osprocess.getProc()
+main_proc, _ = getThreadAndName()
 
 def init():
     """
@@ -357,7 +349,6 @@ def init():
                 main_proc.cond.wait()
             main_proc.cond.release()
             main_proc.wait = wait
-
 
 init()
 

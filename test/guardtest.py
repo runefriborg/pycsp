@@ -132,26 +132,27 @@ def Any2Any_Alting_Test(par_reader, read_sleeper, write_sleeper):
              writer(-c4,14,cnt, write_sleeper),
              writer(-c4,15,cnt, write_sleeper))
 
+    close(c1,c2,c3,c4)
 
 if __name__ == '__main__':
     print "Any2One_Alting_Test(par_reader_skip_sel, sleep_random, sleep_random)"
-    Any2One_Alting_Test(par_reader_skip_sel, sleep_random, sleep_random)
+    #Any2One_Alting_Test(par_reader_skip_sel, sleep_random, sleep_random)
     print
 
     print "Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)"
-    Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)
+    #Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)
     print
 
     print "Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)"
-    Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)
+    #Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)
     print
 
     print "Any2One_Alting_Test(par_reader_timeout_exec, sleep_random, sleep_long_random)"
-    Any2One_Alting_Test(par_reader_timeout_exec, sleep_random, sleep_long_random)
+    #Any2One_Alting_Test(par_reader_timeout_exec, sleep_random, sleep_long_random)
     print
 
     print "Any2Any_Alting_Test(par_reader_skip_sel, None, sleep_long)"
-    Any2Any_Alting_Test(par_reader_skip_sel, None, sleep_long)
+    #Any2Any_Alting_Test(par_reader_skip_sel, None, sleep_long)
     print
 
     print "Any2Any_Alting_Test(par_reader_timeout_sel, None, sleep_long)"
