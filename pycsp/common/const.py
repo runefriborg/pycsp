@@ -6,6 +6,11 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 import threading
+try:
+    import multiprocessing
+except:
+    pass
+
 ENVVAL_PORT = 'PYCSP_PORT'
 
 # Setup
@@ -19,23 +24,41 @@ READY, FAIL, SUCCESS, POISON, RETIRE = range(5)
 
 
 def getThreadAndName():
-    import multiprocessing
-    mname = multiprocessing.current_process().name
+    thread = None
+    name = None
+
+    # Get thread from threading first, since if thread is set, then
+    # we do not have to look up multiprocessing
     try:
         # compatible with Python 2.6+
-        t = threading.current_thread()
-        name = mname + t.name
+        thread = threading.current_thread()
     except AttributeError:
         # compatible with Python 2.5- 
-        t = threading.currentThread()
-        name = mname + t.getName()
+        thread = threading.currentThread()
+    
+    name = thread.getName()
 
     if name == 'MainThread':
+        # This might be a multiprocess, thus multiprocessing must be checked
+        p = None
+        parent_pid = None
         try:
-            if t.id:
-                name = t.id
-        except AttributeError:
-            print "atterror"
+            p = multiprocessing.current_process()
+            parent_pid = p._parent_pid
+        except:
             pass
-            
-    return (t, name)
+
+        if not parent_pid:
+            # This is the main process!
+            try:
+                if thread.id:
+                    name = thread.id
+            except AttributeError:
+                print "atterror"
+                pass
+        else:
+            # p is a MultiProcess
+            thread = p
+            name = p.name
+
+    return (thread, name)

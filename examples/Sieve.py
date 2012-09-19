@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
 
-@process
+@multiprocess
 def producer(cout, cnt):
     for i in range(2,cnt):
         cout(i)

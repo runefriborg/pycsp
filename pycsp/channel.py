@@ -151,6 +151,7 @@ class ChannelControl(object):
         self.check_termination()
 
         p,_ = getThreadAndName()
+ 
         p.state = READY
         p.sequence_number += 1
         
