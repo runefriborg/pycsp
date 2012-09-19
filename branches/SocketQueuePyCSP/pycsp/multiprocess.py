@@ -1,5 +1,5 @@
 """
-Processes and execution
+Multiprocess
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
@@ -27,6 +27,8 @@ import types
 import uuid
 import threading
 
+import multiprocessing
+
 from dispatch import SocketDispatcher
 from protocol import RemoteLock
 from channel import ChannelPoisonException, Channel
@@ -34,7 +36,7 @@ from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
 
 # Decorators
-def process(func):
+def multiprocess(func):
     """
     @process decorator for creating process functions
 
@@ -42,22 +44,21 @@ def process(func):
     ... def P():
     ...     pass
 
-    >>> isinstance(P(), Process)
+    >>> isinstance(P(), MultiProcess)
     True
     """
     def _call(*args, **kwargs):
-        return Process(func, *args, **kwargs)
+        return MultiProcess(func, *args, **kwargs)
     return _call
 
 
-
 # Classes
-class Process(threading.Thread):
+class MultiProcess(multiprocessing.Process):
     """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     """
     def __init__(self, fn, *args, **kwargs):
-        threading.Thread.__init__(self)
+        multiprocessing.Process.__init__(self)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
@@ -82,6 +83,12 @@ class Process(threading.Thread):
 
     def run(self):
         
+        # Multiprocessing inherits global objects like singletons. Thus we must reset!
+        # Reset SocketDispatcher Singleton object to force the creation of a new
+        # SocketDispatcher
+        SocketDispatcher.__condObj = threading.Condition()
+        SocketDispatcher.__instance = None
+
         # Create remote lock
         self.cond = threading.Condition()        
         dispatch = SocketDispatcher().getThread()
@@ -89,7 +96,8 @@ class Process(threading.Thread):
         dispatch.registerProcess(self.id, RemoteLock(self))
 
         try:
-            # Store the returned value from the process
+            # Do not store the returned value from the process
+            # TODO: Consider, whether process should return values
             self.fn(*self.args, **self.kwargs)
         except ChannelPoisonException, e:
             # look for channels and channel ends
@@ -136,11 +144,11 @@ class Process(threading.Thread):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [Process(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
@@ -183,190 +191,3 @@ class Process(threading.Thread):
             return R
         return args
                 
-# Functions
-def Parallel(*plist):
-    """ Parallel(P1, [P2, .. ,PN])
-    >>> from __init__ import *
-    
-    >>> @process
-    ... def P1(cout, id):
-    ...     for i in range(10):
-    ...         cout(id)
-
-    >>> @process
-    ... def P2(cin):
-    ...     for i in range(10):
-    ...         cin()
-    
-    >>> C = [Channel() for i in range(10)]
-    >>> Cin = [chan.reader() for chan in C]
-    >>> Cout = [chan.writer() for chan in C]
-    
-    >>> Parallel([P1(Cout[i], i) for i in range(10)],[P2(Cin[i]) for i in range(10)])
-    """
-    _parallel(plist, True)
-
-def Spawn(*plist):
-    """ Spawn(P1, [P2, .. ,PN])
-    >>> from __init__ import *
-    
-    >>> @process
-    ... def P1(cout, id):
-    ...     for i in range(10):
-    ...         cout(id)
-    
-    >>> C = Channel()
-    >>> Spawn([P1(C.writer(), i) for i in range(10)])
-    
-    >>> L = []
-    >>> cin = C.reader()
-    >>> for i in range(100):
-    ...    L.append(cin())
-    
-    >>> len(L)
-    100
-    """
-    _parallel(plist, False)
-
-def _parallel(plist, block = True):
-    processes=[]
-    for p in plist:
-        if type(p)==list:
-            for q in p:
-                processes.append(q)
-        else:
-            processes.append(p)
-
-    for p in processes:
-        p.start()
-
-    if block:
-        for p in processes:
-            p.join()
-
-    
-def Sequence(*plist):
-    """ Sequence(P1, [P2, .. ,PN])
-    The Sequence construct returns when all given processes exit.
-    >>> from __init__ import *
-    
-    >>> @process
-    ... def P1(cout):
-    ...     Sequence([Process(cout,i) for i in range(10)])
-    
-    >>> C = Channel()
-    >>> Spawn(P1(C.writer()))
-    
-    >>> L = []
-    >>> cin = C.reader()
-    >>> for i in range(10):
-    ...    L.append(cin())
-    
-    >>> L
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    """
-    processes=[]
-    for p in plist:
-        if type(p)==list:
-            for q in p:
-                processes.append(q)
-        else:
-            processes.append(p)
-
-    # For every process we simulate a new process_id. When executing
-    # in Main thread we set the new id in a global variable.
-    _, name = getThreadAndName()
-
-    if name == 'MainThread':
-        global MAINTHREAD_ID
-        for p in processes:
-            MAINTHREAD_ID = p.id
-
-            # Call Run directly instead of start() and join() 
-            p.run()
-        del MAINTHREAD_ID
-    else:
-        t_original_id = t.id
-        for p in processes:
-            t.id = p.id
-
-            # Call Run directly instead of start() and join() 
-            p.run()
-        t.id = t_original_id
-
-
-def current_process_id():
-    t, name = getThreadAndName()
-
-    if name == 'MainThread':
-        try:
-            return MAINTHREAD_ID
-        except NameError:            
-            return '__main__'
-    return t.id
-
-
-# Update Main Thread/Process with necessary state variables
-# All channel communications require the active process to have a running
-# LockThread and have the necessary state variables initialised
-#
-# To accomondate channel communications made from the main thread, the following
-# code initialises state variables and creates a LockThread.
-#
-# This approach has the unfortunate effect that any import of pycsp will always
-# cause this an extra thread, that often may be unused.
-#
-main_proc, _ = getThreadAndName()
-
-def init():
-    """
-    Initialising state variables for channel communication made from the
-    main thread/process.
-    """
-    run = False
-    try:
-        if main_proc.id != None:
-            run = True
-    except AttributeError:
-        pass
-
-
-    if run:
-        main_proc.id = uuid.uuid1().hex
-        main_proc.fn = None
-        main_proc.state = FAIL
-        main_proc.result_ch_idx = None
-        main_proc.result_msg = None
-        main_proc.sequence_number = 1L
-        main_proc.cond = threading.Condition()
-        dispatch = SocketDispatcher().getThread()
-        main_proc.addr = dispatch.server_addr
-        dispatch.registerProcess(main_proc.id, RemoteLock(main_proc))
-
-        def wait():
-            main_proc.cond.acquire()
-            if main_proc.state == READY:
-                main_proc.cond.wait()
-            main_proc.cond.release()
-            main_proc.wait = wait
-
-# TODO: Find out how to enable communication from the main thread
-#init()
-print main_proc
-
-
-def shutdown():
-    """
-    Activates a nice shutdown of the main lock thread created by init()
-
-    The SocketThread thread is a daemon thread and will be terminated hard
-    if not nicely through this function. It is only necessary to call shutdown()
-    if channel communications have been made from the main thread/process
-    otherwise a hard termination is stable.
-    """
-    try:
-        dispatch = SocketDispatcher().getThread()
-        dispatch.deregisterProcess(main_proc.id)
-        main_proc.id = None
-    except AttributeError:
-        pass

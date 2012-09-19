@@ -306,6 +306,15 @@ class SocketThreadData:
 
         self.thread = None
 
+    def is_alive(self):
+        """
+        If the thread is stale (which may happen when channel ends are communicated between OS processes), a new thread must be started.
+        """
+        if self.thread and self.thread.is_alive():
+            return True
+        else:
+            return False
+
     def add_reverse_socket(self, addr, sock):
         ossocket.updateCache(addr, sock)
         
@@ -415,7 +424,7 @@ class SocketThreadData:
         
         m = Message(header, payload)
         
-        # is address the same as my own address? 
+        # is destination address the same as my own address? 
         if addr == self.server_addr:
             self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
@@ -455,7 +464,7 @@ class SocketThreadData:
 
         m = Message(header, payload)
     
-        # is address the same as my own address? 
+        # is destination address the same as my own address? 
         if addr == self.server_addr:
             self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
