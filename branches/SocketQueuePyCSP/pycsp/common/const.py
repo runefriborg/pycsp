@@ -14,7 +14,7 @@ except:
 ENVVAL_PORT = 'PYCSP_PORT'
 
 # Setup
-PICKLE_PROTOCOL= 0
+PICKLE_PROTOCOL= 2
 ENABLE_CACHE = 1
 
 # Operation type
