@@ -34,13 +34,35 @@ from protocol import RemoteLock
 from channel import ChannelPoisonException, Channel
 from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
+from configuration import *
+        
+conf = Configuration()
+
+# Decorators
+def multiprocess2(port=None):
+    """
+    @process decorator for creating process functions
+
+    >>> @multiprocess(port=8080)
+    ... def P():
+    ...     pass
+
+    >>> isinstance(P(), MultiProcess)
+    True
+    """
+    def wrap_process(func):
+        def _call(*args, **kwargs):
+            return MultiProcess(func, port, *args, **kwargs)
+        _call.func_name = func.func_name
+        return _call
+    return wrap_process
 
 # Decorators
 def multiprocess(func):
     """
     @process decorator for creating process functions
 
-    >>> @process
+    >>> @multiprocess(port=8080)
     ... def P():
     ...     pass
 
@@ -48,7 +70,9 @@ def multiprocess(func):
     True
     """
     def _call(*args, **kwargs):
-        return MultiProcess(func, *args, **kwargs)
+        port = None
+        return MultiProcess(func, port, *args, **kwargs)
+    _call.func_name = func.func_name
     return _call
 
 
@@ -57,7 +81,7 @@ class MultiProcess(multiprocessing.Process):
     """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     """
-    def __init__(self, fn, *args, **kwargs):
+    def __init__(self, fn, port, *args, **kwargs):
         multiprocessing.Process.__init__(self)
         self.fn = fn
         self.args = args
@@ -74,6 +98,10 @@ class MultiProcess(multiprocessing.Process):
         
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1L
+
+        # Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
+        if port:
+            conf.set(PYCSP_PORT, port)
 
     def wait(self):
         self.cond.acquire()
