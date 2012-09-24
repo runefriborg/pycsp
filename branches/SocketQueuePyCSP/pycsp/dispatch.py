@@ -31,12 +31,12 @@ class Message:
         self.header = header
         self.payload = payload 
 
-    def transmit(self, addr):
+    def transmit(self, handler, addr):
 
         if not (self.header.cmd & HAS_PAYLOAD):
-            sock = ossocket.connect(addr)
-            sock = ossocket.sendall(sock, self.header)
-            ossocket.close(addr)
+            sock = handler.connect(addr)
+            sock = handler.sendall(sock, self.header)
+            handler.close(addr)
 
         else:
             payload_bin_data = pickle.dumps(self.payload, protocol = PICKLE_PROTOCOL)
@@ -44,7 +44,12 @@ class Message:
             
             
             # Connect or fetch connected socket
-            sock = ossocket.connect(addr)
+            sock = handler.connect(addr)            
+
+            # Send header and payload
+            sock = handler.sendall(sock, self.header)
+            handler.sendallNOreconnect(sock, payload_bin_data)
+            handler.close(addr)
 
             # FIREWALL HACK Update SocketThread with new sock
             if (self.header.cmd == CHANTHREAD_POST_READ or
@@ -52,14 +57,9 @@ class Message:
                 SocketDispatcher().getThread().add_to_active_socket_list(sock)
             
 
-            # Send header and payload
-            sock = ossocket.sendall(sock, self.header)
-            ossocket.sendallNOreconnect(sock, payload_bin_data)
-            ossocket.close(addr)
-            
-
     def __repr__(self):
         return repr("<pycsp.dispatch.Message cmd:%s>" % (cmd2str(self.header.cmd)))
+
 
 class SocketDispatcher(object):
     """
@@ -74,7 +74,7 @@ class SocketDispatcher(object):
     def __new__(cls, *args, **kargs):
         return cls.getInstance(cls, *args, **kargs)
 
-    def __init__(self):
+    def __init__(self, reset=False):
         pass
 
     def getInstance(cls, *args, **kwargs):
@@ -85,6 +85,14 @@ class SocketDispatcher(object):
         #  If the singleton is from another interpreter, then recreate a new singleton for this interpreter.
 
         # Critical section start
+
+        if kwargs.has_key("reset") and kwargs["reset"]:
+            del cls.__condObj
+            cls.__condObj = threading.Condition()
+            del cls.__instance
+            cls.__instance = None
+
+
         cls.__condObj.acquire()
         try:
             try:
@@ -117,8 +125,7 @@ class SocketDispatcher(object):
 
         return cls.__instance
     getInstance = classmethod(getInstance)
-
-
+        
     def getThread(self):
         return self.socketthreaddata
 
@@ -199,6 +206,7 @@ class SocketThread(threading.Thread):
     def run(self):
 
         #print "Starting SocketThread"
+        handler = ossocket.ConnHandler()
 
         while(not self.finished):
             ready, _, exceptready = select.select(self.data.active_socket_list, [], [])
@@ -209,7 +217,17 @@ class SocketThread(threading.Thread):
                 else:
                     header = Header()
                     header.cmd = ERROR_CMD
-                    s.recv_into(header)
+                    self.cond.acquire()
+                    try:
+                        s.recv_into(header)
+                    except ossocket.socket.error, (value, message):
+                        if value == 104:
+                            # Connection has been reset
+                            header.cmd = ERROR_CMD
+                            print "OK"
+                        else:
+                            raise
+                    self.cond.release()
                     if header.cmd == ERROR_CMD:
                         # connection disconnected
                         if s in self.data.active_socket_list:
@@ -217,7 +235,10 @@ class SocketThread(threading.Thread):
                         s.close()
                     else:
                         if (header.cmd & HAS_PAYLOAD):
-                            payload =  pickle.loads(ossocket.recvall(s, header.arg))
+                            self.cond.acquire()
+                            data = ossocket.recvall(s, header.arg)
+                            self.cond.release()
+                            payload =  pickle.loads(data)
 
                             # FIREWALL HACK!
                             if (header.cmd == CHANTHREAD_POST_READ):
@@ -252,7 +273,7 @@ class SocketThread(threading.Thread):
                             if self.processes.has_key(header.id):
                                 self.processes[header.id].handle(m)
                             elif (header.cmd & REQ_REPLY):
-                                self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
+                                self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload=None, otherhandler=handler)
                             elif (header.cmd & IGN_UNKNOWN):
                                 pass
                             else:
@@ -306,6 +327,8 @@ class SocketThreadData:
 
         self.thread = None
 
+        self.handler = ossocket.ConnHandler()
+
     def is_alive(self):
         """
         If the thread is stale (which may happen when channel ends are communicated between OS processes), a new thread must be started.
@@ -316,17 +339,18 @@ class SocketThreadData:
             return False
 
     def add_reverse_socket(self, addr, sock):
-        ossocket.updateCache(addr, sock)
+        self.handler.updateCache(addr, sock)
         
     def add_to_active_socket_list(self, sock):
         if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
             self.cond.acquire()
-            self.active_socket_list_add.append(sock)
-            h = Header(SOCKETTHREAD_PING)
-            sock = ossocket.connect(self.server_addr)
-            sock.sendall(h)
-            ossocket.close(sock)
-            print(str(threading.currentThread())+" added socket")
+            if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
+                self.active_socket_list_add.append(sock)
+                h = Header(SOCKETTHREAD_PING)
+                sock = self.handler.connect(self.server_addr)
+                sock.sendall(h)
+                self.handler.close(sock)
+                print(str(threading.currentThread())+" added socket")
             self.cond.release()
 
     def startThread(self):
@@ -355,7 +379,6 @@ class SocketThreadData:
 
     """
     def registerChannel(self, name_id):
-
         self.cond.acquire()
 
         if self.channels_unknown.has_key(name_id):
@@ -415,24 +438,23 @@ class SocketThreadData:
                 del self.processes[name_id]
                 if len(self.channels) == 0 and len(self.processes) == 0:
                     self.stopThread()
-
             self.cond.release()
 
-    def send(self, addr, header, payload=None):
+    def send(self, addr, header, payload=None, otherhandler=None):
         # Update message source
         header._source_host, header._source_port = self.server_addr
         
         m = Message(header, payload)
         
         # is destination address the same as my own address? 
+        self.cond.acquire()
         if addr == self.server_addr:
-            self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
                     #print("%s UNAVAILABLE for channel %s!" % (str(header.id), str(header._source_id)))
-                    self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id))
+                    self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload=None, otherhandler=otherhandler)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
@@ -448,12 +470,15 @@ class SocketThreadData:
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_normal(m)
-            self.cond.release()
-        else:   
-            m.transmit(addr)
+        else:
+            if otherhandler:
+                m.transmit(otherhandler, addr)
+            else:
+                m.transmit(self.handler, addr)
+        self.cond.release()
 
 
-    def reply(self, source_header, header, payload=None):
+    def reply(self, source_header, header, payload=None, otherhandler=None):
         addr = (source_header._source_host, source_header._source_port)
         
         # Update message source
@@ -465,8 +490,8 @@ class SocketThreadData:
         m = Message(header, payload)
     
         # is destination address the same as my own address? 
+        self.cond.acquire()
         if addr == self.server_addr:
-            self.cond.acquire()
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
@@ -485,9 +510,12 @@ class SocketThreadData:
                     if not self.channels_unknown.has_key(header.id):
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_reply(m)                
-            self.cond.release()
-        else:            
-            m.transmit(addr)
+        else:
+            if otherhandler:
+                m.transmit(otherhandler, addr)
+            else:
+                m.transmit(self.handler, addr)
+        self.cond.release()
         
 
         
