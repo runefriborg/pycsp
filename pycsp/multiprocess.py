@@ -86,8 +86,8 @@ class MultiProcess(multiprocessing.Process):
         # Multiprocessing inherits global objects like singletons. Thus we must reset!
         # Reset SocketDispatcher Singleton object to force the creation of a new
         # SocketDispatcher
-        SocketDispatcher.__condObj = threading.Condition()
-        SocketDispatcher.__instance = None
+        
+        SocketDispatcher(reset=True)
 
         # Create remote lock
         self.cond = threading.Condition()        

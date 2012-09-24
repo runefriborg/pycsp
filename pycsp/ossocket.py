@@ -18,11 +18,7 @@ from pycsp.common.const import *
 
 STDERR_OUTPUT = False
 
-conf = Configuration()
-
-
-# Local storage for socket handling and reuse
-cacheSockets = threading.local()
+conf = Configuration()    
 
 def _connect(addr, reconnect=True):
     """
@@ -69,6 +65,7 @@ def _connect(addr, reconnect=True):
     return sock
 
 
+
 def start_server(server_addr=('', 0)):
     """
     Bind to address and port with the Nagle algorithm disabled.
@@ -113,35 +110,19 @@ def start_server(server_addr=('', 0)):
 
     return sock, address
 
-
-def updateCache(addr, sock):
-    #print(str(threading.currentThread())+"update cache with "+str(addr))
-    cacheSockets.__dict__[addr] = sock
-
-
-def connect(addr, reconnect=True):
+def connectNOcache(addr):
     """
-    Retrieve old connection or acquire new connection
-
-    If reconnect = False, connect returns False instead of socket, when unable to connect to host.
+    Connect to addr circumventing the cached sockets
     """
-    
-    # Lookup connection
-    if cacheSockets.__dict__.has_key(addr):
-        sock = cacheSockets.__dict__[addr]
-        return sock
-    else:
-        pass
-        #print(str(threading.currentThread())+"cache failed for "+str(addr))
 
-    sock = _connect(addr, reconnect)
-
-    # Save connection
-    cacheSockets.__dict__[addr] = sock
-
+    sock = _connect(addr)
     return sock
 
-
+def closeNOcache(sock):
+    """
+    Close socket created with connectNOcache
+    """
+    sock.close()
 
 def recvall(sock, msg_len):
     """
@@ -156,119 +137,138 @@ def recvall(sock, msg_len):
                 raise SocketClosedException()
             msg_chunks.append(chunk)
             msg_len_received += len(chunk)
-    except socket.error, (value,message):
+    except socket.error, (value, message):
         if STDERR_OUTPUT:
             sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
         raise SocketClosedException()
         
     return "".join(msg_chunks)
 
+
+class ConnHandler(object):
+    def __init__(self):
+        self.cacheSockets = {}
+
+    def updateCache(self, addr, sock):
+        #print(str(threading.currentThread())+"update cache with "+str(addr))
+        if ENABLE_CACHE:
+            if not self.cacheSockets.has_key(addr):
+                self.cacheSockets[addr] = sock
+
+    def connect(self, addr, reconnect=True):
+        """
+        Retrieve old connection or acquire new connection
+
+        If reconnect = False, connect returns False instead of socket, when unable to connect to host.
+        """
+
+        # Lookup connection
+        if self.cacheSockets.has_key(addr):
+            sock = self.cacheSockets[addr]
+            return sock
+
+        sock = _connect(addr, reconnect)
+
+        # Save connection
+        if ENABLE_CACHE:
+            self.cacheSockets[addr] = sock
+
+        return sock
+
     
-def sendallNOreconnect(sock, data):
-    """
-    Send all data on socket. Do not reconnect on error.
-    """
-    try:
-        sock.sendall(data)
-    except socket.error, (value,message):
-        if STDERR_OUTPUT:
-            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
-        # TODO make exceptions depending on the error value
-
-        # Expire socket
-        addr = None
-        for item in cacheSockets.__dict__.items():
-            if (item[1] == sock):
-                addr = item[0]
-                forceclose(addr)
-
-        if addr == None:
-            raise Exception("Fatal error: Could not find cached socket " + str(sock))
-
-        raise SocketSendException()
-
-
-
-def sendall(sock, data):
-    """
-    Send all data on socket. Reconnect once if socket fails and the socket was cached.
-
-    Warning: Provided socket may be invalidated and replaced, thus use like this:
-    sock = ossocket.sendall(sock, shipped_data)
-    
-    """
-    ok = False
-    new = False
-
-    while (not ok):
+    def sendallNOreconnect(self, sock, data):
+        """
+        Send all data on socket. Do not reconnect on error.
+        """
         try:
             sock.sendall(data)
-            ok = True
         except socket.error, (value,message):
             if STDERR_OUTPUT:
                 sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
             # TODO make exceptions depending on the error value
 
-            if new:
-                # The socket was new and still failed, thus no reconnection
-                raise SocketSendException()
-            else:
-                # Expire socket
-                addr = None
-                for item in cacheSockets.__dict__.items():
-                    if (item[1] == sock):
-                        addr = item[0]
-                        forceclose(addr)
+            # Expire socket
+            addr = None
+            for item in self.cacheSockets.items():
+                if (item[1] == sock):
+                    addr = item[0]
+                    forceclose(addr)
 
-                if addr == None:
-                    raise Exception("Fatal error: Could not find cached socket " + str(sock))
+            if addr == None:
+                raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
-                # Reconnect
-                sock = connect(addr)
-                new = True
+            raise SocketSendException()
 
-    # Return "possibly new" socket
-    return sock
 
-        
-def close(addr):
-    """
-    Do not close socket. As they kept for later reuse
-    """
-    pass
 
-def forceclose(addr):
-    """
-    Close socket and remove cached socket
-    """
-    if cacheSockets.__dict__.has_key(addr):
-        sock = cacheSockets.__dict__[addr]
+    def sendall(self, sock, data):
+        """
+        Send all data on socket. Reconnect once if socket fails and the socket was cached.
 
-        del cacheSockets.__dict__[addr]
-        
-        sock.close()
+        Warning: Provided socket may be invalidated and replaced, thus use like this:
+        sock = ossocket.sendall(sock, shipped_data)
+
+        """
+        ok = False
+        new = False
+
+        while (not ok):
+            try:
+                sock.sendall(data)
+                ok = True
+            except socket.error, (value,message):
+                if STDERR_OUTPUT:
+                    sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+                # TODO make exceptions depending on the error value
+
+                if new:
+                    # The socket was new and still failed, thus no reconnection
+                    raise SocketSendException()
+                else:
+                    # Expire socket
+                    addr = None
+                    for item in self.cacheSockets.items():
+                        if (item[1] == sock):
+                            addr = item[0]
+                            forceclose(addr)
+
+                    if addr == None:
+                        raise Exception("Fatal error: Could not find cached socket " + str(sock))
+
+                    # Reconnect
+                    sock = connect(addr)
+                    new = True
+
+        # Return "possibly new" socket
+        return sock
+
+
+    def close(self, addr):
+        """
+        Do not close socket. As they kept for later reuse
+        """
+        pass
+
     
-def closeall():
-    """
-    Close all sockets owned by thread
-    """
-    for addr in cacheSockets.__dict__:
-        sock = cacheSockets.__dict__[addr]
-        sock.close()
-    
-    cacheSockets.__dict__ = {}
+    def forceclose(self, addr):
+        """
+        Close socket and remove cached socket
+        """
+        if self.cacheSockets.has_key(addr):
+            sock = self.cacheSockets[addr]
+
+            del self.cacheSockets[addr]
+
+            sock.close()
+
+    def closeall(self):
+        """
+        Close all sockets owned by thread
+        """
+        for addr in self.cacheSockets:
+            sock = self.cacheSockets[addr]
+            sock.close()
+
+        self.cacheSockets = {}
 
 
-def connectNOcache(addr):
-    """
-    Connect to addr circumventing the cached sockets
-    """
-
-    sock = _connect(addr)
-    return sock
-
-def closeNOcache(sock):
-    """
-    Close socket created with connectNOcache
-    """
-    sock.close()

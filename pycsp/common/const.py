@@ -15,6 +15,7 @@ ENVVAL_PORT = 'PYCSP_PORT'
 
 # Setup
 PICKLE_PROTOCOL= 0
+ENABLE_CACHE = 1
 
 # Operation type
 READ, WRITE = range(2)
