@@ -92,10 +92,10 @@ def par_reader_timeout_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
 
 
 def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
-    c1=Channel()
-    c2=Channel()
-    c3=Channel()
-    c4=Channel()
+    c1=Channel("c1")
+    c2=Channel("c2")
+    c3=Channel("c3")
+    c4=Channel("c4")
 
     cnt = 10
     
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     print
 
     print "Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)"
-    #Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)
+    Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)
     print
 
     print "Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)"

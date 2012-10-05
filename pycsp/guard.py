@@ -45,8 +45,8 @@ class Guard:
         self.id = uuid.uuid1().hex
 
         # Necessary to allow for correct locking
-        dispatch = SocketDispatcher().getThread()
-        dispatch.registerChannel(self.id)
+        self.dispatch = SocketDispatcher().getThread()
+        self.dispatch.registerGuard(self.id)
         self.LM = LockMessenger(self.id)
 
     def offer(self, req):
@@ -64,6 +64,7 @@ class Guard:
                 
             # Release lock
             self.LM.remote_release(conn, req.process)
+
         except AddrUnavailableException:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
@@ -72,10 +73,11 @@ class Guard:
             else:
                 sys.stderr.write("PyCSP unable to reach process during Guard.offer(%s)\n" % str(self.process))
 
-        return
-    
+        self.dispatch.deregisterGuard(self.id)
+
     def cancel(self):
-        pass
+        self.dispatch.deregisterGuard(self.id)
+
     
 class SkipGuard(Guard):
     """
@@ -144,8 +146,10 @@ class TimeoutGuard(Guard):
         self.timer.start()
   
     def cancel(self):
+        Guard.cancel(self)
         self.timer.cancel()
-
+        
+        
 # Backwards compatibility
 Skip = SkipGuard
 Timeout = TimeoutGuard
