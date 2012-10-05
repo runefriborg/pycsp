@@ -17,7 +17,6 @@ from dispatch import *
 from pycsp.common.const import *
 from configuration import *
 
-
 conf = Configuration()
 
 class ChannelMessenger(object):
@@ -73,24 +72,6 @@ class ChannelMessenger(object):
             # Unable to join channel
             raise ChannelSocketException(channel.channelhome, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
-    def leave(self, channel, direction):
-        self.restore()
-
-        try:
-            if direction == READ:
-                self.dispatch.send(channel.channelhome,
-                                            Header(CHANTHREAD_LEAVE_READER, channel.name))
-            elif direction == WRITE:
-                self.dispatch.send(channel.channelhome,
-                                            Header(CHANTHREAD_LEAVE_WRITER, channel.name))
-
-        except SocketException:
-            # Unable to decrement writer count on channel
-            if conf.get(SOCKETS_STRICT_MODE):
-                raise ChannelSocketException(channel.channelhome, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
-            else:
-                sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
-
     def retire(self, channel, direction):
         self.restore()
 
@@ -99,7 +80,7 @@ class ChannelMessenger(object):
             if direction == READ:
                 self.dispatch.send(channel.channelhome,
                                             Header(CHANTHREAD_RETIRE_READER, channel.name))
-            elif direction == WRITE:                
+            elif direction == WRITE:      
                 self.dispatch.send(channel.channelhome,
                                             Header(CHANTHREAD_RETIRE_WRITER, channel.name))
 
@@ -132,6 +113,11 @@ class ChannelMessenger(object):
     def post_read(self, channel, process):
         self.restore()
 
+        # Enter channel and update NAT socket
+        if not channel in process.activeChanList:
+            process.activeChanList.append(channel)
+            self.enter(channel, process)
+
         try:
             self.dispatch.send(channel.channelhome,
                                         Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number),
@@ -143,6 +129,11 @@ class ChannelMessenger(object):
     def post_write(self, channel, process, msg):
         self.restore()
 
+        # Enter channel and update NAT socket
+        if not channel in process.activeChanList:
+            process.activeChanList.append(channel)
+            self.enter(channel, process)
+            
         try:
             self.dispatch.send(channel.channelhome,
                                         Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number),
@@ -152,6 +143,39 @@ class ChannelMessenger(object):
             raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
 
 
+    def enter(self, channel, process):
+        """
+        The enter command is also used to update the reverse socket for traversing NAT
+        """
+        self.restore()
+
+        try:
+            self.dispatch.send(channel.channelhome,
+                               Header(CHANTHREAD_ENTER, channel.name),
+                               [AddrID(process.addr, process.id), None])
+            # None is the container for the reverse socket. Updated at the destination dispatch thread
+
+        except SocketException:
+            # Unable to enter channel
+            raise ChannelSocketException(channel.channelhome, "PyCSP (enter channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+
+    def leave(self, channel, process):
+        """
+        The leave command is used to remove and forcefully deny all communication to a process
+        """
+        self.restore()
+
+        try:
+            self.dispatch.send(channel.channelhome,
+                               Header(CHANTHREAD_LEAVE, channel.name),
+                               AddrID(process.addr, process.id))
+
+        except SocketException:
+            # Unable to decrement writer count on channel
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise ChannelSocketException(channel.channelhome, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+            else:
+                sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
 
 
 
@@ -162,23 +186,30 @@ class LockMessenger(object):
         self.channel_id = channel_id
         self.input = self.dispatch.getChannelQueue(channel_id)
 
-    def set_reverse_socket(self, process):
-        self.dispatch.add_reverse_socket(process.hostNport, process.reverse_socket)
+    def set_reverse_socket(self, paddr, reverse_socket):
+        self.dispatch.add_reverse_socket(paddr.hostNport, reverse_socket)
 
     def remote_acquire_and_get_state(self, dest):
+        #sys.stderr.write("\nENTER REMOTE ACQUIRE\n")
         if not dest.active:
             return (None, FAIL, 0)
 
         header = Header()
         try:
+            print("\n%s:SEND REMOTE ACQUIRE TO %s using %s" % (self.channel_id, dest.id, self.dispatch))
+
             h = Header(LOCKTHREAD_ACQUIRE_LOCK,  dest.id)
             h._source_id = self.channel_id
             self.dispatch.send(dest.hostNport, h)
 
             msg = self.input.pop_reply()
-            
-            header = msg.header
+            if msg == None:
+                header.cmd = LOCKTHREAD_UNAVAILABLE
+            else:
+                header = msg.header
+
         except SocketException:
+            #print "SocketException UNAVAILABLE!"
             header.cmd = LOCKTHREAD_UNAVAILABLE
 
         if header.cmd == LOCKTHREAD_UNAVAILABLE:
@@ -187,11 +218,15 @@ class LockMessenger(object):
             # posted request is disabled.
 
             dest.active = False
+            
+            #sys.stderr.write("\nEXIT REMOTE ACQUIRE FAIL\n")
+
             return (None, FAIL, 0)
 
         if header.cmd != LOCKTHREAD_ACCEPT_LOCK:
             raise Exception("Fatal error!")
 
+        #sys.stderr.write("\nEXIT REMOTE ACQUIRE SUCCESS\n")
         return (header, header.arg, header.seq_number)
 
     def remote_notify(self, source_header, dest, result_ch, result_msg):
@@ -232,7 +267,20 @@ class LockMessenger(object):
                 self.dispatch.reply(source_header, h)
             except SocketException:
                 pass
-    
+
+    def remote_final(self, dest):
+        """
+        Tell remote lock, that this is the last communication
+        """
+        if dest.active:
+            try:
+                h = Header(LOCKTHREAD_QUIT,  dest.id)
+                h._source_id = self.channel_id
+                self.dispatch.send(dest.hostNport, h)
+            except SocketException:
+                pass
+
+        
 
 
 class RemoteLock:
@@ -244,57 +292,53 @@ class RemoteLock:
 
         self.waiting = []
         self.lock_acquired = None
-        self.closing = False
 
     def __repr__(self):
         return repr("<pycsp.protocol.RemoteLock for process id:%s acquired:%s waiting:%s, fn:%s>" % (self.process.id, self.lock_acquired, str(self.waiting), self.process.fn))
 
-    def close(self):
-        self.cond.acquire()
-        self.closing = True
-        while (self.lock_acquired or self.waiting):
-            self.cond.wait()        
-        self.cond.release()
-    
 
     def handle(self, message):        
         header = message.header
 
         # Check id
         if not (self.process.id == header.id):
-            raise Exception("Fatal error!, wrong process ID!")
+            raise Exception("Fatal error!, wrong process ID!")        
 
+        if header.cmd == LOCKTHREAD_QUIT:
+            # May be interleaved with any other messages, as it is only sent when the process
+            # is ready to quit.
+            self.cond.acquire()
+            self.process.state = READYQUIT
+            self.cond.notify()
+            self.cond.release()
 
-        if header.cmd == LOCKTHREAD_ACQUIRE_LOCK:
-            #print("%s ACQUIRE\n" % (self.process.id))
-
+        elif header.cmd == LOCKTHREAD_ACQUIRE_LOCK:
+            #print("\n%s:GOT REMOTE ACQUIRE FROM %s" % (self.process.id, header._source_id))
             if not self.lock_acquired == None:
                 self.waiting.append(message)
             else:
                 self.lock_acquired = header._source_id                
                 # Send reply
                 self.dispatch.reply(header, Header(LOCKTHREAD_ACCEPT_LOCK, header._source_id, self.process.sequence_number, self.process.state))
-                
         elif header.cmd == LOCKTHREAD_NOTIFY_SUCCESS:
             #print("%s NOTIFY\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
                 if self.process.state != READY:
                     raise Exception("PyCSP Panic")
-                        
+    
                 self.process.result_ch, self.process.result_msg = message.payload
                 self.process.state = SUCCESS
                 self.cond.notify()
                 self.cond.release()        
             else:
-                print "'%s','%s'" %(self.lock_acquired, ) 
+                #print "'%s','%s'" %(self.lock_acquired, ) 
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
         elif header.cmd == LOCKTHREAD_POISON:
             #print("%s POISON\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
-                
                 if self.process.state == READY:
                     self.process.state = POISON
                     self.cond.notify()
@@ -306,7 +350,6 @@ class RemoteLock:
             #print("%s RETIRE\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
-                
                 if self.process.state == READY:
                     self.process.state = RETIRE
                     self.cond.notify()
@@ -318,15 +361,12 @@ class RemoteLock:
             #print("%s RELEASE\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.lock_acquired = None
+
                 if self.waiting:
                     self.handle(self.waiting.pop(0))
             else:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
-            if self.closing:
-                self.cond.acquire()
-                self.cond.notify()
-                self.cond.release()
 
 
 class Buffer(object):
@@ -480,6 +520,10 @@ class ChannelHome(object):
         else:
             self.check_termination()
 
+    def leave(self, process_id):
+        self.readqueue  = [x for x in self.readqueue if not x.process.id == process_id]
+        self.writequeue = [x for x in self.writequeue if not x.process.id == process_id]
+                
     def match(self):
         if self.buffer:
             # Buffering is enabled.
@@ -544,7 +588,6 @@ class ChannelHome(object):
 
     def poison_reader(self):
         self.ispoisoned=True
-        
         for p in self.readqueue:
             p.poison()
 
@@ -580,7 +623,8 @@ class ChannelHome(object):
             self.writequeue = []
 
     def retire_reader(self):
-        self.leave_reader()
+        self.readers-=1
+
         #print("%s READERS LEFT %d (retired:%s)" % (self.name, self.readers, str(self.isretired)))
         if not self.isretired:
             if self.readers==0:
@@ -588,10 +632,11 @@ class ChannelHome(object):
                 #print "WRITEQUEUE",self.writequeue
                 for p in self.writequeue:
                     p.retire()                                        
-                self.writequeue = []
+                #self.writequeue = []
                 
     def retire_writer(self):
-        self.leave_writer()
+        self.writers-=1
+
         #print("%s WRITERS LEFT %d (retired:%s)" % (self.name, self.writers, str(self.isretired)))
         if not self.isretired:
             if self.writers==0:
@@ -605,19 +650,13 @@ class ChannelHome(object):
                     #print "READQUEUE",self.readqueue
                     for p in self.readqueue:
                         p.retire()                    
-                    self.readqueue = []
+                    #self.readqueue = []
                 
     def join_reader(self):
         self.readers+=1
 
     def join_writer(self):
         self.writers+=1
-
-    def leave_reader(self):
-        self.readers-=1
-
-    def leave_writer(self):
-        self.writers-=1
 
     def register(self):
         self.channelreferences += 1
@@ -634,7 +673,6 @@ class AddrID(object):
         self.hostNport = addr
         self.id = id
         self.active = True
-        self.reverse_socket = None
     
 
 class ChannelReq(object):
@@ -664,7 +702,9 @@ class ChannelReq(object):
  
     def poison(self):
         try:
+            print("\n%s:REQUESTING LOCK" % self.ch_id)
             conn, state, seq = self.LM.remote_acquire_and_get_state(self.process)
+            print("\n%s:ACQUIRED LOCK" % self.ch_id)
             if seq == self.seq_check:
                 self.LM.remote_poison(conn, self.process)
             #Ignore if sequence is incorrect
@@ -697,6 +737,7 @@ class ChannelReq(object):
         remove_write = False
         remove_read = False
 
+        
         try:
             # Acquire double lock
             if (self.process.id < reader.process.id):
@@ -728,6 +769,7 @@ class ChannelReq(object):
             if (w_state != READY):
                 remove_write = True
 
+            
             # Release double lock
             if (self.process.id < reader.process.id):
                 self.LM.remote_release(r_conn, reader.process)
@@ -735,6 +777,7 @@ class ChannelReq(object):
             else:
                 self.LM.remote_release(w_conn, self.process)
                 self.LM.remote_release(r_conn, reader.process)
+
         except AddrUnavailableException as e:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
@@ -749,8 +792,8 @@ class ChannelReq(object):
             if e.addr == reader.process.hostNport:
                 remove_read = True
 
-            
         return (remove_write, remove_read, success)
+
 
 
 
@@ -787,10 +830,6 @@ class ChannelHomeThread(threading.Thread):
                 self.channel.join_reader()
             elif header.cmd == CHANTHREAD_JOIN_WRITER:
                 self.channel.join_writer()
-            elif header.cmd == CHANTHREAD_LEAVE_READER:
-                self.channel.leave_reader()
-            elif header.cmd == CHANTHREAD_LEAVE_WRITER:
-                self.channel.leave_writer()
             elif header.cmd == CHANTHREAD_RETIRE_READER:
                 self.channel.retire_reader()
             elif header.cmd == CHANTHREAD_RETIRE_WRITER:
@@ -798,6 +837,7 @@ class ChannelHomeThread(threading.Thread):
             elif header.cmd == CHANTHREAD_REGISTER:
                 self.channel.register()
             elif header.cmd == CHANTHREAD_DEREGISTER:
+
                 if self.channel.deregister():
                     #print "SHUTDOWN"
                     # Force shutdown
@@ -815,10 +855,10 @@ class ChannelHomeThread(threading.Thread):
             elif header.cmd == CHANTHREAD_POST_WRITE:
                 (process, msg) = msg.payload
 
-                LM.set_reverse_socket(process)
-                
                 try:
+                    #print "posted write1"
                     self.channel.post_write(ChannelReq(LM, process, header.seq_number, self.channel.name, msg))
+                    #print "posted write2"
                 except ChannelPoisonException:
                     try:                    
                         lock_s, state, seq = LM.remote_acquire_and_get_state(process)
@@ -854,8 +894,6 @@ class ChannelHomeThread(threading.Thread):
             elif header.cmd == CHANTHREAD_POST_READ:
                 process = msg.payload
 
-                LM.set_reverse_socket(process)
-
                 try:
                     self.channel.post_read(ChannelReq(LM, process, header.seq_number, self.channel.name))
                 except ChannelPoisonException:
@@ -875,7 +913,7 @@ class ChannelHomeThread(threading.Thread):
                             sys.stderr.write("PyCSP (poison notification:3) unable to reach process (%s)\n" % str(process))
 
                 except ChannelRetireException:
-                    try:                    
+                    try:
                         lock_s, state, seq = LM.remote_acquire_and_get_state(process)
                         if seq == header.seq_number:
                             if state == READY:
@@ -890,4 +928,16 @@ class ChannelHomeThread(threading.Thread):
                         else:
                             sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
 
+            elif header.cmd == CHANTHREAD_ENTER:
+                paddr,socket = msg.payload
+                if socket:
+                    LM.set_reverse_socket(paddr, socket)
+                # Possible code to register process at channel
+                pass
+
+            elif header.cmd == CHANTHREAD_LEAVE:
+                paddr = msg.payload
+                # Final communication to process. Poison or retire can never come after leave.
+                self.channel.leave(paddr.id)
+                LM.remote_final(paddr)
 

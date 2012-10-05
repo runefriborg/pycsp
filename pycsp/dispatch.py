@@ -34,6 +34,14 @@ class Message:
     def transmit(self, handler, addr):
 
         if not (self.header.cmd & HAS_PAYLOAD):
+            if (self.header.cmd == CHANTHREAD_RETIRE_READER):
+                #print("YSEND RETIRE %s %d" % (self.header.id, self.header.seq_number))
+
+                sock = handler.connect(addr)
+                sock = handler.sendall(sock, self.header)
+                handler.close(addr)
+                return
+
             sock = handler.connect(addr)
             sock = handler.sendall(sock, self.header)
             handler.close(addr)
@@ -129,33 +137,55 @@ class SocketDispatcher(object):
     def getThread(self):
         return self.socketthreaddata
 
-
-
 class QueueBuffer:
     def __init__(self):
         self.normal = []
         self.reply = []
 
         self.lock = threading.Condition()
-        self.waiting = False
+
+        self.waitingR = 0
+        self.timeout = False
+
+        self.waitingN = 0
 
     def __repr__(self):
         return repr("<pycsp.dispatch.QueueBuffer containing normal:%s reply:%s messages>" % (str(self.normal), str(self.reply)))
+
+    def timeout_tick(self):
+        # Check timeout values for waiting
+        # Current setting is two ticks, to timeout
+        # It is the input threads, which invokes the ticks
+        if self.waitingR:
+            print "tick"
+            self.lock.acquire()
+            if self.waitingR:
+                ticks = 2
+                if self.waitingR < ticks:
+                    self.waitingR += 1
+                else:
+                    self.timeout = True
+                    self.lock.notify()
+            self.lock.release()
 
     def pop_normal(self):
 
         # Pre test
         if self.normal:
-            return self.normal.pop(0)
+            obj = self.normal.pop(0)
+            #print("POP:%s id:%s" % (str(obj), str(self.x)))
+            return obj
 
         self.lock.acquire()
         while not self.normal:
-            self.waiting = True
+            self.waitingN = 1
             self.lock.wait()
+            
         obj = self.normal.pop(0)
-        self.waiting = False
+        self.waitingN = 0
         self.lock.release()
 
+        #print("POP:%s id:%s" % (str(obj), str(self.x)))
         return obj        
 
     def pop_reply(self):
@@ -165,26 +195,32 @@ class QueueBuffer:
             return self.reply.pop(0)
 
         self.lock.acquire()
-        while not self.reply:
-            self.waiting = True
-            self.lock.wait()
-        obj = self.reply.pop(0)
-        self.waiting = False
+        while not self.reply and not self.timeout:
+            self.timeout = False
+            self.waitingR = 1
+            self.lock.wait()                
+             
+        if self.timeout:
+            obj = None
+        else:
+            obj = self.reply.pop(0)        
+        self.waitingR = 0
         self.lock.release()
 
         return obj
 
     def put_normal(self, obj):
         self.lock.acquire()
+        #print("PUT:%s waiting:%s id:%s" % (str(obj), str(self.waiting), str(self.x)))
         self.normal.append(obj)
-        if self.waiting:
+        if self.waitingN:
             self.lock.notify()
         self.lock.release()
     
     def put_reply(self, obj):
         self.lock.acquire()
         self.reply.append(obj)
-        if self.waiting:
+        if self.waitingR:
             self.lock.notify()
         self.lock.release()
 
@@ -209,97 +245,106 @@ class SocketThread(threading.Thread):
         handler = ossocket.ConnHandler()
 
         while(not self.finished):
-            ready, _, exceptready = select.select(self.data.active_socket_list, [], [])
-            for s in ready:
-                if s == self.data.server_socket:
-                    conn, _ = self.data.server_socket.accept()
-                    self.data.active_socket_list.append(conn)
-                else:
-                    header = Header()
-                    header.cmd = ERROR_CMD
-                    self.cond.acquire()
-                    try:
-                        s.recv_into(header)
-                    except ossocket.socket.error, (value, message):
-                        if value == 104:
-                            # Connection has been reset
-                            header.cmd = ERROR_CMD
-                            print "OK"
-                        else:
-                            raise
-                    self.cond.release()
-                    if header.cmd == ERROR_CMD:
-                        # connection disconnected
-                        if s in self.data.active_socket_list:
-                            self.data.active_socket_list.remove(s)
-                        s.close()
+            ready, _, exceptready = select.select(self.data.active_socket_list, [], [], 10.0)
+            if not ready and not exceptready:
+                # Timeout. Invoke ticks
+                self.cond.acquire()
+                for c in self.channels.values():
+                    c.timeout_tick()
+                self.cond.release()
+
+            else:
+                for s in ready:
+                    if s == self.data.server_socket:
+                        conn, _ = self.data.server_socket.accept()
+                        self.data.active_socket_list.append(conn)
                     else:
-                        if (header.cmd & HAS_PAYLOAD):
-                            self.cond.acquire()
-                            data = ossocket.recvall(s, header.arg)
-                            self.cond.release()
-                            payload =  pickle.loads(data)
-
-                            # FIREWALL HACK!
-                            if (header.cmd == CHANTHREAD_POST_READ):
-                                payload.reverse_socket= s
-                            elif (header.cmd == CHANTHREAD_POST_WRITE):
-                                payload[0].reverse_socket = s
-                        else:
-                            payload = None
-
-                        m = Message(header, payload)
-
+                        header = Header()
+                        header.cmd = ERROR_CMD
                         self.cond.acquire()
-                        if (header.cmd == SOCKETTHREAD_PING):
-                            if self.data.active_socket_list_add:
-                                self.data.active_socket_list.extend(self.data.active_socket_list_add)
-                                self.data.active_socket_list_add = []
-
-                            
-                        elif (header.cmd == SOCKETTHREAD_SHUTDOWN):
-                            if self.channels or self.processes:
-                                # Socketthread is still busy. Thus ignore and expect a later call to deregister to invoke stopThread.
-                                pass
+                        try:
+                            s.recv_into(header)
+                        except ossocket.socket.error, (value, message):
+                            if value == 104:
+                                # Connection has been reset
+                                header.cmd = ERROR_CMD
+                                #print "OK"
                             else:
-                                self.finished = True
-                                
-                                # Remove thread reference
-                                self.data.thread = None
-                        
-                            # Do not close sockets as the socketthread may be restarted at a later time
-
-                        elif (header.cmd & PROCESS_CMD):
-                            if self.processes.has_key(header.id):
-                                self.processes[header.id].handle(m)
-                            elif (header.cmd & REQ_REPLY):
-                                self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload=None, otherhandler=handler)
-                            elif (header.cmd & IGN_UNKNOWN):
-                                pass
-                            else:
-                                if not self.data.processes_unknown.has_key(header.id):
-                                    self.data.processes_unknown[header.id] = []
-                                self.data.processes_unknown[header.id].append(m)
-                                    
-                        else:
-                            if self.channels.has_key(header.id):                                
-                                if (header.cmd & IS_REPLY):
-                                    self.channels[header.id].put_reply(m)
-                                else:
-                                    self.channels[header.id].put_normal(m)
-                            elif (header.cmd & IGN_UNKNOWN):
-                                pass
-                            else:                                
-                                if not self.data.channels_unknown.has_key(header.id):
-                                    self.data.channels_unknown[header.id] = QueueBuffer()
-
-                                if (header.cmd & IS_REPLY):
-                                    self.data.channels_unknown[header.id].put_reply(m)
-                                else:
-                                    self.data.channels_unknown[header.id].put_normal(m)
+                                raise
                         self.cond.release()
 
-        
+                        if header.cmd == ERROR_CMD:
+                            # connection disconnected
+                            if s in self.data.active_socket_list:
+                                self.data.active_socket_list.remove(s)
+                            s.close()
+                        else:
+                            if (header.cmd & HAS_PAYLOAD):
+                                self.cond.acquire()
+                                data = ossocket.recvall(s, header.arg)
+                                self.cond.release()
+                                payload =  pickle.loads(data)
+                            else:
+                                payload = None
+
+                            if (header.cmd & NATFIX):
+                                # save reverse socket as payload
+                                payload[1] = s
+
+                            m = Message(header, payload)
+
+                            self.cond.acquire()
+                            if (header.cmd == SOCKETTHREAD_PING):
+                                if self.data.active_socket_list_add:
+                                    self.data.active_socket_list.extend(self.data.active_socket_list_add)
+                                    self.data.active_socket_list_add = []
+
+
+                            elif (header.cmd == SOCKETTHREAD_SHUTDOWN):
+                                if self.channels or self.processes:
+                                    # Socketthread is still busy. Thus ignore and expect a later call to deregister to invoke stopThread.
+                                    pass
+                                else:
+                                    self.finished = True
+
+                                    # Remove thread reference
+                                    self.data.thread = None
+
+                                # Do not close sockets as the socketthread may be restarted at a later time
+
+                            elif (header.cmd & PROCESS_CMD):
+                                if (header.cmd == LOCKTHREAD_ACQUIRE_LOCK):
+                                    print("\n%s:(REMOTE) delivering remote acquire to %s using %s" % (header._source_id, header.id, self.data))
+                                if self.processes.has_key(header.id):
+                                    self.processes[header.id].handle(m)                                
+                                elif (header.cmd & REQ_REPLY):
+                                    raise FatalException("A REQ_REPLY message should always be valid!")
+                                elif (header.cmd & IGN_UNKNOWN):
+                                    raise FatalException("IGN_UNKNOWN should never occur!")
+                                else:
+                                    if not self.data.processes_unknown.has_key(header.id):
+                                        self.data.processes_unknown[header.id] = []
+                                    self.data.processes_unknown[header.id].append(m)
+
+                            else:
+                                if self.channels.has_key(header.id):
+                                    if (header.cmd & IS_REPLY):
+                                        self.channels[header.id].put_reply(m)
+                                    else:
+                                        self.channels[header.id].put_normal(m)
+                                elif (header.cmd & IGN_UNKNOWN):
+                                    pass
+                                else:                                
+                                    if not self.data.channels_unknown.has_key(header.id):
+                                        self.data.channels_unknown[header.id] = QueueBuffer()
+
+                                    if (header.cmd & IS_REPLY):
+                                        self.data.channels_unknown[header.id].put_reply(m)
+                                    else:
+                                        self.data.channels_unknown[header.id].put_normal(m)
+                            self.cond.release()
+        print("\n%s quit" % self.data) 
+
         
 class SocketThreadData:
     def __init__(self, cond):
@@ -350,7 +395,7 @@ class SocketThreadData:
                 sock = self.handler.connect(self.server_addr)
                 sock.sendall(h)
                 self.handler.close(sock)
-                print(str(threading.currentThread())+" added socket")
+                #print(str(threading.currentThread())+" added socket")
             self.cond.release()
 
     def startThread(self):
@@ -382,11 +427,10 @@ class SocketThreadData:
         self.cond.acquire()
 
         if self.channels_unknown.has_key(name_id):
-            print "GOT UNKNOWN MESSAGE"
+            #print "GOT UNKNOWN MESSAGE"
             q = self.channels_unknown.pop(name_id)
         else:
             q = QueueBuffer()
-
 
         self.channels[name_id] = q
         if self.thread == None:
@@ -407,6 +451,7 @@ class SocketThreadData:
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()            
         self.cond.release()
+        print("\n### DeregisterChannel\n%s: channels: %s,processes: %s" % (name_id, str(self.channels), str(self.processes)))
 
     def registerProcess(self, name_id, remotelock):
         self.cond.acquire()
@@ -424,21 +469,16 @@ class SocketThreadData:
         self.cond.release()
 
     def deregisterProcess(self, name_id):
-        ok = False
-        rl = self.processes[name_id]
 
-        while (not ok):
-            self.cond.acquire()
-            if rl.lock_acquired or rl.waiting:
-                self.cond.release()
-                rl.close()
-                self.cond.acquire()
-            else:
-                ok = True
-                del self.processes[name_id]
-                if len(self.channels) == 0 and len(self.processes) == 0:
-                    self.stopThread()
-            self.cond.release()
+        self.cond.acquire()
+        del self.processes[name_id]
+        self.cond.release()
+
+        if len(self.channels) == 0 and len(self.processes) == 0:
+            self.stopThread()
+
+        print("\n### DeregisterProcess\n%s: channels: %s,processes: %s" % (name_id, str(self.channels), str(self.processes)))
+
 
     def send(self, addr, header, payload=None, otherhandler=None):
         # Update message source
@@ -450,10 +490,12 @@ class SocketThreadData:
         self.cond.acquire()
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
+                if (header.cmd == LOCKTHREAD_ACQUIRE_LOCK):
+                    print("\n%s:(LOCAL) delivering remote acquire to %s using %s" % (header._source_id, header.id, self))
+
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
-                    #print("%s UNAVAILABLE for channel %s!" % (str(header.id), str(header._source_id)))
                     self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload=None, otherhandler=otherhandler)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
@@ -491,6 +533,7 @@ class SocketThreadData:
     
         # is destination address the same as my own address? 
         self.cond.acquire()
+        print("\n%s in reply to %s" % (header._source_id, header.id))
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
                 if self.processes.has_key(header.id):

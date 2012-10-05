@@ -39,7 +39,7 @@ from configuration import *
 conf = Configuration()
 
 # Decorators
-def multiprocess2(port=None):
+def multiprocess(func=None, port=None):
     """
     @process decorator for creating process functions
 
@@ -50,30 +50,20 @@ def multiprocess2(port=None):
     >>> isinstance(P(), MultiProcess)
     True
     """
-    def wrap_process(func):
+    if func:
         def _call(*args, **kwargs):
+            port = None
             return MultiProcess(func, port, *args, **kwargs)
         _call.func_name = func.func_name
         return _call
-    return wrap_process
+    else:
+        def wrap_process(func):
+            def _call(*args, **kwargs):
+                return MultiProcess(func, port, *args, **kwargs)
+            _call.func_name = func.func_name
+            return _call
+        return wrap_process
 
-# Decorators
-def multiprocess(func):
-    """
-    @process decorator for creating process functions
-
-    >>> @multiprocess(port=8080)
-    ... def P():
-    ...     pass
-
-    >>> isinstance(P(), MultiProcess)
-    True
-    """
-    def _call(*args, **kwargs):
-        port = None
-        return MultiProcess(func, port, *args, **kwargs)
-    _call.func_name = func.func_name
-    return _call
 
 
 # Classes
@@ -87,8 +77,8 @@ class MultiProcess(multiprocessing.Process):
         self.args = args
         self.kwargs = kwargs
 
-        # Create 16 byte unique id based on network address, sequence number and time sample.
-        self.id = uuid.uuid1().hex
+        # Create 64 byte unique id based on network address, sequence number and time sample.
+        self.id = uuid.uuid1().hex + "-" + fn.func_name[:31]
         
 
         # Channel request state
@@ -102,6 +92,8 @@ class MultiProcess(multiprocessing.Process):
         # Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
         if port:
             conf.set(PYCSP_PORT, port)
+
+        self.activeChanList = []
 
     def wait(self):
         self.cond.acquire()
@@ -136,9 +128,37 @@ class MultiProcess(multiprocessing.Process):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
 
+
+
+        # A delay after deregisterProcess does not affect anything, thus the problem must be in 
+        # that method
+ 
+
         # Initiate clean up and waiting for channels to finish outstanding operations.
-        #print("Deregister %s %s\n" % (self.id, self.fn))
+        for channel in self.activeChanList:
+            channel.CM.leave(channel, self)
+
+        # Wait for channels
+        self.cond.acquire()
+        for i in xrange(len(self.activeChanList)):
+            self.state = FAIL
+            while not self.state == READYQUIT:
+                self.cond.wait()
+        self.cond.release()
+
         dispatch.deregisterProcess(self.id)
+
+        # Wait for sub-processes as these may not yet have quit.
+        for processchild in multiprocessing.active_children():
+            processchild.join()
+
+        # Wait for sub-threads as these may not yet have quit. When threads are run in multiprocesses (daemon setting is ignored)
+        skip = threading.currentThread()
+        for threadchild in threading.enumerate():
+            if not threadchild == skip:
+                threadchild.join()
+
+        print("multiprocess done: %s" % self.id)        
 
     def __check_poison(self, args):
         for arg in args:
@@ -172,11 +192,11 @@ class MultiProcess(multiprocessing.Process):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, port=None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, port=None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
