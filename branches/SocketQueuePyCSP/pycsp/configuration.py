@@ -52,7 +52,7 @@ class Configuration(object):
             
             cls.__conf = {
                 SOCKETS_CONNECT_TIMEOUT:2,
-                SOCKETS_CONNECT_RETRY_DELAY:0.1,
+                SOCKETS_CONNECT_RETRY_DELAY:0.2,
                 SOCKETS_BIND_TIMEOUT:2,
                 SOCKETS_BIND_RETRY_DELAY:0.2,
                 SOCKETS_PORT:0,

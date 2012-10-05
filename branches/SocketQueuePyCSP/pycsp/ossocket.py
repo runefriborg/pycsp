@@ -29,7 +29,8 @@ def _connect(addr, reconnect=True):
     connected = False
     t1 = None
     sock = None
-    
+
+    print "connect to", addr
     while (not connected):
         try:
             
@@ -61,6 +62,7 @@ def _connect(addr, reconnect=True):
                 if (time.time()-t1) > conf.get(SOCKETS_CONNECT_TIMEOUT):
                     raise SocketConnectException()
             time.sleep(conf.get(SOCKETS_CONNECT_RETRY_DELAY))
+            print "RETRY"
 
     return sock
 
@@ -84,6 +86,9 @@ def start_server(server_addr=('', 0)):
             # Disable Nagle's algorithem, to enable faster send
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
+            # Enable reuse of sockets in TIME_WAIT state.  
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
             # Bind to address
             sock.bind(server_addr)
             ok = True
@@ -101,7 +106,8 @@ def start_server(server_addr=('', 0)):
                 if (time.time()-t1) > conf.get(SOCKETS_BIND_TIMEOUT):
                     raise SocketBindException()
             time.sleep(conf.get(SOCKETS_BIND_RETRY_DELAY))
-    
+            print "RETRY SERVER"
+
     # Obtain binded addresses
     address = sock.getsockname()
 
@@ -192,7 +198,7 @@ class ConnHandler(object):
             for item in self.cacheSockets.items():
                 if (item[1] == sock):
                     addr = item[0]
-                    forceclose(addr)
+                    self.forceclose(addr)
 
             if addr == None:
                 raise Exception("Fatal error: Could not find cached socket " + str(sock))
@@ -230,13 +236,13 @@ class ConnHandler(object):
                     for item in self.cacheSockets.items():
                         if (item[1] == sock):
                             addr = item[0]
-                            forceclose(addr)
+                            self.forceclose(addr)
 
                     if addr == None:
                         raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
                     # Reconnect
-                    sock = connect(addr)
+                    sock = self.connect(addr)
                     new = True
 
         # Return "possibly new" socket

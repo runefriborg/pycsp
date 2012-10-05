@@ -86,7 +86,7 @@ class Channel(object):
         if self.control:
             self.control._deregister()
 
-    def close(self):
+    def close(self):        
         if self.control:
             self.control._deregister()
             self.control._threadjoin()
@@ -105,11 +105,11 @@ class ChannelControl(object):
 
         # Set name
         if name == None:
-            # Create 16 byte unique name based on network address, sequence number and time sample.
+            # Create 32 byte unique name based on network address, sequence number and time sample.
             self.name = uuid.uuid1().hex
         else:
-            if len(name) > 16:
-                raise Exception("Channel names are limited to 16 characters")
+            if len(name) > 32:
+                raise Exception("Channel names are limited to 32 characters")
 
             self.name=name
 
@@ -151,10 +151,9 @@ class ChannelControl(object):
         self.check_termination()
 
         p,_ = getThreadAndName()
- 
         p.state = READY
         p.sequence_number += 1
-        
+
         self.CM.post_read(self, p)
 
         if p.state == READY:
@@ -220,7 +219,6 @@ class ChannelControl(object):
         """
         self.join(direction=WRITE)
         return ChannelEndWrite(self)
-
 
     def join(self, direction):
         self.CM.join(self, direction)

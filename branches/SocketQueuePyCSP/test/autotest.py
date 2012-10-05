@@ -50,6 +50,7 @@ def sleep_random():
 
 
 def One2One_Test(read_sleeper, write_sleeper):
+    print "before"
     x = Channel()
 
     c1=Channel()
@@ -57,6 +58,7 @@ def One2One_Test(read_sleeper, write_sleeper):
              reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
 
     close(x, c1)
+    print "after"
     
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
     x = Channel("x")
@@ -100,8 +102,8 @@ def autotest():
 
             if not rsleep==wsleep==sleep_one:
                 One2One_Test(rsleep, wsleep)
-                Any2One_Alting_Test(rsleep, wsleep)
-                Any2Any_Test(rsleep, wsleep)
+                #Any2One_Alting_Test(rsleep, wsleep)
+                #Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':
     autotest()

@@ -62,8 +62,8 @@ class Process(threading.Thread):
         self.args = args
         self.kwargs = kwargs
 
-        # Create 16 byte unique id based on network address, sequence number and time sample.
-        self.id = uuid.uuid1().hex
+        # Create 64 byte unique id based on network address, sequence number and time sample.
+        self.id = uuid.uuid1().hex + "-" + fn.func_name[:31]
         
 
         # Channel request state
@@ -73,6 +73,8 @@ class Process(threading.Thread):
         
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1L
+
+        self.activeChanList = []
 
     def wait(self):
         self.cond.acquire()
@@ -100,9 +102,20 @@ class Process(threading.Thread):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
 
+
         # Initiate clean up and waiting for channels to finish outstanding operations.
-        #print("Deregister %s %s\n" % (self.id, self.fn))
+        for channel in self.activeChanList:
+            channel.CM.leave(channel, self)
+        
+        self.cond.acquire()
+        for i in xrange(len(self.activeChanList)):
+            self.state = FAIL
+            while not self.state == READYQUIT:
+                self.cond.wait()
+        self.cond.release()
+
         dispatch.deregisterProcess(self.id)
+        print("process done: %s" % self.id)
 
     def __check_poison(self, args):
         for arg in args:
