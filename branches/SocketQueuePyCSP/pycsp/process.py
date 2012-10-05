@@ -106,7 +106,8 @@ class Process(threading.Thread):
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
             channel.CM.leave(channel, self)
-        
+
+        # Wait for channels        
         self.cond.acquire()
         for i in xrange(len(self.activeChanList)):
             self.state = FAIL

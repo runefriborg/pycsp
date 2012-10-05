@@ -149,6 +149,7 @@ class ChannelMessenger(object):
         """
         self.restore()
 
+        
         try:
             self.dispatch.send(channel.channelhome,
                                Header(CHANTHREAD_ENTER, channel.name),

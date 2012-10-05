@@ -23,14 +23,14 @@ def reader(cin, id,  sleeper, assertCheck=None):
         if assertCheck:
             assertCheck(id)
     
-@multiprocess
+@process
 def writer(cout, id, cnt, sleeper):
     try:
         for i in range(cnt):
             if sleeper: sleeper()
             cout((id, i))
         print('writer1 %d' % id)
-        poison(cout)
+        retire(cout)
         print('writer2 %d' % id)
         
     except ChannelRetireException:
@@ -111,8 +111,10 @@ def Any2Any_Test(read_sleeper, write_sleeper):
     
 
 def autotest():
-    for read_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
-        for write_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
+    #for read_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
+    #    for write_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
+    for read_sleep in [('Random',sleep_random)]:
+        for write_sleep in [('Random',sleep_random)]:
             rname, rsleep = read_sleep
             wname, wsleep = write_sleep
 

@@ -299,7 +299,6 @@ class SocketThread(threading.Thread):
                                     self.data.active_socket_list.extend(self.data.active_socket_list_add)
                                     self.data.active_socket_list_add = []
 
-
                             elif (header.cmd == SOCKETTHREAD_SHUTDOWN):
                                 if self.channels or self.processes:
                                     # Socketthread is still busy. Thus ignore and expect a later call to deregister to invoke stopThread.
@@ -325,7 +324,6 @@ class SocketThread(threading.Thread):
                                     if not self.data.processes_unknown.has_key(header.id):
                                         self.data.processes_unknown[header.id] = []
                                     self.data.processes_unknown[header.id].append(m)
-
                             else:
                                 if self.channels.has_key(header.id):
                                     if (header.cmd & IS_REPLY):
@@ -351,6 +349,7 @@ class SocketThreadData:
 
         self.channels = {}
         self.processes = {}
+        self.guards = {}
 
         # Unknown messages, which is moved to known messages, if a channel or processes with a matching name registers.
         # TODO: This must be capped.
@@ -441,17 +440,38 @@ class SocketThreadData:
 
     def getChannelQueue(self, name_id):
         self.cond.acquire()
-        q = self.channels[name_id]
+        if self.channels.has_key(name_id):
+            q = self.channels[name_id]
+        else:
+            q = self.guards[name_id]
         self.cond.release()
         return q
 
     def deregisterChannel(self, name_id):
         self.cond.acquire()
-        del self.channels[name_id]
+        if self.channels.has_key(name_id):
+            del self.channels[name_id]
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()            
         self.cond.release()
         print("\n### DeregisterChannel\n%s: channels: %s,processes: %s" % (name_id, str(self.channels), str(self.processes)))
+
+    def registerGuard(self, name_id):
+        self.cond.acquire()
+
+        self.guards[name_id] = QueueBuffer()
+        if self.thread == None:
+            self.startThread()
+
+        self.cond.release()
+
+    def deregisterGuard(self, name_id):
+        self.cond.acquire()
+        if self.guards.has_key(name_id):
+            del self.guards[name_id]
+        if len(self.channels) == 0 and len(self.processes) == 0:
+            self.stopThread()            
+        self.cond.release()
 
     def registerProcess(self, name_id, remotelock):
         self.cond.acquire()
@@ -490,6 +510,7 @@ class SocketThreadData:
         self.cond.acquire()
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
+                # Process message
                 if (header.cmd == LOCKTHREAD_ACQUIRE_LOCK):
                     print("\n%s:(LOCAL) delivering remote acquire to %s using %s" % (header._source_id, header.id, self))
 
@@ -503,7 +524,11 @@ class SocketThreadData:
                     if not self.processes_unknown.has_key(header.id):
                         self.processes_unknown[header.id] = []
                     self.processes_unknown[header.id].append(m)
+            elif (header.cmd & GUARD_CMD and self.guards.has_key(header.id)):
+                # Guard message
+                raise FatalException("Guard should never receive a normal message")
             else:
+                # Channel message
                 if self.channels.has_key(header.id):
                     self.channels[header.id].put_normal(m)
                 elif (header.cmd & IGN_UNKNOWN):
@@ -536,6 +561,7 @@ class SocketThreadData:
         print("\n%s in reply to %s" % (header._source_id, header.id))
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
+                # Process message
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
                 elif (header.cmd & IGN_UNKNOWN):
@@ -544,7 +570,11 @@ class SocketThreadData:
                     if not self.processes_unknown.has_key(header.id):
                         self.processes_unknown[header.id] = []
                     self.processes_unknown[header.id].append(m)
+            elif (header.cmd & GUARD_CMD and self.guards.has_key(header.id)):
+                # Guard message
+                self.guards[header.id].put_reply(m)
             else:
+                # Channel message
                 if self.channels.has_key(header.id):
                     self.channels[header.id].put_reply(m)
                 elif (header.cmd & IGN_UNKNOWN):
