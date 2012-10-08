@@ -29,6 +29,8 @@ def producer(cout, cnt):
     
 @process
 def worker(cin, cout):
+    child_channel = None
+
     try:
         ccout=None
         my_prime=cin()
@@ -45,6 +47,9 @@ def worker(cin, cout):
             poison(ccout)
         else:
             poison(cout)
+
+    if child_channel:
+        close(child_channel)
 
 @process
 def printer(cin):

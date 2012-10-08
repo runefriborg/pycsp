@@ -23,20 +23,12 @@ def reader(cin, id,  sleeper, assertCheck=None):
         if assertCheck:
             assertCheck(id)
     
-@process
+@multiprocess
 def writer(cout, id, cnt, sleeper):
-    try:
-        for i in range(cnt):
-            if sleeper: sleeper()
-            cout((id, i))
-        print('writer1 %d' % id)
-        retire(cout)
-        print('writer2 %d' % id)
-        
-    except ChannelRetireException:
-        print('retired! %d' % id)
-        raise
-
+    for i in range(cnt):
+        if sleeper: sleeper()
+        cout((id, i))
+    retire(cout)
 
 
 @multiprocess
@@ -44,7 +36,7 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
     while True:
         if sleeper: sleeper()
 
-        print AltSelect(
+        AltSelect(
             InputGuard(cin1, action(assertCheck, 0)),
             InputGuard(cin2, action(assertCheck, 1)),
             InputGuard(cin3, action(assertCheck, 2)),
@@ -69,24 +61,17 @@ def One2One_Test(read_sleeper, write_sleeper):
     
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
-    print "before"
-    x = Channel("x")
+    x = Channel()
 
-    c1=Channel("c1")
-    c2=Channel("c2")
-    c3=Channel("c3")
-    c4=Channel("c4")
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 5
 
-    #Parallel(check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True),
-    #         par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
-    #         writer(c1.writer(),0,cnt, write_sleeper),
-    #         writer(c2.writer(),1,cnt, write_sleeper),
-    #         writer(c3.writer(),2,cnt, write_sleeper),
-    #         writer(c4.writer(),3,cnt, write_sleeper))
-
-    Parallel(par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper),
+    Parallel(check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True),
+             par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
              writer(c1.writer(),0,cnt, write_sleeper),
              writer(c2.writer(),1,cnt, write_sleeper),
              writer(c3.writer(),2,cnt, write_sleeper),
@@ -94,7 +79,6 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
     close(x, c1, c2, c3, c4)
     
-    print "after"
 
 def Any2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
@@ -111,10 +95,8 @@ def Any2Any_Test(read_sleeper, write_sleeper):
     
 
 def autotest():
-    #for read_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
-    #    for write_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
-    for read_sleep in [('Random',sleep_random)]:
-        for write_sleep in [('Random',sleep_random)]:
+    for read_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
+        for write_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
             rname, rsleep = read_sleep
             wname, wsleep = write_sleep
 
