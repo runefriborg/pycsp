@@ -22,7 +22,7 @@ def sleep_long_random():
     time.sleep(random.random()*2)
 
 
-@process
+@multiprocess
 def writer(cout, id, cnt, sleeper):
     for i in range(cnt):
         if sleeper: sleeper()

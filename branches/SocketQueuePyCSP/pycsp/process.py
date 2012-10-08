@@ -75,6 +75,7 @@ class Process(threading.Thread):
         self.sequence_number = 1L
 
         self.activeChanList = []
+        self.closedChanList = []
 
     def wait(self):
         self.cond.acquire()
@@ -103,17 +104,23 @@ class Process(threading.Thread):
             self.__check_retire(self.kwargs.values())
 
 
+        print("process done1: %s" % self.id)
+
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
             channel.CM.leave(channel, self)
 
+        print("process done2: %s" % self.id)
+
         # Wait for channels        
         self.cond.acquire()
-        for i in xrange(len(self.activeChanList)):
-            self.state = FAIL
-            while not self.state == READYQUIT:
-                self.cond.wait()
+        X = len(self.activeChanList)
+        while len(self.closedChanList) < X:
+            self.cond.wait()
         self.cond.release()
+
+        print("process done3: %s" % self.id)
+
 
         dispatch.deregisterProcess(self.id)
         print("process done: %s" % self.id)
