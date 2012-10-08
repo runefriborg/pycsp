@@ -30,7 +30,6 @@ def _connect(addr, reconnect=True):
     t1 = None
     sock = None
 
-    print "connect to", addr
     while (not connected):
         try:
             
@@ -44,6 +43,7 @@ def _connect(addr, reconnect=True):
 
             # Connect to addr
             sock.connect(addr)
+
             connected = True
         except socket.error, (value,message):
             if not reconnect:

@@ -90,8 +90,7 @@ class MultiProcess(multiprocessing.Process):
         self.sequence_number = 1L
 
         # Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
-        if port:
-            conf.set(PYCSP_PORT, port)
+        self.port = port
 
         self.activeChanList = []
         self.closedChanList = []
@@ -107,7 +106,9 @@ class MultiProcess(multiprocessing.Process):
         # Multiprocessing inherits global objects like singletons. Thus we must reset!
         # Reset SocketDispatcher Singleton object to force the creation of a new
         # SocketDispatcher
-        
+
+        if self.port != None:
+            conf.set(PYCSP_PORT, self.port)
         SocketDispatcher(reset=True)
 
         # Create remote lock
@@ -192,11 +193,11 @@ class MultiProcess(multiprocessing.Process):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
