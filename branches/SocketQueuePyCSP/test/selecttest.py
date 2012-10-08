@@ -75,6 +75,8 @@ def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
              writer(-c3,2,cnt, write_sleeper),
              writer(-c4,3,cnt, write_sleeper))
 
+    close(c1,c2,c3,c4)
+
 if __name__ == '__main__':
     print "Any2One_Alting_Test - AltSelect"
     Any2One_Alting_Test(par_reader, sleep_random, sleep_random)
