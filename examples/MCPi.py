@@ -12,7 +12,7 @@ def producer(job_out, bagsize, bags):
    for i in range(bags): job_out(bagsize)
    retire(job_out)
 
-@multiprocess
+@process
 def worker(job_in, result_out):
    while True:
        cnt=job_in()           #Get task

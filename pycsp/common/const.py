@@ -21,7 +21,7 @@ ENABLE_CACHE = 1
 READ, WRITE = range(2)
 
 # Constants used for both ChannelReq results and ReqStatus states.
-READY, FAIL, SUCCESS, POISON, RETIRE, READYQUIT = range(6)
+READY, FAIL, SUCCESS, POISON, RETIRE = range(5)
 
 
 def getThreadAndName():

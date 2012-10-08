@@ -197,7 +197,7 @@ class LockMessenger(object):
 
         header = Header()
         try:
-            print("\n%s:SEND REMOTE ACQUIRE TO %s using %s" % (self.channel_id, dest.id, self.dispatch))
+            #print("\n%s:SEND REMOTE ACQUIRE TO %s using %s" % (self.channel_id, dest.id, self.dispatch))
 
             h = Header(LOCKTHREAD_ACQUIRE_LOCK,  dest.id)
             h._source_id = self.channel_id
@@ -309,7 +309,7 @@ class RemoteLock:
             # May be interleaved with any other messages, as it is only sent when the process
             # is ready to quit.
             self.cond.acquire()
-            self.process.state = READYQUIT
+            self.process.closedChanList.append(header._source_id)
             self.cond.notify()
             self.cond.release()
 
@@ -703,9 +703,9 @@ class ChannelReq(object):
  
     def poison(self):
         try:
-            print("\n%s:REQUESTING LOCK" % self.ch_id)
+            #print("\n%s:REQUESTING LOCK" % self.ch_id)
             conn, state, seq = self.LM.remote_acquire_and_get_state(self.process)
-            print("\n%s:ACQUIRED LOCK" % self.ch_id)
+            #print("\n%s:ACQUIRED LOCK" % self.ch_id)
             if seq == self.seq_check:
                 self.LM.remote_poison(conn, self.process)
             #Ignore if sequence is incorrect

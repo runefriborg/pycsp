@@ -312,8 +312,6 @@ class SocketThread(threading.Thread):
                                 # Do not close sockets as the socketthread may be restarted at a later time
 
                             elif (header.cmd & PROCESS_CMD):
-                                if (header.cmd == LOCKTHREAD_ACQUIRE_LOCK):
-                                    print("\n%s:(REMOTE) delivering remote acquire to %s using %s" % (header._source_id, header.id, self.data))
                                 if self.processes.has_key(header.id):
                                     self.processes[header.id].handle(m)                                
                                 elif (header.cmd & REQ_REPLY):
@@ -341,7 +339,6 @@ class SocketThread(threading.Thread):
                                     else:
                                         self.data.channels_unknown[header.id].put_normal(m)
                             self.cond.release()
-        print("\n%s quit" % self.data) 
 
         
 class SocketThreadData:
@@ -454,7 +451,7 @@ class SocketThreadData:
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()            
         self.cond.release()
-        print("\n### DeregisterChannel\n%s: channels: %s,processes: %s" % (name_id, str(self.channels), str(self.processes)))
+        #print("\n### DeregisterChannel\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
 
     def registerGuard(self, name_id):
         self.cond.acquire()
@@ -472,6 +469,7 @@ class SocketThreadData:
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()            
         self.cond.release()
+        #print("\n### DeregisterGuard\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
 
     def registerProcess(self, name_id, remotelock):
         self.cond.acquire()
@@ -497,7 +495,7 @@ class SocketThreadData:
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()
 
-        print("\n### DeregisterProcess\n%s: channels: %s,processes: %s" % (name_id, str(self.channels), str(self.processes)))
+        #print("\n### DeregisterProcess\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
 
 
     def send(self, addr, header, payload=None, otherhandler=None):
@@ -511,9 +509,6 @@ class SocketThreadData:
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
                 # Process message
-                if (header.cmd == LOCKTHREAD_ACQUIRE_LOCK):
-                    print("\n%s:(LOCAL) delivering remote acquire to %s using %s" % (header._source_id, header.id, self))
-
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
@@ -558,7 +553,6 @@ class SocketThreadData:
     
         # is destination address the same as my own address? 
         self.cond.acquire()
-        print("\n%s in reply to %s" % (header._source_id, header.id))
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
                 # Process message

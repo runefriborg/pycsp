@@ -94,6 +94,7 @@ class MultiProcess(multiprocessing.Process):
             conf.set(PYCSP_PORT, port)
 
         self.activeChanList = []
+        self.closedChanList = []
 
     def wait(self):
         self.cond.acquire()
@@ -138,12 +139,11 @@ class MultiProcess(multiprocessing.Process):
         for channel in self.activeChanList:
             channel.CM.leave(channel, self)
 
-        # Wait for channels
+        # Wait for channels        
         self.cond.acquire()
-        for i in xrange(len(self.activeChanList)):
-            self.state = FAIL
-            while not self.state == READYQUIT:
-                self.cond.wait()
+        X = len(self.activeChanList)
+        while len(self.closedChanList) < X:
+            self.cond.wait()
         self.cond.release()
 
         dispatch.deregisterProcess(self.id)
@@ -192,11 +192,11 @@ class MultiProcess(multiprocessing.Process):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, port=None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, port=None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, None, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
