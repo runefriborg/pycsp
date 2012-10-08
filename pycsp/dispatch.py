@@ -34,15 +34,9 @@ class Message:
     def transmit(self, handler, addr):
 
         if not (self.header.cmd & HAS_PAYLOAD):
-            if (self.header.cmd == CHANTHREAD_RETIRE_READER):
-                #print("YSEND RETIRE %s %d" % (self.header.id, self.header.seq_number))
-
-                sock = handler.connect(addr)
-                sock = handler.sendall(sock, self.header)
-                handler.close(addr)
-                return
 
             sock = handler.connect(addr)
+            
             sock = handler.sendall(sock, self.header)
             handler.close(addr)
 
@@ -60,8 +54,7 @@ class Message:
             handler.close(addr)
 
             # FIREWALL HACK Update SocketThread with new sock
-            if (self.header.cmd == CHANTHREAD_POST_READ or
-                self.header.cmd == CHANTHREAD_POST_WRITE):
+            if (self.header.cmd == CHANTHREAD_ENTER):
                 SocketDispatcher().getThread().add_to_active_socket_list(sock)
             
 
@@ -380,6 +373,7 @@ class SocketThreadData:
             return False
 
     def add_reverse_socket(self, addr, sock):
+        #print "added", addr, sock
         self.handler.updateCache(addr, sock)
         
     def add_to_active_socket_list(self, sock):
@@ -388,6 +382,7 @@ class SocketThreadData:
             if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
                 self.active_socket_list_add.append(sock)
                 h = Header(SOCKETTHREAD_PING)
+                # This connection is made only to the local server
                 sock = self.handler.connect(self.server_addr)
                 sock.sendall(h)
                 self.handler.close(sock)
@@ -406,6 +401,7 @@ class SocketThreadData:
         self.cond.acquire()
         if not self.thread == None:
             h = Header(SOCKETTHREAD_SHUTDOWN)
+            # This connection is made only to the local server
             sock = ossocket.connectNOcache(self.server_addr)
             sock.sendall(h)
             ossocket.closeNOcache(sock)
@@ -501,7 +497,7 @@ class SocketThreadData:
     def send(self, addr, header, payload=None, otherhandler=None):
         # Update message source
         header._source_host, header._source_port = self.server_addr
-        
+
         m = Message(header, payload)
         
         # is destination address the same as my own address? 
@@ -542,7 +538,7 @@ class SocketThreadData:
 
     def reply(self, source_header, header, payload=None, otherhandler=None):
         addr = (source_header._source_host, source_header._source_port)
-        
+
         # Update message source
         header._source_host, header._source_port = self.server_addr        
 

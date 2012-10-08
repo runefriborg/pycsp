@@ -934,7 +934,6 @@ class ChannelHomeThread(threading.Thread):
                 if socket:
                     LM.set_reverse_socket(paddr, socket)
                 # Possible code to register process at channel
-                pass
 
             elif header.cmd == CHANTHREAD_LEAVE:
                 paddr = msg.payload
