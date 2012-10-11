@@ -31,19 +31,24 @@ class Message:
         self.header = header
         self.payload = payload 
 
+        # transport for natfix
+        self.natfix = None
+
     def transmit(self, handler, addr):
 
         if not (self.header.cmd & HAS_PAYLOAD):
 
             sock = handler.connect(addr)
-            
             sock = handler.sendall(sock, self.header)
             handler.close(addr)
+
+            # NATFIX Update SocketThread with new sock
+            if (self.header.cmd == CHANTHREAD_ENTER):
+                SocketDispatcher().getThread().add_to_active_socket_list(sock)
 
         else:
             payload_bin_data = pickle.dumps(self.payload, protocol = PICKLE_PROTOCOL)
             self.header.arg = len(payload_bin_data)
-            
             
             # Connect or fetch connected socket
             sock = handler.connect(addr)            
@@ -51,12 +56,7 @@ class Message:
             # Send header and payload
             sock = handler.sendall(sock, self.header)
             handler.sendallNOreconnect(sock, payload_bin_data)
-            handler.close(addr)
-
-            # FIREWALL HACK Update SocketThread with new sock
-            if (self.header.cmd == CHANTHREAD_ENTER):
-                SocketDispatcher().getThread().add_to_active_socket_list(sock)
-            
+            handler.close(addr)            
 
     def __repr__(self):
         return repr("<pycsp.dispatch.Message cmd:%s>" % (cmd2str(self.header.cmd)))
@@ -280,11 +280,12 @@ class SocketThread(threading.Thread):
                             else:
                                 payload = None
 
-                            if (header.cmd & NATFIX):
-                                # save reverse socket as payload
-                                payload[1] = s
 
                             m = Message(header, payload)
+
+                            if (header.cmd & NATFIX):
+                                # save reverse socket as payload
+                                m.natfix = s
 
                             self.cond.acquire()
                             if (header.cmd == SOCKETTHREAD_PING):

@@ -101,8 +101,9 @@ class ChannelControl(object):
         # Register this channel control reference at the channel home thread
         # and at the current process. The current process will call deregister,
         # upon exit.
-        self._register()        
+        self._register()
         p,_ = getThreadAndName()
+        
         p.registeredChanList.append(self)
 
 
@@ -280,7 +281,6 @@ class ChannelEnd:
     # Also, the total number of namespace_references should be kept constant after
     # a __getstate__ and a _restore
     def __getstate__(self):
-        print "getstate!"
         odict = self.__dict__
         
         odict['restore_info'] = (self.channel.channelhome, self.channel.name)
@@ -291,11 +291,10 @@ class ChannelEnd:
         return odict
 
     def __setstate__(self, dict):
-        print "SETstate!"
         self.__dict__.update(dict)
 
         # restore ChannelControl immediately, as the receiving end must register a new channel control, before
-        # executiong is given back to the calling process
+        # execution is given back to the calling process
         try:
             self.channel = ChannelControl(name=self.restore_info[1], connect=self.restore_info[0])
         except SocketBindException as e:

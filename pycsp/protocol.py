@@ -120,8 +120,7 @@ class ChannelMessenger(object):
 
         try:
             self.dispatch.send(channel.channelhome,
-                                        Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number),
-                                        AddrID(process.addr, process.id))
+                                        Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number, _source_id=process.id))
         except SocketException:
             # Unable to post read request to channel home thread
             raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
@@ -136,8 +135,7 @@ class ChannelMessenger(object):
             
         try:
             self.dispatch.send(channel.channelhome,
-                                        Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number),
-                                        (AddrID(process.addr, process.id), msg))
+                                        Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=msg)
         except SocketException:
             # Unable to post read request to channel home thread
             raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
@@ -152,9 +150,8 @@ class ChannelMessenger(object):
         
         try:
             self.dispatch.send(channel.channelhome,
-                               Header(CHANTHREAD_ENTER, channel.name),
-                               [AddrID(process.addr, process.id), None])
-            # None is the container for the reverse socket. Updated at the destination dispatch thread
+                               Header(CHANTHREAD_ENTER, channel.name, _source_id=process.id))
+            # The reverse socket is added to the message at the destination dispatch thread
 
         except SocketException:
             # Unable to enter channel
@@ -168,8 +165,7 @@ class ChannelMessenger(object):
 
         try:
             self.dispatch.send(channel.channelhome,
-                               Header(CHANTHREAD_LEAVE, channel.name),
-                               AddrID(process.addr, process.id))
+                               Header(CHANTHREAD_LEAVE, channel.name, _source_id=process.id))
 
         except SocketException:
             # Unable to decrement writer count on channel
@@ -187,8 +183,8 @@ class LockMessenger(object):
         self.channel_id = channel_id
         self.input = self.dispatch.getChannelQueue(channel_id)
 
-    def set_reverse_socket(self, paddr, reverse_socket):
-        self.dispatch.add_reverse_socket(paddr.hostNport, reverse_socket)
+    def set_reverse_socket(self, addr, reverse_socket):
+        self.dispatch.add_reverse_socket(addr, reverse_socket)
 
     def remote_acquire_and_get_state(self, dest):
         #sys.stderr.write("\nENTER REMOTE ACQUIRE\n")
@@ -854,7 +850,8 @@ class ChannelHomeThread(threading.Thread):
                 self.channel.poison_writer()
 
             elif header.cmd == CHANTHREAD_POST_WRITE:
-                (process, msg) = msg.payload
+                process = AddrID((header._source_host, header._source_port), header._source_id)
+                msg = msg.payload
 
                 try:
                     #print "posted write1"
@@ -893,7 +890,7 @@ class ChannelHomeThread(threading.Thread):
                             sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
 
             elif header.cmd == CHANTHREAD_POST_READ:
-                process = msg.payload
+                process = AddrID((header._source_host, header._source_port), header._source_id)
 
                 try:
                     self.channel.post_read(ChannelReq(LM, process, header.seq_number, self.channel.name))
@@ -930,13 +927,14 @@ class ChannelHomeThread(threading.Thread):
                             sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
 
             elif header.cmd == CHANTHREAD_ENTER:
-                paddr,socket = msg.payload
+                socket = msg.natfix
+                addr = (header._source_host, header._source_port)
                 if socket:
-                    LM.set_reverse_socket(paddr, socket)
+                    LM.set_reverse_socket(addr, socket)
                 # Possible code to register process at channel
 
             elif header.cmd == CHANTHREAD_LEAVE:
-                paddr = msg.payload
+                paddr = AddrID((header._source_host, header._source_port), header._source_id)
                 # Final communication to process. Poison or retire can never come after leave.
                 self.channel.leave(paddr.id)
                 LM.remote_final(paddr)
