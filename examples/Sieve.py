@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 from pycsp_import import *
 
-@multiprocess
+@process
 def producer(cout, cnt):
     for i in range(2,cnt):
         cout(i)
@@ -48,8 +48,7 @@ def worker(cin, cout):
         else:
             poison(cout)
 
-    if child_channel:
-        close(child_channel)
+
 
 @process
 def printer(cin):
@@ -60,11 +59,10 @@ def printer(cin):
 first=Channel()
 outc=Channel()
 
-Parallel(producer(first.writer(),1000),
+Parallel(producer(first.writer(),100),
          worker(first.reader(), outc.writer()),
          printer(outc.reader()))
 
-close(first, outc)
 
 shutdown()
 

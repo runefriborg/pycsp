@@ -55,10 +55,10 @@ def Consumer(cin):
 
 def CommsTimeBM():
     # Create channels
-    a = Channel("a", buffer=100000)
-    b = Channel("b", buffer=100000)
-    c = Channel("c", buffer=100000)
-    d = Channel("d", buffer=100000)
+    a = Channel(buffer=100000)
+    b = Channel(buffer=100000)
+    c = Channel(buffer=100000)
+    d = Channel(buffer=100000)
 
     print "Running commstime test"
     Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
@@ -73,3 +73,4 @@ for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
     CommsTimeBM()
 
+shutdown()

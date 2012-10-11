@@ -11,8 +11,7 @@ See LICENSE.txt for licensing details (MIT License).
 from guard import Skip, SkipGuard, Timeout, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
-from channel import Channel, close
-from channelend import retire, poison
+from channel import Channel, retire, poison
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id, init, shutdown
 from multiprocess import MultiProcess, multiprocess
 from exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException

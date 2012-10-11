@@ -62,10 +62,10 @@ def par_reader_fair(cin1,cin2,cin3,cin4, cnt, sleeper):
 
 
 def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     
@@ -75,7 +75,6 @@ def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
              writer(-c3,2,cnt, write_sleeper),
              writer(-c4,3,cnt, write_sleeper))
 
-    close(c1,c2,c3,c4)
 
 if __name__ == '__main__':
     print "Any2One_Alting_Test - AltSelect"

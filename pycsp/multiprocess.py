@@ -31,8 +31,7 @@ import multiprocessing
 
 from dispatch import SocketDispatcher
 from protocol import RemoteLock
-from channel import ChannelPoisonException, Channel
-from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite
+from channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
 from configuration import *
         
@@ -92,6 +91,13 @@ class MultiProcess(multiprocessing.Process):
         # Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
         self.port = port
 
+        # Protect against early termination of mother-processes leavings childs in an invalid state
+        self.spawned = []
+
+        # Protect against early termination of channelhomes leaving processes in an invalid state
+        self.registeredChanList = []
+
+        # Protect against early termination of processes leaving channelhomes in an invalid state
         self.activeChanList = []
         self.closedChanList = []
 
@@ -130,11 +136,9 @@ class MultiProcess(multiprocessing.Process):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
 
-
-
-        # A delay after deregisterProcess does not affect anything, thus the problem must be in 
-        # that method
- 
+        # Join spawned processes
+        for p in self.spawned:
+            p.join()
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
@@ -149,6 +153,13 @@ class MultiProcess(multiprocessing.Process):
 
         dispatch.deregisterProcess(self.id)
 
+        # Deregister namespace references
+        for chan in self.registeredChanList:
+            chan._deregister()
+
+        for chan in self.registeredChanList:
+            chan._threadjoin()
+
         # Wait for sub-processes as these may not yet have quit.
         for processchild in multiprocessing.active_children():
             processchild.join()
@@ -159,7 +170,6 @@ class MultiProcess(multiprocessing.Process):
             if not threadchild == skip:
                 threadchild.join()
 
-        print("multiprocess done: %s" % self.id)        
 
     def __check_poison(self, args):
         for arg in args:

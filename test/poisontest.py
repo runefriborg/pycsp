@@ -118,10 +118,10 @@ def Any2Any_Test(read_sleeper, write_sleeper):
 def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()
 
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     Parallel(check.Assert(x.reader(), "Any_Alting2Any_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=80, minimum=40, vocabulary=[0,1,2,3]),
