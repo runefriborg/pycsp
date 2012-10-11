@@ -231,7 +231,8 @@ class LockMessenger(object):
             try:
                 h = Header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id)
                 h._source_id = self.channel_id
-                self.dispatch.reply(source_header, h, payload=(result_ch,result_msg))
+                h._result_id = result_ch
+                self.dispatch.reply(source_header, h, payload=result_msg)
             except SocketException:
                 raise AddrUnavailableException(dest)
 
@@ -324,7 +325,8 @@ class RemoteLock:
                 if self.process.state != READY:
                     raise Exception("PyCSP Panic")
     
-                self.process.result_ch, self.process.result_msg = message.payload
+                self.process.result_ch = header._result_id 
+                self.process.result_msg = message.payload
                 self.process.state = SUCCESS
                 self.cond.notify()
                 self.cond.release()        
