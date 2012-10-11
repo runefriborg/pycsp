@@ -9,7 +9,7 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import inspect
 import types
-#from channel import *
+import cPickle as pickle
 from guard import Guard
 from exceptions import *
 from pycsp.common.const import *
@@ -199,7 +199,18 @@ class Alternation:
                 print 'We should not get here in choice!!!'
 
         idx, op = reqs[act]
-        return (idx, act, p.result_msg, op)
+
+        # unpickle msg
+        msg = p.result_msg
+        if type(msg) == list:
+            msg = msg[0]
+        else:
+            if msg == "":
+                msg = None
+            else:
+                msg = pickle.loads(msg)[0]
+
+        return (idx, act, msg, op)
 
     def execute(self):
         """

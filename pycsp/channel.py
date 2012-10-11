@@ -7,6 +7,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 # Imports
 import uuid
+import cPickle as pickle
 import protocol
 from exceptions import *
 from pycsp.common.const import *
@@ -136,7 +137,13 @@ class ChannelControl(object):
             p.wait()
 
         if p.state == SUCCESS:
-            return p.result_msg                
+            # unpickle msg
+            msg = p.result_msg
+            if type(msg) == list:
+                return msg[0]
+            else:
+                return pickle.loads(msg)[0]
+
         elif p.state == POISON:
             self.ispoisoned = True
         elif p.state == RETIRE:

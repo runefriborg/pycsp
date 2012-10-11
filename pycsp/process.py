@@ -352,7 +352,6 @@ def init():
         pass
 
     if run:
-        print "running main init"
         main_proc.id = uuid.uuid1().hex + "-__main__"
         main_proc.fn = None
         main_proc.state = FAIL

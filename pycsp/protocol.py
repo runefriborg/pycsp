@@ -135,7 +135,7 @@ class ChannelMessenger(object):
             
         try:
             self.dispatch.send(channel.channelhome,
-                                        Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=msg)
+                               Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=[msg])
         except SocketException:
             # Unable to post read request to channel home thread
             raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
@@ -226,7 +226,7 @@ class LockMessenger(object):
         #sys.stderr.write("\nEXIT REMOTE ACQUIRE SUCCESS\n")
         return (header, header.arg, header.seq_number)
 
-    def remote_notify(self, source_header, dest, result_ch, result_msg):
+    def remote_notify(self, source_header, dest, result_ch, result_msg=""):
         if dest.active:
             try:
                 h = Header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id)
@@ -326,7 +326,10 @@ class RemoteLock:
                     raise Exception("PyCSP Panic")
     
                 self.process.result_ch = header._result_id 
+                
+                # The unpickling must be postponed to the @process
                 self.process.result_msg = message.payload
+
                 self.process.state = SUCCESS
                 self.cond.notify()
                 self.cond.release()        
@@ -398,7 +401,7 @@ class Buffer(object):
 
                 if (w_state == READY):
                     self.items.append(writer.msg)
-                    self.LM.remote_notify(w_conn, writer.process, writer.ch_id, None)
+                    self.LM.remote_notify(w_conn, writer.process, writer.ch_id)
                     success = True
 
                     w_state = SUCCESS
@@ -755,7 +758,7 @@ class ChannelReq(object):
             # Success?
             if (r_state == READY and w_state == READY):
                 self.LM.remote_notify(r_conn, reader.process, reader.ch_id, self.msg)
-                self.LM.remote_notify(w_conn, self.process, self.ch_id, None)
+                self.LM.remote_notify(w_conn, self.process, self.ch_id)
                 
                 success = True
 

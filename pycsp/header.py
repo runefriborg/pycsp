@@ -85,11 +85,13 @@ def cmd2str(cmd):
 
 class Header(ctypes.Structure):
     """
-    cmd : type of package
-    id : string, uuid1 in bytes format
-    seq_number : sequence number used for ignoring channel requests, that was left behind.
-    arg : may contain the payload size following this header or a payload of a single value (long)
+    cmd          : type of package
+    id           : string, uuid1 in bytes format
+    seq_number   : sequence number used for ignoring channel requests, that was left behind.
+    arg          : contains the payload size following this header
+    pickled      : tells if the payload is pickled
     _source_host,_source_port,_source_id enables the receiver to reply to a message
+    _result_id   : updated with the chosen channel in an offer and match
     """
     _fields_ = [
         ("cmd", ctypes.c_short),

@@ -27,7 +27,7 @@ class Message:
     header : Must be of Header class type
     payload : Any serializable type
     """
-    def __init__(self, header, payload=None):
+    def __init__(self, header, payload=""):
         self.header = header
         self.payload = payload 
 
@@ -47,7 +47,12 @@ class Message:
                 SocketDispatcher().getThread().add_to_active_socket_list(sock)
 
         else:
-            payload_bin_data = pickle.dumps(self.payload, protocol = PICKLE_PROTOCOL)
+            if type(self.payload) == list:
+                payload_bin_data = pickle.dumps(self.payload, protocol = PICKLE_PROTOCOL)
+            else:
+                # payload is already pickled
+                payload_bin_data = self.payload
+
             self.header.arg = len(payload_bin_data)
             
             # Connect or fetch connected socket
@@ -274,11 +279,10 @@ class SocketThread(threading.Thread):
                         else:
                             if (header.cmd & HAS_PAYLOAD):
                                 self.cond.acquire()
-                                data = ossocket.recvall(s, header.arg)
+                                payload = ossocket.recvall(s, header.arg)
                                 self.cond.release()
-                                payload =  pickle.loads(data)
                             else:
-                                payload = None
+                                payload = ""
 
 
                             m = Message(header, payload)
@@ -495,10 +499,10 @@ class SocketThreadData:
         #print("\n### DeregisterProcess\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
 
 
-    def send(self, addr, header, payload=None, otherhandler=None):
+    def send(self, addr, header, payload="", otherhandler=None):
         # Update message source
         header._source_host, header._source_port = self.server_addr
-
+        
         m = Message(header, payload)
         
         # is destination address the same as my own address? 
@@ -509,7 +513,7 @@ class SocketThreadData:
                 if self.processes.has_key(header.id):
                     self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
-                    self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload=None, otherhandler=otherhandler)
+                    self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload="", otherhandler=otherhandler)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
@@ -537,7 +541,7 @@ class SocketThreadData:
         self.cond.release()
 
 
-    def reply(self, source_header, header, payload=None, otherhandler=None):
+    def reply(self, source_header, header, payload="", otherhandler=None):
         addr = (source_header._source_host, source_header._source_port)
 
         # Update message source
