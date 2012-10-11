@@ -66,7 +66,7 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
     c3=Channel()
     c4=Channel()
 
-    cnt = 5
+    cnt = 10
 
     Parallel(check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True),
              par_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
@@ -95,9 +95,9 @@ def autotest():
             wname, wsleep = write_sleep
 
             if not rsleep==wsleep==sleep_one:
-                #One2One_Test(rsleep, wsleep)
+                One2One_Test(rsleep, wsleep)
                 Any2One_Alting_Test(rsleep, wsleep)
-                #Any2Any_Test(rsleep, wsleep)
+                Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':
     autotest()
