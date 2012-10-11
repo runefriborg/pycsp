@@ -304,26 +304,16 @@ def Sequence(*plist):
         else:
             processes.append(p)
 
-    # For every process we simulate a new process_id. When executing
-    # in Main thread we set the new id in a global variable.
-    _, name = getThreadAndName()
+    # For every process we simulate a new process_id.
+    t, name = getThreadAndName()
 
-    if name == 'MainThread':
-        global MAINTHREAD_ID
-        for p in processes:
-            MAINTHREAD_ID = p.id
+    t_original_id = t.id
+    for p in processes:
+        t.id = p.id
 
-            # Call Run directly instead of start() and join() 
-            p.run()
-        del MAINTHREAD_ID
-    else:
-        t_original_id = t.id
-        for p in processes:
-            t.id = p.id
-
-            # Call Run directly instead of start() and join() 
-            p.run()
-        t.id = t_original_id
+        # Call Run directly instead of start() and join() 
+        p.run()
+    t.id = t_original_id
 
 
 def current_process_id():
@@ -419,7 +409,6 @@ def shutdown():
 
 
         dispatch.deregisterProcess(main_proc.id)
-        main_proc.id = None
 
         # Deregister channel references
         for chan in main_proc.registeredChanList:
@@ -428,6 +417,7 @@ def shutdown():
         # Wait for channelhomethreads to terminate
         for chan in main_proc.registeredChanList:
             chan._threadjoin()
+
 
     except AttributeError:
         pass
