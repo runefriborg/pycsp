@@ -49,10 +49,10 @@ def Consumer(cin):
 
 def CommsTimeBM():
     # Create channels
-    a = Channel("a")
-    b = Channel("b")
-    c = Channel("c")
-    d = Channel("d")
+    a = Channel()
+    b = Channel()
+    c = Channel()
+    d = Channel()
 
     Parallel(Prefix(+c, -a, prefixItem = 0),  # initiator
              Delta2(+a, -b, -d),         # forwarding to two

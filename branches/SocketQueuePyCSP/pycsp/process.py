@@ -28,9 +28,8 @@ import uuid
 import threading
 
 from dispatch import SocketDispatcher
-from protocol import RemoteLock
-from channel import ChannelPoisonException, Channel
-from channelend import ChannelRetireException, ChannelEndRead, ChannelEndWrite
+from protocol import RemoteLock, ChannelMessenger
+from channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
 from pycsp.common.const import *
 
 # Decorators
@@ -74,6 +73,13 @@ class Process(threading.Thread):
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1L
 
+        # Protect against early termination of mother-processes leavings childs in an invalid state
+        self.spawned = []
+
+        # Protect against early termination of channelhomes leaving processes in an invalid state
+        self.registeredChanList = []
+
+        # Protect against early termination of processes leaving channelhomes in an invalid state
         self.activeChanList = []
         self.closedChanList = []
 
@@ -103,6 +109,9 @@ class Process(threading.Thread):
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
 
+        # Join spawned processes
+        for p in self.spawned:
+            p.join()
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
@@ -116,6 +125,13 @@ class Process(threading.Thread):
         self.cond.release()
 
         dispatch.deregisterProcess(self.id)
+
+        # Deregister channel references
+        for chan in self.registeredChanList:
+            chan._deregister()
+
+        for chan in self.registeredChanList:
+            chan._threadjoin()
 
     def __check_poison(self, args):
         for arg in args:
@@ -256,7 +272,9 @@ def _parallel(plist, block = True):
     if block:
         for p in processes:
             p.join()
-
+    else:
+        p,_ = getThreadAndName()
+        p.spawned.extend(processes)
     
 def Sequence(*plist):
     """ Sequence(P1, [P2, .. ,PN])
@@ -336,21 +354,27 @@ def init():
     Initialising state variables for channel communication made from the
     main thread/process.
     """
-    run = False
+    run = True
     try:
         if main_proc.id != None:
-            run = True
+            run = False
     except AttributeError:
         pass
 
-
     if run:
-        main_proc.id = uuid.uuid1().hex
+        print "running main init"
+        main_proc.id = uuid.uuid1().hex + "-__main__"
         main_proc.fn = None
         main_proc.state = FAIL
         main_proc.result_ch_idx = None
         main_proc.result_msg = None
         main_proc.sequence_number = 1L
+
+        main_proc.spawned = []
+        main_proc.registeredChanList = []
+        main_proc.activeChanList = []
+        main_proc.closedChanList = []
+
         main_proc.cond = threading.Condition()
         dispatch = SocketDispatcher().getThread()
         main_proc.addr = dispatch.server_addr
@@ -361,11 +385,10 @@ def init():
             if main_proc.state == READY:
                 main_proc.cond.wait()
             main_proc.cond.release()
-            main_proc.wait = wait
+        main_proc.wait = wait
 
-# TODO: Find out how to enable communication from the main thread
-#init()
-print main_proc
+# Enable the main thread to function as a process
+init()
 
 
 def shutdown():
@@ -379,7 +402,32 @@ def shutdown():
     """
     try:
         dispatch = SocketDispatcher().getThread()
+
+        for p in main_proc.spawned:
+            p.join()
+
+        # Initiate clean up and waiting for channels to finish outstanding operations.
+        for channel in main_proc.activeChanList:
+            channel.CM.leave(channel, main_proc)
+
+        # Wait for channels        
+        main_proc.cond.acquire()
+        X = len(main_proc.activeChanList)
+        while len(main_proc.closedChanList) < X:
+            main_proc.cond.wait()
+        main_proc.cond.release()
+
+
         dispatch.deregisterProcess(main_proc.id)
         main_proc.id = None
+
+        # Deregister channel references
+        for chan in main_proc.registeredChanList:
+            chan._deregister()
+
+        # Wait for channelhomethreads to terminate
+        for chan in main_proc.registeredChanList:
+            chan._threadjoin()
+
     except AttributeError:
         pass

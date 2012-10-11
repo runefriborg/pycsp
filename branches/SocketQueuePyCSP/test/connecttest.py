@@ -31,4 +31,5 @@ try:
 except ChannelSocketException as e:
     raise Exception("Failed test")
 
-close(B)
+
+shutdown()

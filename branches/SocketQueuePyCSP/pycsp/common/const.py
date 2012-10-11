@@ -55,7 +55,8 @@ def getThreadAndName():
                 if thread.id:
                     name = thread.id
             except AttributeError:
-                print "atterror"
+                # Not initilialised yet
+                # Will be initialised  by pycsp.process.init()
                 pass
         else:
             # p is a MultiProcess

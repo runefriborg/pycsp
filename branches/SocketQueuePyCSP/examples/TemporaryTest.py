@@ -19,5 +19,4 @@ Parallel(fisk(A.reader()) * 4,
 
 print "The End"
 
-close(A)
 shutdown()

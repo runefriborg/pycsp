@@ -57,8 +57,6 @@ def One2One_Test(read_sleeper, write_sleeper):
     Spawn(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
 
     Parallel(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
-
-    close(x, c1)
     
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()
@@ -78,8 +76,6 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
              writer(c4.writer(),3,cnt, write_sleeper),
              check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
 
-    close(x, c1, c2, c3, c4)
-    
 
 def Any2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
@@ -94,8 +90,6 @@ def Any2Any_Test(read_sleeper, write_sleeper):
 
     Parallel(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
 
-    close(x, c1)
-    
 
 def autotest():
     for read_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
