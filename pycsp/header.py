@@ -98,7 +98,8 @@ class Header(ctypes.Structure):
         ("arg", ctypes.c_long),
         ("_source_host", ctypes.c_char * 16),
         ("_source_port", ctypes.c_int),
-        ("_source_id", ctypes.c_char * 64)
+        ("_source_id", ctypes.c_char * 64),
+        ("_result_id", ctypes.c_char * 64)
         ]
 
 
