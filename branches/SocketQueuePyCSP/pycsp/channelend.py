@@ -59,29 +59,79 @@ def poison(*list_of_channelEnds):
         channelEnd.poison()
 
 # Classes
-class ChannelEndWrite:
+class ChannelEnd:
     def __init__(self, channel):
         self.channel = channel
         self.op = WRITE
 
-        # Prevention against multiple retires
+        # Prevention against multiple retires / poisons
         self.isretired = False
+        self.ispoisoned = False
 
-        self.__call__ = self.channel._write
+        self.restore_info = None
 
-    def post_write(self, process, msg):
-        self.channel.CM.post_write(self.channel, process, msg)
-
+    # To be able to support the pickle module, we erase the reference
+    # to the channel control, before pickling. This is then restored when
+    # the channelend is depickled using the necessary saved info in restore_info.
+    # Also, the total number of namespace_references should be kept constant after
+    # a __getstate__ and a _restore
+    def __getstate__(self):
+        odict = self.__dict__
         
+        odict['restore_info'] = (self.channel.channelhome, self.channel.name)
+
+        # Remove channel reference from process
+        p,_ = getThreadAndName()
+        p.namespace_references[self.channel.name] -= 1
+
+        # Clear channelcontrol
+        del odict['channel']
+
+        return odict
+
+    def __setstate__(self, dict):
+        self.__dict__.update(dict)
+
+        # TODO: A possible optimization, would be to delay the _restore, to __call__ in
+        # if not self.channel then self._restore()   manner.
+        self._restore()
+
+    def _restore(self):
+        # restore ChannelControl
+        try:
+            self.channel = pycsp.channel.ChannelControl(name=self.restore_info[1], connect=self.restore_info[0])
+
+            # Add channel reference to process
+            p,_ = getThreadAndName()
+            if p.namespace_references.has_key(self.channel.name):
+                p.namespace_references[self.channel.name] += 1
+            else:
+                p.namespace_references[self.channel.name] = 1 
+
+        except SocketBindException as e:
+            raise ChannelSocketException("PyCSP (reconnect to channel) unable to connect to address (%s)" % (e.addr))
+        
+    def _poison(self, *ignore):
+        raise ChannelPoisonException()
+
+    def poison(self):
+        if not self.channel:
+            raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
+
+        if not self.ispoisoned:
+            self.channel.poison(direction=self.op)
+            self.__call__ = self._poison
+            self.ispoisoned = True
+
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
-    def poison(self):
-        self.channel.poison(direction=WRITE)
-
     def retire(self):
+        if not self.channel:
+            raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
+
         if not self.isretired:
-            self.channel.retire(direction=WRITE)
+            self.channel.retire(direction=self.op)
             self.__call__ = self._retire
             self.isretired = True
 
@@ -89,44 +139,44 @@ class ChannelEndWrite:
         return "<ChannelEndWrite on channel named %s>" % self.channel.name
 
     def isWriter(self):
-        return True
+        return self.op == WRITE
 
     def isReader(self):
-        return False
+        return self.op == READ
 
-class ChannelEndRead:
+    
+class ChannelEndWrite(ChannelEnd):
     def __init__(self, channel):
-        self.channel = channel
+        ChannelEnd.__init__(self, channel)
+        self.op = WRITE
+
+    def __call__(self, msg):
+        if not self.channel:
+            raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
+        return self.channel._write(msg)
+
+    def post_write(self, process, msg):
+        self.channel.CM.post_write(self.channel, process, msg)
+
+    def __repr__(self):
+        return "<ChannelEndWrite on channel named %s>" % self.channel.name
+
+
+class ChannelEndRead(ChannelEnd):
+    def __init__(self, channel):
+        ChannelEnd.__init__(self, channel)
         self.op = READ
 
-        # Prevention against multiple retires
-        self.isretired = False
-
-        self.__call__ = self.channel._read
+    def __call__(self, msg):
+        if not self.channel:
+            raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
+        return self.channel._read()
 
     def post_read(self, process):
         self.channel.CM.post_read(self.channel, process)
 
-    def _retire(self, *ignore):
-        raise ChannelRetireException()
-
-    def poison(self):
-        self.channel.poison(direction=READ)
-
-    def retire(self):
-        if not self.isretired:
-            self.channel.retire(direction=READ)
-            self.__call__ = self._retire
-            self.isretired = True
-
     def __repr__(self):
         return "<ChannelEndRead on channel named %s>" % self.channel.name
-
-    def isWriter(self):
-        return False
-
-    def isReader(self):
-        return True
 
 # Run tests
 if __name__ == '__main__':
