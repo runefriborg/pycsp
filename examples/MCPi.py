@@ -40,6 +40,5 @@ Parallel(
    4 * worker( jobs.reader() ,results.writer()),
    consumer(results.reader()))
 
-close(jobs, results)
 
 shutdown()
