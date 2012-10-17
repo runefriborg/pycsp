@@ -389,7 +389,7 @@ class SocketThreadData:
                 h = Header(SOCKETTHREAD_PING)
                 # This connection is made only to the local server
                 sock = self.handler.connect(self.server_addr)
-                sock.sendall(h)
+                self.handler.sendall(sock, h)
                 self.handler.close(sock)
                 #print(str(threading.currentThread())+" added socket")
             self.cond.release()
@@ -408,7 +408,7 @@ class SocketThreadData:
             h = Header(SOCKETTHREAD_SHUTDOWN)
             # This connection is made only to the local server
             sock = ossocket.connectNOcache(self.server_addr)
-            sock.sendall(h)
+            ossocket.sendallNOcache(sock, h)
             ossocket.closeNOcache(sock)
 
         self.cond.release()

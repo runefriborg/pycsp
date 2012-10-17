@@ -695,7 +695,7 @@ class ChannelReq(object):
             if seq == self.seq_check:
                 self.LM.remote_cancel(conn, self.process)
             self.LM.remote_release(conn, self.process)
-        except AddrUnavailableException as e:
+        except AddrUnavailableException:
             # Unable to reach process to notify cancel
             if conf.get(SOCKETS_STRICT_MODE):
                 raise FatalException("PyCSP (cancel notification) unable to reach process (%s)" % str(self.process))
@@ -780,7 +780,7 @@ class ChannelReq(object):
                 self.LM.remote_release(w_conn, self.process)
                 self.LM.remote_release(r_conn, reader.process)
 
-        except AddrUnavailableException as e:
+        except AddrUnavailableException, e:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
             if conf.get(SOCKETS_STRICT_MODE):
