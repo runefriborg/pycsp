@@ -9,10 +9,10 @@ def source(chan_out):
     retire(chan_out)
 
 GridInit()
-server.start(host=public_ip)
+server.start(host="ask.diku.dk")
 
 chan = Channel()
-Spawn(100 * source(-chan))
+Spawn(5 * source(-chan))
 
 # Read
 cin = +chan
