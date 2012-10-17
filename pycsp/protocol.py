@@ -139,7 +139,7 @@ def post_write(channel, process, msg):
 
 def send_payload(hostNport, cmd, id, payload, seq=0):
     pickle_payload = data2bin(payload)
-    header = compile_header(cmd, id, len(pickle_payload), seq)
+    header = Header(cmd, id, len(pickle_payload), seq)
 
     sock = ossocket.connect(hostNport)
     
