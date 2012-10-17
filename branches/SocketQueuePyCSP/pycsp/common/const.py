@@ -11,6 +11,13 @@ try:
 except:
     pass
 
+import platform
+USE_CTYPES=1
+
+if platform.python_implementation()=='PyPy':
+    USE_CTYPES=0
+
+
 ENVVAL_PORT = 'PYCSP_PORT'
 
 # Setup

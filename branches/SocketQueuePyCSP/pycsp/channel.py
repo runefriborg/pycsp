@@ -26,7 +26,7 @@ class Channel(object):
             self.control = ChannelControl(name, buffer, connect)
             self.address = self.control.channelhome
 
-        except SocketBindException as e:
+        except SocketBindException, e:
             self.control = None
             raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
         
@@ -304,7 +304,7 @@ class ChannelEnd:
         # execution is given back to the calling process
         try:
             self.channel = ChannelControl(name=self.restore_info[1], connect=self.restore_info[0])
-        except SocketBindException as e:
+        except SocketBindException, e:
             raise ChannelSocketException("PyCSP (reconnect to channel) unable to connect to address (%s)" % (e.addr))
         
     def _poison(self, *ignore):

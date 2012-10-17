@@ -130,6 +130,19 @@ def closeNOcache(sock):
     """
     sock.close()
 
+def sendallNOcache(sock, data):
+    """
+    Send all data on socket. Do not reconnect on error.
+    """
+    try:
+        sock.sendall(data)
+    except socket.error, (value,message):
+        if STDERR_OUTPUT:
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (value, message))
+            # TODO make exceptions depending on the error value
+
+        raise SocketSendException()
+
 def recvall(sock, msg_len):
     """
     A fast string concatenation in a loop that continues until the entire msg has been received
@@ -204,6 +217,7 @@ class ConnHandler(object):
                 raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
             raise SocketSendException()
+
 
 
 

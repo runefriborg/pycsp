@@ -1,5 +1,5 @@
-
 import ctypes
+from pycsp.common.const import *
 
 # Bit patters for selecting types
 GUARD_CMD   = 1<<13
@@ -103,5 +103,4 @@ class Header(ctypes.Structure):
         ("_source_id", ctypes.c_char * 64),
         ("_result_id", ctypes.c_char * 64)
         ]
-
 

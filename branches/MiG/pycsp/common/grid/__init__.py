@@ -19,7 +19,7 @@ import migrid as grid
 
 
 def grid_process(vgrid='ANY', resource=[], disk=1, cputime=60, cpucount=1, nodecount=1, memory=1, inFiles=[], outFiles=[], execFiles=[]):    
-    def wrap_process(func):
+    def wrap_process(func):        
         def _call(*args, **kwargs):
             return GridProcess(func, vgrid, resource, disk, cputime, cpucount, nodecount, memory, inFiles, outFiles, execFiles, *args, **kwargs)
         _call.func_name = func.func_name
