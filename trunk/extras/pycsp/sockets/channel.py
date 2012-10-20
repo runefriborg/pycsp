@@ -10,7 +10,7 @@ import uuid
 import cPickle as pickle
 import protocol
 from exceptions import *
-from pycsp.common.const import *
+from const import *
 
 
 # Classes

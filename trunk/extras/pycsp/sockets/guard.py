@@ -28,7 +28,7 @@ import uuid
 
 #from channel import ChannelReq, ReqStatus
 from process import Process
-from pycsp.common.const import *
+from const import *
 from protocol import AddrID, ChannelReq, LockMessenger
 from dispatch import SocketDispatcher
 from exceptions import *

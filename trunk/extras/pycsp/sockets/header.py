@@ -1,5 +1,5 @@
 import ctypes
-from pycsp.common.const import *
+from const import *
 
 # Bit patters for selecting types
 GUARD_CMD   = 1<<13

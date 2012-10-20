@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from alternation import Alternation
 from process import current_process_id
 
-from pycsp.common.const import *
+from const import *
 #import pycsp.current
 
 import inspect

@@ -14,7 +14,7 @@ from exceptions import *
 
 from header import *
 from dispatch import *
-from pycsp.common.const import *
+from const import *
 from configuration import *
 
 conf = Configuration()

@@ -14,7 +14,7 @@ import sys
 import threading
 from exceptions import *
 from configuration import *
-from pycsp.common.const import *
+from const import *
 
 STDERR_OUTPUT = False
 
