@@ -30,7 +30,7 @@ import threading
 from dispatch import SocketDispatcher
 from protocol import RemoteLock, ChannelMessenger
 from channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
-from pycsp.common.const import *
+from const import *
 
 # Decorators
 def process(func):

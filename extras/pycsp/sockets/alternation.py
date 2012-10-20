@@ -12,7 +12,7 @@ import types
 import cPickle as pickle
 from guard import Guard
 from exceptions import *
-from pycsp.common.const import *
+from const import *
 
 
 # Decorators

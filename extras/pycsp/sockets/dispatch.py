@@ -16,7 +16,7 @@ import cPickle as pickle
 import struct
 from header import *
 from exceptions import *
-from pycsp.common.const import *
+from const import *
 from configuration import *
         
 conf = Configuration()

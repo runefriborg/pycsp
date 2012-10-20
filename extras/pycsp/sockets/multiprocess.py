@@ -32,7 +32,7 @@ import multiprocessing
 from dispatch import SocketDispatcher
 from protocol import RemoteLock
 from channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
-from pycsp.common.const import *
+from const import *
 from configuration import *
         
 conf = Configuration()
