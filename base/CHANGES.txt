@@ -1,3 +1,17 @@
+0.7.1 - 0.9.0
+----------
+* threads, processes and net has been completely rewritten into a new single
+  implementation named pycsp.parallel. Thus available implementations are now
+    - pycsp.parallel (default)
+    - pycsp.greenlets
+* pycsp.greenlets has not been changed since 0.7.1.
+* The very long list of new features in pycsp.parallel is available at
+  http://code.google.com/p/pycsp
+* The trunk repository has been split into two versions. The base which
+  only requires standard CPython libraries and the extras version, which 
+  adds all the extra stuff (greenlets, and so on) that requires external 
+  libraries.
+
 0.7.0 - 0.7.1
 ----------
 * (pycsp.greenlets) Fixed issue with communicating on channels from the main namespace.
