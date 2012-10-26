@@ -42,7 +42,7 @@ from channel import Channel, ChannelPoisonException, ChannelRetireException
 from channelend import retire, poison, IN, OUT
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id
 
-version = (0,7,1, 'greenlets')
+version = (0,9,0, 'greenlets')
 
 # Set current implementation
 import pycsp.current
