@@ -27,21 +27,13 @@ if len(sys.argv) > 1:
 else:
     mod = ''
 
-if (mod == 'threads'):
-    from pycsp.threads import *
-elif (mod == 'processes'):
-    from pycsp.processes import *
+if (mod == 'parallel'):
+    from pycsp.parallel import *
 elif (mod == 'greenlets'):
     from pycsp.greenlets import *
-elif (mod == 'net'):
-    from pycsp.net import *
 else:
-    print "python",sys.argv[0],"[ threads | processes | greenlets | net ]"
-    from pycsp.threads import *
+    print "python",sys.argv[0],"[ parallel | greenlets ]"
+    from pycsp.parallel import *
 
 print 'Using version', version
-
-if sys.platform == 'win32' and (version[3] == 'processes'):
-    print 'The examples are not compatible with PyCSP.processes and win32.'
-    sys.exit(0)
 

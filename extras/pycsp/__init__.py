@@ -28,12 +28,10 @@ Versions available: greenlets, threads, processes, net
 Channels can not be used to communicate between versions.
 
 Modules
-> import pycsp.threads
+> import pycsp.parallel
 > import pycsp.greenlets
-> import pycsp.processes
-> import pycsp.net
 
->>> from pycsp.threads import *
+>>> from pycsp.parallel import *
 
 >>> @process
 ... def P():
@@ -86,9 +84,9 @@ any-to-any channel example
 >>> Parallel(reader(c.reader()), writer(c.writer(), 10),reader(c.reader()), writer(c.writer(), 10))
 """
 
-# Import threads version
+# Import parallel version
 if not __name__ == '__main__':
-    from threads import *
+    from parallel import *
 else:
     # Run tests
     import sys
