@@ -84,10 +84,7 @@ any-to-any channel example
 >>> Parallel(reader(c.reader()), writer(c.writer(), 10),reader(c.reader()), writer(c.writer(), 10))
 """
 
-# Import parallel version
-if not __name__ == '__main__':
-    from parallel import *
-else:
+if __name__ == '__main__':
     # Run tests
     import sys
     import unittest
@@ -107,7 +104,4 @@ else:
     suite.addTest(doctest.DocTestSuite())
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-
-
-
 

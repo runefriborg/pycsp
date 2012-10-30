@@ -12,7 +12,7 @@ from guard import Skip, SkipGuard, Timeout, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from channel import Channel, retire, poison
-from process import Process, process, Sequence, Parallel, Spawn, current_process_id, init, shutdown
+from process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
 from multiprocess import MultiProcess, multiprocess
 from exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException
 from configuration import *
@@ -36,8 +36,6 @@ pycsp.current.ChannelPoisonException = ChannelPoisonException
 pycsp.current.ChannelRetireException = ChannelRetireException
 pycsp.current.retire = retire
 pycsp.current.poison = poison
-pycsp.current.IN = IN
-pycsp.current.OUT = OUT
 pycsp.current.io = io
 pycsp.current.Process = Process
 pycsp.current.process = process
@@ -49,6 +47,7 @@ pycsp.current.FairSelect = FairSelect
 pycsp.current.AltSelect = AltSelect
 pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
+pycsp.current.shutdown = shutdown
 
 
 def test_suite():

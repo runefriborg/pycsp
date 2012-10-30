@@ -29,14 +29,11 @@ except ImportError, e:
     
 from scheduling import Scheduler
 from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
+from exceptions import *
+
 from pycsp.common.const import *
 
 import time, random
-
-# Exceptions
-class ChannelPoisonException(Exception): 
-    def __init__(self):
-        pass
 
 # Classes
 class ChannelReq:
