@@ -24,10 +24,6 @@ import socket
 import time
 import sys
 
-if sys.platform == 'win32' and (version[3] == 'processes'):
-    print 'This example creates nested processes and channels, which is not supported in win32, when using processes implementation'
-    sys.exit(0)
-
 @process
 def HelloWorld(register):
     request_channel = Channel('HelloWorld'+str(id))
@@ -167,7 +163,7 @@ def serversocket_accept(serversocket):
 @process
 def entry(request):
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(('', 8080))
+    serversocket.bind(('', 8081))
     serversocket.listen(1)
     
     while True:
@@ -185,3 +181,5 @@ Parallel(entry(request),
          [Index(i, -register) for i in range(2)],
          HelloWorld(-register))
 
+
+shutdown()

@@ -58,3 +58,6 @@ outc=Channel()
 Parallel(producer(first.writer(),2000),
          worker(first.reader(), outc.writer()),
          printer(outc.reader()))
+
+
+shutdown()

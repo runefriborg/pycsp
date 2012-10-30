@@ -71,3 +71,4 @@ def ring(args):
 if __name__ == "__main__":
 	ring(sys.argv[2:])
 
+shutdown()

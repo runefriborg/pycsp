@@ -24,21 +24,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from pycsp_import import *
 import time
 
-@process
+@multiprocess
 def Prefix(cin, cout, prefixItem=None):
     t = prefixItem
     while True:
         cout(t)
         t = cin()
 
-@process
+@multiprocess
 def Delta2(cin, cout1, cout2):
     while True:
         t = cin()
         cout1(t)
         cout2(t)
 
-@process
+@multiprocess
 def Successor(cin, cout):
     """Adds 1 to the value read on the input channel and outputs it on the output channel.
     Infinite loop.
@@ -46,7 +46,7 @@ def Successor(cin, cout):
     while True:
         cout(cin()+1)
 
-@process
+@multiprocess
 def Consumer(cin):
     "Commstime consumer process"
     N = 1000

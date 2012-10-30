@@ -29,8 +29,10 @@ class FatalException(Exception):
         return repr(self.msg)
 
 class InfoException(Exception):
-    def __init__(self):
-        pass
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
     
 # Private exceptions
 class AddrUnavailableException(Exception):

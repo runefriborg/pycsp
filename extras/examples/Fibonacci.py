@@ -47,3 +47,4 @@ Parallel(
     Printer(+printC, limit=20)
 )
 
+shutdown()

@@ -69,6 +69,7 @@ def Consumer(cin):
     print "consumer done, posioning channel"
     retire(cin)
 
+@process
 def CommsTimeBM():
     # Create channels
     a = Channel("a")
@@ -85,5 +86,7 @@ def CommsTimeBM():
 N_BM = 10
 for i in range(N_BM):
     print "----------- run %d/%d -------------" % (i+1, N_BM)
-    CommsTimeBM()
+    Parallel(CommsTimeBM())
 
+
+shutdown()
