@@ -41,3 +41,4 @@ def P(cin):
 
 Parallel(P(A.reader()))
 
+shutdown()

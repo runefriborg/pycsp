@@ -200,15 +200,20 @@ class Alternation:
 
         idx, op = reqs[act]
 
-        # unpickle msg
+        # unpickle msg if necessary
         msg = p.result_msg
-        if type(msg) == list:
-            msg = msg[0]
+        if msg == None:
+            # Got successful write
+            pass
         else:
-            if msg == "":
-                msg = None
+            # Got successful read
+            if type(msg) == list:
+                msg = msg[0]
             else:
-                msg = pickle.loads(msg)[0]
+                if msg == "":
+                    msg = None
+                else:
+                    msg = pickle.loads(msg)[0]
 
         return (idx, act, msg, op)
 

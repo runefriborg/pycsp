@@ -47,6 +47,8 @@ class Message:
                 SocketDispatcher().getThread().add_to_active_socket_list(sock)
 
         else:
+            # list is used as a marker, to detect whether
+            # the payload has already been pickled. 
             if type(self.payload) == list:
                 payload_bin_data = pickle.dumps(self.payload, protocol = PICKLE_PROTOCOL)
             else:
