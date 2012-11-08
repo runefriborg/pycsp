@@ -137,7 +137,7 @@ class ChannelControl(object):
             p.wait()
 
         if p.state == SUCCESS:
-            # unpickle msg
+            # unpickle msg if necessary
             msg = p.result_msg
             if type(msg) == list:
                 return msg[0]

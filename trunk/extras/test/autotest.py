@@ -115,4 +115,4 @@ def autotest():
 
 if __name__ == '__main__':
     autotest()
-
+    shutdown()

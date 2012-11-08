@@ -116,10 +116,10 @@ def Any_Alting2Any_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()
     Spawn(check.Assert(x.reader(), "Any_Alting2Any_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=80, minimum=40, vocabulary=[0,1,2,3]))
 
-    c1=Channel('C1')
-    c2=Channel('C2')
-    c3=Channel('C3')
-    c4=Channel('C4')
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
 
     cnt = 10
     Parallel(par_writer(-c1, -c2, -c3, -c4,cnt, write_sleeper),
@@ -141,3 +141,4 @@ def poisontest():
 
 if __name__ == '__main__':
     poisontest()
+    shutdown()

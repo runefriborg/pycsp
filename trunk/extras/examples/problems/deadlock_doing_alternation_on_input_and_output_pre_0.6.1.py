@@ -32,8 +32,9 @@ from common import *
 
 @process
 def P(id, c1, c2):
-    while True:
+    for i in xrange(10000):
         Alternation([{(c1,True):None, c2:None}]).select()
+    poison(c1,c2)
 
 if __name__=='__main__':
     c1 = Channel('c1')
@@ -41,7 +42,9 @@ if __name__=='__main__':
     c3 = Channel('c3')
     c4 = Channel('c4')
 
-    Parallel(P(1,OUT(c1), IN(c2)),
-             P(2,OUT(c2), IN(c3)),
-             P(3,OUT(c3), IN(c4)),
-             P(4,OUT(c4), IN(c1)))
+    Parallel(P(1,c1.writer(), c2.reader()),
+             P(2,c2.writer(), c3.reader()),
+             P(3,c3.writer(), c4.reader()),
+             P(4,c4.writer(), c1.reader()))
+
+shutdown()

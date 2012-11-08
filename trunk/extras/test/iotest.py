@@ -34,3 +34,5 @@ def delay_output(msg, seconds):
 Parallel(
     [ delay_output('%d second delay' % (i),i) for i in range(10)]
     )
+
+shutdown()

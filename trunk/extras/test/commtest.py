@@ -187,3 +187,4 @@ def commtest():
 
 if __name__ == '__main__':
     commtest()
+    shutdown()
