@@ -36,12 +36,12 @@ import cStringIO
 
 # Import installed pycsp or try to import pycsp from parent dir.
 try:
-    from pycsp.threads import *
+    from pycsp.parallel import *
     from pycsp.common import toolkit
 except ImportError:
     # Try import from parent directory relative to PlayTrace.py
     sys.path = [os.path.dirname(os.path.dirname(os.path.realpath(__file__)))] + sys.path
-    from pycsp.threads import *
+    from pycsp.parallel import *
     from pycsp.common import toolkit
     
 # Get dot
@@ -1046,3 +1046,7 @@ if len(sys.argv) > 1:
 
 else:
     print __doc__
+
+
+shutdown()
+
