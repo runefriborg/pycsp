@@ -24,17 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from exceptions import *
 from pycsp.common.const import *
 
-# Functions
-def IN(channel):
-    """ Join as reader
-    """
-    return channel.reader()
-
-def OUT(channel):
-    """ Join as writer
-    """
-    return channel.writer()
-
 def retire(*list_of_channelEnds):
     """ Retire reader or writer, to do auto-poisoning
     When all readers or writer of a channel have retired. The channel is retired.

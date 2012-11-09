@@ -39,7 +39,7 @@ from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from alternation import choice, Alternation
 from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
 from channel import Channel
-from channelend import retire, poison, IN, OUT
+from channelend import retire, poison
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id
 from exceptions import ChannelPoisonException, ChannelRetireException
 from compat import *
@@ -62,8 +62,6 @@ pycsp.current.ChannelPoisonException = ChannelPoisonException
 pycsp.current.ChannelRetireException = ChannelRetireException
 pycsp.current.retire = retire
 pycsp.current.poison = poison
-pycsp.current.IN = IN
-pycsp.current.OUT = OUT
 pycsp.current.io = io
 pycsp.current.Process = Process
 pycsp.current.process = process
