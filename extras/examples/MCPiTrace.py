@@ -61,3 +61,5 @@ Parallel(
 TraceQuit()
 
 print("Created trace file 'MCPiTrace.output'")
+
+shutdown()

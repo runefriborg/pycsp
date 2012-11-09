@@ -28,7 +28,7 @@ from alternation import Alternation
 from process import current_process_id
 
 from const import *
-#import pycsp.current
+import pycsp.current
 
 import inspect
 
@@ -184,12 +184,11 @@ def AltSelect(*guards):
         except AttributeError:
             raise Exception('Cannot use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
 
-    #if pycsp.current.trace:
-    #    import pycsp.common.trace as trace
-    #    a = trace.Alternation(L)
-    #    a.set_execute_frame(-3)
-    #else:
-    if True:
+    if pycsp.current.trace:
+        import pycsp.common.trace as trace
+        a = trace.Alternation(L)
+        a.set_execute_frame(-3)
+    else:
         a = Alternation(L)
         a.set_execute_frame(-2)
 

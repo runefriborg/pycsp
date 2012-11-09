@@ -60,6 +60,8 @@ pycsp.current.Alternation = Alternation
 pycsp.current.Channel = Channel
 pycsp.current.ChannelPoisonException = ChannelPoisonException
 pycsp.current.ChannelRetireException = ChannelRetireException
+pycsp.current.ChannelSocketException = ChannelSocketException
+pycsp.current.FatalException = FatalException
 pycsp.current.retire = retire
 pycsp.current.poison = poison
 pycsp.current.io = io
@@ -73,7 +75,7 @@ pycsp.current.FairSelect = FairSelect
 pycsp.current.AltSelect = AltSelect
 pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
-
+pycsp.current.shutdown = shutdown
 
 def test_suite():
     import unittest

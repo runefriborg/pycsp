@@ -24,7 +24,12 @@ class Channel(object):
 
         try:
             self.control = ChannelControl(name, buffer, connect)
+
+            # Set channel address
             self.address = self.control.channelhome
+            
+            # Set channel name
+            self.name = self.control.name
 
         except SocketBindException, e:
             self.control = None
@@ -354,6 +359,13 @@ class ChannelEndWrite(ChannelEnd):
     def post_write(self, process, msg):
         self.channel.CM.post_write(self.channel, process, msg)
 
+
+    def remove_write(self, req):
+        """
+        Including for compatibility with trace and greenlets
+        """
+        pass
+
     def __repr__(self):
         return "<ChannelEndWrite on channel named %s>" % self.channel.name
 
@@ -370,6 +382,12 @@ class ChannelEndRead(ChannelEnd):
 
     def post_read(self, process):
         self.channel.CM.post_read(self.channel, process)
+
+    def remove_read(self, req):
+        """
+        Including for compatibility with trace and greenlets
+        """
+        pass
 
     def __repr__(self):
         return "<ChannelEndRead on channel named %s>" % self.channel.name
