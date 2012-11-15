@@ -32,7 +32,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='pycsp',
-      version='0.7.1',
+      version='0.9.0',
       description='PyCSP - Python CSP Library',
       long_description=read('README.txt'),
       keywords = "python csp concurrency communicating sequential processes",
@@ -40,7 +40,7 @@ setup(name='pycsp',
       author_email='runef@diku.dk',
       url='http://code.google.com/p/pycsp/',
       license='MIT',
-      packages=['pycsp', 'pycsp.threads', 'pycsp.processes', 'pycsp.greenlets', 'pycsp.net', 'pycsp.common', 'pycsp.current'],
+      packages=['pycsp', 'pycsp.parallel', 'pycsp.greenlets', 'pycsp.common', 'pycsp.current'],
       platforms=['any'],
       classifiers=[
         "Development Status :: 4 - Beta",
