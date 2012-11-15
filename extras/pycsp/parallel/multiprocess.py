@@ -77,7 +77,7 @@ class MultiProcess(multiprocessing.Process):
         self.kwargs = kwargs
 
         # Create 64 byte unique id based on network address, sequence number and time sample.
-        self.id = uuid.uuid1().hex + "-" + fn.func_name[:31]
+        self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
         
 
         # Channel request state

@@ -1042,7 +1042,7 @@ if len(sys.argv) > 1:
     app.MainLoop()
 
     # If app is closed hard, then we poison anyway
-    poison(IMAGE_FILE_CHAN, DOT2_FILE_CHAN)
+    poison(+IMAGE_FILE_CHAN, +DOT2_FILE_CHAN)
 
 else:
     print __doc__
