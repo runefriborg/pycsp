@@ -23,3 +23,10 @@ class MultiProcess():
     def __init__(self, fn, port, *args, **kwargs):
         raise InfoException("MultiProcess not available for greenlets")
 
+class ChannelSocketException(Exception):
+    def __init__(self, addr, msg):
+        self.msg = msg
+        self.addr = addr
+    def __str__(self):
+        return repr("%s %s" % (self.msg, self.addr))
+

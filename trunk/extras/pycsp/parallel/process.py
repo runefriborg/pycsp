@@ -62,7 +62,7 @@ class Process(threading.Thread):
         self.kwargs = kwargs
 
         # Create 64 byte unique id based on network address, sequence number and time sample.
-        self.id = uuid.uuid1().hex + "-" + fn.func_name[:31]
+        self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
         
 
         # Channel request state
@@ -352,7 +352,7 @@ def init():
         pass
 
     if run:
-        main_proc.id = uuid.uuid1().hex + "-__main__"
+        main_proc.id = uuid.uuid1().hex + ".__main__"
         main_proc.fn = None
         main_proc.state = FAIL
         main_proc.result_ch_idx = None

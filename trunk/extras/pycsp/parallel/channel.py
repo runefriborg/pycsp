@@ -244,8 +244,10 @@ def retire(*list_of_channelEnds):
 
     >>> cin = C.reader()
     >>> retire(cin)
-    """    
+    """
     for channelEnd in list_of_channelEnds:
+        if isinstance(channelEnd, Channel):
+            raise InfoException("Tried to retire a channel object. Only channel end objects may be retired.")
         channelEnd.retire()
 
 def poison(*list_of_channelEnds):
@@ -272,6 +274,8 @@ def poison(*list_of_channelEnds):
     42
     """
     for channelEnd in list_of_channelEnds:
+        if isinstance(channelEnd, Channel):
+            raise InfoException("Tried to poison a channel object. Only channel end objects may be poisoned.")
         channelEnd.poison()
 
 # Classes
