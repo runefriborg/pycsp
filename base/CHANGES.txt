@@ -1,0 +1,152 @@
+0.7.1 - 0.9.0
+----------
+* threads, processes and net has been completely rewritten into a new single
+  implementation named pycsp.parallel. Thus available implementations are now
+    - pycsp.parallel (default)
+    - pycsp.greenlets
+* pycsp.greenlets has not been changed since 0.7.1.
+* The very long list of new features in pycsp.parallel is available at
+  http://code.google.com/p/pycsp
+* The trunk repository has been split into two versions. The base which
+  only requires standard CPython libraries and the extras version, which 
+  adds all the extra stuff (greenlets, and so on) that requires external 
+  libraries.
+
+0.7.0 - 0.7.1
+----------
+* (pycsp.greenlets) Fixed issue with communicating on channels from the main namespace.
+* (pycsp.greenlets) Fixed propagation of exceptions from io functions.
+* Added "fair" version of AltSelect, which uses the history from an Alternation to perform an ordered AltSelect (priority)
+* Replaced use of environment variables for some module magic.
+* Added pycsp.common.trace module
+* Moved AltSelect and FairSelect to a separate file (altselect.py)
+* Added Channel() * 3 and 2 * Channel() functionality
+* removed const.py from individual implementations.
+* Added support for Jython and IronPython in the threads implementation. 
+
+0.6.2 - 0.7.0
+----------
+* Added a raised Exception('Deadlock') when all processes are blocked on
+  channel communication. Only pycsp.greenlets has this deadlock detection.
+* Added a wrapper for Alternation to simplify usage. It consists of
+  the following constructs AltSelect, InputGuard, OutputGuard,
+  SkipGuard and TimeoutGuard:
+
+  AltSelect examples:
+           AltSelect(
+                   InputGuard(register, action=add_service()),
+                   InputGuard(inc, action=dispatch())
+                   )
+
+           AltSelect(
+                   OutputGuard(left, msg=True, action="right(True)"),
+                   OutputGuard(right, msg=True, action="left(True)")
+                   )
+
+           ch, msg = AltSelect(
+                   InputGuard(workerIn),
+                   OutputGuard(workerOut, jobs[-1]),
+                   SkipGuard()
+                   )
+
+* Added buffered channels to all versions.
+  Usage:  A = Channel(buffer=<N>) # where <N> is the wanted buffer size.
+  The Channel is implemented in buffer.py as a process maintaining a list of
+  buffered elements.
+* Fixed (threads) bug in Alternation, where a poison or retire could overwrite a committed match.
+* Fixed a poor design choice. The naming __channel_input can have unwanted side-effects
+  in Python, thus __channel_input is renamed to channel_input. Sorry for the inconvenience.
+* Removed the Channel.status method.
+* Fixed bug in propagation of poison / retire.
+* Fixed Python 2.4 support for threads implementation.
+* Added pycsp.common package that contains plugNplay processes and other general process
+  templates.
+  Usage:
+
+    from pycsp.threads import *
+    from pycsp.common import plugNplay
+
+    Parallel(plugNplay.Prefix(cin, cout, prefix=1))
+
+* Added current_process_id() function for debugging purposes. It returns the unique id of the
+  pycsp process executing current_process_id().
+* Changed matching of channels in function parameter lists, when propagating retire and poison.
+* Changed Alternation.execute to also return (guard, msg) just as Alternation.select.
+
+0.6.1 - 0.6.2
+----------
+* Changed the reserved variable name for reading channel inputs from ChannelInput
+  to __channel_input.
+* @choice will now create a function that instantiates a Choice object. This can be used to
+  send other arguments to the wrapped choice function.
+  Example:
+	@choice
+	def action(id, __channel_input):
+	    print id, __channel_input
+
+	Alternation([{cin:action(42)}]).execute()
+
+* Changed the internal representation of guards in Alternation and added an optional syntax
+  for usage in the guardlist. These are now equivalent and legal arguments for Alternation.
+ - input guard: [{cin1:action()}]  <->  [(cin1, action())]
+ - output guard: [{(cout1, msg):action()}] <-> [(cout1, msg, action()]
+
+* Fixed a bug in reference counting for retire, that could result in a race condition.
+* Fixed (greenlets) bug where retire could overwrite a committed request.
+* Fixed propagation of poison and retire, when channelends are in lists / dictionaries.
+* Added syntactic sugar to allow multiplying processes.
+  Example:
+	Parallel(
+		producer(OUT(jobs),10000, 1000),
+		10 * worker(IN(jobs),OUT(results)),
+		consumer(IN(results)))
+
+
+0.6.0 - 0.6.1
+----------
+* Changed retire() behaviour, to propagate a retire pill. Added ChannelRetireException.
+* Fixed possible deadlock, when doing several concurrent alternations on an input
+  and output guard. This is an issue in pycsp.threads and pycsp.net.
+ - See examples/problems/deadlock_doing_alternation_on_input_and_output_pre_0.6.1.py
+* Added a Pyro nameserver lookup to the PyroServerProcess thread, to avoid sharing
+  of a global Pyro nameserver proxy, which is not recommended by Pyro.
+* Changed greenlet dependency to the greenlet 0.2 module available at http://pypi.python.org/pypi/greenlet
+* Added new Channel methods for returning ChannelEnd objects. +C / -C  and  C.reader() / C.writer()
+
+
+0.5.2 - 0.6.0
+----------
+* Added 3 new implementations of PyCSP
+ - Processes : Uses the multiprocessing module.
+ - Greenlets(coroutine) : Uses a third party py.magic.greenlet module from pylib.
+ - Net : Uses Pyro to enable all channels as remote channels.
+* Modified examples and tests to support all 4 implementations (threads, processes,
+  greenlets, net)
+* import pycsp, defaults to pycsp.threads
+* Added a TestSuite system to doctest. Execute python __init__.py to run testsuites.
+
+
+0.5.1 - 0.5.2
+----------
+* Added doctest items to classes and functions.
+* Fixed Sequence(*plist) to accept list of processes.
+
+
+0.5.0 - 0.5.1
+----------
+* Fixed race condition with poisoning.
+* Optimized ChannelEnd implementation.
+* Added Spawn for starting background CSP processes.
+* Added Skip and Timeout guards.
+* Added @choice decorator to clearify where actions are defined. Usage is optional.
+* Added @io decorator for compatibility with PyCSP coroutine implementation.
+* A nameless Channel requests a name using uuid.uuid1().
+
+
+all versions - 0.5.0
+----------
+The PyCSP library has been completely rewritten.
+
+There is no backwards compatibility.
+
+For now please look at the examples for documentation on how to use the library.
