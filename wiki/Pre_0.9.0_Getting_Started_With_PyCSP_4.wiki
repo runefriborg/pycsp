@@ -1,0 +1,205 @@
+#summary Tutorial on how to get started with PyCSP (page 4)
+#labels Tutorial
+#sidebar TutorialList
+
+= A Scalable Webserver =
+
+Contents:
+<wiki:toc max_depth="2" />
+
+== Answer request on port 8080 ==
+
+{{{
+import pycsp
+
+@pycsp.process
+def HTTPsocket(sock):
+    answer= 'HTTP/1.0...'
+
+    conn, addr=sock
+    req=conn.recv(256)
+    if req:
+        lines = req.split('\n')
+        for line in lines:
+            line=line.split(' ')
+            if line[0]=='GET':
+                conn.sendall(answer)
+                conn.sendall("Hello from HTTPSocket");
+
+    conn.shutdown(socket.SHUT_RDWR)
+    conn.close()
+
+@pycsp.process
+def Entry():
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversocket.bind(('', 8080))
+    serversocket.listen(1)
+    while True:
+        s = serversocket.accept()
+        pycsp.Spawn( HTTPsocket(s) )
+
+pycsp.Parallel( Entry() )
+}}}
+
+<img src="http://pycsp.googlecode.com/files/WebserverStep1.png" width=400>
+
+== Adding a Hello World service ==
+
+{{{
+import pycsp
+
+@pycsp.process
+def HelloWorld(request):
+    while True:
+        (request_string, cout) = request()
+        cout("Hello World at "+time.strftime("%H:%M:%S",  \\ time.localtime()))
+
+@pycsp.process
+def HTTPsocket(sock, sendRequest):
+ [snip]
+    for line in lines:
+        line=line.split(' ')
+        if line[0]=='GET':
+            conn.sendall(answer)
+            sendRequest((line[1], itemOut))
+            conn.sendall(itemIn())
+ [snip]
+
+@pycsp.process
+def Entry(dispatch):
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversocket.bind(('', int(sys.argv[1])))
+    serversocket.listen(1)
+    while True:
+        s = serversocket.accept()
+        pycsp.Spawn( HTTPsocket(s, dispatch) )
+
+requestChan = pycsp.Channel('Request')
+
+pycsp.Parallel( 
+    Entry(requestChan.writer()),
+    HelloWorld(requestChan.reader())
+    )
+}}}
+<img src="http://pycsp.googlecode.com/files/WebserverStep2.png" width=400>
+
+== Adding More Services ==
+{{{
+import pycsp
+
+@pycsp.process
+def Sleep5sec(id, request):
+    seconds = 5 
+    while True:
+        (request_string, cout) = request()
+        s = "Process " + str(id)
+        s += " is going to sleep for " +str(seconds) + " seconds"
+        cout(s)
+        time.sleep(seconds)
+
+pycsp.Parallel( 
+    Entry(requestChan.writer()),
+    [ Sleep5sec(id, requestChan.reader()) for id in range(3) ]
+    )
+}}}
+
+<img src="http://pycsp.googlecode.com/files/WebserverStep3.png" width=400>
+
+== Adding a Service Dispatcher ==
+{{{
+import pycsp
+
+@pycsp.process
+def HelloWorld(register):
+    req = pycsp.Channel()
+    cin = req.reader()
+    register(('/hello.html', req.writer()))
+    while True:
+        (request_string, cout) = cin()
+        cout("Hello World at " + time.strftime("%H:%M:%S", time.localtime()))
+
+@pycsp.process
+def Dispatcher(register, incoming_request):
+    services = {}
+    while True:
+        pycsp.AltSelect(
+           pycsp.InputGuard(register, action=add_service(services)),
+           pycsp.InputGuard(incoming_request,
+					action=dispatch(services))
+        )
+
+@pycsp.choice
+def add_service(services, channel_input=None):
+    (id, requestChEnd) = channel_input
+    if services.has_key(id):
+        services[id].append(requestChEnd)
+    else:
+        services[id] = [requestChEnd]
+
+@pycsp.choice
+def dispatch(services, channel_input = None):
+    (GET, resultChEnd) = channel_input
+    if GET.find('?') != -1:
+        service_id = GET[:GET.index('?')]
+    else:
+        service_id = GET
+
+    # Dispatch to service by Alting on output ends.
+    if services.has_key(service_id):
+        guards = []
+        for req in services[service_id]:
+            guards.append( OutputGuard(req, msg=(GET, resultChEnd)) )
+        pycsp.AltSelect(*guards)
+    else:
+        resultChEnd("Service '"+str(service_id)+"' not found!<br>")
+
+pycsp.Parallel( 
+    Entry(requestChan.writer()),
+    Dispatcher(registerChan.reader(), requestChan.reader()),
+    [ Sleep5sec(id, registerChan.writer()) for id in range(3) ],
+    [Index(id, registerChan.writer()) for id in range(2)],
+    HelloWorld(registerChan.writer()))
+}}}
+
+<img src="http://pycsp.googlecode.com/files/WebserverStep4.png" width=600>
+
+== Adding a pool of HTTPsocket processes ==
+{{{
+import pycsp
+
+@pycsp.process
+def HTTPsocket(getSocket, sendRequest):
+    [snip]
+    while True:
+        conn, addr= getSocket()
+        req=conn.recv(256)
+        if not req:
+            conn.close()
+            return
+        lines = req.split('\n')
+        for line in lines:
+            line=line.split(' ')
+            if line[0]=='GET':
+                conn.sendall(answer)
+                sendRequest((line[1], itemOut))
+                conn.sendall(itemIn())
+
+@pycsp.process
+def Entry(dispatch):
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serversocket.bind(('', int(sys.argv[1])))
+    serversocket.listen(1)
+
+    socketChan = pycsp.Channel('Socket Channel')
+    sendSocket = socketChan.writer()
+    
+    pycsp.Spawn(
+        [ HTTPsocket(socketChan.reader(), dispatch) for i in range(8) ]
+        )
+
+    while True:
+        s = serversocket.accept()
+        sendSocket(s)
+}}}
+
+<img src="http://pycsp.googlecode.com/files/WebserverStep5.png" width=800>
