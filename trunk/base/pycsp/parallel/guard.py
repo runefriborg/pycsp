@@ -27,11 +27,11 @@ import threading
 import uuid
 
 #from channel import ChannelReq, ReqStatus
-from process import Process
-from const import *
-from protocol import AddrID, ChannelReq, LockMessenger
-from dispatch import SocketDispatcher
-from exceptions import *
+from pycsp.parallel.process import Process
+from pycsp.parallel.const import *
+from pycsp.parallel.protocol import AddrID, ChannelReq, LockMessenger
+from pycsp.parallel.dispatch import SocketDispatcher
+from pycsp.parallel.exceptions import *
 
 # Classes
 class Guard:

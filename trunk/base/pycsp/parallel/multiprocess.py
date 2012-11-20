@@ -29,11 +29,11 @@ import threading
 
 import multiprocessing
 
-from dispatch import SocketDispatcher
-from protocol import RemoteLock
-from channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
-from const import *
-from configuration import *
+from pycsp.parallel.dispatch import SocketDispatcher
+from pycsp.parallel.protocol import RemoteLock
+from pycsp.parallel.channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
+from pycsp.parallel.const import *
+from pycsp.parallel.configuration import *
         
 conf = Configuration()
 
@@ -86,7 +86,7 @@ class MultiProcess(multiprocessing.Process):
         self.result_msg = None
         
         # Used to ensure the validity of the remote answers
-        self.sequence_number = 1L
+        self.sequence_number = 1
 
         # Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
         self.port = port
@@ -127,11 +127,11 @@ class MultiProcess(multiprocessing.Process):
             # Do not store the returned value from the process
             # TODO: Consider, whether process should return values
             self.fn(*self.args, **self.kwargs)
-        except ChannelPoisonException, e:
+        except ChannelPoisonException as e:
             # look for channels and channel ends
             self.__check_poison(self.args)
             self.__check_poison(self.kwargs.values())
-        except ChannelRetireException, e:
+        except ChannelRetireException as e:
             # look for channel ends
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
