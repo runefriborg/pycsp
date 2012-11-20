@@ -22,7 +22,7 @@ def Assert(cin, name = "", count = 0, minimum = 0, vocabulary = [], ordered = Fa
                 sys.stdout.write("Debug: "+str(val)+"\n")
                 sys.stdout.flush()
             received.append(val)
-        except ChannelPoisonException, e:
+        except ChannelPoisonException:
             poison = True
             break                
         except ChannelRetireException:

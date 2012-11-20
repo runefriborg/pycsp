@@ -7,10 +7,15 @@ See LICENSE.txt for licensing details (MIT License).
 """
 # Imports
 import uuid
-import cPickle as pickle
-import protocol
-from exceptions import *
-from const import *
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+from pycsp.parallel import protocol
+from pycsp.parallel.exceptions import *
+from pycsp.parallel.const import *
 
 
 # Classes
@@ -31,7 +36,7 @@ class Channel(object):
             # Set channel name
             self.name = self.control.name
 
-        except SocketBindException, e:
+        except SocketBindException as e:
             self.control = None
             raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
         
@@ -156,7 +161,7 @@ class ChannelControl(object):
 
         self.check_termination()
 
-        print 'We should not get here in read!!!', p.state
+        print('We should not get here in read!!!' + str(p.state))
         return None
 
     
@@ -181,7 +186,7 @@ class ChannelControl(object):
 
         self.check_termination()
 
-        print 'We should not get here in write!!!', p.state, msg
+        print('We should not get here in write!!! ' + str(p.state) + ' ' + str(msg))
         return None
     
     def reader(self):
@@ -313,7 +318,7 @@ class ChannelEnd:
         # execution is given back to the calling process
         try:
             self.channel = ChannelControl(name=self.restore_info[1], connect=self.restore_info[0])
-        except SocketBindException, e:
+        except SocketBindException as e:
             raise ChannelSocketException("PyCSP (reconnect to channel) unable to connect to address (%s)" % (e.addr))
         
     def _poison(self, *ignore):

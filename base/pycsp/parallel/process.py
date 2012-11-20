@@ -27,10 +27,10 @@ import types
 import uuid
 import threading
 
-from dispatch import SocketDispatcher
-from protocol import RemoteLock, ChannelMessenger
-from channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
-from const import *
+from pycsp.parallel.dispatch import SocketDispatcher
+from pycsp.parallel.protocol import RemoteLock, ChannelMessenger
+from pycsp.parallel.channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
+from pycsp.parallel.const import *
 
 # Decorators
 def process(func):
@@ -71,7 +71,7 @@ class Process(threading.Thread):
         self.result_msg = None
         
         # Used to ensure the validity of the remote answers
-        self.sequence_number = 1L
+        self.sequence_number = 1
 
         # Protect against early termination of mother-processes leavings childs in an invalid state
         self.spawned = []
@@ -100,11 +100,11 @@ class Process(threading.Thread):
         try:
             # Store the returned value from the process
             self.fn(*self.args, **self.kwargs)
-        except ChannelPoisonException, e:
+        except ChannelPoisonException as e:
             # look for channels and channel ends
             self.__check_poison(self.args)
             self.__check_poison(self.kwargs.values())
-        except ChannelRetireException, e:
+        except ChannelRetireException as e:
             # look for channel ends
             self.__check_retire(self.args)
             self.__check_retire(self.kwargs.values())
@@ -357,7 +357,7 @@ def init():
         main_proc.state = FAIL
         main_proc.result_ch_idx = None
         main_proc.result_msg = None
-        main_proc.sequence_number = 1L
+        main_proc.sequence_number = 1
 
         main_proc.spawned = []
         main_proc.registeredChanList = []

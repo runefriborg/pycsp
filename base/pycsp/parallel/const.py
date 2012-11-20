@@ -19,6 +19,7 @@ if platform.python_implementation()=='PyPy':
 
 
 ENVVAL_PORT = 'PYCSP_PORT'
+ENVVAL_HOST = 'PYCSP_HOST'
 
 # Setup
 PICKLE_PROTOCOL= 2
