@@ -271,7 +271,7 @@ class SocketThread(threading.Thread):
                         try:
                             s.recv_into(header)
                         except ossocket.socket.error as e:
-                            if e.value == 104:
+                            if e.errno == 104:
                                 # Connection has been reset
                                 header.cmd = ERROR_CMD
                             else:
@@ -369,6 +369,7 @@ class SocketThreadData:
         addr = (host, port)
 
         self.server_socket, self.server_addr = ossocket.start_server(addr)
+
         self.active_socket_list = [self.server_socket]
         self.active_socket_list_add = []
 
