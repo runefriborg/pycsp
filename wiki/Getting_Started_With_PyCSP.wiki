@@ -7,25 +7,16 @@
 PyCSP provides an API that can be used to write concurrent
 applications using [http://en.wikipedia.org/wiki/Communicating_sequential_processes CSP (Communicating Sequential Processes)].
 
-The API is implemented in four versions:
-Threads, processes, greenlets and net. All implementations share an
-almost identical API making it trivial to switch from one implementation to 
-another.
+The API is implemented in two versions:
+One implementation any mix of communication between threads, multiprocesses and distributed processes. The other provides a light-weight thread approach for running everything in a single thread. Both implementations share an almost identical API making it trivial to switch from one implementation to another.
 
-  * pycsp.threads - A CSP process is implemented as an OS thread. The internal synchronization is handled by thread-locking mechanisms. This is the default implementation. Because of the Python Global Interpeter Lock, this is best suited for applications that spend most of their time in external routines.
+  * pycsp.parallel - A CSP process network may consists of OS threads and OS processes spread across a network, or it may just be OS threads running in a single OS process. The internal synchronization is handled by a mix of thread-locking mechanism and socket communication. This implementation is the most flexible and provides the means for running CSP networks on clusters or just for dynamic network communication.
 
-  * pycsp.processes - A CSP process is implemented as an OS process. The internal synchronization is more complex than pycsp.threads and is built on top of the multiprocessing module available in Python 2.6. This implementation is not affected by the Global Interpreter Lock, but has some limitations on a Windows OS and generally has a larger communication overhead than the threaded version.
-
-  * pycsp.greenlets - This uses co-routines instead of threads. Greenlets is a simple co-routine implementation and can be downloaded [http://pypi.python.org/pypi/greenlet here]. It provides the possibility to create 100.000 CSP processes in a single CSP network. This version is optimal for single-core architectures since it provides the fastest communication.
-
-  * pycsp.net - A proof-of-concept net implementation of pycsp.threads. All synchronization is handled in a single process. This provides the same functionality as pycsp.threads, but adding a larger cost and a bottleneck by introducing the ChannelServerProcess. It requires Pyro (http://pyro.sourceforge.net/) for communication.
-
+  * pycsp.greenlets - This uses co-routines instead of OS threads/processes. Greenlets is a simple co-routine implementation and can be downloaded [http://pypi.python.org/pypi/greenlet here]. It provides the possibility to create 100.000 CSP processes in a single CSP network on a single host. This version is optimal for single-core architectures since it provides the fastest communication.
 
 Requirements:
-  * pycsp.threads - Works with the entire Python 2.x string.
-  * pycsp.processes - Needs the [http://docs.python.org/library/multiprocessing.html multiprocessing] module available in Python 2.6+
+  * pycsp.parallel - Works with the entire Python 2.x string, but needs the multiprocessing module for supporting OS processes ([http://docs.python.org/library/multiprocessing.html multiprocessing] module available in Python 2.6+).
   * pycsp.greenlets - Requires the [http://pypi.python.org/pypi/greenlet greenlet] module
-  * pycsp.net - Requires [http://www.xs4all.nl/~irmen/pyro3/ Pyro] 3.8+
 
 = Contents =
 <wiki:toc max_depth="2" />
@@ -44,9 +35,9 @@ python setup.py install
 You can now try starting your python interpreter and type `import pycsp`. If no errors, then you are good to go. The default implementation is always pycsp.threads. 
 
 {{{
->>> import pycsp
->>> print pycsp.version
-(0, 7, 1, 'threads')
+>>> from pycsp.parallel import *
+>>> print version
+(0, 9, 0, 'parallel')
 }}}
 
 = Elements of PyCSP =
@@ -54,7 +45,7 @@ You can now try starting your python interpreter and type `import pycsp`. If no 
 Open a new file and put
 
 {{{
-from pycsp.threads import *
+from pycsp.parallel import *
 }}}
 
 as your first line.
