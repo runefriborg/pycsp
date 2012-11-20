@@ -108,6 +108,8 @@ To communicate on a channel you are required to join it first.
 = A Simple Application =
 
 {{{
+from pycsp.parallel import *
+
 @process
 def counter(cout, limit):
   for i in xrange(limit):
@@ -124,6 +126,8 @@ Parallel(
   counter(A.writer(), limit=10),
   printer(A.reader())
 )
+
+shutdown()
 }}}
 
 Output:
