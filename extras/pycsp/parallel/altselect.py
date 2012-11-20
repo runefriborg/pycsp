@@ -24,13 +24,14 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from alternation import Alternation
-from process import current_process_id
+import inspect
 
-from const import *
+from pycsp.parallel.alternation import Alternation
+from pycsp.parallel.process import current_process_id
+
+from pycsp.parallel.const import *
 import pycsp.current
 
-import inspect
 
 class InputGuard:
     """
@@ -214,7 +215,7 @@ def FairSelect(*guards):
     for item in guards:
         try:
             chan_name = item.g[0].channel.name
-            if H.has_key(chan_name):
+            if chan_name in H:
                 L.append((H[chan_name], item.g))
             else:
                 L.append((0, item.g))
@@ -269,16 +270,16 @@ class AltHistory(object):
     getInstance = classmethod(getInstance)
 
     def get_history(self, alt_key):
-        if not self.history.has_key(alt_key):
+        if not alt_key in self.history:
             self.history[alt_key] = {}
         return self.history[alt_key]
 
     def update_history(self, alt_key, chan_name):
-        if not self.history.has_key(alt_key):
+        if not alt_key in self.history:
             self.history[alt_key] = {}
 
         H = self.history[alt_key]
-        if H.has_key(chan_name):
+        if chan_name in H:
             H[chan_name] += 1
         else:
             H[chan_name] = 1

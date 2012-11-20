@@ -3,7 +3,7 @@ PYTHON=`which python`
 DESTDIR=/
 BUILDIR=$(CURDIR)/debian/pycsp
 PROJECT=Pycsp
-VERSION=0.6.2
+VERSION=0.9.0
 
 all:
 	@echo "make source - Create source package"

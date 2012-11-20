@@ -10,12 +10,12 @@ See LICENSE.txt for licensing details (MIT License).
 
 import sys
 import threading
-from exceptions import *
 
-from header import *
-from dispatch import *
-from const import *
-from configuration import *
+from pycsp.parallel.exceptions import *
+from pycsp.parallel.header import *
+from pycsp.parallel.dispatch import *
+from pycsp.parallel.const import *
+from pycsp.parallel.configuration import *
 
 conf = Configuration()
 
@@ -780,7 +780,7 @@ class ChannelReq(object):
                 self.LM.remote_release(w_conn, self.process)
                 self.LM.remote_release(r_conn, reader.process)
 
-        except AddrUnavailableException, e:
+        except AddrUnavailableException as e:
             # Unable to reach process during offer
             # The primary reason is probably because a request were part of an alting and the process have exited.
             if conf.get(SOCKETS_STRICT_MODE):

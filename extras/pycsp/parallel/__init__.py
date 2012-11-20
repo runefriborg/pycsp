@@ -8,15 +8,15 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 
-from guard import Skip, SkipGuard, Timeout, TimeoutGuard
-from alternation import choice, Alternation
-from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
-from channel import Channel, retire, poison
-from process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
-from multiprocess import MultiProcess, multiprocess
-from exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException
-from configuration import *
-from compat import *
+from pycsp.parallel.guard import Skip, SkipGuard, Timeout, TimeoutGuard
+from pycsp.parallel.alternation import choice, Alternation
+from pycsp.parallel.altselect import FairSelect, AltSelect, InputGuard, OutputGuard
+from pycsp.parallel.channel import Channel, retire, poison
+from pycsp.parallel.process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
+from pycsp.parallel.multiprocess import MultiProcess, multiprocess
+from pycsp.parallel.exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException
+from pycsp.parallel.configuration import *
+from pycsp.parallel.compat import *
 
 version = (0,9,0, 'parallel')
 

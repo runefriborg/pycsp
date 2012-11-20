@@ -10,14 +10,20 @@ See LICENSE.txt for licensing details (MIT License).
 
 import os
 import sys
-import ossocket
 import select, threading
-import cPickle as pickle
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import struct
-from header import *
-from exceptions import *
-from const import *
-from configuration import *
+
+from pycsp.parallel import ossocket
+from pycsp.parallel.header import *
+from pycsp.parallel.exceptions import *
+from pycsp.parallel.const import *
+from pycsp.parallel.configuration import *
         
 conf = Configuration()
 
@@ -94,7 +100,7 @@ class SocketDispatcher(object):
 
         # Critical section start
 
-        if kwargs.has_key("reset") and kwargs["reset"]:
+        if "reset" in kwargs and kwargs["reset"]:
             del cls.__condObj
             cls.__condObj = threading.Condition()
             del cls.__instance
@@ -157,7 +163,7 @@ class QueueBuffer:
         # Current setting is two ticks, to timeout
         # It is the input threads, which invokes the ticks
         if self.waitingR:
-            print "tick"
+            print("tick")
             self.lock.acquire()
             if self.waitingR:
                 ticks = 2
@@ -264,11 +270,10 @@ class SocketThread(threading.Thread):
                         self.cond.acquire()
                         try:
                             s.recv_into(header)
-                        except ossocket.socket.error, (value, message):
-                            if value == 104:
+                        except ossocket.socket.error as e:
+                            if e.errno == 104:
                                 # Connection has been reset
                                 header.cmd = ERROR_CMD
-                                #print "OK"
                             else:
                                 raise
                         self.cond.release()
@@ -312,18 +317,18 @@ class SocketThread(threading.Thread):
                                 # Do not close sockets as the socketthread may be restarted at a later time
 
                             elif (header.cmd & PROCESS_CMD):
-                                if self.processes.has_key(header.id):
+                                if header.id in self.processes:
                                     self.processes[header.id].handle(m)                                
                                 elif (header.cmd & REQ_REPLY):
                                     raise FatalException("A REQ_REPLY message should always be valid!")
                                 elif (header.cmd & IGN_UNKNOWN):
                                     raise FatalException("IGN_UNKNOWN should never occur!")
                                 else:
-                                    if not self.data.processes_unknown.has_key(header.id):
+                                    if not header.id in self.data.processes_unknown:
                                         self.data.processes_unknown[header.id] = []
                                     self.data.processes_unknown[header.id].append(m)
                             else:
-                                if self.channels.has_key(header.id):
+                                if header.id in self.channels:
                                     if (header.cmd & IS_REPLY):
                                         self.channels[header.id].put_reply(m)
                                     else:
@@ -331,7 +336,7 @@ class SocketThread(threading.Thread):
                                 elif (header.cmd & IGN_UNKNOWN):
                                     pass
                                 else:                                
-                                    if not self.data.channels_unknown.has_key(header.id):
+                                    if not header.id in self.data.channels_unknown:
                                         self.data.channels_unknown[header.id] = QueueBuffer()
 
                                     if (header.cmd & IS_REPLY):
@@ -355,14 +360,16 @@ class SocketThreadData:
 
         self.cond = cond
 
-        if conf.get(PYCSP_PORT) != 0:
-            addr = ('', conf.get(PYCSP_PORT))
-        elif os.environ.has_key(ENVVAL_PORT):
-            addr = ('', int(os.environ[ENVVAL_PORT]))
-        else:
-            addr = ('', 0)
+        host = conf.get(PYCSP_HOST)
+        port = conf.get(PYCSP_PORT)
+        if port == 0 and ENVVAL_PORT in os.environ:
+            port = int(os.environ[ENVVAL_PORT])
+        if host == '' and ENVVAL_HOST in os.environ:
+            host = os.environ[ENVVAL_HOST]
+        addr = (host, port)
 
         self.server_socket, self.server_addr = ossocket.start_server(addr)
+
         self.active_socket_list = [self.server_socket]
         self.active_socket_list_add = []
 
@@ -425,7 +432,7 @@ class SocketThreadData:
     def registerChannel(self, name_id):
         self.cond.acquire()
 
-        if self.channels_unknown.has_key(name_id):
+        if name_id in self.channels_unknown:
             #print "GOT UNKNOWN MESSAGE"
             q = self.channels_unknown.pop(name_id)
         else:
@@ -440,7 +447,7 @@ class SocketThreadData:
 
     def getChannelQueue(self, name_id):
         self.cond.acquire()
-        if self.channels.has_key(name_id):
+        if name_id in self.channels:
             q = self.channels[name_id]
         else:
             q = self.guards[name_id]
@@ -449,7 +456,7 @@ class SocketThreadData:
 
     def deregisterChannel(self, name_id):
         self.cond.acquire()
-        if self.channels.has_key(name_id):
+        if name_id in self.channels:
             del self.channels[name_id]
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()            
@@ -467,7 +474,7 @@ class SocketThreadData:
 
     def deregisterGuard(self, name_id):
         self.cond.acquire()
-        if self.guards.has_key(name_id):
+        if name_id in self.guards:
             del self.guards[name_id]
         if len(self.channels) == 0 and len(self.processes) == 0:
             self.stopThread()            
@@ -476,7 +483,7 @@ class SocketThreadData:
 
     def registerProcess(self, name_id, remotelock):
         self.cond.acquire()
-        if self.processes_unknown.has_key(name_id):
+        if name_id in self.processes_unknown:
             for m in self.processes_unknown[name_id]:
                 remotelock.handle(m)
             del self.processes_unknown[name_id]
@@ -512,27 +519,27 @@ class SocketThreadData:
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
                 # Process message
-                if self.processes.has_key(header.id):
+                if header.id in self.processes:
                     self.processes[header.id].handle(m)
                 elif (header.cmd & REQ_REPLY):
                     self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload="", otherhandler=otherhandler)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    if not self.processes_unknown.has_key(header.id):
+                    if not header.id in self.processes_unknown:
                         self.processes_unknown[header.id] = []
                     self.processes_unknown[header.id].append(m)
-            elif (header.cmd & GUARD_CMD and self.guards.has_key(header.id)):
+            elif (header.cmd & GUARD_CMD and header.id in self.guards):
                 # Guard message
                 raise FatalException("Guard should never receive a normal message")
             else:
                 # Channel message
-                if self.channels.has_key(header.id):
+                if header.id in self.channels:
                     self.channels[header.id].put_normal(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    if not self.channels_unknown.has_key(header.id):
+                    if not header.id in self.channels_unknown:
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_normal(m)
         else:
@@ -559,25 +566,25 @@ class SocketThreadData:
         if addr == self.server_addr:
             if (header.cmd & PROCESS_CMD):
                 # Process message
-                if self.processes.has_key(header.id):
+                if header.id in self.processes:
                     self.processes[header.id].handle(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    if not self.processes_unknown.has_key(header.id):
+                    if not header.id in self.processes_unknown:
                         self.processes_unknown[header.id] = []
                     self.processes_unknown[header.id].append(m)
-            elif (header.cmd & GUARD_CMD and self.guards.has_key(header.id)):
+            elif (header.cmd & GUARD_CMD and header.id in self.guards):
                 # Guard message
                 self.guards[header.id].put_reply(m)
             else:
                 # Channel message
-                if self.channels.has_key(header.id):
+                if header.id in self.channels:
                     self.channels[header.id].put_reply(m)
                 elif (header.cmd & IGN_UNKNOWN):
                     pass
                 else:
-                    if not self.channels_unknown.has_key(header.id):
+                    if not header.id in self.channels_unknown:
                         self.channels_unknown[header.id] = QueueBuffer()
                     self.channels_unknown[header.id].put_reply(m)                
         else:
