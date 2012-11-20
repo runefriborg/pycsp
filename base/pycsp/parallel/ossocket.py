@@ -9,6 +9,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 import time
 import errno
+import os
 import socket
 import sys
 import threading
@@ -16,9 +17,39 @@ from pycsp.parallel.exceptions import *
 from pycsp.parallel.configuration import *
 from pycsp.parallel.const import *
 
+
 STDERR_OUTPUT = False
 
 conf = Configuration()    
+
+# Functions for retrieving LAN ip addresses
+if os.name != "nt":
+    import fcntl
+    import struct
+    
+    def _get_interface_ip(ifname):
+    	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    	ip = socket.inet_ntoa(fcntl.ioctl(
+                s.fileno(),
+                0x8915,  # SIOCGIFADDR
+                struct.pack('256s', ifname[:15])
+    		)[20:24])
+        s.close()
+        return ip
+    
+def _get_ip():
+    ip = socket.gethostbyname(socket.gethostname())
+    if ip.startswith("127.") and os.name != "nt":
+    	interfaces = ["eth0","eth1","eth2","wlan0","wlan1","wifi0","ath0","ath1","ppp0"]
+    	for ifname in interfaces:
+            try:
+                ip = _get_interface_ip(ifname)
+                break;
+            except IOError:
+                pass
+    return ip
+    
+
 
 def _connect(addr, reconnect=True):
     """
@@ -50,10 +81,10 @@ def _connect(addr, reconnect=True):
                 return False
             
             if STDERR_OUTPUT:
-                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.value, e.message))
+                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
             if sock:
                 sock.close()
-            if e.value != errno.ECONNREFUSED:            
+            if e.errno != errno.ECONNREFUSED:            
                 raise Exception("Fatal error: Could not open socket: " + e.message)
         if not connected:
             if t1 == None:
@@ -94,10 +125,10 @@ def start_server(server_addr=('', 0)):
             ok = True
         except socket.error as e:
             if STDERR_OUTPUT:
-                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.value, e.message))
+                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
             if sock:
                 sock.close()
-            if e.value != errno.EADDRINUSE:            
+            if e.errno != errno.EADDRINUSE:            
                 raise Exception("Fatal error: Could not bind to socket: " + e.message)
         if not ok:
             if t1 == None:
@@ -110,6 +141,10 @@ def start_server(server_addr=('', 0)):
 
     # Obtain binded addresses
     address = sock.getsockname()
+
+    # If bounded address equals '0.0.0.0', then lookup the best candidate for a public IP.
+    if address[0] == '0.0.0.0':
+        address = (_get_ip(), address[1])
 
     # Initiate listening for connections. Create queue of 5 for unaccepted connections
     sock.listen(5)
@@ -138,7 +173,7 @@ def sendallNOcache(sock, data):
         sock.sendall(data)
     except socket.error as e:
         if STDERR_OUTPUT:
-            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.value, e.message))
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
             # TODO make exceptions depending on the error value
 
         raise SocketSendException()
@@ -158,7 +193,7 @@ def recvall(sock, msg_len):
             msg_len_received += len(chunk)
     except socket.error as e:
         if STDERR_OUTPUT:
-            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.value, e.message))
+            sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
         raise SocketClosedException()
         
     return "".join(msg_chunks)
@@ -203,7 +238,7 @@ class ConnHandler(object):
             sock.sendall(data)
         except socket.error as e:
             if STDERR_OUTPUT:
-                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.value, e.message))
+                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
             # TODO make exceptions depending on the error value
 
             # Expire socket
@@ -238,7 +273,7 @@ class ConnHandler(object):
                 ok = True
             except socket.error as e:
                 if STDERR_OUTPUT:
-                    sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.value, e.message))
+                    sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
                 # TODO make exceptions depending on the error value
 
                 if new:
