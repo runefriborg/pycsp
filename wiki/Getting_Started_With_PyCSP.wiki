@@ -138,4 +138,4 @@ Output:
 
 = More Examples =
 
-For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/examples examples].
+For a lot more [http://code.google.com/p/pycsp/source/browse/#svn/trunk/base/examples examples].
