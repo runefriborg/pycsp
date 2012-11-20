@@ -9,10 +9,14 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import inspect
 import types
-import cPickle as pickle
-from guard import Guard
-from exceptions import *
-from const import *
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+from pycsp.parallel.guard import Guard
+from pycsp.parallel.exceptions import *
+from pycsp.parallel.const import *
 
 
 # Decorators
@@ -196,7 +200,7 @@ class Alternation:
                 if retire:
                     raise ChannelRetireException()
 
-                print 'We should not get here in choice!!!'
+                print('We should not get here in choice!!!')
 
         idx, op = reqs[act]
 
