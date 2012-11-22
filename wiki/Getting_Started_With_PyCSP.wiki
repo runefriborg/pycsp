@@ -104,6 +104,13 @@ To communicate on a channel you are required to join it first.
 
 `cin = A.reader()` or `cout = A.writer()`
 
+== Closing the PYCSP instance ==
+
+Every PyCSP application will create a server thread, to serve incoming communications on channels. For this reason, it is required that you always end your PyCSP application with a call to shutdown()
+
+{{{
+shutdown()
+}}}
 
 = A Simple Application =
 
