@@ -7,14 +7,14 @@
 All PyCSP executions can be traced using the pycsp.common.trace module. It must be imported into the current pycsp namespace after a previous import of a pycsp implementation. Like this:
 
 {{{
-from pycsp.processes import *
+from pycsp.parallel import *
 from pycsp.common.trace import *
 }}}
 
 or
 
 {{{
-import pycsp.processes as csp
+import pycsp.parallel as csp
 import pycsp.common.trace as csp
 }}}
 
@@ -43,7 +43,7 @@ The written trace file is updated with every new trace update, thus it can be pi
 = Example =
 
 {{{
-from pycsp.threads import *
+from pycsp.parallel import *
 from pycsp.common.trace import *
 
 TraceInit()
@@ -129,7 +129,7 @@ $ cat pycsp_trace.log
 
 = Using PlayTrace.py =
 
-In the tools folder of the PyCSP download you will find the PlayTrace.py tool. Executing this
+In the tools folder of the PyCSP-extras download you will find the PlayTrace.py tool. Executing this
 
 {{{
 $ python PlayTrace.py
