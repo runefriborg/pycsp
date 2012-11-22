@@ -10,7 +10,7 @@ Contents:
 == Answer request on port 8080 ==
 
 {{{
-import pycsp
+import pycsp.parallel as pycsp
 
 @pycsp.process
 def HTTPsocket(sock):
@@ -39,6 +39,8 @@ def Entry():
         pycsp.Spawn( HTTPsocket(s) )
 
 pycsp.Parallel( Entry() )
+
+pycsp.shutdown()
 }}}
 
 <img src="http://pycsp.googlecode.com/files/WebserverStep1.png" width=400>
@@ -46,7 +48,7 @@ pycsp.Parallel( Entry() )
 == Adding a Hello World service ==
 
 {{{
-import pycsp
+import pycsp.parallel as pycsp
 
 @pycsp.process
 def HelloWorld(request):
@@ -80,12 +82,14 @@ pycsp.Parallel(
     Entry(requestChan.writer()),
     HelloWorld(requestChan.reader())
     )
+
+pycsp.shutdown()
 }}}
 <img src="http://pycsp.googlecode.com/files/WebserverStep2.png" width=400>
 
 == Adding More Services ==
 {{{
-import pycsp
+import pycsp.parallel as pycsp
 
 @pycsp.process
 def Sleep5sec(id, request):
@@ -101,13 +105,15 @@ pycsp.Parallel(
     Entry(requestChan.writer()),
     [ Sleep5sec(id, requestChan.reader()) for id in range(3) ]
     )
+
+pycsp.shutdown()
 }}}
 
 <img src="http://pycsp.googlecode.com/files/WebserverStep3.png" width=400>
 
 == Adding a Service Dispatcher ==
 {{{
-import pycsp
+import pycsp.parallel as pycsp
 
 @pycsp.process
 def HelloWorld(register):
@@ -159,13 +165,15 @@ pycsp.Parallel(
     [ Sleep5sec(id, registerChan.writer()) for id in range(3) ],
     [Index(id, registerChan.writer()) for id in range(2)],
     HelloWorld(registerChan.writer()))
+
+pycsp.shutdown()
 }}}
 
 <img src="http://pycsp.googlecode.com/files/WebserverStep4.png" width=600>
 
 == Adding a pool of HTTPsocket processes ==
 {{{
-import pycsp
+import pycsp.parallel as pycsp
 
 @pycsp.process
 def HTTPsocket(getSocket, sendRequest):
@@ -200,6 +208,8 @@ def Entry(dispatch):
     while True:
         s = serversocket.accept()
         sendSocket(s)
+
+pycsp.shutdown()
 }}}
 
 <img src="http://pycsp.googlecode.com/files/WebserverStep5.png" width=800>
