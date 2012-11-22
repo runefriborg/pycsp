@@ -56,6 +56,9 @@ cin = BufferC[4].reader()
 
 The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or as an alternative the FairSelect can be used to balance the guards.
 
+
+_In a distributed PyCSP application the buffer of a buffered channel is located where the Channel is hosted. Thus, hosting the Channel at the receiving end would enable some latency hiding by transferring the communicated data before a channel communication is committed._
+
 = External Choice (AltSelect, FairSelect) =
 
 The external choice selects a single guard from a set of guards. The current guard types are:
