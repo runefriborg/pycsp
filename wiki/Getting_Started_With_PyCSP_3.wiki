@@ -5,6 +5,8 @@
 = Termination =
 
 {{{
+from pycsp.parallel import pycsp
+
 C = pycsp.Channel()
 @pycsp.process
 def P(cin):
@@ -23,6 +25,8 @@ Shutdown on next read.
 
 Exception handling:
 {{{
+from pycsp.parallel import pycsp
+
 @pycsp.process
 def streamFile(cout, filename):
   try:
