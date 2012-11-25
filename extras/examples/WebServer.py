@@ -129,7 +129,8 @@ def Dispatcher(register, inc):
                 
     except ChannelPoisonException:
         poison(register, inc)
-        poison(*services.values())
+        for regs in services.values():
+            poison(*regs)
 
 @process
 def HTTPsocket(sock, dispatchChan):
@@ -180,6 +181,5 @@ Parallel(entry(request),
          [Sleep(i, -register) for i in range(50)],
          [Index(i, -register) for i in range(2)],
          HelloWorld(-register))
-
 
 shutdown()

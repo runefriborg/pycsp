@@ -4,13 +4,25 @@
   implementation named pycsp.parallel. Thus available implementations are now
     - pycsp.parallel (default)
     - pycsp.greenlets
-* pycsp.greenlets has not been changed since 0.7.1.
-* The very long list of new features in pycsp.parallel is available at
-  http://code.google.com/p/pycsp
+* pycsp.greenlets has not been changed. Simple and fast.
 * The trunk repository has been split into two versions. The base which
   only requires standard CPython libraries and the extras version, which 
   adds all the extra stuff (greenlets, and so on) that requires external 
   libraries.
+* Previously buffered channels were implemented as a string of processes. This
+  would greatly limit performance, as the latency for communicating across
+  a channel would increase. Now, a buffered channel has an internal buffer and
+  perform only slightly more work than an unbuffered channel. Also the buffer
+  has a location, which means that a buffered channel can be used to hide the
+  latency induced by the data-transfer latency.
+* All channels pycsp.parallel are created as network-enabled channels and supports
+  communicating with remote processes.
+* Added a new process type @multiprocess which runs as an OS-process. This enables
+  mixing @process and @multiprocess in one PyCSP network.
+* Added a shutdown() method, which must be called at the end of all applications
+  importing pycsp. It closes the channel references and waits for all references to
+  leave hosted channels, thus ensuring that the PyCSP network is left in a robust
+  state.
 
 0.7.0 - 0.7.1
 ----------
