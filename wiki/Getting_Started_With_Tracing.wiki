@@ -66,6 +66,8 @@ Parallel(
 )
 
 TraceQuit()
+
+shutdown()
 }}}
 
 writes the following trace file:
