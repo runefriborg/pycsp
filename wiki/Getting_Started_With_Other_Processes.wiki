@@ -7,7 +7,7 @@ PyCSP provides a variety of different process types for different tasks. Table 1
 Table 1. Commstime benchmarks
 || *pycsp.greenlets : @process* || ~ 0.007ms ||
 || *pycsp.parallel : @process* || ~ 0.250ms ||
-|| *pycsp.parallel : @multiprocess* || ~ 0.415 ||
+|| *pycsp.parallel : @multiprocess* || ~ 0.415ms ||
 
 == pycsp.greenlets : @process ==
 
