@@ -4,8 +4,8 @@
 
 PyCSP provides a variety of different process types for different tasks. Table 1 shows the performance of channel communication using the [http://code.google.com/p/pycsp/source/browse/#svn/trunk/base/examples commstime] benchmark for each process type on a Intel i7-2760QM CPU @ 2.40GHz running Ubuntu 12.10.
 
-|| pycsp.greenlets : @process || ~ 7us ||
-|| pycsp.parallel : @process || ~ 250us ||
+|| *pycsp.greenlets : @process* || ~ 0.007ms ||
+|| *pycsp.parallel : @process* || ~ 0.250ms ||
 
 Table 1. Commstime benchmarks
 
