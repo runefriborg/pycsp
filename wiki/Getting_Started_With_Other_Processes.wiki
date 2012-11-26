@@ -47,10 +47,48 @@ The pycsp.greenlets module translates the other process decorators, such as @mul
 
 @process is implemented as an OS thread. Multiple started processes (OS threads) will be able to communicate directly without using sockets, as long as the involved channels are hosted in the same CPython Interpreter.
 
+{{{
+import pycsp.parallel as pycsp
+from random import random
+
+@pycsp.process
+def work(cnt, result_out):
+   sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
+   result_out((4.0*sum)/cnt)
+
+A = pycsp.Channel("A")
+
+pycsp.Spawn(2 * work(5000000, A.writer()))
+
+cin = A.reader()
+print("Result: %f" % ((cin()+cin())/2) )
+
+pycsp.shutdown()
+}}}
+
 The GIL (CPython Global Interpreter Lock) limits the execution of parallel OS threads, when accessing Python objects. This limitation can be overcome by using @multiprocess instead.
 
 == pycsp.parallel / @multiprocess ==
 
 This process is using the CPython multiprocessing module to run CPS processes as OS processes. All communication from a @multiprocess will be handled through sockets. Channel-ends can still be passed between/to OS processes and even between/to remote processes as the channel-ends contains the information required to reconnect the underlying sockets.
+
+{{{
+import pycsp.parallel as pycsp
+from random import random
+
+@pycsp.multiprocess
+def work(cnt, result_out):
+   sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
+   result_out((4.0*sum)/cnt)
+
+A = pycsp.Channel("A")
+
+pycsp.Spawn(2 * work(5000000, A.writer()))
+
+cin = A.reader()
+print("Result: %f" % ((cin()+cin())/2) )
+
+pycsp.shutdown()
+}}}
 
 See Remote connections for more information on how to connect remote processes using PyCSP channels.
