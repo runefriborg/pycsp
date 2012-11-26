@@ -19,6 +19,10 @@ PYCSP_HOST=localhost PYCSP_PORT=8888 python test.py
 A = pycsp.Channel('A', connect=('localhost, 8888))
 }}}
 
+= Channel(name, buffer, connect) =
+
+
+
 
 = Limitations =
 
