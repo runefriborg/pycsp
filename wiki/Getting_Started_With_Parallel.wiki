@@ -52,7 +52,7 @@ try:
   while True:
     data= input()
     # Perform work on data
-except ChannelRetireException:
+except pycsp.ChannelRetireException:
   # Close hosted channel, as the channel has been retired
   pycsp.shutdown()
 }}}
