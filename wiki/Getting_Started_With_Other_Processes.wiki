@@ -1,4 +1,4 @@
-#summary A tutorial on the various process types available
+#summary The various process types available
 
 = Introduction =
 
