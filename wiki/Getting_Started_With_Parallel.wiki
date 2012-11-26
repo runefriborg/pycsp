@@ -1,5 +1,8 @@
 #summary A tutorial on the network-enabled part of PyCSP (incomplete)
+#labels Tutorial
 #sidebar TutorialList
+
+<wiki:toc max_depth="2" />
 
 = Introduction =
 
@@ -19,16 +22,6 @@ PYCSP_HOST=localhost PYCSP_PORT=8888 python test.py
 A = pycsp.Channel('A', connect=('localhost, 8888))
 }}}
 
-= Channel(name, buffer, connect) =
-
-
-
-
-= Limitations =
-
-  * All channel names have been restricted to a length of 16 chars.
-
-
 = Connection Handling =
 
 As all CSP communications are using sockets, it may happen that sockets are disconnected unexpectedly. Such situations can be handled through catching the exceptions below.
@@ -40,3 +33,47 @@ As all CSP communications are using sockets, it may happen that sockets are disc
 
 
 Whenever a connection is lost, the connection is recreated and retried. If after N tries, the connection still fails, then...
+
+= Channel(name, buffer, connect) =
+
+The buffer parameter is only valid for the hosted Channel, since the buffer is located at the Channel host. 
+
+not documented yet
+
+== Latency hiding with a buffered channel ==
+
+{{{
+#Host A
+import pycsp.parallel as pycsp
+line42 = pycsp.Channel("line42", buffer=1000)
+print("Address: %s" % (str(line42.address)))
+input = line42.reader()
+try:
+  while True:
+    data= input()
+    # Perform work on data
+except ChannelRetireException:
+  # Close hosted channel, as the channel has been retired
+  pycsp.shutdown()
+}}}
+
+
+{{{
+#Host B1,B2 .. BN
+import pycsp.parallel as pycsp
+line42 = pycsp.Channel("line42", connect=<address at Host A>)
+output = line42.writer()
+for i in xrange(10):
+  output(i) # i could be large numpy arrays
+
+pycsp.retire(output)
+
+pycsp.shutdown()
+}}}
+== NAT traversal ==
+
+not documented yet
+
+== Limitations ==
+
+  * All channel names have been restricted to a length of 16 chars.
