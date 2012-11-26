@@ -17,6 +17,25 @@ The implementation of @process in pycsp.greenlets, does not allow any communicat
 
 Up to 100.000 pycsp.greenlets processes has successfully been used in a single PyCSP network.
 
+{{{
+import pycsp.greenlets as pycsp
+
+@pycsp.process
+def readP(cin):
+  cin()
+
+A = pycsp.Channel("A")
+
+pycsp.Spawn(100000 * readP(A.reader()))
+
+cout = A.writer()
+for i in xrange(100000):
+  cout(i)
+
+pycsp.shutdown()
+}}}
+
+
 The pycsp.greenlets module translates the other process decorators, such as @multiprocess, to the standard pycsp.greenlets @process.
 
 
@@ -28,6 +47,6 @@ The GIL (CPython Global Interpreter Lock) limits the execution of parallel OS th
 
 == pycsp.parallel / @multiprocess ==
 
-@multiprocess is using the CPython multiprocessing module to run CPS processes as OS processes. All communication from a @multiprocess will be handled through sockets. Channel-ends can still be passed between/to OS processes and even between/to remote processes as the channel-ends contains the information required to reconnect the underlying sockets.
+This process is using the CPython multiprocessing module to run CPS processes as OS processes. All communication from a @multiprocess will be handled through sockets. Channel-ends can still be passed between/to OS processes and even between/to remote processes as the channel-ends contains the information required to reconnect the underlying sockets.
 
 See Remote connections for more information on how to connect remote processes using PyCSP channels.
