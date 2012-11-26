@@ -1,4 +1,5 @@
 #summary The various process types available
+#labels Featured,Tutorial
 #sidebar TutorialList
 
 = Introduction =
