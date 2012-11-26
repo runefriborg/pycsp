@@ -7,4 +7,5 @@ Tutorials:
     * [Getting_Started_With_PyCSP_4 A Scalable Webserver]
   * [Getting_Started_With_Other_Processes Various Process Types]
   * [Getting_Started_With_Tracing The Trace Module]
+  * [Getting_Started_With_Parallel Connecting Distributed Channels]
   * [Getting_Started_With_Syntactic_Sugar Some Syntactic Sugar]
