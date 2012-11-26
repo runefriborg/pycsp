@@ -3,20 +3,21 @@
 
 = Introduction =
 
-The pycsp.parallel module has a Channel type, which by default, allows other processes to connect to it.
+The pycsp.parallel module has one any-2-any Channel type, which by default, allows other processes to connect to it. When a new channel is created, it is automatically hosted in the current Python interpreter. To connect to a hosted channel the location must be known, as there is no name server available for channels.
 
-There is currently no name server for channels, thus the location of channels must be known.
-
-Every CPython interpreter importing PyCSP.parallel will listen on only one port, which handles all communication to channels and processes.
+Every Python interpreter importing PyCSP.parallel will listen on only one port and that port handles all the communication to channels and processes started in this Python interpreter.
 
 The default host is '0.0.0.0' and the default port is just any available port. To specify a host or port, the enviroment variables PYCSP_HOST or PYCSP_PORT may be used.
 
 {{{
+#This interpreter listens on port 8888 on localhost.
 PYCSP_HOST=localhost PYCSP_PORT=8888 python test.py
 }}}
 
-The above cmd listens only on port 8888 on localhost.
-
+{{{
+#To connect to a channel 'A' on localhost, port 8888
+A = pycsp.Channel('A', connect=('localhost, 8888))
+}}}
 
 
 = Limitations =
