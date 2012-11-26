@@ -22,13 +22,12 @@ The pycsp.greenlets module translates the other process decorators, such as @mul
 
 == pycsp.parallel / @process ==
 
+@process is implemented as an OS thread. Multiple started processes (OS threads) will be able to communicate directly without using sockets, as long as the involved channels are hosted in the same CPython Interpreter.
+
+The GIL (CPython Global Interpreter Lock) limits the execution of parallel OS threads, when accessing Python objects. This limitation can be overcome by using @multiprocess instead.
+
 == pycsp.parallel / @multiprocess ==
 
+@multiprocess is using the CPython multiprocessing module to run CPS processes as OS processes. All communication from a @multiprocess will be handled through sockets. Channel-ends can still be passed between/to OS processes and even between/to remote processes as the channel-ends contains the information required to reconnect the underlying sockets.
 
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+See Remote connections for more information on how to connect remote processes using PyCSP channels.
