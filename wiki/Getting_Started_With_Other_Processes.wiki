@@ -91,4 +91,4 @@ print("Result: %f" % ((cin()+cin())/2) )
 pycsp.shutdown()
 }}}
 
-See Remote connections for more information on how to connect remote processes using PyCSP channels.
+See [Getting_Started_With_Parallel Remote connections] for more information on how to connect remote processes using PyCSP channels.
