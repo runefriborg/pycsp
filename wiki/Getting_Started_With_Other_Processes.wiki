@@ -15,10 +15,12 @@ The process type in pycsp.greenlets is similar to a co-routine and requires only
 
 The implementation of @process in pycsp.greenlets, does not allow any communication between greenlets from different OS threads or OS processes, thus the performance is limited by the systems single-thread performance.
 
-Up to 100.000 pycsp.greenlets processes has successfully been used in a single PyCSP network.
+Up to 1.000.000 pycsp.greenlets processes has successfully been used in a single PyCSP network.
 
 {{{
 import pycsp.greenlets as pycsp
+
+N = 100000
 
 @pycsp.process
 def readP(cin):
@@ -26,10 +28,10 @@ def readP(cin):
 
 A = pycsp.Channel("A")
 
-pycsp.Spawn(100000 * readP(A.reader()))
+pycsp.Spawn(N * readP(A.reader()))
 
 cout = A.writer()
-for i in xrange(100000):
+for i in xrange(N):
   cout(i)
 
 pycsp.shutdown()
