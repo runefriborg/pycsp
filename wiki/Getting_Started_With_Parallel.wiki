@@ -26,9 +26,9 @@ A = pycsp.Channel('A', connect=('localhost, 8888))
 
 As all CSP communications are using sockets, it may happen that sockets are disconnected unexpectedly. Such situations can be handled through catching the exceptions below.
 
-|| SocketException || ... ||
-|| SocketClosedException || ... ||
-|| SocketConnectException || ... ||
+|| SocketException || The parent Exception type for the other Socket Exceptions ||
+|| SocketClosedException || ... ||
+|| SocketConnectException || Thrown when a  ||
 || SocketBindException || ... ||
 
 
