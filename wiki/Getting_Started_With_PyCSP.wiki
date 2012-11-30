@@ -33,9 +33,11 @@ sudo python setup.py install
 You can now try starting your python interpreter and type `import pycsp.parallel`. If no errors, then you are good to go. 
 
 {{{
->>> from pycsp.parallel import *
->>> print version
+>>> import pycsp.parallel as pycsp
+>>> print pycsp.version
 (0, 9, 0, 'parallel')
+>>> pycsp.shutdown()
+>>> quit
 }}}
 
 = Elements of PyCSP =
@@ -43,7 +45,7 @@ You can now try starting your python interpreter and type `import pycsp.parallel
 Open a new file and put
 
 {{{
-from pycsp.parallel import *
+import pycsp.parallel as pycsp
 }}}
 
 as your first line.
@@ -53,7 +55,7 @@ as your first line.
 This is a process with one output channel end:
 
 {{{
-@process
+@pycsp.process
 def counter(cout, limit=1000)
   for i in xrange(limit):
     cout(i)
@@ -67,13 +69,13 @@ To start two instances of our newly created counter process we have the followin
 The Parallel construct will block until both counter processes have terminated.
 
 {{{
-Parallel(counter(...), counter(...))
+pycsp.Parallel(counter(...), counter(...))
 }}}
 
 They can also be started asynchronously by using the Spawn construct. 
 
 {{{
-Spawn(counter(...), counter(...))
+pycsp.Spawn(counter(...), counter(...))
 }}}
 
 === In sequence ===
@@ -81,7 +83,7 @@ Spawn(counter(...), counter(...))
 The Sequence construct will block until both counter processes have terminated. Only one process will be execute at any possible time and will be executed in the order they are provided.
 
 {{{
-Sequence(counter(...), counter(...))
+pycsp.Sequence(counter(...), counter(...))
 }}}
 
 
@@ -95,7 +97,7 @@ Sequence(counter(...), counter(...))
 Channels can have any number of readers and writers and will block until a read or write have been committed to the opposite action.
 
 {{{
-A = Channel('A')
+A = pycsp.Channel('A')
 }}}
 
 To communicate on a channel you are required to join it first.
@@ -107,7 +109,7 @@ To communicate on a channel you are required to join it first.
 Every PyCSP application will create a server thread, to serve incoming communications on channels. For this reason, it is required that you always end your PyCSP application with a call to shutdown()
 
 {{{
-shutdown()
+pycsp.shutdown()
 }}}
 
 = A Simple Application =
