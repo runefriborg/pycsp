@@ -24,15 +24,13 @@ Requirements:
 
 = Installing =
 
-Start by fetching the latest [http://code.google.com/p/pycsp/downloads/list tarball].
-
-Unpack and to install run
-
 {{{
-python setup.py install
+svn checkout http://pycsp.googlecode.com/svn/trunk/extras/ pycsp
+cd pycsp
+sudo python setup.py install
 }}}
 
-You can now try starting your python interpreter and type `import pycsp`. If no errors, then you are good to go. The default implementation is always pycsp.threads. 
+You can now try starting your python interpreter and type `import pycsp.parallel`. If no errors, then you are good to go. 
 
 {{{
 >>> from pycsp.parallel import *
