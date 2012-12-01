@@ -84,7 +84,10 @@ any-to-any channel example
 >>> Parallel(reader(c.reader()), writer(c.writer(), 10),reader(c.reader()), writer(c.writer(), 10))
 """
 
-if __name__ == '__main__':
+# Import parallel
+if not __name__ == '__main__':
+    from pycsp.parallel import *
+else:
     # Run tests
     import sys
     import unittest
