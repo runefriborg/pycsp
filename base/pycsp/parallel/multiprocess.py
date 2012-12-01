@@ -38,11 +38,11 @@ from pycsp.parallel.configuration import *
 conf = Configuration()
 
 # Decorators
-def multiprocess(func=None, port=None):
+def multiprocess(func=None, host='', port=None):
     """
     @process decorator for creating process functions
 
-    >>> @multiprocess(port=8080)
+    >>> @multiprocess(host='', port=8080)
     ... def P():
     ...     pass
 
@@ -51,14 +51,15 @@ def multiprocess(func=None, port=None):
     """
     if func:
         def _call(*args, **kwargs):
+            host = ''
             port = None
-            return MultiProcess(func, port, *args, **kwargs)
+            return MultiProcess(func, host, port, *args, **kwargs)
         _call.func_name = func.func_name
         return _call
     else:
         def wrap_process(func):
             def _call(*args, **kwargs):
-                return MultiProcess(func, port, *args, **kwargs)
+                return MultiProcess(func, host, port, *args, **kwargs)
             _call.func_name = func.func_name
             return _call
         return wrap_process
@@ -70,7 +71,7 @@ class MultiProcess(multiprocessing.Process):
     """ Process(func, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     """
-    def __init__(self, fn, port, *args, **kwargs):
+    def __init__(self, fn, host, port, *args, **kwargs):
         multiprocessing.Process.__init__(self)
         self.fn = fn
         self.args = args
@@ -88,7 +89,8 @@ class MultiProcess(multiprocessing.Process):
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1
 
-        # Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
+        # Host and Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
+        self.host = host
         self.port = port
 
         # Protect against early termination of mother-processes leavings childs in an invalid state
@@ -113,6 +115,8 @@ class MultiProcess(multiprocessing.Process):
         # Reset SocketDispatcher Singleton object to force the creation of a new
         # SocketDispatcher
 
+        if self.host != '':
+            conf.set(PYCSP_HOST, self.host)
         if self.port != None:
             conf.set(PYCSP_PORT, self.port)
         SocketDispatcher(reset=True)

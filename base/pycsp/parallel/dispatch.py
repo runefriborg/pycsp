@@ -106,7 +106,6 @@ class SocketDispatcher(object):
             del cls.__instance
             cls.__instance = None
 
-
         cls.__condObj.acquire()
         try:
             try:
@@ -163,7 +162,7 @@ class QueueBuffer:
         # Current setting is two ticks, to timeout
         # It is the input threads, which invokes the ticks
         if self.waitingR:
-            print("tick")
+            #print("tick")
             self.lock.acquire()
             if self.waitingR:
                 ticks = 2
@@ -345,7 +344,6 @@ class SocketThread(threading.Thread):
                                         self.data.channels_unknown[header.id].put_normal(m)
                             self.cond.release()
 
-        
 class SocketThreadData:
     def __init__(self, cond):
 
@@ -358,7 +356,7 @@ class SocketThreadData:
         self.channels_unknown = {}
         self.processes_unknown = {}
 
-        self.cond = cond
+        self.cond = cond        
 
         host = conf.get(PYCSP_HOST)
         port = conf.get(PYCSP_PORT)

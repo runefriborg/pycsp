@@ -337,13 +337,23 @@ def current_process_id():
 # This approach has the unfortunate effect that any import of pycsp will always
 # cause this an extra thread, that often may be unused.
 #
-main_proc, _ = getThreadAndName()
+main_proc = None
 
+# Enable the main thread to function as a process
 def init():
     """
     Initialising state variables for channel communication made from the
     main thread/process.
     """
+    global main_proc
+    if not main_proc:
+        try:
+            # compatible with Python 2.6+
+            main_proc = threading.current_thread()
+        except AttributeError:
+            # compatible with Python 2.5- 
+            main_proc = threading.currentThread()
+
     run = True
     try:
         if main_proc.id != None:
@@ -376,10 +386,6 @@ def init():
             main_proc.cond.release()
         main_proc.wait = wait
 
-# Enable the main thread to function as a process
-init()
-
-
 def shutdown():
     """
     Activates a nice shutdown of the main lock thread created by init()
@@ -389,6 +395,11 @@ def shutdown():
     if channel communications have been made from the main thread/process
     otherwise a hard termination is stable.
     """
+    global main_proc
+    if not main_proc:
+        # PyCSP not initialised
+        return
+
     try:
         dispatch = SocketDispatcher().getThread()
 
@@ -406,16 +417,18 @@ def shutdown():
             main_proc.cond.wait()
         main_proc.cond.release()
 
-
         dispatch.deregisterProcess(main_proc.id)
 
         # Deregister channel references
         for chan in main_proc.registeredChanList:
-            chan._deregister()
-
+            chan._deregister()        
+            
         # Wait for channelhomethreads to terminate
         for chan in main_proc.registeredChanList:
             chan._threadjoin()
+
+        # Reset main_proc id, to force a new init(), if required
+        del main_proc.id
 
 
     except AttributeError:

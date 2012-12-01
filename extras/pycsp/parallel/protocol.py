@@ -41,17 +41,17 @@ class ChannelMessenger(object):
         self.restore()
 
         try:
-            self.dispatch.send(channel.channelhome, 
+            self.dispatch.send(channel.address, 
                                         Header(CHANTHREAD_REGISTER, channel.name))
         except SocketException:
             # Unable to register at channel home thread
-            raise ChannelSocketException(channel.channelhome, "PyCSP (register channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+            raise ChannelSocketException(channel.address, "PyCSP (register channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
     def deregister(self, channel):
         self.restore()
 
         try:
-            self.dispatch.send(channel.channelhome,
+            self.dispatch.send(channel.address,
                                         Header(CHANTHREAD_DEREGISTER, channel.name))
         except SocketException:
             # Unable to deregister at channel home thread
@@ -63,14 +63,14 @@ class ChannelMessenger(object):
 
         try:
             if direction == READ:
-                self.dispatch.send(channel.channelhome,
+                self.dispatch.send(channel.address,
                                             Header(CHANTHREAD_JOIN_READER, channel.name))
             elif direction == WRITE:
-                self.dispatch.send(channel.channelhome,
+                self.dispatch.send(channel.address,
                                             Header(CHANTHREAD_JOIN_WRITER, channel.name))
         except SocketException:
             # Unable to join channel
-            raise ChannelSocketException(channel.channelhome, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+            raise ChannelSocketException(channel.address, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
     def retire(self, channel, direction):
         self.restore()
@@ -78,36 +78,36 @@ class ChannelMessenger(object):
         try:
             #print("CM RETIRE %s" % channel.name)
             if direction == READ:
-                self.dispatch.send(channel.channelhome,
+                self.dispatch.send(channel.address,
                                             Header(CHANTHREAD_RETIRE_READER, channel.name))
             elif direction == WRITE:      
-                self.dispatch.send(channel.channelhome,
+                self.dispatch.send(channel.address,
                                             Header(CHANTHREAD_RETIRE_WRITER, channel.name))
 
         except SocketException:
             # Unable to retire from channel
             if conf.get(SOCKETS_STRICT_MODE):
-                raise ChannelSocketException(channel.channelhome, "PyCSP (retire from channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+                raise ChannelSocketException(channel.address, "PyCSP (retire from channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
             else:
-                sys.stderr.write("PyCSP (retire from channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
+                sys.stderr.write("PyCSP (retire from channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
 
     def poison(self, channel, direction):
         self.restore()
 
         try:
             if direction == READ:
-                self.dispatch.send(channel.channelhome,
+                self.dispatch.send(channel.address,
                                             Header(CHANTHREAD_POISON_READER, channel.name))
             elif direction == WRITE:
-                self.dispatch.send(channel.channelhome,
+                self.dispatch.send(channel.address,
                                             Header(CHANTHREAD_POISON_WRITER, channel.name))
 
         except SocketException:
             # Unable to poison channel
             if conf.get(SOCKETS_STRICT_MODE):
-                raise ChannelSocketException(channel.channelhome, "PyCSP (poison channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+                raise ChannelSocketException(channel.address, "PyCSP (poison channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
             else:
-                sys.stderr.write("PyCSP (poison channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
+                sys.stderr.write("PyCSP (poison channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
 
 
     def post_read(self, channel, process):
@@ -119,11 +119,11 @@ class ChannelMessenger(object):
             self.enter(channel, process)
 
         try:
-            self.dispatch.send(channel.channelhome,
+            self.dispatch.send(channel.address,
                                         Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number, _source_id=process.id))
         except SocketException:
             # Unable to post read request to channel home thread
-            raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+            raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
     def post_write(self, channel, process, msg):
         self.restore()
@@ -134,11 +134,11 @@ class ChannelMessenger(object):
             self.enter(channel, process)
             
         try:
-            self.dispatch.send(channel.channelhome,
+            self.dispatch.send(channel.address,
                                Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=[msg])
         except SocketException:
             # Unable to post read request to channel home thread
-            raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+            raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
 
     def enter(self, channel, process):
@@ -149,13 +149,13 @@ class ChannelMessenger(object):
 
         
         try:
-            self.dispatch.send(channel.channelhome,
+            self.dispatch.send(channel.address,
                                Header(CHANTHREAD_ENTER, channel.name, _source_id=process.id))
             # The reverse socket is added to the message at the destination dispatch thread
 
         except SocketException:
             # Unable to enter channel
-            raise ChannelSocketException(channel.channelhome, "PyCSP (enter channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+            raise ChannelSocketException(channel.address, "PyCSP (enter channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
     def leave(self, channel, process):
         """
@@ -164,15 +164,15 @@ class ChannelMessenger(object):
         self.restore()
 
         try:
-            self.dispatch.send(channel.channelhome,
+            self.dispatch.send(channel.address,
                                Header(CHANTHREAD_LEAVE, channel.name, _source_id=process.id))
 
         except SocketException:
             # Unable to decrement writer count on channel
             if conf.get(SOCKETS_STRICT_MODE):
-                raise ChannelSocketException(channel.channelhome, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.channelhome)))
+                raise ChannelSocketException(channel.address, "PyCSP (leave channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
             else:
-                sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.channelhome)))
+                sys.stderr.write("PyCSP (leave channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
 
 
 
@@ -840,9 +840,9 @@ class ChannelHomeThread(threading.Thread):
                 self.channel.register()
             elif header.cmd == CHANTHREAD_DEREGISTER:
 
-                if self.channel.deregister():
+                is_final = self.channel.deregister()
+                if is_final:
                     #print "SHUTDOWN"
-                    # Force shutdown
                     # TODO: Ensure that the channel is unused
                     # TODO: Check if any unread messages is left in channel?
                     self.dispatch.deregisterChannel(self.id)

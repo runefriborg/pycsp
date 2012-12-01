@@ -129,7 +129,7 @@ class Alternation:
         retire=False
 
         p, _ = getThreadAndName()
-        
+            
 
         if p.state==SUCCESS:
             for c in reqs.keys():

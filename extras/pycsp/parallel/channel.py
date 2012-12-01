@@ -31,7 +31,7 @@ class Channel(object):
             self.control = ChannelControl(name, buffer, connect)
 
             # Set channel address
-            self.address = self.control.channelhome
+            self.address = self.control.address
             
             # Set channel name
             self.name = self.control.name
@@ -104,9 +104,9 @@ class ChannelControl(object):
             # Get local channel home
             self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             self.channelhomethread.start()
-            self.channelhome = self.channelhomethread.addr
+            self.address = self.channelhomethread.addr
         else:
-            self.channelhome = connect
+            self.address = connect
 
 
         # Register this channel control reference at the channel home thread
@@ -304,7 +304,7 @@ class ChannelEnd:
     def __getstate__(self):
         odict = self.__dict__
         
-        odict['restore_info'] = (self.channel.channelhome, self.channel.name)
+        odict['restore_info'] = (self.channel.address, self.channel.name)
 
         # Clear channelcontrol
         del odict['channel']

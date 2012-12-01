@@ -32,7 +32,7 @@ READ, WRITE = range(2)
 READY, FAIL, SUCCESS, POISON, RETIRE = range(5)
 
 
-def getThreadAndName():
+def getThreadAndName(init=True):
     thread = None
     name = None
 
@@ -63,12 +63,20 @@ def getThreadAndName():
                 if thread.id:
                     name = thread.id
             except AttributeError:
-                # Not initilialised yet
-                # Will be initialised  by pycsp.process.init()
+                # Not initialised yet
                 pass
         else:
             # p is a MultiProcess
             thread = p
             name = p.name
+
+    try:
+        if thread.id:
+            pass
+    except AttributeError:
+        if init:
+            # Engaging auto init
+            import process
+            process.init()
 
     return (thread, name)
