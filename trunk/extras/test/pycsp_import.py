@@ -20,7 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 import sys
-sys.path.append("..")
+sys.path.insert(0,"..")
 
 if len(sys.argv) > 1:
     mod = sys.argv[1]
