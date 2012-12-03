@@ -87,13 +87,9 @@ class ChannelControl(object):
 
             self.name=name
 
-        # Check that the channel name is not already registers at this channel. If this is the
+        # Check that the channel name is not already registered at this channel. If this is the
         # case, then throw exception.
         p,_ = getThreadAndName()
-        for c in p.registeredChanList:
-            if self.name == c.name:
-                raise FatalException("Reusing channel name in same process namespace")
-                break
 
         self.CM = protocol.ChannelMessenger()
 
@@ -101,6 +97,10 @@ class ChannelControl(object):
         self.channelhomethread = None
 
         if connect == None:
+            for c in p.registeredChanHomeList:
+                if self.name == c.name:
+                    raise InfoException("Reusing channel name in same process namespace")
+
             # Get local channel home
             self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
             self.channelhomethread.start()
@@ -114,8 +114,11 @@ class ChannelControl(object):
         # upon exit.
         self._register()
         p,_ = getThreadAndName()
-        
-        p.registeredChanList.append(self)
+
+        if self.channelhomethread:
+            p.registeredChanHomeList.append(self)
+        else:
+            p.registeredChanConnectList.append(self)
 
 
     def _register(self):

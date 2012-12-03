@@ -54,10 +54,10 @@ pycsp.current.shutdown = shutdown
 def test_suite():
     import unittest
     import doctest
-    import scheduling, guard, alternation, channel, channelend, process, buffer
+    import guard, alternation, channel, process
 
     suite = unittest.TestSuite()
-    for mod in scheduling, guard, alternation, channel, channelend, process, buffer:
+    for mod in guard, alternation, channel, process:
         suite.addTest(doctest.DocTestSuite(mod))
     suite.addTest(doctest.DocTestSuite())
     return suite

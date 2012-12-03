@@ -29,8 +29,9 @@ import threading
 
 from pycsp.parallel.dispatch import SocketDispatcher
 from pycsp.parallel.protocol import RemoteLock, ChannelMessenger
-from pycsp.parallel.channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
+from pycsp.parallel.channel import Channel, ChannelEndRead, ChannelEndWrite
 from pycsp.parallel.const import *
+from pycsp.parallel.exceptions import *
 
 # Decorators
 def process(func):
@@ -77,11 +78,15 @@ class Process(threading.Thread):
         self.spawned = []
 
         # Protect against early termination of channelhomes leaving processes in an invalid state
-        self.registeredChanList = []
+        self.registeredChanHomeList = []
+        self.registeredChanConnectList = []
 
         # Protect against early termination of processes leaving channelhomes in an invalid state
         self.activeChanList = []
         self.closedChanList = []
+
+        # Identify this as a wrapped pycsp process, which must not be terminated by shutdown
+        self.maintained= True
 
     def wait(self):
         self.cond.acquire()
@@ -127,10 +132,12 @@ class Process(threading.Thread):
         dispatch.deregisterProcess(self.id)
 
         # Deregister channel references
-        for chan in self.registeredChanList:
+        for chan in self.registeredChanConnectList:
+            chan._deregister()
+        for chan in self.registeredChanHomeList:
             chan._deregister()
 
-        for chan in self.registeredChanList:
+        for chan in self.registeredChanHomeList:
             chan._threadjoin()
 
     def __check_poison(self, args):
@@ -334,57 +341,56 @@ def current_process_id():
 # To accomondate channel communications made from the main thread, the following
 # code initialises state variables and creates a LockThread.
 #
-# This approach has the unfortunate effect that any import of pycsp will always
-# cause this an extra thread, that often may be unused.
-#
-main_proc = None
+init_procs = []
 
 # Enable the main thread to function as a process
 def init():
     """
-    Initialising state variables for channel communication made from the
-    main thread/process.
+    Initialising state variables for channel communication made from an uninitialized thread/process (__main__).
     """
-    global main_proc
-    if not main_proc:
-        try:
-            # compatible with Python 2.6+
-            main_proc = threading.current_thread()
-        except AttributeError:
-            # compatible with Python 2.5- 
-            main_proc = threading.currentThread()
+    global init_procs
+    try:
+        # compatible with Python 2.6+
+        current_proc = threading.current_thread()
+    except AttributeError:
+        # compatible with Python 2.5- 
+        current_proc = threading.currentThread()        
 
     run = True
     try:
-        if main_proc.id != None:
+        if current_proc.id != None:
             run = False
     except AttributeError:
         pass
 
     if run:
-        main_proc.id = uuid.uuid1().hex + ".__main__"
-        main_proc.fn = None
-        main_proc.state = FAIL
-        main_proc.result_ch_idx = None
-        main_proc.result_msg = None
-        main_proc.sequence_number = 1
+        if not current_proc in init_procs:
+            init_procs.append(current_proc)
 
-        main_proc.spawned = []
-        main_proc.registeredChanList = []
-        main_proc.activeChanList = []
-        main_proc.closedChanList = []
+        current_proc.id = uuid.uuid1().hex + ".__INIT__"
+        current_proc.fn = None
+        current_proc.state = FAIL
+        current_proc.result_ch_idx = None
+        current_proc.result_msg = None
+        current_proc.sequence_number = 1
 
-        main_proc.cond = threading.Condition()
+        current_proc.spawned = []
+        current_proc.registeredChanHomeList = []
+        current_proc.registeredChanConnectList = []
+        current_proc.activeChanList = []
+        current_proc.closedChanList = []
+
+        current_proc.cond = threading.Condition()
         dispatch = SocketDispatcher().getThread()
-        main_proc.addr = dispatch.server_addr
-        dispatch.registerProcess(main_proc.id, RemoteLock(main_proc))
+        current_proc.addr = dispatch.server_addr
+        dispatch.registerProcess(current_proc.id, RemoteLock(current_proc))
 
         def wait():
-            main_proc.cond.acquire()
-            if main_proc.state == READY:
-                main_proc.cond.wait()
-            main_proc.cond.release()
-        main_proc.wait = wait
+            current_proc.cond.acquire()
+            if current_proc.state == READY:
+                current_proc.cond.wait()
+            current_proc.cond.release()
+        current_proc.wait = wait
 
 def shutdown():
     """
@@ -395,40 +401,58 @@ def shutdown():
     if channel communications have been made from the main thread/process
     otherwise a hard termination is stable.
     """
-    global main_proc
-    if not main_proc:
-        # PyCSP not initialised
-        return
+    global init_procs
+    try:
+        # compatible with Python 2.6+
+        current_proc = threading.current_thread()
+    except AttributeError:
+        # compatible with Python 2.5- 
+        current_proc = threading.currentThread()
+
+    try:
+        if current_proc.maintained:
+            raise InfoException("pycsp.shutdown must not be called in PyCSP processes wrapped in a PyCSP.Process structure. PyCSP.Process processes have their own shutdown mechanism.")
+    except AttributeError:
+        pass
 
     try:
         dispatch = SocketDispatcher().getThread()
 
-        for p in main_proc.spawned:
+        for p in current_proc.spawned:
             p.join()
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
-        for channel in main_proc.activeChanList:
-            channel.CM.leave(channel, main_proc)
+        for channel in current_proc.activeChanList:
+            channel.CM.leave(channel, current_proc)
 
         # Wait for channels        
-        main_proc.cond.acquire()
-        X = len(main_proc.activeChanList)
-        while len(main_proc.closedChanList) < X:
-            main_proc.cond.wait()
-        main_proc.cond.release()
+        current_proc.cond.acquire()
+        X = len(current_proc.activeChanList)
+        while len(current_proc.closedChanList) < X:
+            current_proc.cond.wait()
+        current_proc.cond.release()
 
-        dispatch.deregisterProcess(main_proc.id)
+        dispatch.deregisterProcess(current_proc.id)
 
         # Deregister channel references
-        for chan in main_proc.registeredChanList:
+        for chan in current_proc.registeredChanConnectList:
+            chan._deregister()        
+        for chan in current_proc.registeredChanHomeList:
             chan._deregister()        
             
         # Wait for channelhomethreads to terminate
-        for chan in main_proc.registeredChanList:
+        for chan in current_proc.registeredChanHomeList:
             chan._threadjoin()
 
-        # Reset main_proc id, to force a new init(), if required
-        del main_proc.id
+        # Cleaning structures
+        current_proc.spawned = []
+        current_proc.registeredChanHomeList = []
+        current_proc.registeredChanConnectList = []
+        current_proc.activeChanList = []
+        current_proc.closedChanList = []
+
+        # Reset current_proc id, to force a new init(), if required
+        del current_proc.id
 
 
     except AttributeError:

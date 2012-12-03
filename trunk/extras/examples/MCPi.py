@@ -54,3 +54,5 @@ Parallel(
    producer( jobs.writer() , 10000, 1000),
    10 * worker( jobs.reader() ,results.writer()),
    consumer(results.reader()))
+
+shutdown()

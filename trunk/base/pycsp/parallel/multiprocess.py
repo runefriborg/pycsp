@@ -97,11 +97,15 @@ class MultiProcess(multiprocessing.Process):
         self.spawned = []
 
         # Protect against early termination of channelhomes leaving processes in an invalid state
-        self.registeredChanList = []
+        self.registeredChanHomeList = []
+        self.registeredChanConnectList = []
 
         # Protect against early termination of processes leaving channelhomes in an invalid state
         self.activeChanList = []
         self.closedChanList = []
+
+        # Identify this as a wrapped pycsp process, which must not be terminated by shutdown
+        self.maintained= True
 
     def wait(self):
         self.cond.acquire()
@@ -158,10 +162,12 @@ class MultiProcess(multiprocessing.Process):
         dispatch.deregisterProcess(self.id)
 
         # Deregister namespace references
-        for chan in self.registeredChanList:
+        for chan in self.registeredChanConnectList:
+            chan._deregister()
+        for chan in self.registeredChanHomeList:
             chan._deregister()
 
-        for chan in self.registeredChanList:
+        for chan in self.registeredChanHomeList:
             chan._threadjoin()
 
         # Wait for sub-processes as these may not yet have quit.
@@ -207,11 +213,11 @@ class MultiProcess(multiprocessing.Process):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, self.host, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return [self] + [MultiProcess(self.fn, self.host, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
