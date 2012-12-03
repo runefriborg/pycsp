@@ -18,7 +18,7 @@ def multiprocess(func=None, host="", port=None):
     raise InfoException("multiprocess not available for greenlets")
 
 class MultiProcess():
-    def __init__(self, fn, port, *args, **kwargs):
+    def __init__(self, fn, host, port, *args, **kwargs):
         raise InfoException("MultiProcess not available for greenlets")
 
 class ChannelSocketException(Exception):
