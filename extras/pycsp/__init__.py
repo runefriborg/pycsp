@@ -47,7 +47,7 @@ Modules
 42
 
 >>> print selected # doctest:+ELLIPSIS
-<pycsp.threads.guard.SkipGuard instance at 0x...>
+<pycsp.parallel.guard.SkipGuard instance at 0x...>
 
 >>> cout = c.writer()
 >>> _,_ = AltSelect( OutputGuard(cout, 'MSG_DATA', "print 'sent'"), TimeoutGuard(0.01, "print 'abort'") )
@@ -94,12 +94,12 @@ else:
     import doctest
 
 
-    sys.path.append("..")
+    sys.path.insert(0, "..")
 
     mods = []
 
-    import pycsp.threads
-    mods.append(pycsp.threads)
+    import pycsp.parallel
+    mods.append(pycsp.parallel)
 
     suite = unittest.TestSuite()
     for mod in mods:

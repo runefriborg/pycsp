@@ -91,6 +91,8 @@ class SkipGuard(Guard):
 
     >>> isinstance(g, Skip) and msg == None
     True
+
+    >>> shutdown()
     """
     def __init__(self, action=None):
         Guard.__init__(self, action)
@@ -128,6 +130,8 @@ class TimeoutGuard(Guard):
     
     >>> isinstance(g, Timeout) and msg == None
     True
+
+    >>> shutdown()
     """
     def __init__(self, seconds, action=None):
         Guard.__init__(self, action)
@@ -154,7 +158,7 @@ class TimeoutGuard(Guard):
 Skip = SkipGuard
 Timeout = TimeoutGuard
 
-# Run tests
+# Validate doc examples
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
