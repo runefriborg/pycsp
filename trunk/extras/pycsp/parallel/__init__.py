@@ -14,9 +14,11 @@ from pycsp.parallel.altselect import FairSelect, AltSelect, InputGuard, OutputGu
 from pycsp.parallel.channel import Channel, retire, poison
 from pycsp.parallel.process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
 from pycsp.parallel.multiprocess import MultiProcess, multiprocess
-from pycsp.parallel.exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException
+from pycsp.parallel.exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, FatalException, InfoException
 from pycsp.parallel.configuration import *
 from pycsp.parallel.compat import *
+
+__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
 
 version = (0,9,0, 'parallel')
 
@@ -50,6 +52,7 @@ pycsp.current.AltSelect = AltSelect
 pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
 pycsp.current.shutdown = shutdown
+
 
 def test_suite():
     import unittest

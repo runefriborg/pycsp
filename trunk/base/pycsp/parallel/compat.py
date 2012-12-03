@@ -6,6 +6,9 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
+class Io(object):
+    pass
+
 def io(func):
     """
     @io decorator for blocking io operations.
