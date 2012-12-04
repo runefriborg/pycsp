@@ -17,57 +17,8 @@ from pycsp.parallel import protocol
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.const import *
 
-
 # Classes
 class Channel(object):
-    """
-    This is the frontend class to the ChannelControl object.
-    It's function is to handle the automatic termination of the
-    channel home by updating the reference count.
-    """
-    def __init__(self, name=None, buffer=0, connect=None):
-
-        try:
-            self.control = ChannelControl(name, buffer, connect)
-
-            # Set channel address
-            self.address = self.control.address
-            
-            # Set channel name
-            self.name = self.control.name
-
-        except SocketBindException as e:
-            self.control = None
-            raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
-        
-        # public methods available to the user
-        self.writer = self.control.writer
-        self.reader = self.control.reader
-        self.retire = self.control.retire
-        self.poison = self.control.poison
-
-    # syntactic sugar: cin = +chan
-    def __pos__(self):
-        return self.reader()
-    
-    # syntactic sugar: cout = -chan
-    def __neg__(self):
-        return self.writer()
-
-    # syntactic sugar: Channel() * N
-    def __mul__(self, multiplier):
-        new = [self]
-        for i in range(multiplier-1):
-            new.append(Channel())
-        return new
-
-    # syntactic sugar: N * Channel()
-    def __rmul__(self, multiplier):
-        return self.__mul__(multiplier)
-
-        
-        
-class ChannelControl(object):
     def __init__(self, name=None, buffer=0, connect=None):
         
         self.ispoisoned=False
@@ -96,29 +47,32 @@ class ChannelControl(object):
         # Set channel home
         self.channelhomethread = None
 
-        if connect == None:
-            for c in p.registeredChanHomeList:
-                if self.name == c.name:
-                    raise InfoException("Reusing channel name in same process namespace")
+        try:
+            if connect == None:
+                for c in p.registeredChanHomeList:
+                    if self.name == c.name:
+                        raise InfoException("Reusing channel name in same process namespace")
 
-            # Get local channel home
-            self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
-            self.channelhomethread.start()
-            self.address = self.channelhomethread.addr
-        else:
-            self.address = connect
+                # Get local channel home
+                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+                self.channelhomethread.start()
+                self.address = self.channelhomethread.addr
+            else:
+                self.address = connect
 
 
-        # Register this channel control reference at the channel home thread
-        # and at the current process. The current process will call deregister,
-        # upon exit.
-        self._register()
-        p,_ = getThreadAndName()
+            # Register this channel reference at the channel home thread
+            # and at the current process. The current process will call deregister,
+            # upon exit.
+            self._register()
+            p,_ = getThreadAndName()
+            if self.channelhomethread:
+                p.registeredChanHomeList.append(self)
+            else:
+                p.registeredChanConnectList.append(self)
 
-        if self.channelhomethread:
-            p.registeredChanHomeList.append(self)
-        else:
-            p.registeredChanConnectList.append(self)
+        except SocketBindException as e:
+            raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
 
 
     def _register(self):
@@ -228,7 +182,24 @@ class ChannelControl(object):
             self.ispoisoned = True        
             self.CM.poison(self, direction)
 
+    # syntactic sugar: cin = +chan
+    def __pos__(self):
+        return self.reader()
+    
+    # syntactic sugar: cout = -chan
+    def __neg__(self):
+        return self.writer()
 
+    # syntactic sugar: Channel() * N
+    def __mul__(self, multiplier):
+        new = [self]
+        for i in range(multiplier-1):
+            new.append(Channel())
+        return new
+
+    # syntactic sugar: N * Channel()
+    def __rmul__(self, multiplier):
+        return self.__mul__(multiplier)
 
 ##### Channel end  ####
 
@@ -300,7 +271,7 @@ class ChannelEnd:
 
 
     # To be able to support the pickle module, we erase the reference
-    # to the channel control, before pickling. This is then restored when
+    # to the channel, before pickling. This is then restored when
     # the channelend is depickled using the necessary saved info in restore_info.
     # Also, the total number of namespace_references should be kept constant after
     # a __getstate__ and a _restore
@@ -309,7 +280,7 @@ class ChannelEnd:
         
         odict['restore_info'] = (self.channel.address, self.channel.name)
 
-        # Clear channelcontrol
+        # Clear channel object
         del odict['channel']
 
         return odict
@@ -317,10 +288,10 @@ class ChannelEnd:
     def __setstate__(self, dict):
         self.__dict__.update(dict)
 
-        # restore ChannelControl immediately, as the receiving end must register a new channel control, before
+        # restore Channel immediately, as the receiving end must register a new channel reference, before
         # execution is given back to the calling process
         try:
-            self.channel = ChannelControl(name=self.restore_info[1], connect=self.restore_info[0])
+            self.channel = Channel(name=self.restore_info[1], connect=self.restore_info[0])
         except SocketBindException as e:
             raise ChannelSocketException("PyCSP (reconnect to channel) unable to connect to address (%s)" % (e.addr))
         
