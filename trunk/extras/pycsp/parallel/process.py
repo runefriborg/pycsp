@@ -74,10 +74,10 @@ class Process(threading.Thread):
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1
 
-        # Protect against early termination of mother-processes leavings childs in an invalid state
+        # Protect against early termination of mother-processes leaving childs in an invalid state
         self.spawned = []
 
-        # Protect against early termination of channelhomes leaving processes in an invalid state
+        # Protect against early termination of channelhomes leaving channel references in an invalid state
         self.registeredChanHomeList = []
         self.registeredChanConnectList = []
 
@@ -120,7 +120,7 @@ class Process(threading.Thread):
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
-            channel.CM.leave(channel, self)
+            channel._CM.leave(channel, self)
 
         # Wait for channels        
         self.cond.acquire()
@@ -374,9 +374,14 @@ def init():
         current_proc.result_msg = None
         current_proc.sequence_number = 1
 
+        # Protect against early termination of mother-processes leaving childs in an invalid state
         current_proc.spawned = []
+
+        # Protect against early termination of channelhomes leaving channel references in an invalid state
         current_proc.registeredChanHomeList = []
         current_proc.registeredChanConnectList = []
+
+        # Protect against early termination of processes leaving channelhomes in an invalid state
         current_proc.activeChanList = []
         current_proc.closedChanList = []
 
@@ -423,7 +428,7 @@ def shutdown():
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in current_proc.activeChanList:
-            channel.CM.leave(channel, current_proc)
+            channel._CM.leave(channel, current_proc)
 
         # Wait for channels        
         current_proc.cond.acquire()

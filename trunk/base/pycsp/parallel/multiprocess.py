@@ -150,7 +150,7 @@ class MultiProcess(multiprocessing.Process):
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
-            channel.CM.leave(channel, self)
+            channel._CM.leave(channel, self)
 
         # Wait for channels        
         self.cond.acquire()

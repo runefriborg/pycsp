@@ -19,6 +19,13 @@ from pycsp.parallel.const import *
 
 # Classes
 class Channel(object):
+    """
+pycsp.parallel.Channel(name=None, buffer=0, connect=None)
+
+name is the name of the channel, which must be used by remote processes connecting to the same process. 
+    
+Create a PyCSP channel for synchronous communication.
+    """
     def __init__(self, name=None, buffer=0, connect=None):
         
         self.ispoisoned=False
@@ -38,67 +45,80 @@ class Channel(object):
 
             self.name=name
 
-        # Check that the channel name is not already registered at this channel. If this is the
-        # case, then throw exception.
-        p,_ = getThreadAndName()
 
-        self.CM = protocol.ChannelMessenger()
+        self._CM = protocol.ChannelMessenger()
 
         # Set channel home
-        self.channelhomethread = None
+        self._channelhomethread = None
+
 
         try:
             if connect == None:
+
+                # Check that the channel name is not already registered at this channel. If this is the
+                # case, then throw exception.
+                p,_ = getThreadAndName()
+
                 for c in p.registeredChanHomeList:
                     if self.name == c.name:
                         raise InfoException("Reusing channel name in same process namespace")
 
                 # Get local channel home
-                self.channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
-                self.channelhomethread.start()
-                self.address = self.channelhomethread.addr
+                self._channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+                self._channelhomethread.start()
+                self.address = self._channelhomethread.addr
+
             else:
                 self.address = connect
 
-
-            # Register this channel reference at the channel home thread
-            # and at the current process. The current process will call deregister,
-            # upon exit.
+            # Register channel reference at channelhomethread
+            self._registered = False            
             self._register()
-            p,_ = getThreadAndName()
-            if self.channelhomethread:
-                p.registeredChanHomeList.append(self)
-            else:
-                p.registeredChanConnectList.append(self)
 
         except SocketBindException as e:
             raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
 
-
     def _register(self):
-        self.CM.register(self)
+        # Register this channel reference at the channel home thread
+        # and at the current process. The current process will call deregister,
+        # upon exit.
+        self._CM.register(self)
+
+        p,_ = getThreadAndName()
+        if self._channelhomethread:
+            p.registeredChanHomeList.append(self)
+        else:
+            p.registeredChanConnectList.append(self)
+
+        self._registered = True
 
     def _deregister(self):
-        self.CM.deregister(self)
+        self._CM.deregister(self)
+
+    def _check_registration(self):
+        if not self._registered:
+            self._register()
         
     def _threadjoin(self):
-        if self.channelhomethread:
-            self.channelhomethread.join()
+        if self._channelhomethread:
+            self._channelhomethread.join()
 
-    def check_termination(self):
+    def _check_termination(self):
         if self.ispoisoned:
             raise ChannelPoisonException()
         if self.isretired:
             raise ChannelRetireException()
+    
 
     def _read(self):
-        self.check_termination()
+        self._check_termination()
+        self._check_registration()
 
         p,_ = getThreadAndName()
         p.state = READY
         p.sequence_number += 1
 
-        self.CM.post_read(self, p)
+        self._CM.post_read(self, p)
 
         if p.state == READY:
             p.wait()
@@ -116,20 +136,21 @@ class Channel(object):
         elif p.state == RETIRE:
             self.isretired = True
 
-        self.check_termination()
+        self._check_termination()
 
         print('We should not get here in read!!!' + str(p.state))
         return None
 
     
     def _write(self, msg):
-        self.check_termination()
+        self._check_termination()
+        self._check_registration()
 
         p,_ = getThreadAndName()
         p.state = READY
         p.sequence_number += 1
 
-        self.CM.post_write(self, p, msg)
+        self._CM.post_write(self, p, msg)
 
         if p.state == READY:
             p.wait()
@@ -141,7 +162,7 @@ class Channel(object):
         elif p.state == RETIRE:
             self.isretired = True
 
-        self.check_termination()
+        self._check_termination()
 
         print('We should not get here in write!!! ' + str(p.state) + ' ' + str(msg))
         return None
@@ -155,7 +176,8 @@ class Channel(object):
         >>> isinstance(cin, ChannelEndRead)
         True
         """
-        self.join(direction=READ)
+        self._check_registration()
+        self._CM.join(self, direction=READ)
         return ChannelEndRead(self)
 
     def writer(self):
@@ -167,20 +189,38 @@ class Channel(object):
         >>> isinstance(cout, ChannelEndWrite)
         True
         """
-        self.join(direction=WRITE)
+        self._check_registration()
+        self._CM.join(self, direction=WRITE)
         return ChannelEndWrite(self)
 
-    def join(self, direction):
-        self.CM.join(self, direction)
-
-    def retire(self, direction):
+    def _retire(self, direction):
         if not self.isretired:
-            self.CM.retire(self, direction)
+            self._check_registration()
+            self._CM.retire(self, direction)
 
-    def poison(self, direction):
+    def _poison(self, direction):
         if not self.ispoisoned:
+            self._check_registration()
             self.ispoisoned = True        
-            self.CM.poison(self, direction)
+            self._CM.poison(self, direction)
+
+    def disconnect(self):
+        """
+        Explicit close is only relevant for channel references
+        connected to remote channels
+
+        It can be used to make an early close, to allow another interpreter
+        hosting the channel home, to quit. This is especially useful when
+        used in a server - client setting, where the client has provied a 
+        reply channel and desires to disconnect after having received the reply.
+
+        The channel reference will automatically open and reconnect if it is used after a close.
+        """
+        p,_ = getThreadAndName()
+        if self in p.registeredChanConnectList:
+            self._deregister()
+            p.registeredChanConnectList.remove(self)
+
 
     # syntactic sugar: cin = +chan
     def __pos__(self):
@@ -303,7 +343,7 @@ class ChannelEnd:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
 
         if not self.ispoisoned:
-            self.channel.poison(direction=self.op)
+            self.channel._poison(direction=self.op)
             self.__call__ = self._poison
             self.ispoisoned = True
 
@@ -315,7 +355,7 @@ class ChannelEnd:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
 
         if not self.isretired:
-            self.channel.retire(direction=self.op)
+            self.channel._retire(direction=self.op)
             self.__call__ = self._retire
             self.isretired = True
 
@@ -327,6 +367,32 @@ class ChannelEnd:
 
     def isReader(self):
         return self.op == READ
+
+    def disconnect(self):
+        """
+        Explicit close is only relevant for closing mobile channel ends in a 
+        process.
+
+        Mobile channel ends are automatically closed when a process terminates
+        """
+        p,_ = getThreadAndName()
+
+        # Initiate clean up and wait for channel to finish outstanding operations.
+        if self.channel in p.activeChanList:
+            self.channel._CM.leave(self.channel, p)
+            
+            # Wait for channel        
+            p.cond.acquire()
+            if not self.channel.name in p.closedChanList:
+                p.cond.wait()
+            p.cond.release()
+
+
+            p.closedChanList.remove(self.channel.name)
+            p.activeChanList.remove(self.channel)
+
+        # Tell channel to disconnect
+        self.channel.disconnect()
 
     
 class ChannelEndWrite(ChannelEnd):
@@ -340,7 +406,7 @@ class ChannelEndWrite(ChannelEnd):
         return self.channel._write(msg)
 
     def post_write(self, process, msg):
-        self.channel.CM.post_write(self.channel, process, msg)
+        self.channel._CM.post_write(self.channel, process, msg)
 
 
     def remove_write(self, req):
@@ -364,7 +430,7 @@ class ChannelEndRead(ChannelEnd):
         return self.channel._read()
 
     def post_read(self, process):
-        self.channel.CM.post_read(self.channel, process)
+        self.channel._CM.post_read(self.channel, process)
 
     def remove_read(self, req):
         """
