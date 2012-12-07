@@ -1,5 +1,6 @@
 #summary One-sentence summary of this page.
 
+{{{
 Help on class Channel in module pycsp.parallel.channel:
 
 class Channel(__builtin__.object)
@@ -95,3 +96,4 @@ class Channel(__builtin__.object)
  |  
  |  __weakref__
  |      list of weak references to the object (if defined)
+}}}
