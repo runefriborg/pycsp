@@ -1,0 +1,97 @@
+#summary One-sentence summary of this page.
+
+Help on class Channel in module pycsp.parallel.channel:
+
+class Channel(__builtin__.object)
+ |  Any-2-any channel for communication between both local and remote processes.
+ |  
+ |  To communicate on this channel, channel ends must be requested using the .reader/.writer methods.
+ |  
+ |  Usage:
+ |    >>> A = Channel("A")
+ |    >>> cout = A.writer()
+ |    >>> cout("Hello World")
+ |  
+ |  A channel is registered at the Python interpreter level and hosted in the interpreter where it
+ |  was created.
+ |  
+ |  Retrieving the address and name of a channel:
+ |  >>> print(A.address)
+ |  ('10.11.105.254', 33703)
+ |  >>> print(A.name)
+ |  A
+ |  
+ |  Channel(name=None, buffer=0, connect=None):
+ |  name
+ |    is a string used for identifying the Channel and must be unique for every Channel instance.
+ |    The name is limited to maximum 32 characters.
+ |  buffer
+ |    The channel may be buffered by configuring a buffer of size <buffer>.
+ |    buffer=3 will create a channel which can contain three elements, before blocking send.
+ |  connect
+ |    If provided with (host, port), the channel will not create a host, but instead try to connect
+ |    to (host, port) and register at the channel here.
+ |    A name must be provided when connect is set.
+ |  
+ |  Public variables:
+ |    Channel.address    (host, port) where the channel is hosted
+ |    Channel.name       name to identify the hosted channel
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, name=None, buffer=0, connect=None)
+ |      # Constructor
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar: Channel() * N
+ |  
+ |  __neg__(self)
+ |      # syntactic sugar: cout = -chan
+ |  
+ |  __pos__(self)
+ |      # syntactic sugar: cin = +chan
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar: N * Channel()
+ |  
+ |  disconnect(self)
+ |      Explicit close is only relevant for channel references
+ |      connected to remote channels
+ |      
+ |      It can be used to make an early close, to allow another interpreter
+ |      hosting the channel home, to quit. This is especially useful when
+ |      used in a server - client setting, where the client has provied a 
+ |      reply channel and desires to disconnect after having received the reply.
+ |      
+ |      The channel reference will automatically open and reconnect if it is used after a close.
+ |  
+ |  reader(self)
+ |      Create and return a receiving end of the channel
+ |      
+ |      Returns:
+ |        ChannelEndRead object
+ |      
+ |      Usage:
+ |        >>> C = Channel()
+ |        >>> cin = C.reader()
+ |        >>> print( cin() ) # Read
+ |  
+ |  writer(self)
+ |      Create and return a writing end of the channel
+ |      
+ |      Returns:
+ |        ChannelEndWrite object
+ |      
+ |      Usage:
+ |        >>> C = Channel()
+ |        >>> cout = C.writer()
+ |        >>> cout("Hello reader")
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
