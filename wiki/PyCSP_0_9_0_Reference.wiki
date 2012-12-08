@@ -4,7 +4,7 @@
 <wiki:toc max_depth="2" />
 
 =pycsp.Channel=
-{{{
+<pre>
 class Channel(__builtin__.object)
  |  Any-2-any channel for communication between both local and remote processes.
  |  
@@ -98,4 +98,4 @@ class Channel(__builtin__.object)
  |  
  |  __weakref__
  |      list of weak references to the object (if defined)
-}}}
+</pre>
