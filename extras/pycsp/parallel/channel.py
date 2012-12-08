@@ -20,14 +20,44 @@ from pycsp.parallel.const import *
 # Classes
 class Channel(object):
     """
-pycsp.parallel.Channel(name=None, buffer=0, connect=None)
-
-name is the name of the channel, which must be used by remote processes connecting to the same process. 
+    Any-2-any channel for communication between both local and remote processes.
     
-Create a PyCSP channel for synchronous communication.
+    To communicate on this channel, channel ends must be requested using the .reader/.writer methods.
+
+    Usage:
+      >>> A = Channel("A")
+      >>> cout = A.writer()
+      >>> cout("Hello World")
+
+    A channel is registered at the Python interpreter level and hosted in the interpreter where it
+    was created.
+
+    Retrieving the address and name of a channel:
+    >>> print(A.address)
+    ('10.11.105.254', 33703)
+    >>> print(A.name)
+    A
+
+    Channel(name=None, buffer=0, connect=None):
+    name
+      is a string used for identifying the Channel and must be unique for every Channel instance.
+      The name is limited to maximum 32 characters.
+    buffer
+      The channel may be buffered by configuring a buffer of size <buffer>.
+      buffer=3 will create a channel which can contain three elements, before blocking send.
+    connect
+      If provided with (host, port), the channel will not create a host, but instead try to connect
+      to (host, port) and register at the channel here.
+      A name must be provided when connect is set.
+
+    Public variables:
+      Channel.address    (host, port) where the channel is hosted
+      Channel.name       name to identify the hosted channel
     """
+
+    # Constructor
     def __init__(self, name=None, buffer=0, connect=None):
-        
+
         self.ispoisoned=False
         self.isretired=False
         
@@ -50,7 +80,6 @@ Create a PyCSP channel for synchronous communication.
 
         # Set channel home
         self._channelhomethread = None
-
 
         try:
             if connect == None:
@@ -169,12 +198,15 @@ Create a PyCSP channel for synchronous communication.
     
     def reader(self):
         """
-        Join as reader
-        
-        >>> C = Channel()
-        >>> cin = C.reader()
-        >>> isinstance(cin, ChannelEndRead)
-        True
+        Create and return a receiving end of the channel
+
+        Returns:
+          ChannelEndRead object
+
+        Usage:
+          >>> C = Channel()
+          >>> cin = C.reader()
+          >>> print( cin() ) # Read
         """
         self._check_registration()
         self._CM.join(self, direction=READ)
@@ -182,12 +214,15 @@ Create a PyCSP channel for synchronous communication.
 
     def writer(self):
         """
-        Join as writer
-        
-        >>> C = Channel()
-        >>> cout = C.writer()
-        >>> isinstance(cout, ChannelEndWrite)
-        True
+        Create and return a writing end of the channel
+
+        Returns:
+          ChannelEndWrite object
+
+        Usage:
+          >>> C = Channel()
+          >>> cout = C.writer()
+          >>> cout("Hello reader")
         """
         self._check_registration()
         self._CM.join(self, direction=WRITE)
