@@ -1,9 +1,8 @@
 #summary Documentation for all components in PyCSP ver. 0.9.0 (incomplete)
 
-= Contents =
 <wiki:toc max_depth="2" />
 
-=Channel=
+=<pre>Channel</pre>=
 <pre>
 Help on class Channel in module pycsp.parallel.channel:
 
@@ -102,7 +101,7 @@ class Channel(__builtin__.object)
  |      list of weak references to the object (if defined)
 
 </pre>
-=ChannelEndRead=
+=<pre>ChannelEndRead</pre>=
 <pre>
 Help on instance of ChannelEndRead in module pycsp.parallel.channel:
 
@@ -179,7 +178,7 @@ class ChannelEndRead(ChannelEnd)
  |      when terminating multiple concurrent processes.
 
 </pre>
-=ChannelEndWrite=
+=<pre>ChannelEndWrite</pre>=
 <pre>
 Help on instance of ChannelEndWrite in module pycsp.parallel.channel:
 
@@ -244,28 +243,7 @@ class ChannelEndWrite(ChannelEnd)
  |      when terminating multiple concurrent processes.
 
 </pre>
-=poison=
-<pre>
-Help on function poison in module pycsp.parallel.channel:
-
-poison(*list_of_channelEnds)
-    Poison channel ends
-    
-    When a channel end is poisoned, the channel is set into a poisoned state where
-    after all actions on the channel will invoke a ChannelPoisonException which
-    is propagated through the PyCSP network to shutdown all processes unless
-    caugth by the user with a try/except clause.
-    
-    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
-    See retire for an improved shutdown method.
-    
-    Usage:
-    >>> poison(cin0)
-    >>> poison(cin0, cin1, cout0)
-    >>> poison(*cinList)
-
-</pre>
-=retire=
+=<pre>retire</pre>=
 <pre>
 Help on function retire in module pycsp.parallel.channel:
 
@@ -286,5 +264,26 @@ retire(*list_of_channelEnds)
     >>> retire(cin0)
     >>> retire(cin0, cin1, cout0)
     >>> retire(*cinList)
+
+</pre>
+=<pre>poison</pre>=
+<pre>
+Help on function poison in module pycsp.parallel.channel:
+
+poison(*list_of_channelEnds)
+    Poison channel ends
+    
+    When a channel end is poisoned, the channel is set into a poisoned state where
+    after all actions on the channel will invoke a ChannelPoisonException which
+    is propagated through the PyCSP network to shutdown all processes unless
+    caugth by the user with a try/except clause.
+    
+    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+    See retire for an improved shutdown method.
+    
+    Usage:
+    >>> poison(cin0)
+    >>> poison(cin0, cin1, cout0)
+    >>> poison(*cinList)
 
 </pre>
