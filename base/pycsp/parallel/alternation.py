@@ -162,11 +162,11 @@ class Alternation:
             for prio_item in self.guards:
                 if len(prio_item) == 3:
                     c, msg, action = prio_item
-                    c.post_write(p, msg)
+                    c._post_write(p, msg)
                     op=WRITE
                 else:
                     c, action = prio_item
-                    c.post_read(p)
+                    c._post_read(p)
                     op=READ
 
                 reqs[c]=(idx, op)

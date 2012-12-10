@@ -98,12 +98,12 @@ class SkipGuard(Guard):
         Guard.__init__(self, action)
 
     # Offer instantly
-    def post_read(self, process):
+    def _post_read(self, process):
         self.offer(ChannelReq(self.LM, AddrID(process.addr, process.id),
                                        process.sequence_number,
                                        self.id))
 
-    def post_write(self, process, msg):
+    def _post_write(self, process, msg):
         raise InfoException("Can not use SkipGuard with msg")
         
 
@@ -142,7 +142,7 @@ class TimeoutGuard(Guard):
     def expire(self):
         self.offer(self.posted_req)
         
-    def post_read(self, process):
+    def _post_read(self, process):
         self.posted_req = ChannelReq(self.LM, AddrID(process.addr, process.id),
                                      process.sequence_number,
                                      self.id)
