@@ -3,7 +3,7 @@
 = Contents =
 <wiki:toc max_depth="2" />
 
-=pycsp.parallel.Channel=
+=Channel=
 <pre>
 Help on class Channel in module pycsp.parallel.channel:
 
@@ -102,7 +102,7 @@ class Channel(__builtin__.object)
  |      list of weak references to the object (if defined)
 
 </pre>
-=pycsp.parallel.ChannelEndRead=
+=ChannelEndRead=
 <pre>
 Help on instance of ChannelEndRead in module pycsp.parallel.channel:
 
@@ -179,7 +179,7 @@ class ChannelEndRead(ChannelEnd)
  |      when terminating multiple concurrent processes.
 
 </pre>
-=pycsp.parallel.ChannelEndWrite=
+=ChannelEndWrite=
 <pre>
 Help on instance of ChannelEndWrite in module pycsp.parallel.channel:
 
@@ -244,7 +244,7 @@ class ChannelEndWrite(ChannelEnd)
  |      when terminating multiple concurrent processes.
 
 </pre>
-=pycsp.parallel.poison=
+=poison=
 <pre>
 Help on function poison in module pycsp.parallel.channel:
 
@@ -265,7 +265,7 @@ poison(*list_of_channelEnds)
     >>> poison(*cinList)
 
 </pre>
-=pycsp.parallel.retire=
+=retire=
 <pre>
 Help on function retire in module pycsp.parallel.channel:
 
