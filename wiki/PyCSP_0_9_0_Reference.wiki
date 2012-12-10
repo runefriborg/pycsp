@@ -3,8 +3,10 @@
 = Contents =
 <wiki:toc max_depth="2" />
 
-=pycsp.Channel=
+=pycsp.parallel.Channel=
 <pre>
+Help on class Channel in module pycsp.parallel.channel:
+
 class Channel(__builtin__.object)
  |  Any-2-any channel for communication between both local and remote processes.
  |  
@@ -98,4 +100,191 @@ class Channel(__builtin__.object)
  |  
  |  __weakref__
  |      list of weak references to the object (if defined)
+
+</pre>
+=pycsp.parallel.ChannelEndRead=
+<pre>
+Help on instance of ChannelEndRead in module pycsp.parallel.channel:
+
+class ChannelEndRead(ChannelEnd)
+ |  The reading end of a channel. 
+ |  
+ |  Usage:
+ |    >>> val = reading_end()
+ |  
+ |  Throws:
+ |    ChannelPoisonException()
+ |    ChannelRetireException()
+ |  
+ |  If the poison and retire exceptions are not caught explicitly they will automatically be
+ |  propagated to all other known channelends provided to the process in the argument list.
+ |  
+ |  Methods defined here:
+ |  
+ |  __call__(self)
+ |  
+ |  __init__(self, channel)
+ |  
+ |  __repr__(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from ChannelEnd:
+ |  
+ |  __getstate__(self)
+ |      Enables channel end mobility
+ |  
+ |  __setstate__(self, dict)
+ |      Enables channel end mobility
+ |  
+ |  disconnect(self)
+ |      Explicit close is only relevant for mobile channel ends to invoke an
+ |      early close.
+ |      
+ |      The reason for an early close is to allow another interpreter
+ |      hosting the channel home, to quit. This is especially useful when
+ |      used in a server/client setting, where the client has provided a 
+ |      reply channel and desires to disconnect after having received the reply.
+ |      
+ |      The mobile channel end reference will automatically open and reconnect if
+ |      it is used after a close.
+ |  
+ |  isReader(self)
+ |      Returns True for ChannelEndRead object
+ |  
+ |  isWriter(self)
+ |      Returns True for ChannelEndWrite object
+ |  
+ |  poison(self)
+ |      Poison channel end
+ |      
+ |      When a channel end is poisoned, the channel is set into a poisoned state where
+ |      after all actions on the channel will invoke a ChannelPoisonException which
+ |      is propagated through the PyCSP network to shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+ |      See retire for an improved shutdown method.
+ |  
+ |  retire(self)
+ |      Retire channel end
+ |      
+ |      When a channel end is retired, the channel is signaled that a channel end
+ |      has now left the channel. When the set of all reading or writing channel ends is set
+ |      to none, then the channel enters a retired state whereafter
+ |      all actions on the channel will invoke a ChannelRetireException which
+ |      is propagated through the PyCSP network to nicely shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Retiring is an improved version of poisoning, which avoids the race condition issue
+ |      when terminating multiple concurrent processes.
+
+</pre>
+=pycsp.parallel.ChannelEndWrite=
+<pre>
+Help on instance of ChannelEndWrite in module pycsp.parallel.channel:
+
+class ChannelEndWrite(ChannelEnd)
+ |  Methods defined here:
+ |  
+ |  __call__(self, msg)
+ |  
+ |  __init__(self, channel)
+ |  
+ |  __repr__(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from ChannelEnd:
+ |  
+ |  __getstate__(self)
+ |      Enables channel end mobility
+ |  
+ |  __setstate__(self, dict)
+ |      Enables channel end mobility
+ |  
+ |  disconnect(self)
+ |      Explicit close is only relevant for mobile channel ends to invoke an
+ |      early close.
+ |      
+ |      The reason for an early close is to allow another interpreter
+ |      hosting the channel home, to quit. This is especially useful when
+ |      used in a server/client setting, where the client has provided a 
+ |      reply channel and desires to disconnect after having received the reply.
+ |      
+ |      The mobile channel end reference will automatically open and reconnect if
+ |      it is used after a close.
+ |  
+ |  isReader(self)
+ |      Returns True for ChannelEndRead object
+ |  
+ |  isWriter(self)
+ |      Returns True for ChannelEndWrite object
+ |  
+ |  poison(self)
+ |      Poison channel end
+ |      
+ |      When a channel end is poisoned, the channel is set into a poisoned state where
+ |      after all actions on the channel will invoke a ChannelPoisonException which
+ |      is propagated through the PyCSP network to shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+ |      See retire for an improved shutdown method.
+ |  
+ |  retire(self)
+ |      Retire channel end
+ |      
+ |      When a channel end is retired, the channel is signaled that a channel end
+ |      has now left the channel. When the set of all reading or writing channel ends is set
+ |      to none, then the channel enters a retired state whereafter
+ |      all actions on the channel will invoke a ChannelRetireException which
+ |      is propagated through the PyCSP network to nicely shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Retiring is an improved version of poisoning, which avoids the race condition issue
+ |      when terminating multiple concurrent processes.
+
+</pre>
+=pycsp.parallel.poison=
+<pre>
+Help on function poison in module pycsp.parallel.channel:
+
+poison(*list_of_channelEnds)
+    Poison channel ends
+    
+    When a channel end is poisoned, the channel is set into a poisoned state where
+    after all actions on the channel will invoke a ChannelPoisonException which
+    is propagated through the PyCSP network to shutdown all processes unless
+    caugth by the user with a try/except clause.
+    
+    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+    See retire for an improved shutdown method.
+    
+    Usage:
+    >>> poison(cin0)
+    >>> poison(cin0, cin1, cout0)
+    >>> poison(*cinList)
+
+</pre>
+=pycsp.parallel.retire=
+<pre>
+Help on function retire in module pycsp.parallel.channel:
+
+retire(*list_of_channelEnds)
+    Retire channel ends
+    
+    When a channel end is retired, the channel is signaled that a channel end
+    has now left the channel. When the set of all reading or writing channel ends is set
+    to none, then the channel enters a retired state whereafter
+    all actions on the channel will invoke a ChannelRetireException which
+    is propagated through the PyCSP network to nicely shutdown all processes unless
+    caugth by the user with a try/except clause.
+    
+    Retiring is an improved version of poisoning, which avoids the race condition issue
+    when terminating multiple concurrent processes.
+    
+    Usage:
+    >>> retire(cin0)
+    >>> retire(cin0, cin1, cout0)
+    >>> retire(*cinList)
+
 </pre>
