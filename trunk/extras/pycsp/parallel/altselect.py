@@ -62,7 +62,7 @@ class InputGuard:
     """
     def __init__(self, ch_end, action=None):
         try:
-            if ch_end.op == READ:
+            if ch_end._op == READ:
                 self.g = (ch_end, action)
             else:
                 raise Exception('InputGuard requires an input ch_end')
@@ -99,7 +99,7 @@ class OutputGuard:
     """
     def __init__(self, ch_end, msg, action=None):
         try:
-            if ch_end.op == WRITE:
+            if ch_end._op == WRITE:
                 self.g = (ch_end, msg, action)
             else:
                 raise Exception('OutputGuard requires an output ch_end')

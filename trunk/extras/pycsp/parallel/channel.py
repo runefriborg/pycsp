@@ -58,8 +58,8 @@ class Channel(object):
     # Constructor
     def __init__(self, name=None, buffer=0, connect=None):
 
-        self.ispoisoned=False
-        self.isretired=False
+        self._ispoisoned=False
+        self._isretired=False
         
         # Check args
         if name == None and connect != None:
@@ -133,9 +133,9 @@ class Channel(object):
             self._channelhomethread.join()
 
     def _check_termination(self):
-        if self.ispoisoned:
+        if self._ispoisoned:
             raise ChannelPoisonException()
-        if self.isretired:
+        if self._isretired:
             raise ChannelRetireException()
     
 
@@ -161,9 +161,9 @@ class Channel(object):
                 return pickle.loads(msg)[0]
 
         elif p.state == POISON:
-            self.ispoisoned = True
+            self._ispoisoned = True
         elif p.state == RETIRE:
-            self.isretired = True
+            self._isretired = True
 
         self._check_termination()
 
@@ -187,9 +187,9 @@ class Channel(object):
         if p.state == SUCCESS:
             return               
         elif p.state == POISON:
-            self.ispoisoned = True
+            self._ispoisoned = True
         elif p.state == RETIRE:
-            self.isretired = True
+            self._isretired = True
 
         self._check_termination()
 
@@ -229,14 +229,14 @@ class Channel(object):
         return ChannelEndWrite(self)
 
     def _retire(self, direction):
-        if not self.isretired:
+        if not self._isretired:
             self._check_registration()
             self._CM.retire(self, direction)
 
     def _poison(self, direction):
-        if not self.ispoisoned:
+        if not self._ispoisoned:
             self._check_registration()
-            self.ispoisoned = True        
+            self._ispoisoned = True        
             self._CM.poison(self, direction)
 
     def disconnect(self):
@@ -280,24 +280,22 @@ class Channel(object):
 
 # Functions
 def retire(*list_of_channelEnds):
-    """ Retire reader or writer, to do auto-poisoning
-    When all readers or writer of a channel have retired. The channel is retired.
-    
-    >>> from __init__ import *
-    >>> C = Channel()
-    >>> cout1, cout2 = C.writer(), C.writer()
-    >>> retire(cout1)
+    """ Retire channel ends
 
-    >>> Spawn(Process(cout2, 'ok'))
+    When a channel end is retired, the channel is signaled that a channel end
+    has now left the channel. When the set of all reading or writing channel ends is set
+    to none, then the channel enters a retired state whereafter
+    all actions on the channel will invoke a ChannelRetireException which
+    is propagated through the PyCSP network to nicely shutdown all processes unless
+    caugth by the user with a try/except clause.
 
-    >>> try:
-    ...     cout1('fail')
-    ... except ChannelRetireException:
-    ...     True
-    True
+    Retiring is an improved version of poisoning, which avoids the race condition issue
+    when terminating multiple concurrent processes.
 
-    >>> cin = C.reader()
-    >>> retire(cin)
+    Usage:
+    >>> retire(cin0)
+    >>> retire(cin0, cin1, cout0)
+    >>> retire(*cinList)
     """
     for channelEnd in list_of_channelEnds:
         if isinstance(channelEnd, Channel):
@@ -305,27 +303,20 @@ def retire(*list_of_channelEnds):
         channelEnd.retire()
 
 def poison(*list_of_channelEnds):
-    """ Poison channel
-    >>> from __init__ import *
-
-    >>> @process
-    ... def P1(cin, done):
-    ...     try:
-    ...         while True:
-    ...             cin()
-    ...     except ChannelPoisonException:
-    ...         done(42)
-
-    >>> C1, C2 = Channel(), Channel()
-    >>> Spawn(P1(C1.reader(), C2.writer()))
-    >>> cout = C1.writer()
-    >>> cout('Test')
-
-    >>> poison(cout)
+    """ Poison channel ends
     
-    >>> cin = C2.reader()
-    >>> cin()
-    42
+    When a channel end is poisoned, the channel is set into a poisoned state where
+    after all actions on the channel will invoke a ChannelPoisonException which
+    is propagated through the PyCSP network to shutdown all processes unless
+    caugth by the user with a try/except clause.
+
+    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+    See retire for an improved shutdown method.
+
+    Usage:
+    >>> poison(cin0)
+    >>> poison(cin0, cin1, cout0)
+    >>> poison(*cinList)
     """
     for channelEnd in list_of_channelEnds:
         if isinstance(channelEnd, Channel):
@@ -335,25 +326,32 @@ def poison(*list_of_channelEnds):
 # Classes
 class ChannelEnd:
     def __init__(self, channel):
+
+
         self.channel = channel
-        self.op = WRITE
+        self._op = WRITE
 
         # Prevention against multiple retires / poisons
-        self.isretired = False
-        self.ispoisoned = False
+        self._isretired = False
+        self._ispoisoned = False
 
-        self.restore_info = None
+        self._restore_info = None
 
 
-    # To be able to support the pickle module, we erase the reference
-    # to the channel, before pickling. This is then restored when
-    # the channelend is depickled using the necessary saved info in restore_info.
-    # Also, the total number of namespace_references should be kept constant after
-    # a __getstate__ and a _restore
     def __getstate__(self):
+        """
+        Enables channel end mobility
+        """
+
+        # To be able to support the pickle module, we erase the reference
+        # to the channel, before pickling. This is then restored when
+        # the channelend is depickled using the necessary saved info in restore_info.
+        # Also, the total number of namespace_references should be kept constant after
+        # a __getstate__ and a _restore
+
         odict = self.__dict__
         
-        odict['restore_info'] = (self.channel.address, self.channel.name)
+        odict['_restore_info'] = (self.channel.address, self.channel.name)
 
         # Clear channel object
         del odict['channel']
@@ -361,12 +359,16 @@ class ChannelEnd:
         return odict
 
     def __setstate__(self, dict):
+        """
+        Enables channel end mobility
+        """        
+
         self.__dict__.update(dict)
 
         # restore Channel immediately, as the receiving end must register a new channel reference, before
         # execution is given back to the calling process
         try:
-            self.channel = Channel(name=self.restore_info[1], connect=self.restore_info[0])
+            self.channel = Channel(name=self._restore_info[1], connect=self._restore_info[0])
         except SocketBindException as e:
             raise ChannelSocketException("PyCSP (reconnect to channel) unable to connect to address (%s)" % (e.addr))
         
@@ -374,41 +376,77 @@ class ChannelEnd:
         raise ChannelPoisonException()
 
     def poison(self):
+        """ Poison channel end
+    
+        When a channel end is poisoned, the channel is set into a poisoned state where
+        after all actions on the channel will invoke a ChannelPoisonException which
+        is propagated through the PyCSP network to shutdown all processes unless
+        caugth by the user with a try/except clause.
+
+        Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+        See retire for an improved shutdown method.
+        """
+
         if not self.channel:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
 
-        if not self.ispoisoned:
-            self.channel._poison(direction=self.op)
+        if not self._ispoisoned:
+            self.channel._poison(direction=self._op)
             self.__call__ = self._poison
-            self.ispoisoned = True
+            self._ispoisoned = True
 
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
     def retire(self):
+        """ Retire channel end
+
+        When a channel end is retired, the channel is signaled that a channel end
+        has now left the channel. When the set of all reading or writing channel ends is set
+        to none, then the channel enters a retired state whereafter
+        all actions on the channel will invoke a ChannelRetireException which
+        is propagated through the PyCSP network to nicely shutdown all processes unless
+        caugth by the user with a try/except clause.
+
+        Retiring is an improved version of poisoning, which avoids the race condition issue
+        when terminating multiple concurrent processes.
+        """
+
         if not self.channel:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
 
-        if not self.isretired:
-            self.channel._retire(direction=self.op)
+        if not self._isretired:
+            self.channel._retire(direction=self._op)
             self.__call__ = self._retire
-            self.isretired = True
+            self._isretired = True
 
     def __repr__(self):
         return "<ChannelEndWrite on channel named %s>" % self.channel.name
 
     def isWriter(self):
-        return self.op == WRITE
+        """
+        Returns True for ChannelEndWrite object
+        """
+        return self._op == WRITE
 
     def isReader(self):
-        return self.op == READ
+        """
+        Returns True for ChannelEndRead object
+        """
+        return self._op == READ
 
     def disconnect(self):
         """
-        Explicit close is only relevant for closing mobile channel ends in a 
-        process.
+        Explicit close is only relevant for mobile channel ends to invoke an
+        early close.
 
-        Mobile channel ends are automatically closed when a process terminates
+        The reason for an early close is to allow another interpreter
+        hosting the channel home, to quit. This is especially useful when
+        used in a server/client setting, where the client has provided a 
+        reply channel and desires to disconnect after having received the reply.
+
+        The mobile channel end reference will automatically open and reconnect if
+        it is used after a close.
         """
         p,_ = getThreadAndName()
 
@@ -433,18 +471,18 @@ class ChannelEnd:
 class ChannelEndWrite(ChannelEnd):
     def __init__(self, channel):
         ChannelEnd.__init__(self, channel)
-        self.op = WRITE
+        self._op = WRITE
 
     def __call__(self, msg):
         if not self.channel:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
         return self.channel._write(msg)
 
-    def post_write(self, process, msg):
+    def _post_write(self, process, msg):
         self.channel._CM.post_write(self.channel, process, msg)
 
 
-    def remove_write(self, req):
+    def _remove_write(self, req):
         """
         Including for compatibility with trace and greenlets
         """
@@ -455,19 +493,33 @@ class ChannelEndWrite(ChannelEnd):
 
 
 class ChannelEndRead(ChannelEnd):
+    """
+    The reading end of a channel. 
+    
+    Usage:
+      >>> val = reading_end()
+
+    Throws:
+      ChannelPoisonException()
+      ChannelRetireException()
+
+    If the poison and retire exceptions are not caught explicitly they will automatically be
+    propagated to all other known channelends provided to the process in the argument list.
+    """
+
     def __init__(self, channel):
         ChannelEnd.__init__(self, channel)
-        self.op = READ
+        self._op = READ
 
     def __call__(self):
         if not self.channel:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
         return self.channel._read()
 
-    def post_read(self, process):
+    def _post_read(self, process):
         self.channel._CM.post_read(self.channel, process)
 
-    def remove_read(self, req):
+    def _remove_read(self, req):
         """
         Including for compatibility with trace and greenlets
         """
