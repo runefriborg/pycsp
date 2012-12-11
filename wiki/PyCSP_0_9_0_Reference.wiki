@@ -1,7 +1,112 @@
+python generate_pycsp_doc.py [ parallel | greenlets ]
+Using version (0, 9, 0, 'parallel')
 #summary Documentation for all components in PyCSP ver. 0.9.0 (incomplete)
 
-<wiki:toc max_depth="2" />
 
+<wiki:toc max_depth="2" />
+=<pre>@process</pre>=
+<pre>
+Help on function process in module pycsp.parallel.process:
+
+process(func)
+    @process decorator for making a function into a CSP Process factory.
+    Each generated CSP process is implemented as a single OS thread.
+    
+    Usage:
+      >>> @process
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+    The CSP Process factory returned by the @process decorator:
+      func(*args, **kwargs)
+
+</pre>
+=<pre>Process</pre>=
+<pre>
+Help on class Process in module pycsp.parallel.process:
+
+class Process(threading.Thread)
+ |  CSP process implemented as a single OS thread.
+ |  
+ |  It is recommended to use the @process decorator, to create Process instances.
+ |  See help(pycsp.process)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = Process(filter, A.reader(), B.writer(), "42", debug=True) 
+ |  
+ |  Process(func, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs are passed directly to the execution of the function object.
+ |  
+ |  Public variables:
+ |    Process.name       Unique name to identify the process
+ |  
+ |  Method resolution order:
+ |      Process
+ |      threading.Thread
+ |      threading._Verbose
+ |      __builtin__.object
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  run(self)
+ |  
+ |  wait(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from threading.Thread:
+ |  
+ |  __repr__(self)
+ |  
+ |  getName(self)
+ |  
+ |  isAlive(self)
+ |  
+ |  isDaemon(self)
+ |  
+ |  is_alive = isAlive(self)
+ |  
+ |  join(self, timeout=None)
+ |  
+ |  setDaemon(self, daemonic)
+ |  
+ |  setName(self, name)
+ |  
+ |  start(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from threading.Thread:
+ |  
+ |  daemon
+ |  
+ |  ident
+ |  
+ |  name
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from threading._Verbose:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+</pre>
 =<pre>Channel</pre>=
 <pre>
 Help on class Channel in module pycsp.parallel.channel:
@@ -28,7 +133,7 @@ class Channel(__builtin__.object)
  |  Channel(name=None, buffer=0, connect=None):
  |  name
  |    is a string used for identifying the Channel and must be unique for every Channel instance.
- |    The name is limited to maximum 32 characters.
+ |    The name is limited to maximum 32 characters. If name=None then a unique name is generated.
  |  buffer
  |    The channel may be buffered by configuring a buffer of size <buffer>.
  |    buffer=3 will create a channel which can contain three elements, before blocking send.
@@ -248,6 +353,8 @@ class ChannelEndWrite(ChannelEnd)
 Help on function retire in module pycsp.parallel.channel:
 
 retire(*list_of_channelEnds)
+    Retire(C1, [C2, .. , CN])
+    
     Retire channel ends
     
     When a channel end is retired, the channel is signaled that a channel end
@@ -263,7 +370,7 @@ retire(*list_of_channelEnds)
     Usage:
     >>> retire(cin0)
     >>> retire(cin0, cin1, cout0)
-    >>> retire(*cinList)
+    >>> retire(cinList)
 
 </pre>
 =<pre>poison</pre>=
@@ -271,6 +378,8 @@ retire(*list_of_channelEnds)
 Help on function poison in module pycsp.parallel.channel:
 
 poison(*list_of_channelEnds)
+    Poison(C1, [C2, .. , CN])
+    
     Poison channel ends
     
     When a channel end is poisoned, the channel is set into a poisoned state where
@@ -284,6 +393,96 @@ poison(*list_of_channelEnds)
     Usage:
     >>> poison(cin0)
     >>> poison(cin0, cin1, cout0)
-    >>> poison(*cinList)
+    >>> poison(cinList)
+
+</pre>
+=<pre>Parallel</pre>=
+<pre>
+Help on function Parallel in module pycsp.parallel.process:
+
+Parallel(*plist)
+    Parallel(P1, [P2, .. ,PN])
+    
+    Performs concurrent synchronous execution of the supplied CSP processes. 
+    
+    Blocks until all processes have exited.
+    
+    Usage:
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
+    
+      >>> @process
+      ... def P2(cin):
+      ...     while True:
+      ...         cin()
+    
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()), P2(C.reader()))
+
+</pre>
+=<pre>Spawn</pre>=
+<pre>
+Help on function Spawn in module pycsp.parallel.process:
+
+Spawn(*plist)
+    Spawn(P1, [P2, .. ,PN])
+    
+    Performs concurrent asynchronous execution of the supplied CSP processes. 
+    
+    Usage:
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
+    
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()))
+    
+      >>> cin = C.reader()
+      ... try:
+      ...     while True:
+      ...         cin()
+
+</pre>
+=<pre>Sequence</pre>=
+<pre>
+Help on function Sequence in module pycsp.parallel.process:
+
+Sequence(*plist)
+    Sequence(P1, [P2, .. ,PN])
+    
+    Performs synchronous execution of the supplied CSP processes. 
+    
+    The supplied processes are executed in order.
+    
+    Blocks until the last process has exited.
+    
+    Usage:
+      >>> @process
+      ... def P1(id):
+      ...     print(id)
+    
+      >>> L = [P1(i) for i in range(10)]
+      >>> Sequence(L)
+
+</pre>
+=<pre>current_process_id</pre>=
+<pre>
+Help on function current_process_id in module pycsp.parallel.process:
+
+current_process_id()
+    Returns the id of the executing CSP process.
+
+</pre>
+=<pre>shutdown</pre>=
+<pre>
+Help on function shutdown in module pycsp.parallel.process:
+
+shutdown()
+    TODO!
 
 </pre>
