@@ -1,5 +1,3 @@
-python generate_pycsp_doc.py [ parallel | greenlets ]
-Using version (0, 9, 0, 'parallel')
 #summary Documentation for all components in PyCSP ver. 0.9.0 (incomplete)
 
 
