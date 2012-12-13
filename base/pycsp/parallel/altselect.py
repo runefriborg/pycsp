@@ -30,181 +30,251 @@ from pycsp.parallel.alternation import Alternation
 from pycsp.parallel.process import current_process_id
 
 from pycsp.parallel.const import *
+from pycsp.parallel.exceptions import *
 import pycsp.current
 
 
 class InputGuard:
-    """
-    InputGuard wraps an input ch_end for use with AltSelect.
+    """ InputGuard(ch_end_read, action=None)
 
-    >>> from __init__ import *
-
-    >>> C = Channel()
-    >>> cin, cout = C.reader(), C.writer()
-
-    >>> @process
-    ... def P1(cout):
-    ...     for i in range(3): cout(i)
-
-    >>> Spawn (P1(cout))
-
-    >>> ch_end, msg = AltSelect( InputGuard(cin) )
-    >>> ch_end, msg = AltSelect( InputGuard(cin, action="print channel_input") )
-    1
-    >>> ch_end, msg = AltSelect( InputGuard(cin, action=lambda channel_input: Spawn(Process(cout, channel_input))) )
+    InputGuard wraps a ChannelEndRead for use with AltSelect/FairSelect.
     
-    >>> @choice
-    ... def Action(val1, val2, channel_input=None):
-    ...     print channel_input
+    If the Inputguard is selected and an action is configured, then the action is executed.
 
-    >>> ch_end, msg = AltSelect( InputGuard(cin, action=Action('going into val1', 'going into val2')) )
-    2
+    Usage:
+      >>> ch_end, msg = AltSelect( InputGuard(cin) )
+      >>> ch_end, msg = AltSelect( InputGuard(cin, action="print(channel_input)") )
+      1
+    
+      >>> @choice
+      ... def Action(val1, val2, sendResult, channel_input=None):
+      ...     sendResult(channel_input)      
+
+      >>> ch_end, msg = AltSelect( InputGuard(cin, action=Action('going into val1', 'going into val2', cout)) )
+
+    InputGuard(ch_end_read, action=None)
+    ch_end_read
+      The ChannelEndRead object to configure as an InputGuard
+    action
+      An action may be provided as a string, a callable function object or a Choice object.
+      The Choice object is the recommended use of action.
+      
+      A string:
+        >>> action="L.append(channel_input)"
+      
+        The string passed to the action parameter is evaluted in the current namespace and can 
+        read variables, but can only write output by editing the content of existing mutable variables.
+        Newly created immutable and mutable variables will only exist in the evalutation of this string.
+      
+      callable(func):
+        >>> def func(channel_input=None)
+        ...     L.append(channel_input)
+        >>> action=func
+        
+        The callable function object must accept one parameter for actions on InputGuards and must
+        accept zero parameters for actions on OutputGuards.
+
+      Choice:
+        >>> @choice
+        ... def func(L, channel_input=None)
+        ...     L.append(channel_input)
+        >>> action=func(gatherList)
+
+        The choice decorator can be used to make a Choice factory, which can generate actions with
+        different parameters depending on the use case. See help(pycsp.choice)
     """
-    def __init__(self, ch_end, action=None):
+    def __init__(self, ch_end_read, action=None):
         try:
-            if ch_end._op == READ:
-                self.g = (ch_end, action)
+            if ch_end_read._op == READ:
+                self.g = (ch_end_read, action)
             else:
-                raise Exception('InputGuard requires an input ch_end')
+                raise InfoException('Can not use ChannelEndWrite object. InputGuard requires a ChannelEndRead object')
         except AttributeError:
-            raise Exception('Cannot use ' + str(ch_end) + ' as input ch_end')
+            raise InfoException('Can not use ' + str(ch_end_read) + ' as ch_end_read. InputGuard requires a ChannelEndRead object')
 
 class OutputGuard:
-    """
-    OutputGuard wraps an output ch_end for use with AltSelect.
+    """ OutputGuard(ch_end_write, msg, action=None)
 
-    >>> from __init__ import *
-
-    >>> C = Channel()
-    >>> cin, cout = C.reader(), C.writer()
-
-    >>> @process
-    ... def P1(cin):
-    ...     for i in range(5): cin()
-
-    >>> Spawn (P1(cin))
-
-    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=0) )
-    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=1, action="print 'done'") )
-    done
-
-    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=2, action=lambda: Spawn(Process(cout, 3))) )
+    OutputGuard wraps a ChannelEndWrite for use with AltSelect/FairSelect.
     
-    >>> @choice
-    ... def Action(val1, val2):
-    ...     print 'sent'
+    If the Outputguard is selected and an action is configured, then the action is executed.
 
-    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=4, action=Action('going into val1', 'going into val2')) )
-    sent
+    Usage:
+      >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=0) )
+      >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=1, action="print('done')") )
+      done
+
+      >>> @choice
+      ... def Action(val1, val2):
+      ...     print('%s %s sent' % (val1, val2))
+
+      >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=4, action=Action('going into val1', 'going into val2')) )
+      sent
+
+    OutputGuard(ch_end_read, action=None)
+    ch_end_read
+      The ChannelEndWrite object to configure as an OutputGuard
+    msg
+      The message to send. This may be any object for local communication and any object
+      supporting pickling for remote communication.
+    action
+      An action may be provided as a string, a callable function object or a Choice object.
+      The Choice object is the recommended use of action.
+      
+      A string:
+        >>> action="L.append(True)"
+      
+        The string passed to the action parameter is evaluted in the current namespace and can 
+        read variables, but can only write output by editing the content of existing mutable variables.
+        Newly created immutable and mutable variables will only exist in the evalutation of this string.
+      
+      callable(func):
+        >>> def func()
+        ...     print("Value sent")
+        >>> action=func
+        
+        The callable function object must accept one parameter for actions on InputGuards and must
+        accept zero parameters for actions on OutputGuards.
+
+      Choice:
+        >>> @choice
+        ... def func(L, val)
+        ...     L.remove(val)
+        >>> action=func(gatherList, sending_value)
+
+        The choice decorator can be used to make a Choice factory, which can generate actions with
+        different parameters depending on the use case. See help(pycsp.choice)
     """
-    def __init__(self, ch_end, msg, action=None):
+    def __init__(self, ch_end_write, msg, action=None):
         try:
-            if ch_end._op == WRITE:
-                self.g = (ch_end, msg, action)
+            if ch_end_write._op == WRITE:
+                self.g = (ch_end_write, msg, action)
             else:
-                raise Exception('OutputGuard requires an output ch_end')
+                raise InfoException('Can not use ChannelEndRead object. OutputGuard requires a ChannelEndWrite object')
         except AttributeError:
-            raise Exception('Cannot use ' + str(ch_end) + ' as output ch_end')
+            raise InfoException('Can not use ' + str(ch_end_write) + ' as ch_end_write. OutputGuard requires a ChannelEndWrite object')
 
 
 def AltSelect(*guards):
-    """
-    AltSelect is a wrapper to Alternation with a much more intuitive
-    interface. 
-    It performs a prioritized choice from a list of guard objects and
+    """ AltSelect(G1, [G2, .. ,GN])
+    
+    AltSelect performs a prioritized choice from a list of guard objects and
     returns a tuple with the selected channel end and the read msg if
     there is one, otherwise None.
 
-    >>> from __init__ import *
+    Usage:
+      >>> g,msg = AltSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> print("Message:%s" % (str(msg)))
 
-    >>> C = Channel()
-    >>> cin = C.reader()
+    Returns:
+      ChannelEnd, message    
 
-    >>> ch_end, msg = AltSelect(InputGuard(cin), SkipGuard())
+    More detailed usage:
+      >>> C = Channel()
+      >>> cin = C.reader()
 
-    >>> if ch_end == cin:
-    ...     print msg
-    ... else:
-    ...     print msg == None
-    True
+      >>> ch_end, msg = AltSelect(InputGuard(cin), SkipGuard())
+
+      >>> if ch_end == cin:
+      ...     print msg
+      ... else:
+      ...     print msg == None
+      True
 
 
-    AltSelect supports skip, timeout, input and output guards.
+      AltSelect supports skip, timeout, input and output guards.
 
-    >>> @choice 
-    ... def callback(type, channel_input = None):
-    ...    print type, channel_input
+      >>> @choice 
+      ... def callback(type, channel_input = None):
+      ...    print type, channel_input
 
-    >>> A, B = Channel('A'), Channel('B')
-    >>> cin, cout = A.reader(), B.writer()
-    >>> g1 = InputGuard(cin, action=callback('input'))
-    >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
-    >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
+      >>> A, B = Channel('A'), Channel('B')
+      >>> cin, cout = A.reader(), B.writer()
+      >>> g1 = InputGuard(cin, action=callback('input'))
+      >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
+      >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
     
-    >>> _ = AltSelect(g1, g2, g3)
-    timeout None
+      >>> _ = AltSelect(g1, g2, g3)
+      timeout None
     
 
-    Note that AltSelect always performs the guard that was chosen,
-    i.e. channel input or output is executed within the AltSelect so
-    even the empty choice with an AltSelect or where
-    the results are simply ignored, still performs the guarded input or
-    output.
+      Note that AltSelect always performs the guard that was chosen,
+      i.e. channel input or output is executed within the AltSelect so
+      even the empty choice with an AltSelect or where
+      the results are simply ignored, still performs the guarded input or
+      output.
 
-    >>> L = []
+      >>> L = []
 
-    >>> @choice 
-    ... def action(channel_input):
-    ...     L.append(channel_input)
+      >>> @choice 
+      ... def action(channel_input):
+      ...     L.append(channel_input)
 
-    >>> @process
-    ... def P1(cout, n=5):
-    ...     for i in range(n):
-    ...         cout(i)
+      >>> @process
+      ... def P1(cout, n=5):
+      ...     for i in range(n):
+      ...         cout(i)
     
-    >>> @process
-    ... def P2(cin1, cin2, n=10):
-    ...     for i in range(n):
-    ...         _ = AltSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
+      >>> @process
+      ... def P2(cin1, cin2, n=10):
+      ...     for i in range(n):
+      ...         _ = AltSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
                 
-    >>> C1, C2 = Channel(), Channel()
-    >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+      >>> C1, C2 = Channel(), Channel()
+      >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
 
-    >>> len(L)
-    10
+      >>> len(L)
+      10
 
-    >>> L.sort()
-    >>> L
-    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+      >>> L.sort()
+      >>> L
+      [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
     """
     L = []
     # Build guard list
-    for item in guards:
+    for item in guards:                
         try:
-            L.append(item.g)
+            if type(item) == list:
+                for item2 in item:
+                    L.append(item2.g)
+            else:
+                L.append(item.g)        
         except AttributeError:
-            raise Exception('Cannot use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
+            if type(item)==list:
+                raise InfoException('Cannot use ' + str(item2) + ' as guard. Only use *Guard types for AltSelect')
+            else:
+                raise InfoException('Cannot use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
 
     if pycsp.current.trace:
         import pycsp.common.trace as trace
         a = trace.Alternation(L)
-        a.set_execute_frame(-3)
+        a._set_execute_frame(-3)
     else:
         a = Alternation(L)
-        a.set_execute_frame(-2)
+        a._set_execute_frame(-2)
 
     return a.execute()
 
 
 def FairSelect(*guards):
-    """ 
-    It sorts the list of guards in order based on the history for
-    the chosen guards in this FairSelect located at a specific line in a specific process.
+    """  FairSelect(G1, [G2, .. ,GN])
+
+    FairSelect sorts the list of guards in order based on the history for
+    the chosen guards in this FairSelect.
 
     Internally it invokes a priority select on the new order of guards.
     
-    Timer and Skip guards are placed with lowest priority, since it does make sence to make them
-    fair.
+    Timer and Skip guards are always given lowest priority.
+
+    Usage:
+      >>> g,msg = FairSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> print("Message:%s" % (str(msg)))
+
+    Returns:
+      ChannelEnd, message
+
+    More detailed usage:
+      see help(pycsp.AltSelect)
     """
     alt_key = str(current_process_id()) + '_' + str(inspect.currentframe().f_back.f_lineno)
     A = AltHistory()
@@ -212,29 +282,38 @@ def FairSelect(*guards):
 
     L = []
     L_last = []
-    for item in guards:
+
+    def add(obj):
         try:
-            chan_name = item.g[0].channel.name
+            chan_name = obj.g[0].channel.name
             if chan_name in H:
-                L.append((H[chan_name], item.g))
+                L.append((H[chan_name], obj.g))
             else:
-                L.append((0, item.g))
+                L.append((0, obj.g))
         except AttributeError:
             try:
-                L_last.append(item.g)
+                L_last.append(obj.g)
             except AttributeError:
-                raise Exception('Can not use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
+                raise InfoException('Can not use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
+
+    # Add and organise 2 levels
+    for item in guards:
+        if type(item) == list:
+            for item2 in item:
+                add(item2)
+        else:
+            add(item)
+
     L.sort()
     L = [x[1] for x in L] + L_last
 
-    #if pycsp.current.trace:
-    #    import pycsp.common.trace as trace
-    #    a = trace.Alternation(L)
-    #    a.set_execute_frame(-3)
-    #else:
-    if True:
+    if pycsp.current.trace:
+        import pycsp.common.trace as trace
+        a = trace.Alternation(L)
+        a._set_execute_frame(-3)
+    else:
         a = Alternation(L)
-        a.set_execute_frame(-2)
+        a._set_execute_frame(-2)
 
     result =  a.execute()
     try:

@@ -3,7 +3,23 @@ Alternation module
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
       Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
-See LICENSE.txt for licensing details (MIT License). 
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+  
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.  THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 # Imports
@@ -22,15 +38,34 @@ from pycsp.parallel.const import *
 # Decorators
 def choice(func):
     """
-    Decorator for creating choice objets
-    
-    >>> from __init__ import *
-    >>> @choice
-    ... def action(channel_input=None):
-    ...     print 'Hello'
+    @choice decorator for making a function into a Choice factory.
 
-    >>> _,_ = AltSelect(SkipGuard(action=action()))
-    Hello
+    Each generated Choice object can be used as actions in one of
+    the four guards: InputGuard, OutputGuard, SkipGuard or TimeoutGuard.
+
+    The keyword variable channel_input is special and is provided in the
+    execution of the choice. Choice functions must accept the channel_input
+    parameter, when used in InputGuards.
+
+    Usage:
+      >>> @choice
+      ... def add_service(serviceDB, channel_input):
+      ...     (id, request) = channel_input
+      ...     if serviceDB.has_key(id):
+      ...         serviceDB[id].append(request)
+      ...     else:
+      ...         serviceDB[id] = [request]
+
+      >>> @choice
+      ... def quit(ch_end):
+      ...   poison(ch_end)
+      
+      >>> _,_ = AltSelect(
+                  InputGuard(request, action=add_service(services)),
+                  TimeoutGuard(action=quit(request)))
+
+      The Choice factory returned by the @choice decorator:
+      func(*args, **kwargs)
     """
     # __choice_fn func_name used to identify function in Alternation.execute
     def __choice_fn(*args, **kwargs):
@@ -57,9 +92,13 @@ class Choice:
 
 
 class Alternation:
-    """
-    Alternation supports input and output guards. Guards are ChannelEnd
-    or Guard objects.
+    """ Alternation([{cin0:None, (cout0,val):None}])
+
+    Alternation provides the basic interface to Alt. It is recommended
+    to use AltSelect / FairSelect as these are much more user-friendly.
+    
+    Alternation supports the SkipGuard, TimeoutGuard, ChannelEndRead
+    or ChannelEndWrite objects.
     
     Note that alternation always performs the guard that was chosen,
     i.e. channel input or output is executed within the alternation so
@@ -67,34 +106,50 @@ class Alternation:
     the results are simply ignored, still performs the guarded input or
     output.
 
-    >>> from __init__ import *
+    Usage:
+      >>> L = []
 
-    >>> L = []
+      >>> @choice 
+      ... def action(channel_input):
+      ...     L.append(channel_input)
 
-    >>> @choice 
-    ... def action(channel_input):
-    ...     L.append(channel_input)
-
-    >>> @process
-    ... def P1(cout, n=5):
-    ...     for i in range(n):
-    ...         cout(i)
+      >>> @process
+      ... def P1(cout, n=5):
+      ...     for i in range(n):
+      ...         cout(i)
     
-    >>> @process
-    ... def P2(cin1, cin2, n=10):
-    ...     alt = Alternation([{cin1:action(), cin2:action()}])
-    ...     for i in range(n):
-    ...         alt.execute()
+      >>> @process
+      ... def P2(cin1, cin2, n=10):
+      ...     alt = Alternation([{cin1:action(), cin2:action()}])
+      ...     for i in range(n):
+      ...         alt.execute()
                 
-    >>> C1, C2 = Channel(), Channel()
-    >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+      >>> C1, C2 = Channel(), Channel()
+      >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
 
-    >>> len(L)
-    10
+      >>> len(L)
+      10
 
-    >>> L.sort()
-    >>> L
-    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+      >>> L.sort()
+      >>> L
+      [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+
+
+      Performing a non-blocking write
+
+      >>> Alternation([
+      ...   { ( cout , datablock ): None } ,  # Try to write to a channel
+      ...   { SkipGuard (): " print('skipped !') } # Skip the alternation
+      ... ]).execute()     
+      
+      Input with a timeout
+
+      >>> g, msg = Alternation([
+      ...   { cin : None } ,
+      ...   { TimeoutGuard (seconds=1): " print('Ignore this message !') }
+      ... ]).select()      
+      >>> if g == cin:
+      ...     print("Got: %s" % (msg))
     """
     def __init__(self, guards):
         # Preserve tuple entries and convert dictionary entries to tuple entries
@@ -117,7 +172,7 @@ class Alternation:
         # Default is to go one up in stackframe.
         self.execute_frame = -1
 
-    def set_execute_frame(self, steps):
+    def _set_execute_frame(self, steps):
         if steps > 0:
             self.execute_frame = -1*steps
         else:
@@ -136,7 +191,7 @@ class Alternation:
                 if isinstance(c, Guard):
                     if c.id == p.result_ch:
                         act = c
-                    c.cancel()
+                    c._cancel()
                     
                 elif c.channel.name == p.result_ch:
                     act = c
@@ -147,7 +202,7 @@ class Alternation:
             retire=True
         return (act, poison, retire)
 
-    def choose(self):
+    def _choose(self):
         reqs={}
         act = None
         poison = False
@@ -225,7 +280,6 @@ class Alternation:
         """
         Selects the guard and executes the attached action. Action is a function or python code passed in a string.
 
-        >>> from __init__ import *
         >>> L1,L2 = [],[]
 
         >>> @process
@@ -248,7 +302,7 @@ class Alternation:
         >>> len(L1), len(L2)
         (10, 5)
         """
-        idx, c, result_msg, op = self.choose()
+        idx, c, result_msg, op = self._choose()
         if self.guards[idx]:
             action = self.guards[idx][-1]
 
@@ -263,7 +317,7 @@ class Alternation:
             elif callable(action):
                 # Choice function not allowed as callback
                 if type(action) == types.FunctionType and action.func_name == '__choice_fn':
-                    raise Exception('@choice function is not instantiated. Please use action() and not just action')
+                    raise InfoException('@choice function is not instantiated. Please use action() and not just action')
                 else:
                     # Execute callback function
                     if op==WRITE:
@@ -301,7 +355,6 @@ class Alternation:
         """
         Selects the guard.
 
-        >>> from __init__ import *
         >>> L1,L2 = [],[]
 
         >>> @process
@@ -328,7 +381,7 @@ class Alternation:
         >>> len(L1), len(L2)
         (5, 5)
         """
-        idx, c, result_msg, op = self.choose()
+        idx, c, result_msg, op = self._choose()
         return (c, result_msg)
 
 

@@ -221,10 +221,10 @@ class ChannelEndReadTrace:
         self.wrapped = wrapped
 
         self.channel = chan
-        self.op = READ
+        self._op = READ
 
-        self.post_read = self.wrapped.post_read
-        self.remove_read = self.wrapped.remove_read
+        self._post_read = self.wrapped._post_read
+        self._remove_read = self.wrapped._remove_read
         self.__repr__ = self.wrapped.__repr__
         self.isWriter = self.wrapped.isWriter
         self.isReader = self.wrapped.isReader
@@ -255,10 +255,10 @@ class ChannelEndWriteTrace:
         self.wrapped = wrapped
 
         self.channel = chan
-        self.op = WRITE
+        self._op = WRITE
 
-        self.post_write = self.wrapped.post_write
-        self.remove_write = self.wrapped.remove_write
+        self._post_write = self.wrapped._post_write
+        self._remove_write = self.wrapped._remove_write
         self.__repr__ = self.wrapped.__repr__
         self.isWriter = self.wrapped.isWriter
         self.isReader = self.wrapped.isReader
@@ -296,8 +296,8 @@ class ChannelEndWriteTrace:
 class Alternation:
     def __init__(self, guards):
         self.wrapped = pycsp.Alternation(guards)
-        self.wrapped.set_execute_frame(-2)
-        self.set_execute_frame = self.wrapped.set_execute_frame
+        self.wrapped._set_execute_frame(-2)
+        self._set_execute_frame = self.wrapped._set_execute_frame
 
         process_id = pycsp.current_process_id()
         val = {'type':'Alternation', 'guards':[], 'process_id':process_id}
@@ -306,9 +306,9 @@ class Alternation:
         sendTrace(val)
 
     def __translate(self, g):        
-        if isinstance(g, Timeout):
+        if isinstance(g, TimeoutGuard):
             return {'type':'TimeoutGuard'}
-        elif isinstance(g, Skip):
+        elif isinstance(g, SkipGuard):
             return {'type':'SkipGuard'}
         elif isinstance(g, ChannelEndReadTrace):
             return {'type':'ReadGuard', 'chan_name':g.wrapped.channel.name}

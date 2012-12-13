@@ -19,7 +19,8 @@ from pycsp.parallel.const import *
 
 # Classes
 class Channel(object):
-    """
+    """ Channel(name=None, buffer=0, connect=None)
+
     Any-2-any channel for communication between both local and remote processes.
     
     To communicate on this channel, channel ends must be requested using the .reader/.writer methods.
@@ -41,7 +42,7 @@ class Channel(object):
     Channel(name=None, buffer=0, connect=None):
     name
       is a string used for identifying the Channel and must be unique for every Channel instance.
-      The name is limited to maximum 32 characters.
+      The name is limited to maximum 32 characters. If name=None then a unique name is generated.
     buffer
       The channel may be buffered by configuring a buffer of size <buffer>.
       buffer=3 will create a channel which can contain three elements, before blocking send.
@@ -280,7 +281,9 @@ class Channel(object):
 
 # Functions
 def retire(*list_of_channelEnds):
-    """ Retire channel ends
+    """ retire(C1, [C2, .. , CN])
+
+    Retire channel ends
 
     When a channel end is retired, the channel is signaled that a channel end
     has now left the channel. When the set of all reading or writing channel ends is set
@@ -295,15 +298,22 @@ def retire(*list_of_channelEnds):
     Usage:
     >>> retire(cin0)
     >>> retire(cin0, cin1, cout0)
-    >>> retire(*cinList)
+    >>> retire(cinList)
     """
     for channelEnd in list_of_channelEnds:
-        if isinstance(channelEnd, Channel):
+        if type(channelEnd)==list:
+            for end2 in channelEnd:
+                # recursive call to retire
+                retire(end2)
+        elif isinstance(channelEnd, Channel):
             raise InfoException("Tried to retire a channel object. Only channel end objects may be retired.")
-        channelEnd.retire()
+        else:
+            channelEnd.retire()
 
 def poison(*list_of_channelEnds):
-    """ Poison channel ends
+    """ poison(C1, [C2, .. , CN])
+
+    Poison channel ends
     
     When a channel end is poisoned, the channel is set into a poisoned state where
     after all actions on the channel will invoke a ChannelPoisonException which
@@ -316,12 +326,17 @@ def poison(*list_of_channelEnds):
     Usage:
     >>> poison(cin0)
     >>> poison(cin0, cin1, cout0)
-    >>> poison(*cinList)
+    >>> poison(cinList)
     """
     for channelEnd in list_of_channelEnds:
-        if isinstance(channelEnd, Channel):
+        if type(channelEnd)==list:
+            for end2 in channelEnd:
+                # recursive call to poison
+                poison(end2)
+        elif isinstance(channelEnd, Channel):
             raise InfoException("Tried to poison a channel object. Only channel end objects may be poisoned.")
-        channelEnd.poison()
+        else:
+            channelEnd.poison()
 
 # Classes
 class ChannelEnd:

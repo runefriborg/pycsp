@@ -64,6 +64,7 @@ pycsp.current.ChannelPoisonException = ChannelPoisonException
 pycsp.current.ChannelRetireException = ChannelRetireException
 pycsp.current.ChannelSocketException = ChannelSocketException
 pycsp.current.FatalException = FatalException
+pycsp.current.InfoException = InfoException
 pycsp.current.retire = retire
 pycsp.current.poison = poison
 pycsp.current.io = io

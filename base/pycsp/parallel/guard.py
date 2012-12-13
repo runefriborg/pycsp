@@ -49,7 +49,7 @@ class Guard:
         self.dispatch.registerGuard(self.id)
         self.LM = LockMessenger(self.id)
 
-    def offer(self, req):
+    def _offer(self, req):
         try:
             # Acquire lock
             conn, state, seq = self.LM.remote_acquire_and_get_state(req.process)
@@ -75,31 +75,56 @@ class Guard:
 
         self.dispatch.deregisterGuard(self.id)
 
-    def cancel(self):
+    def _cancel(self):
+        # Invoked from Alternation
         self.dispatch.deregisterGuard(self.id)
 
     
 class SkipGuard(Guard):
-    """
-    SkipGuard will try to accept a read or a write, the moment it is posted.
-    
-    >>> from __init__ import *
+    """ SkipGuard(action=None)
 
-    >>> C = Channel()
-    >>> Cin = C.reader()
-    >>> (g, msg) = AltSelect(InputGuard(Cin),  SkipGuard() )
+    SkipGuard will commit a successful communication the moment it is posted.
 
-    >>> isinstance(g, Skip) and msg == None
-    True
+    Usage:
+      >>> C = Channel()
+      >>> Cin = C.reader()
+      >>> (g, msg) = AltSelect(InputGuard(Cin),  SkipGuard() )
 
-    >>> shutdown()
+    SkipGuard(action=None)
+    action
+      An action may be provided as a string, a callable function object or a Choice object.
+      The Choice object is the recommended use of action.
+      
+      A string:
+        >>> action="L.append(channel_input)"
+      
+        The string passed to the action parameter is evaluted in the current namespace and can 
+        read variables, but can only write output by editing the content of existing mutable variables.
+        Newly created immutable and mutable variables will only exist in the evalutation of this string.
+      
+      callable(func):
+        >>> def func(channel_input=None)
+        ...     L.append(channel_input)
+        >>> action=func
+        
+        The callable function object must accept one parameter for actions on InputGuards and must
+        accept zero parameters for actions on OutputGuards.
+
+      Choice:
+        >>> @choice
+        ... def func(L, channel_input=None)
+        ...     L.append(channel_input)
+        >>> action=func(gatherList)
+
+        The choice decorator can be used to make a Choice factory, which can generate actions with
+        different parameters depending on the use case. See help(pycsp.choice)
     """
     def __init__(self, action=None):
         Guard.__init__(self, action)
 
     # Offer instantly
     def _post_read(self, process):
-        self.offer(ChannelReq(self.LM, AddrID(process.addr, process.id),
+        self._offer(ChannelReq(self.LM, AddrID(process.addr, process.id),
                                        process.sequence_number,
                                        self.id))
 
@@ -108,30 +133,46 @@ class SkipGuard(Guard):
         
 
 class TimeoutGuard(Guard):
-    """
+    """ TimeoutGuard(action=None)
+
     TimeoutGuard spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
-    
-    >>> from __init__ import *
-    >>> import time
 
-    >>> C = Channel()
-    >>> Cin = C.reader()
+    When the timer expires, the timer thread will commit a successful communication.
 
-    >>> time_start = time.time()
-    >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
-    >>> time_passed = time.time() - time_start
+    Usage:
+      >>> C = Channel()
+      >>> Cin = C.reader()
+      >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
 
-    >>> time_passed >= 0.5
-    True
-    
-    >>> time_passed < 0.6
-    True
-    
-    >>> isinstance(g, Timeout) and msg == None
-    True
+    TimeoutGuard(action=None)
+    action
+      An action may be provided as a string, a callable function object or a Choice object.
+      The Choice object is the recommended use of action.
+      
+      A string:
+        >>> action="L.append(channel_input)"
+      
+        The string passed to the action parameter is evaluted in the current namespace and can 
+        read variables, but can only write output by editing the content of existing mutable variables.
+        Newly created immutable and mutable variables will only exist in the evalutation of this string.
+      
+      callable(func):
+        >>> def func(channel_input=None)
+        ...     L.append(channel_input)
+        >>> action=func
+        
+        The callable function object must accept one parameter for actions on InputGuards and must
+        accept zero parameters for actions on OutputGuards.
 
-    >>> shutdown()
+      Choice:
+        >>> @choice
+        ... def func(L, channel_input=None)
+        ...     L.append(channel_input)
+        >>> action=func(gatherList)
+
+        The choice decorator can be used to make a Choice factory, which can generate actions with
+        different parameters depending on the use case. See help(pycsp.choice)
     """
     def __init__(self, seconds, action=None):
         Guard.__init__(self, action)
@@ -139,18 +180,18 @@ class TimeoutGuard(Guard):
         self.posted_req = None
 
     # Timer expired, offer an active Channel Request
-    def expire(self):
-        self.offer(self.posted_req)
+    def _expire(self):
+        self._offer(self.posted_req)
         
     def _post_read(self, process):
         self.posted_req = ChannelReq(self.LM, AddrID(process.addr, process.id),
                                      process.sequence_number,
                                      self.id)
-        self.timer = threading.Timer(self.seconds, self.expire)
+        self.timer = threading.Timer(self.seconds, self._expire)
         self.timer.start()
   
-    def cancel(self):
-        Guard.cancel(self)
+    def _cancel(self):
+        Guard._cancel(self)
         self.timer.cancel()
         
         
