@@ -426,7 +426,7 @@ class ChannelEndWrite(ChannelEnd)
  |      when terminating multiple concurrent processes.
 
 </pre>
-=<pre>Alt</pre>=
+=<pre>AltSelect</pre>=
 ==<pre>AltSelect</pre>==
 <pre>
 Help on function AltSelect in module pycsp.parallel.altselect:
@@ -515,7 +515,7 @@ FairSelect(*guards)
     FairSelect(G1, [G2, .. ,GN])
     
     FairSelect sorts the list of guards in order based on the history for
-    the chosen guards in this FairSelect located at this specific line in this specific process.
+    the chosen guards in this FairSelect.
     
     Internally it invokes a priority select on the new order of guards.
     
@@ -582,7 +582,7 @@ class InputGuard
  |      ...     L.append(channel_input)
  |      >>> action=func(gatherList)
  |  
- |      The choice decorator can be used to make a Choice factory, which can degenerate actions with
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
  |      different parameters depending on the use case. See help(pycsp.choice)
  |  
  |  Methods defined here:
@@ -644,7 +644,7 @@ class OutputGuard
  |      ...     L.remove(val)
  |      >>> action=func(gatherList, sending_value)
  |  
- |      The choice decorator can be used to make a Choice factory, which can degenerate actions with
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
  |      different parameters depending on the use case. See help(pycsp.choice)
  |  
  |  Methods defined here:
@@ -652,29 +652,152 @@ class OutputGuard
  |  __init__(self, ch_end_write, msg, action=None)
 
 </pre>
+==<pre>SkipGuard</pre>==
+<pre>
+Help on class SkipGuard in module pycsp.parallel.guard:
+
+class SkipGuard(Guard)
+ |  SkipGuard(action=None)
+ |  
+ |  SkipGuard will commit a successful communication the moment it is posted.
+ |  
+ |  Usage:
+ |    >>> C = Channel()
+ |    >>> Cin = C.reader()
+ |    >>> (g, msg) = AltSelect(InputGuard(Cin),  SkipGuard() )
+ |  
+ |  SkipGuard(action=None)
+ |  action
+ |    An action may be provided as a string, a callable function object or a Choice object.
+ |    The Choice object is the recommended use of action.
+ |    
+ |    A string:
+ |      >>> action="L.append(channel_input)"
+ |    
+ |      The string passed to the action parameter is evaluted in the current namespace and can 
+ |      read variables, but can only write output by editing the content of existing mutable variables.
+ |      Newly created immutable and mutable variables will only exist in the evalutation of this string.
+ |    
+ |    callable(func):
+ |      >>> def func(channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func
+ |      
+ |      The callable function object must accept one parameter for actions on InputGuards and must
+ |      accept zero parameters for actions on OutputGuards.
+ |  
+ |    Choice:
+ |      >>> @choice
+ |      ... def func(L, channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func(gatherList)
+ |  
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
+ |      different parameters depending on the use case. See help(pycsp.choice)
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, action=None)
+
+</pre>
+==<pre>TimeoutGuard</pre>==
+<pre>
+Help on class TimeoutGuard in module pycsp.parallel.guard:
+
+class TimeoutGuard(Guard)
+ |  TimeoutGuard(action=None)
+ |  
+ |  TimeoutGuard spawns a timer thread, when posted. If removed
+ |  before timeout, then the timer thread is cancelled.
+ |  
+ |  When the timer expires, the timer thread will commit a successful communication.
+ |  
+ |  Usage:
+ |    >>> C = Channel()
+ |    >>> Cin = C.reader()
+ |    >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
+ |  
+ |  TimeoutGuard(action=None)
+ |  action
+ |    An action may be provided as a string, a callable function object or a Choice object.
+ |    The Choice object is the recommended use of action.
+ |    
+ |    A string:
+ |      >>> action="L.append(channel_input)"
+ |    
+ |      The string passed to the action parameter is evaluted in the current namespace and can 
+ |      read variables, but can only write output by editing the content of existing mutable variables.
+ |      Newly created immutable and mutable variables will only exist in the evalutation of this string.
+ |    
+ |    callable(func):
+ |      >>> def func(channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func
+ |      
+ |      The callable function object must accept one parameter for actions on InputGuards and must
+ |      accept zero parameters for actions on OutputGuards.
+ |  
+ |    Choice:
+ |      >>> @choice
+ |      ... def func(L, channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func(gatherList)
+ |  
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
+ |      different parameters depending on the use case. See help(pycsp.choice)
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, seconds, action=None)
+
+</pre>
 ==<pre>@choice</pre>==
 <pre>
 Help on function choice in module pycsp.parallel.alternation:
 
 choice(func)
-    Decorator for creating choice objets
+    @choice decorator for making a function into a Choice factory.
     
-    >>> from __init__ import *
-    >>> @choice
-    ... def action(channel_input=None):
-    ...     print 'Hello'
+    Each generated Choice object can be used as actions in one of
+    the four guards: InputGuard, OutputGuard, SkipGuard or TimeoutGuard.
     
-    >>> _,_ = AltSelect(SkipGuard(action=action()))
-    Hello
+    The keyword variable channel_input is special and is provided in the
+    execution of the choice. Choice functions must accept the channel_input
+    parameter, when used in InputGuards.
+    
+    Usage:
+      >>> @choice
+      ... def add_service(serviceDB, channel_input):
+      ...     (id, request) = channel_input
+      ...     if serviceDB.has_key(id):
+      ...         serviceDB[id].append(request)
+      ...     else:
+      ...         serviceDB[id] = [request]
+    
+      >>> @choice
+      ... def quit(ch_end):
+      ...   poison(ch_end)
+      
+      >>> _,_ = AltSelect(
+                  InputGuard(request, action=add_service(services)),
+                  TimeoutGuard(action=quit(request)))
+    
+      The Choice factory returned by the @choice decorator:
+      func(*args, **kwargs)
 
 </pre>
-==<pre>Alternation</pre>==
+=<pre>Alternation (alternative to AltSelect)</pre>=
 <pre>
 Help on class Alternation in module pycsp.parallel.alternation:
 
 class Alternation
- |  Alternation supports input and output guards. Guards are ChannelEnd
- |  or Guard objects.
+ |  Alternation([{cin0:None, (cout0,val):None}])
+ |  
+ |  Alternation provides the basic interface to Alt. It is recommended
+ |  to use AltSelect / FairSelect as these are much more user-friendly.
+ |  
+ |  Alternation supports the SkipGuard, TimeoutGuard, ChannelEndRead
+ |  or ChannelEndWrite objects.
  |  
  |  Note that alternation always performs the guard that was chosen,
  |  i.e. channel input or output is executed within the alternation so
@@ -682,45 +805,58 @@ class Alternation
  |  the results are simply ignored, still performs the guarded input or
  |  output.
  |  
- |  >>> from __init__ import *
+ |  Usage:
+ |    >>> L = []
  |  
- |  >>> L = []
+ |    >>> @choice 
+ |    ... def action(channel_input):
+ |    ...     L.append(channel_input)
  |  
- |  >>> @choice 
- |  ... def action(channel_input):
- |  ...     L.append(channel_input)
+ |    >>> @process
+ |    ... def P1(cout, n=5):
+ |    ...     for i in range(n):
+ |    ...         cout(i)
  |  
- |  >>> @process
- |  ... def P1(cout, n=5):
- |  ...     for i in range(n):
- |  ...         cout(i)
- |  
- |  >>> @process
- |  ... def P2(cin1, cin2, n=10):
- |  ...     alt = Alternation([{cin1:action(), cin2:action()}])
- |  ...     for i in range(n):
- |  ...         alt.execute()
+ |    >>> @process
+ |    ... def P2(cin1, cin2, n=10):
+ |    ...     alt = Alternation([{cin1:action(), cin2:action()}])
+ |    ...     for i in range(n):
+ |    ...         alt.execute()
  |              
- |  >>> C1, C2 = Channel(), Channel()
- |  >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+ |    >>> C1, C2 = Channel(), Channel()
+ |    >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
  |  
- |  >>> len(L)
- |  10
+ |    >>> len(L)
+ |    10
  |  
- |  >>> L.sort()
- |  >>> L
- |  [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+ |    >>> L.sort()
+ |    >>> L
+ |    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+ |  
+ |  
+ |    Performing a non-blocking write
+ |  
+ |    >>> Alternation([
+ |    ...   { ( cout , datablock ): None } ,  # Try to write to a channel
+ |    ...   { SkipGuard (): " print('skipped !') } # Skip the alternation
+ |    ... ]).execute()     
+ |    
+ |    Input with a timeout
+ |  
+ |    >>> g, msg = Alternation([
+ |    ...   { cin : None } ,
+ |    ...   { TimeoutGuard (seconds=1): " print('Ignore this message !') }
+ |    ... ]).select()      
+ |    >>> if g == cin:
+ |    ...     print("Got: %s" % (msg))
  |  
  |  Methods defined here:
  |  
  |  __init__(self, guards)
  |  
- |  choose(self)
- |  
  |  execute(self)
  |      Selects the guard and executes the attached action. Action is a function or python code passed in a string.
  |      
- |      >>> from __init__ import *
  |      >>> L1,L2 = [],[]
  |      
  |      >>> @process
@@ -746,7 +882,6 @@ class Alternation
  |  select(self)
  |      Selects the guard.
  |      
- |      >>> from __init__ import *
  |      >>> L1,L2 = [],[]
  |      
  |      >>> @process
@@ -772,8 +907,6 @@ class Alternation
  |      
  |      >>> len(L1), len(L2)
  |      (5, 5)
- |  
- |  set_execute_frame(self, steps)
 
 </pre>
 =<pre>Termination</pre>=
@@ -825,6 +958,15 @@ poison(*list_of_channelEnds)
     >>> poison(cinList)
 
 </pre>
+=<pre>Other</pre>=
+==<pre>current_process_id</pre>==
+<pre>
+Help on function current_process_id in module pycsp.parallel.process:
+
+current_process_id()
+    Returns the id of the executing CSP process.
+
+</pre>
 ==<pre>shutdown</pre>==
 <pre>
 Help on function shutdown in module pycsp.parallel.process:
@@ -841,14 +983,5 @@ shutdown()
     
     Performs a stable shutdown of hosted channels, waiting for local and remote
     processes to disconnect from the hosted channels.
-
-</pre>
-=<pre>Other</pre>=
-==<pre>current_process_id</pre>==
-<pre>
-Help on function current_process_id in module pycsp.parallel.process:
-
-current_process_id()
-    Returns the id of the executing CSP process.
 
 </pre>
