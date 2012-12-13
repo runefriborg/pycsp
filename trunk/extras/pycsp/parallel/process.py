@@ -36,14 +36,18 @@ from pycsp.parallel.exceptions import *
 # Decorators
 def process(func):
     """
-    @process decorator for creating process functions
+    @process decorator for making a function into a CSP Process factory.
+    Each generated CSP process is implemented as a single OS thread.
 
-    >>> @process
-    ... def P():
-    ...     pass
+    Usage:
+      >>> @process
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
 
-    >>> isinstance(P(), Process)
-    True
+    The CSP Process factory returned by the @process decorator:
+      func(*args, **kwargs)
     """
     def _call(*args, **kwargs):
         return Process(func, *args, **kwargs)
@@ -54,7 +58,25 @@ def process(func):
 # Classes
 class Process(threading.Thread):
     """ Process(func, *args, **kwargs)
-    It is recommended to use the @process decorator, to create Process instances
+
+    CSP process implemented as a single OS thread.
+
+    It is recommended to use the @process decorator, to create Process instances.
+    See help(pycsp.process)
+
+    Usage:
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = Process(filter, A.reader(), B.writer(), "42", debug=True) 
+
+    Process(func, *args, **kwargs)
+    func
+      The function object to wrap and execute in the body of the process.
+    args and kwargs are passed directly to the execution of the function object.
+    
+    Public variables:
+      Process.name       Unique name to identify the process
     """
     def __init__(self, fn, *args, **kwargs):
         threading.Thread.__init__(self)
@@ -65,7 +87,6 @@ class Process(threading.Thread):
         # Create 64 byte unique id based on network address, sequence number and time sample.
         self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
         
-
         # Channel request state
         self.state = FAIL
         self.result_ch_idx = None
@@ -222,45 +243,47 @@ class Process(threading.Thread):
 # Functions
 def Parallel(*plist):
     """ Parallel(P1, [P2, .. ,PN])
-    >>> from __init__ import *
-    
-    >>> @process
-    ... def P1(cout, id):
-    ...     for i in range(10):
-    ...         cout(id)
 
-    >>> @process
-    ... def P2(cin):
-    ...     for i in range(10):
-    ...         cin()
+    Performs concurrent synchronous execution of the supplied CSP processes. 
     
-    >>> C = [Channel() for i in range(10)]
-    >>> Cin = [chan.reader() for chan in C]
-    >>> Cout = [chan.writer() for chan in C]
+    Blocks until all processes have exited.
+  
+    Usage:
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
+
+      >>> @process
+      ... def P2(cin):
+      ...     while True:
+      ...         cin()
     
-    >>> Parallel([P1(Cout[i], i) for i in range(10)],[P2(Cin[i]) for i in range(10)])
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()), P2(C.reader()))
     """
     _parallel(plist, True)
 
 def Spawn(*plist):
     """ Spawn(P1, [P2, .. ,PN])
-    >>> from __init__ import *
+
+    Performs concurrent asynchronous execution of the supplied CSP processes. 
+  
+    Usage:
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
     
-    >>> @process
-    ... def P1(cout, id):
-    ...     for i in range(10):
-    ...         cout(id)
-    
-    >>> C = Channel()
-    >>> Spawn([P1(C.writer(), i) for i in range(10)])
-    
-    >>> L = []
-    >>> cin = C.reader()
-    >>> for i in range(100):
-    ...    L.append(cin())
-    
-    >>> len(L)
-    100
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()))
+
+      >>> cin = C.reader()
+      ... try:
+      ...     while True:
+      ...         cin()
     """
     _parallel(plist, False)
 
@@ -285,23 +308,20 @@ def _parallel(plist, block = True):
     
 def Sequence(*plist):
     """ Sequence(P1, [P2, .. ,PN])
-    The Sequence construct returns when all given processes exit.
-    >>> from __init__ import *
+
+    Performs synchronous execution of the supplied CSP processes. 
     
-    >>> @process
-    ... def P1(cout):
-    ...     Sequence([Process(cout,i) for i in range(10)])
-    
-    >>> C = Channel()
-    >>> Spawn(P1(C.writer()))
-    
-    >>> L = []
-    >>> cin = C.reader()
-    >>> for i in range(10):
-    ...    L.append(cin())
-    
-    >>> L
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    The supplied processes are executed in order.
+
+    Blocks until the last process has exited.
+  
+    Usage:
+      >>> @process
+      ... def P1(id):
+      ...     print(id)
+
+      >>> L = [P1(i) for i in range(10)]
+      >>> Sequence(L)
     """
     processes=[]
     for p in plist:
@@ -324,6 +344,9 @@ def Sequence(*plist):
 
 
 def current_process_id():
+    """
+    Returns the id of the executing CSP process.
+    """
     t, name = getThreadAndName()
 
     if name == 'MainThread':
@@ -347,6 +370,8 @@ init_procs = []
 def init():
     """
     Initialising state variables for channel communication made from an uninitialized thread/process (__main__).
+
+    This function is invoked from const.getThreadAndName to initialise the current NON-CSP! process when necessary.
     """
     global init_procs
     try:
@@ -399,12 +424,17 @@ def init():
 
 def shutdown():
     """
-    Activates a nice shutdown of the main lock thread created by init()
+    Closing the PYCSP instance
 
-    The SocketThread thread is a daemon thread and will be terminated hard
-    if not nicely through this function. It is only necessary to call shutdown()
-    if channel communications have been made from the main thread/process
-    otherwise a hard termination is stable.
+    Every PyCSP application will create a server thread, to serve incoming communications
+    on channels. For this reason, it is required to always end the PyCSP application with
+    a call to shutdown()
+
+    Usage:
+      >>> shutdown()
+
+    Performs a stable shutdown of hosted channels, waiting for local and remote
+    processes to disconnect from the hosted channels.
     """
     global init_procs
     try:
