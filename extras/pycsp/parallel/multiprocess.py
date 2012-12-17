@@ -27,13 +27,15 @@ import types
 import uuid
 import threading
 
-import multiprocessing
+from multiprocessing import Process
+from multiprocessing.sharedctypes import RawValue
 
 from pycsp.parallel.dispatch import SocketDispatcher
 from pycsp.parallel.protocol import RemoteLock
-from pycsp.parallel.channel import ChannelPoisonException, Channel, ChannelRetireException, ChannelEndRead, ChannelEndWrite
+from pycsp.parallel.channel import Channel, ChannelEndRead, ChannelEndWrite
 from pycsp.parallel.const import *
 from pycsp.parallel.configuration import *
+from pycsp.parallel.exceptions import *
         
 conf = Configuration()
 
@@ -107,11 +109,25 @@ class MultiProcess(multiprocessing.Process):
         # Identify this as a wrapped pycsp process, which must not be terminated by shutdown
         self.maintained= True
 
+        # report execution error
+        self._error = RawValue('i', 0)
+
     def wait(self):
         self.cond.acquire()
         if self.state == READY:
             self.cond.wait()
         self.cond.release()
+
+    def _report(self):
+        # Method to execute after process have quit.
+        # This method enables propagation of errors to parent processes and threads.
+        
+        # It is optional whether the parent process/threads calls this method, thus
+        # no cleanup should be made from this method. Purely reporting.
+
+        # 1001 = Socket bind error
+        if self._error.value == 1001:          
+            raise ChannelBindException(None, 'Could not bind to address in multiprocess')
 
     def run(self):
         
@@ -123,7 +139,12 @@ class MultiProcess(multiprocessing.Process):
             conf.set(PYCSP_HOST, self.host)
         if self.port != None:
             conf.set(PYCSP_PORT, self.port)
-        SocketDispatcher(reset=True)
+
+        try:            
+            SocketDispatcher(reset=True)
+        except SocketBindException as e:
+            self._error.value = 1001
+            return
 
         # Create remote lock
         self.cond = threading.Condition()        
@@ -179,7 +200,6 @@ class MultiProcess(multiprocessing.Process):
         for threadchild in threading.enumerate():
             if not threadchild == skip:
                 threadchild.join()
-
 
     def __check_poison(self, args):
         for arg in args:

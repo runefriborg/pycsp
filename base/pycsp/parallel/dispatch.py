@@ -366,6 +366,7 @@ class SocketThreadData:
             host = os.environ[ENVVAL_HOST]
         addr = (host, port)
 
+        
         self.server_socket, self.server_addr = ossocket.start_server(addr)
 
         self.active_socket_list = [self.server_socket]
@@ -390,35 +391,40 @@ class SocketThreadData:
         
     def add_to_active_socket_list(self, sock):
         if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
+            
             self.cond.acquire()
-            if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
-                self.active_socket_list_add.append(sock)
-                h = Header(SOCKETTHREAD_PING)
-                # This connection is made only to the local server
-                sock = self.handler.connect(self.server_addr)
-                self.handler.sendall(sock, h)
-                self.handler.close(sock)
-                #print(str(threading.currentThread())+" added socket")
-            self.cond.release()
+            try:
+                if not (sock in self.active_socket_list or sock in self.active_socket_list_add):
+                    self.active_socket_list_add.append(sock)
+                    h = Header(SOCKETTHREAD_PING)
+                    # This connection is made only to the local server
+                    sock = self.handler.connect(self.server_addr)
+                    self.handler.sendall(sock, h)
+                    self.handler.close(sock)
+            finally:
+                self.cond.release()
 
     def startThread(self):
         self.cond.acquire()
-        if self.thread == None:
-            self.thread = SocketThread(self)
-            self.thread.start()
-        self.cond.release()
+        try:
+            if self.thread == None:
+                self.thread = SocketThread(self)
+                self.thread.start()
+        finally:
+            self.cond.release()
 
             
     def stopThread(self):
         self.cond.acquire()
-        if not self.thread == None:
-            h = Header(SOCKETTHREAD_SHUTDOWN)
-            # This connection is made only to the local server
-            sock = ossocket.connectNOcache(self.server_addr)
-            ossocket.sendallNOcache(sock, h)
-            ossocket.closeNOcache(sock)
-
-        self.cond.release()
+        try:
+            if not self.thread == None:
+                h = Header(SOCKETTHREAD_SHUTDOWN)
+                # This connection is made only to the local server
+                sock = ossocket.connectNOcache(self.server_addr)
+                ossocket.sendallNOcache(sock, h)
+                ossocket.closeNOcache(sock)
+        finally:
+            self.cond.release()
                 
     
     """
@@ -429,18 +435,18 @@ class SocketThreadData:
     """
     def registerChannel(self, name_id):
         self.cond.acquire()
+        try:
+            if name_id in self.channels_unknown:
+                #print "GOT UNKNOWN MESSAGE"
+                q = self.channels_unknown.pop(name_id)
+            else:
+                q = QueueBuffer()
 
-        if name_id in self.channels_unknown:
-            #print "GOT UNKNOWN MESSAGE"
-            q = self.channels_unknown.pop(name_id)
-        else:
-            q = QueueBuffer()
-
-        self.channels[name_id] = q
-        if self.thread == None:
-            self.startThread()
-
-        self.cond.release()
+            self.channels[name_id] = q
+            if self.thread == None:
+                self.startThread()
+        finally:
+            self.cond.release()
         return q
 
     def getChannelQueue(self, name_id):
@@ -454,45 +460,48 @@ class SocketThreadData:
 
     def deregisterChannel(self, name_id):
         self.cond.acquire()
-        if name_id in self.channels:
-            del self.channels[name_id]
-        if len(self.channels) == 0 and len(self.processes) == 0:
-            self.stopThread()            
-        self.cond.release()
-        #print("\n### DeregisterChannel\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
+        try:
+            if name_id in self.channels:
+                del self.channels[name_id]
+            if len(self.channels) == 0 and len(self.processes) == 0:
+                self.stopThread()           
+        finally:
+            self.cond.release()
 
     def registerGuard(self, name_id):
         self.cond.acquire()
-
-        self.guards[name_id] = QueueBuffer()
-        if self.thread == None:
-            self.startThread()
-
-        self.cond.release()
+        try:
+            self.guards[name_id] = QueueBuffer()
+            if self.thread == None:
+                self.startThread()
+        finally:
+            self.cond.release()
 
     def deregisterGuard(self, name_id):
         self.cond.acquire()
-        if name_id in self.guards:
-            del self.guards[name_id]
-        if len(self.channels) == 0 and len(self.processes) == 0:
-            self.stopThread()            
-        self.cond.release()
-        #print("\n### DeregisterGuard\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
+        try:
+            if name_id in self.guards:
+                del self.guards[name_id]
+            if len(self.channels) == 0 and len(self.processes) == 0:
+                self.stopThread()            
+        finally:
+            self.cond.release()
 
     def registerProcess(self, name_id, remotelock):
         self.cond.acquire()
-        if name_id in self.processes_unknown:
-            for m in self.processes_unknown[name_id]:
-                remotelock.handle(m)
-            del self.processes_unknown[name_id]
+        try:
+            if name_id in self.processes_unknown:
+                for m in self.processes_unknown[name_id]:
+                    remotelock.handle(m)
+                del self.processes_unknown[name_id]
 
 
-        self.processes[name_id] = remotelock
+            self.processes[name_id] = remotelock
 
-        if self.thread == None:
-            self.startThread()
-
-        self.cond.release()
+            if self.thread == None:
+                self.startThread()
+        finally:
+            self.cond.release()
 
     def deregisterProcess(self, name_id):
 
@@ -514,38 +523,40 @@ class SocketThreadData:
         
         # is destination address the same as my own address? 
         self.cond.acquire()
-        if addr == self.server_addr:
-            if (header.cmd & PROCESS_CMD):
-                # Process message
-                if header.id in self.processes:
-                    self.processes[header.id].handle(m)
-                elif (header.cmd & REQ_REPLY):
-                    self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload="", otherhandler=otherhandler)
-                elif (header.cmd & IGN_UNKNOWN):
-                    pass
+        try:
+            if addr == self.server_addr:
+                if (header.cmd & PROCESS_CMD):
+                    # Process message
+                    if header.id in self.processes:
+                        self.processes[header.id].handle(m)
+                    elif (header.cmd & REQ_REPLY):
+                        self.reply(header, Header(LOCKTHREAD_UNAVAILABLE, header._source_id), payload="", otherhandler=otherhandler)
+                    elif (header.cmd & IGN_UNKNOWN):
+                        pass
+                    else:
+                        if not header.id in self.processes_unknown:
+                            self.processes_unknown[header.id] = []
+                        self.processes_unknown[header.id].append(m)
+                elif (header.cmd & GUARD_CMD and header.id in self.guards):
+                    # Guard message
+                    raise FatalException("Guard should never receive a normal message")
                 else:
-                    if not header.id in self.processes_unknown:
-                        self.processes_unknown[header.id] = []
-                    self.processes_unknown[header.id].append(m)
-            elif (header.cmd & GUARD_CMD and header.id in self.guards):
-                # Guard message
-                raise FatalException("Guard should never receive a normal message")
+                    # Channel message
+                    if header.id in self.channels:
+                        self.channels[header.id].put_normal(m)
+                    elif (header.cmd & IGN_UNKNOWN):
+                        pass
+                    else:
+                        if not header.id in self.channels_unknown:
+                            self.channels_unknown[header.id] = QueueBuffer()
+                        self.channels_unknown[header.id].put_normal(m)
             else:
-                # Channel message
-                if header.id in self.channels:
-                    self.channels[header.id].put_normal(m)
-                elif (header.cmd & IGN_UNKNOWN):
-                    pass
+                if otherhandler:
+                    m.transmit(otherhandler, addr)
                 else:
-                    if not header.id in self.channels_unknown:
-                        self.channels_unknown[header.id] = QueueBuffer()
-                    self.channels_unknown[header.id].put_normal(m)
-        else:
-            if otherhandler:
-                m.transmit(otherhandler, addr)
-            else:
-                m.transmit(self.handler, addr)
-        self.cond.release()
+                    m.transmit(self.handler, addr)
+        finally:
+            self.cond.release()
 
 
     def reply(self, source_header, header, payload="", otherhandler=None):
@@ -561,36 +572,38 @@ class SocketThreadData:
     
         # is destination address the same as my own address? 
         self.cond.acquire()
-        if addr == self.server_addr:
-            if (header.cmd & PROCESS_CMD):
-                # Process message
-                if header.id in self.processes:
-                    self.processes[header.id].handle(m)
-                elif (header.cmd & IGN_UNKNOWN):
-                    pass
+        try:
+            if addr == self.server_addr:
+                if (header.cmd & PROCESS_CMD):
+                    # Process message
+                    if header.id in self.processes:
+                        self.processes[header.id].handle(m)
+                    elif (header.cmd & IGN_UNKNOWN):
+                        pass
+                    else:
+                        if not header.id in self.processes_unknown:
+                            self.processes_unknown[header.id] = []
+                        self.processes_unknown[header.id].append(m)
+                elif (header.cmd & GUARD_CMD and header.id in self.guards):
+                    # Guard message
+                    self.guards[header.id].put_reply(m)
                 else:
-                    if not header.id in self.processes_unknown:
-                        self.processes_unknown[header.id] = []
-                    self.processes_unknown[header.id].append(m)
-            elif (header.cmd & GUARD_CMD and header.id in self.guards):
-                # Guard message
-                self.guards[header.id].put_reply(m)
+                    # Channel message
+                    if header.id in self.channels:
+                        self.channels[header.id].put_reply(m)
+                    elif (header.cmd & IGN_UNKNOWN):
+                        pass
+                    else:
+                        if not header.id in self.channels_unknown:
+                            self.channels_unknown[header.id] = QueueBuffer()
+                        self.channels_unknown[header.id].put_reply(m)                
             else:
-                # Channel message
-                if header.id in self.channels:
-                    self.channels[header.id].put_reply(m)
-                elif (header.cmd & IGN_UNKNOWN):
-                    pass
+                if otherhandler:
+                    m.transmit(otherhandler, addr)
                 else:
-                    if not header.id in self.channels_unknown:
-                        self.channels_unknown[header.id] = QueueBuffer()
-                    self.channels_unknown[header.id].put_reply(m)                
-        else:
-            if otherhandler:
-                m.transmit(otherhandler, addr)
-            else:
-                m.transmit(self.handler, addr)
-        self.cond.release()
+                    m.transmit(self.handler, addr)
+        finally:
+            self.cond.release()
         
 
         

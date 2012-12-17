@@ -93,8 +93,6 @@ def _connect(addr, reconnect=True):
                 if (time.time()-t1) > conf.get(SOCKETS_CONNECT_TIMEOUT):
                     raise SocketConnectException()
             time.sleep(conf.get(SOCKETS_CONNECT_RETRY_DELAY))
-            print("RETRY")
-
     return sock
 
 
@@ -135,9 +133,8 @@ def start_server(server_addr=('', 0)):
                 t1 = time.time()
             else:
                 if (time.time()-t1) > conf.get(SOCKETS_BIND_TIMEOUT):
-                    raise SocketBindException()
+                    raise SocketBindException(server_addr)
             time.sleep(conf.get(SOCKETS_BIND_RETRY_DELAY))
-            print("RETRY SERVER")
 
     # Obtain binded addresses
     address = sock.getsockname()
