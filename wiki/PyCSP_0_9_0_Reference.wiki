@@ -110,81 +110,6 @@ class Process(threading.Thread)
  |      list of weak references to the object (if defined)
 
 </pre>
-==<pre>Parallel</pre>==
-<pre>
-Help on function Parallel in module pycsp.parallel.process:
-
-Parallel(*plist)
-    Parallel(P1, [P2, .. ,PN])
-    
-    Performs concurrent synchronous execution of the supplied CSP processes. 
-    
-    Blocks until all processes have exited.
-    
-    Usage:
-      >>> @process
-      ... def P1(cout):
-      ...     for i in range(10):
-      ...         cout(i)
-      ...     retire(cout)
-    
-      >>> @process
-      ... def P2(cin):
-      ...     while True:
-      ...         cin()
-    
-      >>> C = Channel()  
-      >>> Parallel(P1(C.writer()), P2(C.reader()))
-
-</pre>
-==<pre>Spawn</pre>==
-<pre>
-Help on function Spawn in module pycsp.parallel.process:
-
-Spawn(*plist)
-    Spawn(P1, [P2, .. ,PN])
-    
-    Performs concurrent asynchronous execution of the supplied CSP processes. 
-    
-    Usage:
-      >>> @process
-      ... def P1(cout):
-      ...     for i in range(10):
-      ...         cout(i)
-      ...     retire(cout)
-    
-      >>> C = Channel()  
-      >>> Parallel(P1(C.writer()))
-    
-      >>> cin = C.reader()
-      ... try:
-      ...     while True:
-      ...         cin()
-
-</pre>
-==<pre>Sequence</pre>==
-<pre>
-Help on function Sequence in module pycsp.parallel.process:
-
-Sequence(*plist)
-    Sequence(P1, [P2, .. ,PN])
-    
-    Performs synchronous execution of the supplied CSP processes. 
-    
-    The supplied processes are executed in order.
-    
-    Blocks until the last process has exited.
-    
-    Usage:
-      >>> @process
-      ... def P1(id):
-      ...     print(id)
-    
-      >>> L = [P1(i) for i in range(10)]
-      >>> Sequence(L)
-
-</pre>
-=<pre>MultiProcess</pre>=
 ==<pre>@multiprocess</pre>==
 <pre>
 Help on function multiprocess in module pycsp.parallel.multiprocess:
@@ -306,59 +231,79 @@ class MultiProcess(multiprocessing.process.Process)
  |      Return identifier (PID) of process or `None` if it has yet to start
 
 </pre>
-==<pre>ChannelConnectException</pre>==
+==<pre>Parallel</pre>==
 <pre>
- ChannelConnectException()
-    
-    This exception is raised when a channel is unable to connect
-    to the destination provided in the connect parameter.
+Help on function Parallel in module pycsp.parallel.process:
 
+Parallel(*plist)
+    Parallel(P1, [P2, .. ,PN])
+    
+    Performs concurrent synchronous execution of the supplied CSP processes. 
+    
+    Blocks until all processes have exited.
+    
     Usage:
-      >>> try:
-      ...     A = Channel('A', connect=('unknown', 999))
-      ... except ChannelConnectException as e:
-      ...     print("Addr %s is unavailable
-", % (str(e.addr)))
-
-    If a mobile channel end is sent to another remote interpreter, where
-    the channel end is unable to reconnect with the channel host, then
-    a ChannelConnectException is also raised.
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
     
+      >>> @process
+      ... def P2(cin):
+      ...     while True:
+      ...         cin()
+    
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()), P2(C.reader()))
+
 </pre>
-==<pre>ChannelBindException</pre>==
+==<pre>Spawn</pre>==
 <pre>
- ChannelBindException(addr, msg)
+Help on function Spawn in module pycsp.parallel.process:
+
+Spawn(*plist)
+    Spawn(P1, [P2, .. ,PN])
     
-    This exception is raised when PyCSP is unable to bind to a port.
-
-    The host and port to bind to is ('', 0) which binds
-    to 0.0.0.0 and any available port number, unless provided through
-    environment variables, configuration variables or from parameters
-    to multiprocess.
-
+    Performs concurrent asynchronous execution of the supplied CSP processes. 
+    
     Usage:
-      >>> @multiprocess(port=99)
-      ... def runner(chanName):
-      ...     A = Channel(chanName)
-      ...     cin = A.reader()
-      ...     print(cin())
-
-      >>> try:
-      ...     Parallel(runner('A'))
-      ... except ChannelBindException:
-      ...     print("Can not bind to port 80")
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
     
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()))
+    
+      >>> cin = C.reader()
+      ... try:
+      ...     while True:
+      ...         cin()
+
 </pre>
-==<pre>ChannelLostException</pre>==
+==<pre>Sequence</pre>==
 <pre>
- ChannelLostException(addr, msg)
-    
-    This exception is raised when PyCSP has a channel which is left
-    in an unstable state caused by a broken network connection, which
-    could not be reestablished.
+Help on function Sequence in module pycsp.parallel.process:
 
-    Usually PyCSP can not recover from this exception.    
+Sequence(*plist)
+    Sequence(P1, [P2, .. ,PN])
     
+    Performs synchronous execution of the supplied CSP processes. 
+    
+    The supplied processes are executed in order.
+    
+    Blocks until the last process has exited.
+    
+    Usage:
+      >>> @process
+      ... def P1(id):
+      ...     print(id)
+    
+      >>> L = [P1(i) for i in range(10)]
+      >>> Sequence(L)
+
 </pre>
 =<pre>Channel</pre>=
 ==<pre>Channel</pre>==
@@ -603,6 +548,60 @@ class ChannelEndWrite(ChannelEnd)
  |      Retiring is an improved version of poisoning, which avoids the race condition issue
  |      when terminating multiple concurrent processes.
 
+</pre>
+==<pre>ChannelConnectException</pre>==
+<pre>
+ ChannelConnectException()
+    
+    This exception is raised when a channel is unable to connect
+    to the destination provided in the connect parameter.
+
+    Usage:
+      >>> try:
+      ...     A = Channel('A', connect=('unknown', 999))
+      ... except ChannelConnectException as e:
+      ...     print("Addr %s is unavailable
+", % (str(e.addr)))
+
+    If a mobile channel end is sent to another remote interpreter, where
+    the channel end is unable to reconnect with the channel host, then
+    a ChannelConnectException is also raised.
+    
+</pre>
+==<pre>ChannelBindException</pre>==
+<pre>
+ ChannelBindException(addr, msg)
+    
+    This exception is raised when PyCSP is unable to bind to a port.
+
+    The host and port to bind to is ('', 0) which binds
+    to 0.0.0.0 and any available port number, unless provided through
+    environment variables, configuration variables or from parameters
+    to multiprocess.
+
+    Usage:
+      >>> @multiprocess(port=99)
+      ... def runner(chanName):
+      ...     A = Channel(chanName)
+      ...     cin = A.reader()
+      ...     print(cin())
+
+      >>> try:
+      ...     Parallel(runner('A'))
+      ... except ChannelBindException:
+      ...     print("Can not bind to port 80")
+    
+</pre>
+==<pre>ChannelLostException</pre>==
+<pre>
+ ChannelLostException(addr, msg)
+    
+    This exception is raised when PyCSP has a channel which is left
+    in an unstable state caused by a broken network connection, which
+    could not be reestablished.
+
+    Usually PyCSP can not recover from this exception.    
+    
 </pre>
 =<pre>AltSelect</pre>=
 ==<pre>AltSelect</pre>==
