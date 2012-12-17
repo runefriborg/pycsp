@@ -1,6 +1,6 @@
-#summary Documentation for all components in PyCSP ver. 0.9.0
-#labels Featured
+#summary Documentation for all components in PyCSP ver. 0.9.0 (incomplete)
 #sidebar TutorialList
+
 
 <wiki:toc max_depth="2" />
 =<pre>Process</pre>=
@@ -427,6 +427,60 @@ class ChannelEndWrite(ChannelEnd)
  |      when terminating multiple concurrent processes.
 
 </pre>
+==<pre>ChannelConnectException</pre>==
+<pre>
+ ChannelConnectException()
+    
+    This exception is raised when a channel is unable to connect
+    to the destination provided in the connect parameter.
+
+    Usage:
+      >>> try:
+      ...     A = Channel('A', connect=('unknown', 999))
+      ... except ChannelConnectException as e:
+      ...     print("Addr %s is unavailable
+", % (str(e.addr)))
+
+    If a mobile channel end is sent to another remote interpreter, where
+    the channel end is unable to reconnect with the channel host, then
+    a ChannelConnectException is also raised.
+    
+</pre>
+==<pre>ChannelBindException</pre>==
+<pre>
+ ChannelBindException(addr, msg)
+    
+    This exception is raised when PyCSP is unable to bind to a port.
+
+    The host and port to bind to is ('', 0) which binds
+    to 0.0.0.0 and any available port number, unless provided through
+    environment variables, configuration variables or from parameters
+    to multiprocess.
+
+    Usage:
+      >>> @multiprocess(port=99)
+      ... def runner(chanName):
+      ...     A = Channel(chanName)
+      ...     cin = A.reader()
+      ...     print(cin())
+
+      >>> try:
+      ...     Parallel(runner('A'))
+      ... except ChannelBindException:
+      ...     print("Can not bind to port 80")
+    
+</pre>
+==<pre>ChannelLostException</pre>==
+<pre>
+ ChannelLostException(addr, msg)
+    
+    This exception is raised when PyCSP has a channel which is left
+    in an unstable state caused by a broken network connection, which
+    could not be reestablished.
+
+    Usually PyCSP can not recover from this exception.    
+    
+</pre>
 =<pre>AltSelect</pre>=
 ==<pre>AltSelect</pre>==
 <pre>
@@ -706,7 +760,7 @@ class SkipGuard(Guard)
 Help on class TimeoutGuard in module pycsp.parallel.guard:
 
 class TimeoutGuard(Guard)
- |  TimeoutGuard(action=None)
+ |  TimeoutGuard(seconds, action=None)
  |  
  |  TimeoutGuard spawns a timer thread, when posted. If removed
  |  before timeout, then the timer thread is cancelled.
@@ -719,6 +773,8 @@ class TimeoutGuard(Guard)
  |    >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
  |  
  |  TimeoutGuard(action=None)
+ |  seconds
+ |    Set the seconds to wait before timeout. eg. 0.5s
  |  action
  |    An action may be provided as a string, a callable function object or a Choice object.
  |    The Choice object is the recommended use of action.
@@ -959,7 +1015,95 @@ poison(*list_of_channelEnds)
     >>> poison(cinList)
 
 </pre>
+==<pre>ChannelRetireException</pre>==
+<pre>
+ ChannelRetireException()
+    
+    Exception thrown by a read or write operation on a channel end.
+
+    In case a ChannelRetireException is raised in a CSP process and not caught, the CSP process
+    will look for channel ends in the argument list and invoke a retire signal to every found channel end.
+    
+    The following network can be shutdown like this:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     while True:
+      ...         cout(cin()+cin())
+
+      >>> L1, L2, L3 = Channel(), Channel(), Channel()
+      >>> Parallel(
+      ...   P1(L1.reader(), L2.writer()),
+      ...   P1(L2.reader(), L3.writer())       
+      ... )
+      >>> cout = L1.writer()
+
+    The first P1 process will automatically propagate the signal to the other P1 process
+      >>> cout.retire()
+
+    Another configuration for process P1 using a custom propagation:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     try:
+      ...         while True:
+      ...             cout(cin()+cin())
+      ...     except ChannelRetireException:
+      ...         print("Terminating P1")
+      ...         cout.retire()
+    
+</pre>
+==<pre>ChannelPoisonException</pre>==
+<pre>
+ ChannelPoisonException()
+
+    Exception thrown by a read or write operation on a channel end.
+    
+    In case a ChannelPoisonException is raised in a CSP process and not caught, the CSP process
+    will look for channel ends in the argument list and invoke a poison signal to every found channel end.
+    
+    The following network can be shutdown like this:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     while True:
+      ...         cout(cin()+cin())
+
+      >>> L1, L2, L3 = Channel(), Channel(), Channel()
+      >>> Parallel(
+      ...   P1(L1.reader(), L2.writer()),
+      ...   P1(L2.reader(), L3.writer())       
+      ... )
+      >>> cout = L1.writer()
+
+    The first P1 process will automatically propagate the signal to the other P1 process
+      >>> cout.poison()
+
+    Another configuration for process P1 using a custom propagation:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     try:
+      ...         while True:
+      ...             cout(cin()+cin())
+      ...     except ChannelPoisonException:
+      ...         print("Terminating P1")
+      ...         cout.poison()
+    
+</pre>
 =<pre>Other</pre>=
+==<pre>InfoException</pre>==
+<pre>
+ InfoException(msg)
+
+    This exception is raised to inform that there is an error in the usage of
+    PyCSP and also provide a likely solution to fix the error.
+    
+</pre>
+==<pre>FatalException</pre>==
+<pre>
+ FatalException(msg)
+    
+    This exception is raised if PyCSP is in an unexpected unstable state, which
+    is guaranteed to be unrecoverable.
+    
+</pre>
 ==<pre>current_process_id</pre>==
 <pre>
 Help on function current_process_id in module pycsp.parallel.process:
