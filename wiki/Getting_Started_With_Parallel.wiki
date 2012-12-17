@@ -1,4 +1,4 @@
-#summary A tutorial on the network-enabled part of PyCSP (incomplete)
+#summary A tutorial on the network-enabled part of PyCSP
 #labels Tutorial,Featured
 #sidebar TutorialList
 
