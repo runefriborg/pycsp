@@ -1,5 +1,5 @@
 #summary A tutorial on the network-enabled part of PyCSP (incomplete)
-#labels Tutorial
+#labels Tutorial,Featured
 #sidebar TutorialList
 
 <wiki:toc max_depth="2" />
@@ -24,21 +24,15 @@ A = pycsp.Channel('A', connect=('localhost, 8888))
 
 = Connection Handling =
 
-As all CSP communications are using sockets, it may happen that sockets are disconnected unexpectedly. Such situations can be handled through catching the exceptions below.
+As all CSP communications are using sockets, it may happen that sockets is unable to connect or are disconnected unexpectedly. Such situations can be handled through catching the exceptions below.
 
-|| SocketException || The parent Exception type for the other Socket Exceptions ||
-|| SocketClosedException || ... ||
-|| SocketConnectException || Thrown when a  ||
-|| SocketBindException || ... ||
+|| ChannelSocketException || The super class for the other Socket Exceptions ||
+|| ChannelConnectException(addr, msg) || This exception is raised when a channel is unable to connect to the destination provided in the connect parameter. ||
+|| ChannelLostException ||  This exception is raised when PyCSP has a channel which is left in an unstable state caused by a broken network connection, which could not be reestablished. Usually PyCSP can not recover from this exception. ||
+|| ChannelBindException || This exception is raised when PyCSP is unable to bind to a port. ||
 
 
-Whenever a connection is lost, the connection is recreated and retried. If after N tries, the connection still fails, then...
-
-= Channel(name, buffer, connect) =
-
-The buffer parameter is only valid for the hosted Channel, since the buffer is located at the Channel host. 
-
-not documented yet
+Whenever a connection is lost, the connection is automatically recreated and retried. If after N tries, the connection still fails, then one of the above exceptions is raised.
 
 == Latency hiding with a buffered channel ==
 
@@ -72,8 +66,12 @@ pycsp.shutdown()
 }}}
 == NAT traversal ==
 
-not documented yet
+For a process to communicate on a channel, it must be able to connect to the channel host. It is not necessary for the channel host, to be able to connect to the process, as the previous connection is used for two-way communication. Thus, if the relevant channels are hosted on points, which can be reached from multiple processes, these processes may communicate eventhough they can not connect directly to each other.
+
+== Supported communication types ==
+
+All channel configurations and all configurations for external choice is supported in a distributed environment as well as a local environment or any mix of the two.
 
 == Limitations ==
 
-  * All channel names have been restricted to a length of 16 chars.
+  * All channel names have been restricted to a length of 32 chars.
