@@ -133,7 +133,7 @@ class SkipGuard(Guard):
         
 
 class TimeoutGuard(Guard):
-    """ TimeoutGuard(action=None)
+    """ TimeoutGuard(seconds, action=None)
 
     TimeoutGuard spawns a timer thread, when posted. If removed
     before timeout, then the timer thread is cancelled.
@@ -146,6 +146,8 @@ class TimeoutGuard(Guard):
       >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
 
     TimeoutGuard(action=None)
+    seconds
+      Set the seconds to wait before timeout. eg. 0.5s
     action
       An action may be provided as a string, a callable function object or a Choice object.
       The Choice object is the recommended use of action.

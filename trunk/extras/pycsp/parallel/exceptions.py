@@ -22,6 +22,19 @@ class ChannelSocketException(Exception):
     def __str__(self):
         return repr("%s %s" % (self.msg, self.addr))
 
+class ChannelConnectException(ChannelSocketException):
+    def __init__(self, addr, msg):
+        ChannelSocketException.__init__(self, addr, msg)
+
+class ChannelBindException(ChannelSocketException):
+    def __init__(self, addr, msg):
+        ChannelSocketException.__init__(self, addr, msg)
+
+class ChannelLostException(ChannelSocketException):
+    def __init__(self, addr, msg):
+        ChannelSocketException.__init__(self, addr, msg)
+
+
 class FatalException(Exception):
     def __init__(self, msg):
         self.msg = msg

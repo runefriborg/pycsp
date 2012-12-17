@@ -10,3 +10,4 @@ $PYTHON guardtest.py $IMPL
 $PYTHON iotest.py $IMPL
 $PYTHON poisontest.py $IMPL
 $PYTHON selecttest.py $IMPL
+$PYTHON remotetest.py $IMPL

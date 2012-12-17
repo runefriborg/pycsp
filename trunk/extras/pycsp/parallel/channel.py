@@ -82,8 +82,9 @@ class Channel(object):
         # Set channel home
         self._channelhomethread = None
 
-        try:
-            if connect == None:
+        if connect == None:
+
+            try:
 
                 # Check that the channel name is not already registered at this channel. If this is the
                 # case, then throw exception.
@@ -98,15 +99,17 @@ class Channel(object):
                 self._channelhomethread.start()
                 self.address = self._channelhomethread.addr
 
-            else:
-                self.address = connect
+            except SocketBindException as e:
+                raise ChannelBindException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
 
-            # Register channel reference at channelhomethread
-            self._registered = False            
-            self._register()
+        else:
+            self.address = connect
 
-        except SocketBindException as e:
-            raise ChannelSocketException("PyCSP (create channel) unable to bind channel (%s) to address (%s)" % (e.addr))
+        # Register channel reference at channelhomethread
+        self._registered = False            
+        self._register()
+
+
 
     def _register(self):
         # Register this channel reference at the channel home thread
@@ -382,10 +385,7 @@ class ChannelEnd:
 
         # restore Channel immediately, as the receiving end must register a new channel reference, before
         # execution is given back to the calling process
-        try:
-            self.channel = Channel(name=self._restore_info[1], connect=self._restore_info[0])
-        except SocketBindException as e:
-            raise ChannelSocketException("PyCSP (reconnect to channel) unable to connect to address (%s)" % (e.addr))
+        self.channel = Channel(name=self._restore_info[1], connect=self._restore_info[0])
         
     def _poison(self, *ignore):
         raise ChannelPoisonException()

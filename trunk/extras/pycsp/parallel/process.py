@@ -109,12 +109,23 @@ class Process(threading.Thread):
         # Identify this as a wrapped pycsp process, which must not be terminated by shutdown
         self.maintained= True
 
+        # report execution error
+        self._error = None
+
     def wait(self):
         self.cond.acquire()
         if self.state == READY:
             self.cond.wait()
         self.cond.release()
 
+    def _report(self):
+        # Method to execute after process have quit.
+        # This method enables propagation of errors to parent processes and threads.
+        
+        # It is optional whether the parent process/threads calls this method, thus
+        # no cleanup should be made from this method. Purely reporting.
+        pass
+        
     def run(self):
         
         # Create remote lock
@@ -302,6 +313,7 @@ def _parallel(plist, block = True):
     if block:
         for p in processes:
             p.join()
+            p._report()
     else:
         p,_ = getThreadAndName()
         p.spawned.extend(processes)
@@ -340,6 +352,8 @@ def Sequence(*plist):
 
         # Call Run directly instead of start() and join() 
         p.run()
+        p._report()
+
     t.id = t_original_id
 
 
