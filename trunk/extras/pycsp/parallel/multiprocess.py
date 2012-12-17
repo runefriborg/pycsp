@@ -41,15 +41,30 @@ conf = Configuration()
 
 # Decorators
 def multiprocess(func=None, host='', port=None):
-    """
-    @process decorator for creating process functions
+    """ @multiprocess(host='', port=None)
 
-    >>> @multiprocess(host='', port=8080)
-    ... def P():
-    ...     pass
+    @multiprocess decorator for making a function into a CSP MultiProcess factory.
+    Each generated CSP process is implemented as a single OS process.
 
-    >>> isinstance(P(), MultiProcess)
-    True
+    All objects and variables provided to multiprocesses through the
+    parameter list must support pickling.
+   
+    Usage:
+      >>> @multiprocess
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+
+      or
+      >>> @multiprocess(host="localhost", port=9998)
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+      
+    The CSP MultiProcess factory returned by the @multiprocess decorator:
+      func(*args, **kwargs)
     """
     if func:
         def _call(*args, **kwargs):
@@ -70,8 +85,28 @@ def multiprocess(func=None, host='', port=None):
 
 # Classes
 class MultiProcess(multiprocessing.Process):
-    """ Process(func, *args, **kwargs)
-    It is recommended to use the @process decorator, to create Process instances
+    """ MultiProcess(func, host, port, *args, **kwargs)
+
+    CSP process implemented as a single OS process.
+
+    It is recommended to use the @multiprocess decorator, to create MultiProcess instances.
+    See help(pycsp.multiprocess)
+
+    Usage:
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = MultiProcess(filter, "localhost", 0, A.reader(), B.writer(), "42", debug=True) 
+
+    MultiProcess(func, host, port, *args, **kwargs)
+    func
+      The function object to wrap and execute in the body of the process.
+    args and kwargs
+      are pickled and sent to the multiprocess where it is reassembled and
+      passed to the execution of the function object.
+    
+    Public variables:
+      MultiProcess.name       Unique name to identify the process
     """
     def __init__(self, fn, host, port, *args, **kwargs):
         multiprocessing.Process.__init__(self)

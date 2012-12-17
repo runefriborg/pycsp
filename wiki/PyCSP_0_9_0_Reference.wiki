@@ -44,7 +44,8 @@ class Process(threading.Thread)
  |  Process(func, *args, **kwargs)
  |  func
  |    The function object to wrap and execute in the body of the process.
- |  args and kwargs are passed directly to the execution of the function object.
+ |  args and kwargs
+ |    are passed directly to the execution of the function object.
  |  
  |  Public variables:
  |    Process.name       Unique name to identify the process
@@ -182,6 +183,182 @@ Sequence(*plist)
       >>> L = [P1(i) for i in range(10)]
       >>> Sequence(L)
 
+</pre>
+=<pre>MultiProcess</pre>=
+==<pre>@multiprocess</pre>==
+<pre>
+Help on function multiprocess in module pycsp.parallel.multiprocess:
+
+multiprocess(func=None, host='', port=None)
+    @multiprocess(host='', port=None)
+    
+    @multiprocess decorator for making a function into a CSP MultiProcess factory.
+    Each generated CSP process is implemented as a single OS process.
+    
+    All objects and variables provided to multiprocesses through the
+    parameter list must support pickling.
+    
+    Usage:
+      >>> @multiprocess
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+      or
+      >>> @multiprocess(host="localhost", port=9998)
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+      
+    The CSP MultiProcess factory returned by the @multiprocess decorator:
+      func(*args, **kwargs)
+
+</pre>
+==<pre>MultiProcess</pre>==
+<pre>
+Help on class MultiProcess in module pycsp.parallel.multiprocess:
+
+class MultiProcess(multiprocessing.process.Process)
+ |  MultiProcess(func, host, port, *args, **kwargs)
+ |  
+ |  CSP process implemented as a single OS process.
+ |  
+ |  It is recommended to use the @multiprocess decorator, to create MultiProcess instances.
+ |  See help(pycsp.multiprocess)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = MultiProcess(filter, "localhost", 0, A.reader(), B.writer(), "42", debug=True) 
+ |  
+ |  MultiProcess(func, host, port, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs
+ |    are pickled and sent to the multiprocess where it is reassembled and
+ |    passed to the execution of the function object.
+ |  
+ |  Public variables:
+ |    MultiProcess.name       Unique name to identify the process
+ |  
+ |  Method resolution order:
+ |      MultiProcess
+ |      multiprocessing.process.Process
+ |      __builtin__.object
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, host, port, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  run(self)
+ |  
+ |  wait(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from multiprocessing.process.Process:
+ |  
+ |  __repr__(self)
+ |  
+ |  is_alive(self)
+ |      Return whether process is alive
+ |  
+ |  join(self, timeout=None)
+ |      Wait until child process terminates
+ |  
+ |  start(self)
+ |      Start child process
+ |  
+ |  terminate(self)
+ |      Terminate process; sends SIGTERM signal or uses TerminateProcess()
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from multiprocessing.process.Process:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |  
+ |  authkey
+ |  
+ |  daemon
+ |      Return whether process is a daemon
+ |  
+ |  exitcode
+ |      Return exit code of process or `None` if it has yet to stop
+ |  
+ |  ident
+ |      Return identifier (PID) of process or `None` if it has yet to start
+ |  
+ |  name
+ |  
+ |  pid
+ |      Return identifier (PID) of process or `None` if it has yet to start
+
+</pre>
+==<pre>ChannelConnectException</pre>==
+<pre>
+ ChannelConnectException()
+    
+    This exception is raised when a channel is unable to connect
+    to the destination provided in the connect parameter.
+
+    Usage:
+      >>> try:
+      ...     A = Channel('A', connect=('unknown', 999))
+      ... except ChannelConnectException as e:
+      ...     print("Addr %s is unavailable
+", % (str(e.addr)))
+
+    If a mobile channel end is sent to another remote interpreter, where
+    the channel end is unable to reconnect with the channel host, then
+    a ChannelConnectException is also raised.
+    
+</pre>
+==<pre>ChannelBindException</pre>==
+<pre>
+ ChannelBindException(addr, msg)
+    
+    This exception is raised when PyCSP is unable to bind to a port.
+
+    The host and port to bind to is ('', 0) which binds
+    to 0.0.0.0 and any available port number, unless provided through
+    environment variables, configuration variables or from parameters
+    to multiprocess.
+
+    Usage:
+      >>> @multiprocess(port=99)
+      ... def runner(chanName):
+      ...     A = Channel(chanName)
+      ...     cin = A.reader()
+      ...     print(cin())
+
+      >>> try:
+      ...     Parallel(runner('A'))
+      ... except ChannelBindException:
+      ...     print("Can not bind to port 80")
+    
+</pre>
+==<pre>ChannelLostException</pre>==
+<pre>
+ ChannelLostException(addr, msg)
+    
+    This exception is raised when PyCSP has a channel which is left
+    in an unstable state caused by a broken network connection, which
+    could not be reestablished.
+
+    Usually PyCSP can not recover from this exception.    
+    
 </pre>
 =<pre>Channel</pre>=
 ==<pre>Channel</pre>==
@@ -426,60 +603,6 @@ class ChannelEndWrite(ChannelEnd)
  |      Retiring is an improved version of poisoning, which avoids the race condition issue
  |      when terminating multiple concurrent processes.
 
-</pre>
-==<pre>ChannelConnectException</pre>==
-<pre>
- ChannelConnectException()
-    
-    This exception is raised when a channel is unable to connect
-    to the destination provided in the connect parameter.
-
-    Usage:
-      >>> try:
-      ...     A = Channel('A', connect=('unknown', 999))
-      ... except ChannelConnectException as e:
-      ...     print("Addr %s is unavailable
-", % (str(e.addr)))
-
-    If a mobile channel end is sent to another remote interpreter, where
-    the channel end is unable to reconnect with the channel host, then
-    a ChannelConnectException is also raised.
-    
-</pre>
-==<pre>ChannelBindException</pre>==
-<pre>
- ChannelBindException(addr, msg)
-    
-    This exception is raised when PyCSP is unable to bind to a port.
-
-    The host and port to bind to is ('', 0) which binds
-    to 0.0.0.0 and any available port number, unless provided through
-    environment variables, configuration variables or from parameters
-    to multiprocess.
-
-    Usage:
-      >>> @multiprocess(port=99)
-      ... def runner(chanName):
-      ...     A = Channel(chanName)
-      ...     cin = A.reader()
-      ...     print(cin())
-
-      >>> try:
-      ...     Parallel(runner('A'))
-      ... except ChannelBindException:
-      ...     print("Can not bind to port 80")
-    
-</pre>
-==<pre>ChannelLostException</pre>==
-<pre>
- ChannelLostException(addr, msg)
-    
-    This exception is raised when PyCSP has a channel which is left
-    in an unstable state caused by a broken network connection, which
-    could not be reestablished.
-
-    Usually PyCSP can not recover from this exception.    
-    
 </pre>
 =<pre>AltSelect</pre>=
 ==<pre>AltSelect</pre>==

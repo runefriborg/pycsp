@@ -73,7 +73,8 @@ class Process(threading.Thread):
     Process(func, *args, **kwargs)
     func
       The function object to wrap and execute in the body of the process.
-    args and kwargs are passed directly to the execution of the function object.
+    args and kwargs
+      are passed directly to the execution of the function object.
     
     Public variables:
       Process.name       Unique name to identify the process
