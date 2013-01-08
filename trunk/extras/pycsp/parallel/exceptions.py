@@ -96,7 +96,7 @@ class ChannelSocketException(Exception):
         return repr("%s %s" % (self.msg, self.addr))
 
 class ChannelConnectException(ChannelSocketException):
-    """ ChannelConnectException()
+    """ ChannelConnectException(addr, msg)
     
     This exception is raised when a channel is unable to connect
     to the destination provided in the connect parameter.

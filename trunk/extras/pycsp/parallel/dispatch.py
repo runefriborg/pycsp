@@ -11,6 +11,7 @@ See LICENSE.txt for licensing details (MIT License).
 import os
 import sys
 import select, threading
+import errno
 
 try:
     import cPickle as pickle
@@ -18,6 +19,7 @@ except ImportError:
     import pickle
 
 import struct
+
 
 from pycsp.parallel import ossocket
 from pycsp.parallel.header import *
@@ -270,7 +272,7 @@ class SocketThread(threading.Thread):
                         try:
                             s.recv_into(header)
                         except ossocket.socket.error as e:
-                            if e.errno == 104:
+                            if e.errno == errno.ECONNRESET:
                                 # Connection has been reset
                                 header.cmd = ERROR_CMD
                             else:
