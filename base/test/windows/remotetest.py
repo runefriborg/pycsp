@@ -21,27 +21,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import sys
-sys.path.insert(0, "..")
+sys.path.insert(0, "../..")
 from pycsp.parallel import *
 
 import time
 import random
 import sys
 
-@io
 def sleep_random():
-    time.sleep(random.random()/10)
+    time.sleep(2+random.random()/10)
 
-@io
 def sleep_long_random():
-    time.sleep(random.random()*5)
+    time.sleep(2+random.random()*5)
 
 
-@process
 def connect_reader(remote_addr):
     while True:
         try:
-            X=Channel('A', connect=remote_addr)            
+            X=Channel('A', connect=remote_addr)
             cin = X.reader()
             val = cin()
             sys.stdout.write(str(val) + ' ')
@@ -50,7 +47,6 @@ def connect_reader(remote_addr):
         except ChannelConnectException as e:
             sys.stdout.write('.')
 
-@process
 def connect_reader_quit(remote_addr):
     while True:
         try:
@@ -72,12 +68,15 @@ def host_writer(N=1):
 
 def ConnectCatchFailed():
     addr = ('localhost', 22222)
-    Parallel(connect_reader_quit(addr))
+    Parallel(Process(connect_reader_quit,addr))
 
 def BindCatchFailed():
     addr = ('localhost', 22223)
     Spawn(MultiProcess(host_writer, host=addr[0], port=addr[1]))
 
+    import time
+    time.sleep(5)
+    
     # Fail to bind!
     try:
         Parallel(MultiProcess(host_writer, host=addr[0], port=addr[1]))
@@ -92,7 +91,7 @@ def BindCatchFailed():
 
 def ConnectOne(sleeper, port):
     addr = ('localhost', port)
-    Spawn(connect_reader(addr))
+    Spawn(Process(connect_reader,addr))
     
     if sleeper:
         sleeper()
@@ -104,7 +103,7 @@ def ConnectOne(sleeper, port):
 
 def ConnectMultiple(sleeper, port):
     addr = ('localhost', port)
-    Spawn(10 * connect_reader(addr))
+    Spawn(10 * Process(connect_reader,addr))
     
     if sleeper:
         sleeper()
@@ -115,14 +114,9 @@ def ConnectMultiple(sleeper, port):
    
 if __name__ == '__main__':
 
-
     sys.stdout.write("ConnectCatchFailed:")
     ConnectCatchFailed()
     sys.stdout.write("\n")
-
-    sys.stdout.write("BindCatchFailed:")
-    BindCatchFailed()
-    sys.stdout.write("\n")    
 
     sys.stdout.write("ConnectOne-sleep_random:")
     ConnectOne(sleep_random, 12346)

@@ -120,13 +120,18 @@ def start_server(server_addr=('', 0)):
 
             # Bind to address
             sock.bind(server_addr)
+            
+            # Initiate listening for connections. Create queue of 5 for unaccepted connections
+            sock.listen(5)
+
             ok = True
+            
         except socket.error as e:
             if STDERR_OUTPUT:
                 sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
             if sock:
                 sock.close()
-            if e.errno != errno.EADDRINUSE:            
+            if e.errno != errno.EADDRINUSE:       
                 raise Exception("Fatal error: Could not bind to socket: " + e.message)
         if not ok:
             if t1 == None:
@@ -142,9 +147,6 @@ def start_server(server_addr=('', 0)):
     # If bounded address equals '0.0.0.0', then lookup the best candidate for a public IP.
     if address[0] == '0.0.0.0':
         address = (_get_ip(), address[1])
-
-    # Initiate listening for connections. Create queue of 5 for unaccepted connections
-    sock.listen(5)
 
     return sock, address
 
