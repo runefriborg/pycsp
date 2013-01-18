@@ -104,9 +104,9 @@ class Channel(object):
 
         p.setstate(ACTIVE)
         req = ChannelReq(p)
-        self.post_read(req)
+        self._post_read(req)
         req.process.wait()
-        self.remove_read(req)
+        self._remove_read(req)
 
         if req.result==SUCCESS:
             return req.msg
@@ -136,9 +136,9 @@ class Channel(object):
 
         p.setstate(ACTIVE)
         req = ChannelReq(p,msg=msg)
-        self.post_write(req)
+        self._post_write(req)
         req.process.wait()
-        self.remove_write(req)
+        self._remove_write(req)
 
         if req.result==SUCCESS:
             return True
@@ -148,20 +148,20 @@ class Channel(object):
         print 'We should not get here in write!!!'
         return None #Here we should handle that a read was cancled...
 
-    def post_read(self, req):
+    def _post_read(self, req):
         self.check_termination()
         self.readqueue.append(req)
         self.match()
 
-    def remove_read(self, req):
+    def _remove_read(self, req):
         self.readqueue.remove(req)
         
-    def post_write(self, req):
+    def _post_write(self, req):
         self.check_termination()
         self.writequeue.append(req)
         self.match()
 
-    def remove_write(self, req):
+    def _remove_write(self, req):
         self.writequeue.remove(req)
 
     def match(self):

@@ -18,16 +18,16 @@ class Guard():
     """
     The empty interface of a guard.
     """
-    def post_read(self, req):
+    def _post_read(self, req):
         pass
 
-    def post_write(self, req):
+    def _post_write(self, req):
         pass
 
-    def remove_read(self, req):
+    def _remove_read(self, req):
         pass
 
-    def remove_write(self, req):
+    def _remove_write(self, req):
         pass
 
 
@@ -49,11 +49,11 @@ class SkipGuard(Guard):
         return p
         
     # Offer instantly
-    def post_read(self, reader):
+    def _post_read(self, reader):
         ChannelReq(self.process(), msg=None).offer(reader)
         
     # Offer instantly
-    def post_write(self, writer):
+    def _post_write(self, writer):
         writer.offer(ChannelReq(self.process()))
 
 
@@ -79,7 +79,7 @@ class TimeoutGuard(Guard):
         elif op == WRITE:
             req.offer(ChannelReq(self.p))
 
-    def post_read(self, reader):
+    def _post_read(self, reader):
         self.posted = (READ, reader)
 
         # Start process
@@ -90,7 +90,7 @@ class TimeoutGuard(Guard):
         # Put process on the scheduler timer queue
         self.s.timer_wait(self.p, self.seconds)
 
-    def post_write(self, writer):
+    def _post_write(self, writer):
         self.posted = (WRITE, writer)
 
         # Start process
@@ -101,10 +101,10 @@ class TimeoutGuard(Guard):
         # Put process on the scheduler timer queue
         self.s.timer_wait(self.p, self.seconds)
   
-    def remove_read(self, req):
+    def _remove_read(self, req):
         self.s.timer_cancel(self.p)
 
-    def remove_write(self, req):
+    def _remove_write(self, req):
         self.s.timer_cancel(self.p)
 
 # Backwards compatibility
