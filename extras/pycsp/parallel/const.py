@@ -2,26 +2,20 @@
 Constants
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
 See LICENSE.txt for licensing details (MIT License). 
 """
+
 import threading
 try:
     import multiprocessing
 except:
     pass
 
-import platform
-USE_CTYPES=1
-
-if platform.python_implementation()=='PyPy':
-    USE_CTYPES=0
-
-
 ENVVAL_PORT = 'PYCSP_PORT'
 ENVVAL_HOST = 'PYCSP_HOST'
 
-# Setup
+# Setup (consider moving to configuration.py)
 PICKLE_PROTOCOL= 2
 ENABLE_CACHE = 1
 

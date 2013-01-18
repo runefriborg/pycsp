@@ -1,3 +1,11 @@
+"""
+The header specification for the message protocol
+
+Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
+See LICENSE.txt for licensing details (MIT License). 
+"""
+
 import ctypes
 from pycsp.parallel.const import *
 
@@ -13,12 +21,12 @@ IGN_UNKNOWN = 1<<6
 
 ERROR_CMD = 0
 
-
 """
-PROCESS_CMD and CHANNEL_CMD encodes the destination.
+GUARD_CMD, PROCESS_CMD and CHANNEL_CMD encodes the destination.
 HAS_PAYLOAD tells the receiver, that it must read N bytes containing a payload message
-REQ_REPLY informs that if the destination is not available and an error must be returned, such that the sender does not deadlock by waiting eternally for a reply
+REQ_REPLY informs that if the destination is not available, an error must be returned, such that the sender does not deadlock by waiting eternally for a reply
 IS_REPLY informs which queue to post the incoming message to.
+NATFIX informs that the receiving socket should also be used as a sending socket  
 IGN_UNKNOWN informs that it is ok to drop this message, if the destination is not found
 """
 
@@ -89,7 +97,6 @@ class Header(ctypes.Structure):
     id           : string, uuid1 in bytes format
     seq_number   : sequence number used for ignoring channel requests, that was left behind.
     arg          : contains the payload size following this header
-    pickled      : tells if the payload is pickled
     _source_host,_source_port,_source_id enables the receiver to reply to a message
     _result_id   : updated with the chosen channel in an offer and match
     """

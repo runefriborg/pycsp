@@ -4,9 +4,10 @@ Socket abstraction module
 Allows reusing previously opened sockets.
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
 See LICENSE.txt for licensing details (MIT License). 
 """
+
 import time
 import errno
 import os

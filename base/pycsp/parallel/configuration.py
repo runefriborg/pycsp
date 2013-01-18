@@ -2,7 +2,7 @@
 Configuration module
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
 See LICENSE.txt for licensing details (MIT License). 
 """
 
@@ -15,6 +15,7 @@ PYCSP_PORT = 5
 PYCSP_HOST = 6
 
 SOCKETS_STRICT_MODE = 4
+
 # Classes
 class Configuration(object):
     """
@@ -68,9 +69,4 @@ class Configuration(object):
 
     def set(self, conf_id, value):
         self.__conf[conf_id] = value
-
-# Run tests
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
     

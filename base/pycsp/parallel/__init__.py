@@ -2,7 +2,7 @@
 PyCSP implementation of the CSP Core functionality (Channels, Processes, PAR, ALT).
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
 See LICENSE.txt for licensing details (MIT License). 
 """
 
@@ -57,22 +57,3 @@ pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
 pycsp.current.shutdown = shutdown
 
-
-def test_suite():
-    import unittest
-    import doctest
-    import guard, alternation, channel, process
-
-    suite = unittest.TestSuite()
-    for mod in guard, alternation, channel, process:
-        suite.addTest(doctest.DocTestSuite(mod))
-    suite.addTest(doctest.DocTestSuite())
-    return suite
-
-# Run tests
-if __name__ == '__main__':
-    import unittest
-
-    suite = test_suite()
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
