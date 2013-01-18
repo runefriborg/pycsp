@@ -5,12 +5,6 @@ Procedure for creating new release.
 
 == Test ==
 
-Unittesting:
-{{{
-cd trunk/pycsp
-python __init__.py
-}}}
-
 Tests:
 {{{
 cd trunk/test
