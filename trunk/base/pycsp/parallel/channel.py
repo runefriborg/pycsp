@@ -2,9 +2,10 @@
 Channel module
 
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
 See LICENSE.txt for licensing details (MIT License). 
 """
+
 # Imports
 import uuid
 
@@ -16,6 +17,65 @@ except ImportError:
 from pycsp.parallel import protocol
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.const import *
+
+# Functions
+def retire(*list_of_channelEnds):
+    """ retire(C1, [C2, .. , CN])
+
+    Retire channel ends
+
+    When a channel end is retired, the channel is signaled that a channel end
+    has now left the channel. When the set of all reading or writing channel ends is set
+    to none, then the channel enters a retired state whereafter
+    all actions on the channel will invoke a ChannelRetireException which
+    is propagated through the PyCSP network to nicely shutdown all processes unless
+    caugth by the user with a try/except clause.
+
+    Retiring is an improved version of poisoning, which avoids the race condition issue
+    when terminating multiple concurrent processes.
+
+    Usage:
+    >>> retire(cin0)
+    >>> retire(cin0, cin1, cout0)
+    >>> retire(cinList)
+    """
+    for channelEnd in list_of_channelEnds:
+        if type(channelEnd)==list:
+            for end2 in channelEnd:
+                # recursive call to retire
+                retire(end2)
+        elif isinstance(channelEnd, Channel):
+            raise InfoException("Tried to retire a channel object. Only channel end objects may be retired.")
+        else:
+            channelEnd.retire()
+
+def poison(*list_of_channelEnds):
+    """ poison(C1, [C2, .. , CN])
+
+    Poison channel ends
+    
+    When a channel end is poisoned, the channel is set into a poisoned state where
+    after all actions on the channel will invoke a ChannelPoisonException which
+    is propagated through the PyCSP network to shutdown all processes unless
+    caugth by the user with a try/except clause.
+
+    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+    See retire for an improved shutdown method.
+
+    Usage:
+    >>> poison(cin0)
+    >>> poison(cin0, cin1, cout0)
+    >>> poison(cinList)
+    """
+    for channelEnd in list_of_channelEnds:
+        if type(channelEnd)==list:
+            for end2 in channelEnd:
+                # recursive call to poison
+                poison(end2)
+        elif isinstance(channelEnd, Channel):
+            raise InfoException("Tried to poison a channel object. Only channel end objects may be poisoned.")
+        else:
+            channelEnd.poison()
 
 # Classes
 class Channel(object):
@@ -280,68 +340,7 @@ class Channel(object):
     def __rmul__(self, multiplier):
         return self.__mul__(multiplier)
 
-##### Channel end  ####
 
-# Functions
-def retire(*list_of_channelEnds):
-    """ retire(C1, [C2, .. , CN])
-
-    Retire channel ends
-
-    When a channel end is retired, the channel is signaled that a channel end
-    has now left the channel. When the set of all reading or writing channel ends is set
-    to none, then the channel enters a retired state whereafter
-    all actions on the channel will invoke a ChannelRetireException which
-    is propagated through the PyCSP network to nicely shutdown all processes unless
-    caugth by the user with a try/except clause.
-
-    Retiring is an improved version of poisoning, which avoids the race condition issue
-    when terminating multiple concurrent processes.
-
-    Usage:
-    >>> retire(cin0)
-    >>> retire(cin0, cin1, cout0)
-    >>> retire(cinList)
-    """
-    for channelEnd in list_of_channelEnds:
-        if type(channelEnd)==list:
-            for end2 in channelEnd:
-                # recursive call to retire
-                retire(end2)
-        elif isinstance(channelEnd, Channel):
-            raise InfoException("Tried to retire a channel object. Only channel end objects may be retired.")
-        else:
-            channelEnd.retire()
-
-def poison(*list_of_channelEnds):
-    """ poison(C1, [C2, .. , CN])
-
-    Poison channel ends
-    
-    When a channel end is poisoned, the channel is set into a poisoned state where
-    after all actions on the channel will invoke a ChannelPoisonException which
-    is propagated through the PyCSP network to shutdown all processes unless
-    caugth by the user with a try/except clause.
-
-    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
-    See retire for an improved shutdown method.
-
-    Usage:
-    >>> poison(cin0)
-    >>> poison(cin0, cin1, cout0)
-    >>> poison(cinList)
-    """
-    for channelEnd in list_of_channelEnds:
-        if type(channelEnd)==list:
-            for end2 in channelEnd:
-                # recursive call to poison
-                poison(end2)
-        elif isinstance(channelEnd, Channel):
-            raise InfoException("Tried to poison a channel object. Only channel end objects may be poisoned.")
-        else:
-            channelEnd.poison()
-
-# Classes
 class ChannelEnd:
     def __init__(self, channel):
 

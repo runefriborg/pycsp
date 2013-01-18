@@ -1,60 +1,14 @@
 """
 Trace module
 
-Example usage:
-
-from pycsp.threads import *
-from pycsp.common.trace import *
-
-TraceInit('trace.out')
-
-@process
-def source(chan_out):
-    for i in range(10):
-        chan_out("Hello world (%d)\n" % (i))
-    retire(chan_out)
-    
-@process
-def sink(chan_in):
-    while True:
-        sys.stdout.write(chan_in())
-
-    TraceMsg('sink terminating')
-
-chan = Channel()
-Parallel(
-    5 * source(OUT(chan)),
-    5 * sink(IN(chan))
-)
-
-TraceQuit()
-
-
 Trace functions:
   TraceInit(<filename or file object>)
   TraceMsg(<message>)
   TraceQuit()
 
-
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>.
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-  
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.  THE
-SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
+See LICENSE.txt for licensing details (MIT License). 
 """
 
 import sys
@@ -68,10 +22,7 @@ from pycsp.common import toolkit as pycsp_toolkit
 pycsp.trace = True
 
 # Setup gather system
-if pycsp.version[3] == 'net':
-    C = [None, None]
-else:
-    C = [pycsp.Channel('TraceChan_A'), pycsp.Channel('TraceChan_B')]
+C = [pycsp.Channel('TraceChan_A'), pycsp.Channel('TraceChan_B')]
 
 @pycsp.process
 def Convert2Str(cin, cout):
@@ -91,11 +42,6 @@ def TraceInit(file=None, stdout=False):
 
     This function must be called before tracing.
     """
-
-    if pycsp.version[3] == 'net':
-        global C, _TraceQuit
-        C = [pycsp.Channel('TraceChan_A'), pycsp.Channel('TraceChan_B')]
-        _TraceQuit = C[0].writer().retire
 
     class PipeHandler:
         def __init__(self, wrapped_pipe):
@@ -117,10 +63,7 @@ def TraceInit(file=None, stdout=False):
                 pycsp_toolkit.file_w(C[1].reader(), file)) 
 
 
-if pycsp.version[3] == 'net':
-    _TraceQuit = None
-else:
-    _TraceQuit = C[0].writer().retire
+_TraceQuit = C[0].writer().retire
 
 def TraceQuit():
     """ TraceQuit()
