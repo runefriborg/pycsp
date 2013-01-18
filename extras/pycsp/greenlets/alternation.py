@@ -88,9 +88,9 @@ class Alternation:
         for req in reqs.keys():
             _, c, op = reqs[req]
             if op==READ:
-                c.remove_read(req)
+                c._remove_read(req)
             else:
-                c.remove_write(req)
+                c._remove_write(req)
             if req.result==SUCCESS:
                 act=req
             if req.result==POISON:
@@ -112,12 +112,12 @@ class Alternation:
                 if len(prio_item) == 3:
                     c, msg, action = prio_item
                     req = ChannelReq(self.s.current, msg=msg)
-                    c.post_write(req)
+                    c._post_write(req)
                     op=WRITE
                 else:
                     c, action = prio_item
                     req = ChannelReq(self.s.current)
-                    c.post_read(req)
+                    c._post_read(req)
                     op=READ
                 reqs[req]=(idx, c, op)
                 idx += 1

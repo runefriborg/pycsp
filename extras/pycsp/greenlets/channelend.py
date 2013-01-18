@@ -32,8 +32,8 @@ class ChannelEndWrite():
         self.isretired = False
 
         self.__call__ = self.channel._write
-        self.post_write = self.channel.post_write
-        self.remove_write = self.channel.remove_write
+        self._post_write = self.channel._post_write
+        self._remove_write = self.channel._remove_write
         self.poison = self.channel.poison
 
     def _retire(self, *ignore):
@@ -43,7 +43,7 @@ class ChannelEndWrite():
         if not self.isretired:
             self.channel.leave_writer()
             self.__call__ = self._retire
-            self.post_write = self._retire
+            self._post_write = self._retire
             self.isretired = True
 
     def __repr__(self):
@@ -67,8 +67,8 @@ class ChannelEndRead():
         self.isretired = False
 
         self.__call__ = self.channel._read
-        self.post_read = self.channel.post_read
-        self.remove_read = self.channel.remove_read
+        self._post_read = self.channel._post_read
+        self._remove_read = self.channel._remove_read
         self.poison = self.channel.poison
 
     def _retire(self, *ignore):
@@ -78,7 +78,7 @@ class ChannelEndRead():
         if not self.isretired:
             self.channel.leave_reader()
             self.__call__ = self._retire
-            self.post_read = self._retire
+            self._post_read = self._retire
             self.isretired = True
 
     def __repr__(self):

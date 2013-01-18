@@ -1,28 +1,15 @@
 """
 Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
-      Brian Vinter <vinter@diku.dk>, Rune M. Friborg <runef@diku.dk>
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-  
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.  THE
-SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+      Brian Vinter <vinter@nbi.dk>, Rune M. Friborg <rune.m.friborg@gmail.com>.
+See LICENSE.txt for licensing details (MIT License). 
 """
+
 from pycsp_import import *
 import socket
 import time
 import sys
+
+PORT = 8081
 
 @process
 def HelloWorld(register):
@@ -129,7 +116,8 @@ def Dispatcher(register, inc):
                 
     except ChannelPoisonException:
         poison(register, inc)
-        poison(*services.values())
+        for regs in services.values():
+            poison(*regs)
 
 @process
 def HTTPsocket(sock, dispatchChan):
@@ -163,7 +151,14 @@ def serversocket_accept(serversocket):
 @process
 def entry(request):
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(('', 8081))
+    
+    # Enable reuse of sockets in TIME_WAIT state.  
+    serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    serversocket.bind(('', PORT))
+
+    print("Listening on http://localhost:" + str(PORT))
+    
     serversocket.listen(1)
     
     while True:
@@ -180,6 +175,5 @@ Parallel(entry(request),
          [Sleep(i, -register) for i in range(50)],
          [Index(i, -register) for i in range(2)],
          HelloWorld(-register))
-
 
 shutdown()
