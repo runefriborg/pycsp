@@ -13,3 +13,4 @@ $PYTHON selecttest.py $IMPL
 
 cd unix
 $PYTHON remotetest.py $IMPL
+$PYTHON multiprocesstest.py $IMPL

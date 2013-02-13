@@ -106,12 +106,18 @@ class SkipGuard(Guard):
         Guard.__init__(self, action)
 
     # Offer instantly
-    def _post_read(self, process):
-        self._offer(ChannelReq(self.LM, AddrID(process.addr, process.id),
+    def _post_read(self, process, ack=False):
+        proc_addr_id = AddrID(process.addr, process.id)
+        self._offer(ChannelReq(self.LM, proc_addr_id,
                                        process.sequence_number,
                                        self.id))
 
-    def _post_write(self, process, msg):
+        # Send acknowledgement to process. (used to ensure prioritized select)
+        if ack:
+            self.LM.ack(proc_addr_id)
+
+
+    def _post_write(self, process, msg, ask=False):
         raise InfoException("Can not use SkipGuard with msg")
         
 
@@ -168,16 +174,22 @@ class TimeoutGuard(Guard):
     def _expire(self):
         self._offer(self.posted_req)
         
-    def _post_read(self, process):
-        self.posted_req = ChannelReq(self.LM, AddrID(process.addr, process.id),
+    def _post_read(self, process, ack=False):
+        proc_addr_id = AddrID(process.addr, process.id)
+
+        # Send acknowledgement to process. (used to ensure prioritized select)
+        if ack:
+            self.LM.ack(proc_addr_id)
+
+        self.posted_req = ChannelReq(self.LM, proc_addr_id,
                                      process.sequence_number,
                                      self.id)
         self.timer = threading.Timer(self.seconds, self._expire)
         self.timer.start()
   
     def _cancel(self):
-        Guard._cancel(self)
         self.timer.cancel()
+        Guard._cancel(self)
         
         
 # Backwards compatibility

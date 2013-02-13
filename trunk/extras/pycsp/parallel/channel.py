@@ -492,8 +492,8 @@ class ChannelEndWrite(ChannelEnd):
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
         return self.channel._write(msg)
 
-    def _post_write(self, process, msg):
-        self.channel._CM.post_write(self.channel, process, msg)
+    def _post_write(self, process, msg, ack=False):
+        self.channel._CM.post_write(self.channel, process, msg, ack=ack)
 
 
     def _remove_write(self, req):
@@ -530,8 +530,8 @@ class ChannelEndRead(ChannelEnd):
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")
         return self.channel._read()
 
-    def _post_read(self, process):
-        self.channel._CM.post_read(self.channel, process)
+    def _post_read(self, process, ack=False):
+        self.channel._CM.post_read(self.channel, process, ack=ack)
 
     def _remove_read(self, req):
         """

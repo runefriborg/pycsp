@@ -310,7 +310,7 @@ class Scheduler(object):
 
     # Get next greenlet available for scheduling
     def getNext(self):
-        if self.new:
+        if self.new:            
             # Returning scheduler, to avoid exceeding the recursion limit.
             # All new greenlets must be started from the scheduler, to have the
             # scheduler as parent greenlet.
