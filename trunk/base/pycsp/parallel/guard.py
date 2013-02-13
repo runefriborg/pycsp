@@ -56,9 +56,7 @@ class Guard:
             else:
                 sys.stderr.write("PyCSP unable to reach process during Guard.offer(%s)\n" % str(self.process))
 
-        self.dispatch.deregisterGuard(self.id)
-
-    def _cancel(self):
+    def _close(self):
         # Invoked from Alternation
         self.dispatch.deregisterGuard(self.id)
 
@@ -169,11 +167,16 @@ class TimeoutGuard(Guard):
         Guard.__init__(self, action)
         self.seconds = seconds
         self.posted_req = None
+        self.timer_cancelled=False
+        self.lock = threading.Lock()
 
     # Timer expired, offer an active Channel Request
     def _expire(self):
-        self._offer(self.posted_req)
-        
+        self.lock.acquire()
+        if not self.timer_cancelled:        
+            self._offer(self.posted_req)
+        self.lock.release()
+
     def _post_read(self, process, ack=False):
         proc_addr_id = AddrID(process.addr, process.id)
 
@@ -187,9 +190,11 @@ class TimeoutGuard(Guard):
         self.timer = threading.Timer(self.seconds, self._expire)
         self.timer.start()
   
-    def _cancel(self):
-        self.timer.cancel()
-        Guard._cancel(self)
+    def _close(self):
+        self.lock.acquire()
+        self.timer_cancelled=True
+        Guard._close(self)
+        self.lock.release()
         
         
 # Backwards compatibility
