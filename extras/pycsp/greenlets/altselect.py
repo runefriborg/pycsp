@@ -90,9 +90,9 @@ class OutputGuard:
             raise Exception('Cannot use ' + str(ch_end) + ' as output ch_end')
 
 
-def AltSelect(*guards):
+def PriSelect(*guards):
     """
-    AltSelect is a wrapper to Alternation with a much more intuitive
+    PriSelect is a wrapper to Alternation with a much more intuitive
     interface. 
     It performs a prioritized choice from a list of guard objects and
     returns a tuple with the selected channel end and the read msg if
@@ -103,7 +103,7 @@ def AltSelect(*guards):
     >>> C = Channel()
     >>> cin = C.reader()
 
-    >>> ch_end, msg = AltSelect(InputGuard(cin), SkipGuard())
+    >>> ch_end, msg = PriSelect(InputGuard(cin), SkipGuard())
 
     >>> if ch_end == cin:
     ...     print msg
@@ -112,7 +112,7 @@ def AltSelect(*guards):
     True
 
 
-    AltSelect supports skip, timeout, input and output guards.
+    PriSelect supports skip, timeout, input and output guards.
 
     >>> @choice 
     ... def callback(type, channel_input = None):
@@ -124,13 +124,13 @@ def AltSelect(*guards):
     >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
     >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
     
-    >>> _ = AltSelect(g1, g2, g3)
+    >>> _ = PriSelect(g1, g2, g3)
     timeout None
     
 
-    Note that AltSelect always performs the guard that was chosen,
-    i.e. channel input or output is executed within the AltSelect so
-    even the empty choice with an AltSelect or where
+    Note that PriSelect always performs the guard that was chosen,
+    i.e. channel input or output is executed within the PriSelect so
+    even the empty choice with an PriSelect or where
     the results are simply ignored, still performs the guarded input or
     output.
 
@@ -166,7 +166,7 @@ def AltSelect(*guards):
         try:
             L.append(item.g)
         except AttributeError:
-            raise Exception('Cannot use ' + str(item) + ' as guard. Only use *Guard types for AltSelect')
+            raise Exception('Cannot use ' + str(item) + ' as guard. Only use *Guard types for Pri/AltSelect')
 
     if pycsp.current.trace:
         import pycsp.common.trace as trace
@@ -178,6 +178,7 @@ def AltSelect(*guards):
 
     return a.execute()
 
+AltSelect = PriSelect
 
 def FairSelect(*guards):
     """ 

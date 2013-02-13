@@ -73,10 +73,13 @@ class Process(threading.Thread):
         self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
         
         # Channel request state
-        self.state = FAIL
+        self.state = FAIL        
         self.result_ch_idx = None
         self.result_msg = None
-        
+
+        # Used to wait for acknowledgements from the RemoteLock
+        self.ack = False
+
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1
 
@@ -97,9 +100,17 @@ class Process(threading.Thread):
         # report execution error
         self._error = None
 
+    def wait_ack(self):
+        self.cond.acquire()
+        while not self.ack:
+            self.cond.wait()
+        # Got ack, resetting
+        self.ack= False
+        self.cond.release()
+
     def wait(self):
         self.cond.acquire()
-        if self.state == READY:
+        while self.state == READY:
             self.cond.wait()
         self.cond.release()
 
@@ -396,6 +407,8 @@ def init():
         current_proc.state = FAIL
         current_proc.result_ch_idx = None
         current_proc.result_msg = None
+        current_proc.ack = False
+
         current_proc.sequence_number = 1
 
         # Protect against early termination of mother-processes leaving childs in an invalid state
@@ -414,12 +427,22 @@ def init():
         current_proc.addr = dispatch.server_addr
         dispatch.registerProcess(current_proc.id, RemoteLock(current_proc))
 
+        def wait_ack():
+            current_proc.cond.acquire()
+            while not current_proc.ack:
+                current_proc.cond.wait()
+            # Got ack, resetting
+            current_proc.ack= False
+            current_proc.cond.release()
+
         def wait():
             current_proc.cond.acquire()
-            if current_proc.state == READY:
+            while current_proc.state == READY:
                 current_proc.cond.wait()
             current_proc.cond.release()
+
         current_proc.wait = wait
+        current_proc.wait_ack = wait_ack
 
 def shutdown():
     """

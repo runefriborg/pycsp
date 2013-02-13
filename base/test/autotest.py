@@ -41,6 +41,30 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
             InputGuard(cin4, action(assertCheck, 3))
             )
 
+@process
+def par_fair_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
+    while True:
+        if sleeper: sleeper()
+        
+        FairSelect(
+            InputGuard(cin1, action(assertCheck, 0)),
+            InputGuard(cin2, action(assertCheck, 1)),
+            InputGuard(cin3, action(assertCheck, 2)),
+            InputGuard(cin4, action(assertCheck, 3))
+            )
+
+@process
+def par_pri_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
+    while True:
+        if sleeper: sleeper()
+        
+        PriSelect(
+            InputGuard(cin1, action(assertCheck, 0)),
+            InputGuard(cin2, action(assertCheck, 1)),
+            InputGuard(cin3, action(assertCheck, 2)),
+            InputGuard(cin4, action(assertCheck, 3))
+            )
+
 @io
 def sleep_one():
     time.sleep(0.01)
@@ -74,6 +98,40 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
              writer(c3.writer(),2,cnt, write_sleeper),
              writer(c4.writer(),3,cnt, write_sleeper))
 
+def Any2One_FairAlting_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any2One_FairAlting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
+
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
+
+    cnt = 10
+
+    Parallel(par_fair_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
+             writer(c1.writer(),0,cnt, write_sleeper),
+             writer(c2.writer(),1,cnt, write_sleeper),
+             writer(c3.writer(),2,cnt, write_sleeper),
+             writer(c4.writer(),3,cnt, write_sleeper))
+
+def Any2One_PriAlting_Test(read_sleeper, write_sleeper):
+    x = Channel()
+    Spawn(check.Assert(x.reader(), "Any2One_PriAlting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
+
+    c1=Channel()
+    c2=Channel()
+    c3=Channel()
+    c4=Channel()
+
+    cnt = 10
+
+    Parallel(par_pri_reader(c1.reader(), c2.reader(), c3.reader(), c4.reader(),cnt, read_sleeper, x.writer()),
+             writer(c1.writer(),0,cnt, write_sleeper),
+             writer(c2.writer(),1,cnt, write_sleeper),
+             writer(c3.writer(),2,cnt, write_sleeper),
+             writer(c4.writer(),3,cnt, write_sleeper))
+
 def Any2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
     Spawn(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
@@ -96,6 +154,8 @@ def autotest():
             if not rsleep==wsleep==sleep_one:
                 One2One_Test(rsleep, wsleep)
                 Any2One_Alting_Test(rsleep, wsleep)
+                Any2One_FairAlting_Test(rsleep, wsleep)
+                Any2One_PriAlting_Test(rsleep, wsleep)
                 Any2Any_Test(rsleep, wsleep)
 
 if __name__ == '__main__':

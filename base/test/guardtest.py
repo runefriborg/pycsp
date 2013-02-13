@@ -32,7 +32,7 @@ def par_reader_skip_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
 
-        c, msg = AltSelect(
+        c, msg = PriSelect(
             InputGuard(cin1),
             InputGuard(cin2),
             SkipGuard(),
@@ -48,7 +48,7 @@ def par_reader_timeout_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
 
-        c, msg = AltSelect(
+        c, msg = PriSelect(
             InputGuard(cin1),
             InputGuard(cin2),
             InputGuard(cin3),
@@ -64,7 +64,7 @@ def par_reader_skip_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
 
-        AltSelect(
+        PriSelect(
             InputGuard(cin1, action="print 'From cin1 got', channel_input"),
             InputGuard(cin2, action="print 'From cin2 got', channel_input"),
             SkipGuard(action="print 'SkipGuard()'"),
@@ -79,7 +79,7 @@ def par_reader_timeout_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
     for i in range(cnt*4):
         if sleeper: sleeper()
 
-        AltSelect(
+        PriSelect(
             InputGuard(cin1, action="print 'From cin1 got', channel_input"),
             InputGuard(cin2, action="print 'From cin2 got', channel_input"),
             InputGuard(cin3, action="print 'From cin3 got', channel_input"),

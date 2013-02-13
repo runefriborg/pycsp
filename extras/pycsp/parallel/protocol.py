@@ -110,7 +110,7 @@ class ChannelMessenger(object):
                 sys.stderr.write("PyCSP (poison channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
 
 
-    def post_read(self, channel, process):
+    def post_read(self, channel, process, ack=False):
         self.restore()
 
         # Enter channel and update NAT socket
@@ -119,13 +119,17 @@ class ChannelMessenger(object):
             self.enter(channel, process)
 
         try:
-            self.dispatch.send(channel.address,
-                                        Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number, _source_id=process.id))
+            if ack:
+                self.dispatch.send(channel.address,
+                                   Header(CHANTHREAD_POST_ACK_READ, channel.name, process.sequence_number, _source_id=process.id))                
+            else:
+                self.dispatch.send(channel.address,
+                                   Header(CHANTHREAD_POST_READ, channel.name, process.sequence_number, _source_id=process.id))            
         except SocketException:
             # Unable to post read request to channel home thread
-            raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
+            raise FatalException("PyCSP (post read request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))        
 
-    def post_write(self, channel, process, msg):
+    def post_write(self, channel, process, msg, ack=False):
         self.restore()
 
         # Enter channel and update NAT socket
@@ -134,8 +138,12 @@ class ChannelMessenger(object):
             self.enter(channel, process)
             
         try:
-            self.dispatch.send(channel.address,
-                               Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=[msg])
+            if ack:
+                self.dispatch.send(channel.address,
+                                   Header(CHANTHREAD_POST_ACK_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=[msg])            
+            else:
+                self.dispatch.send(channel.address,
+                                   Header(CHANTHREAD_POST_WRITE, channel.name, process.sequence_number, _source_id=process.id), payload=[msg])
         except SocketException:
             # Unable to post read request to channel home thread
             raise FatalException("PyCSP (post write request) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
@@ -185,6 +193,21 @@ class LockMessenger(object):
 
     def set_reverse_socket(self, addr, reverse_socket):
         self.dispatch.add_reverse_socket(addr, reverse_socket)
+
+    def ack(self, dest):
+        """
+        Send acknowledgement to process, that the posted request have been checked for
+        valid offers.
+
+        This ack is used to ensure prioritized selects.
+        """
+        header = Header()
+        try:
+            h = Header(LOCKTHREAD_ACK,  dest.id)
+            h._source_id = self.channel_id
+            self.dispatch.send(dest.hostNport, h)
+        except SocketException:
+            raise FatalException("Process %s is unavailable!", str(dest.id))
 
     def remote_acquire_and_get_state(self, dest):
         #sys.stderr.write("\nENTER REMOTE ACQUIRE\n")
@@ -302,11 +325,23 @@ class RemoteLock:
         if not (self.process.id == header.id):
             raise Exception("Fatal error!, wrong process ID!")        
 
+
         if header.cmd == LOCKTHREAD_QUIT:
             # May be interleaved with any other messages, as it is only sent when the process
             # is ready to quit.
             self.cond.acquire()
             self.process.closedChanList.append(header._source_id)
+            self.cond.notify()
+            self.cond.release()
+
+        elif header.cmd == LOCKTHREAD_ACK:
+            # Send acknowledgement to process through the condition variable.
+            # Used for prioritised select
+            self.cond.acquire()
+            if self.process.ack:
+                raise Exception("PyCSP Panic")
+
+            self.process.ack= True
             self.cond.notify()
             self.cond.release()
 
@@ -854,7 +889,7 @@ class ChannelHomeThread(threading.Thread):
             elif header.cmd == CHANTHREAD_POISON_WRITER:
                 self.channel.poison_writer()
 
-            elif header.cmd == CHANTHREAD_POST_WRITE:
+            elif header.cmd == CHANTHREAD_POST_WRITE or header.cmd == CHANTHREAD_POST_ACK_WRITE:
                 process = AddrID((header._source_host, header._source_port), header._source_id)
                 msg = msg.payload
 
@@ -894,7 +929,11 @@ class ChannelHomeThread(threading.Thread):
                         else:
                             sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
 
-            elif header.cmd == CHANTHREAD_POST_READ:
+                # Send acknowledgement to process. (used to ensure prioritized select)
+                if header.cmd == CHANTHREAD_POST_ACK_WRITE:
+                    LM.ack(process)
+
+            elif header.cmd == CHANTHREAD_POST_READ or header.cmd == CHANTHREAD_POST_ACK_READ:
                 process = AddrID((header._source_host, header._source_port), header._source_id)
 
                 try:
@@ -930,6 +969,10 @@ class ChannelHomeThread(threading.Thread):
                             raise FatalException("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
                         else:
                             sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
+
+                # Send acknowledgement to process. (used to ensure prioritized select)
+                if header.cmd == CHANTHREAD_POST_ACK_READ:
+                    LM.ack(process)
 
             elif header.cmd == CHANTHREAD_ENTER:
                 socket = msg.natfix

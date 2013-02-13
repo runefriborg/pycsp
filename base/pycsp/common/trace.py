@@ -237,8 +237,8 @@ class ChannelEndWriteTrace:
         self.count += 1
 
 class Alternation:
-    def __init__(self, guards):
-        self.wrapped = pycsp.Alternation(guards)
+    def __init__(self, guards, ensurePriority=False):
+        self.wrapped = pycsp.Alternation(guards, ensurePriority=ensurePriority)
         self.wrapped._set_execute_frame(-2)
         self._set_execute_frame = self.wrapped._set_execute_frame
 

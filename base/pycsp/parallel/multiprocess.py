@@ -107,6 +107,9 @@ class MultiProcess(multiprocessing.Process):
         self.result_ch_idx = None
         self.result_msg = None
         
+        # Used to wait for acknowledgements from the RemoteLock
+        self.ack = False
+
         # Used to ensure the validity of the remote answers
         self.sequence_number = 1
 
@@ -131,9 +134,17 @@ class MultiProcess(multiprocessing.Process):
         # report execution error
         self._error = RawValue('i', 0)
 
+    def wait_ack(self):
+        self.cond.acquire()
+        while not self.ack:
+            self.cond.wait()
+        # Got ack, resetting
+        self.ack= False
+        self.cond.release()
+
     def wait(self):
         self.cond.acquire()
-        if self.state == READY:
+        while self.state == READY:
             self.cond.wait()
         self.cond.release()
 

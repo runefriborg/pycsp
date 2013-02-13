@@ -19,14 +19,14 @@ except ImportError, e:
 from scheduling import Io, io
 from guard import Skip, Timeout, SkipGuard, TimeoutGuard
 from alternation import choice, Alternation
-from altselect import FairSelect, AltSelect, InputGuard, OutputGuard
+from altselect import FairSelect, AltSelect, PriSelect, InputGuard, OutputGuard
 from channel import Channel
 from channelend import retire, poison
 from process import Process, process, Sequence, Parallel, Spawn, current_process_id
 from exceptions import ChannelPoisonException, ChannelRetireException, FatalException, InfoException
 from compat import *
 
-__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
+__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'PriSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
 
 version = (0,9,0, 'greenlets')
 
@@ -58,6 +58,7 @@ pycsp.current.Spawn = Spawn
 pycsp.current.current_process_id = current_process_id
 pycsp.current.FairSelect = FairSelect
 pycsp.current.AltSelect = AltSelect
+pycsp.current.PriSelect = PriSelect
 pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
 pycsp.current.shutdown = shutdown

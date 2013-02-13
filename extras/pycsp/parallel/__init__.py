@@ -10,7 +10,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 from pycsp.parallel.guard import Skip, SkipGuard, Timeout, TimeoutGuard
 from pycsp.parallel.alternation import choice, Alternation
-from pycsp.parallel.altselect import FairSelect, AltSelect, InputGuard, OutputGuard
+from pycsp.parallel.altselect import FairSelect, PriSelect, AltSelect, InputGuard, OutputGuard
 from pycsp.parallel.channel import Channel, retire, poison
 from pycsp.parallel.process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
 from pycsp.parallel.multiprocess import MultiProcess, multiprocess
@@ -18,7 +18,7 @@ from pycsp.parallel.exceptions import ChannelRetireException, ChannelPoisonExcep
 from pycsp.parallel.configuration import *
 from pycsp.parallel.compat import *
 
-__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'ChannelConnectException', 'ChannelBindException', 'ChannelLostException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
+__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'PriSelect', 'AltSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'ChannelConnectException', 'ChannelBindException', 'ChannelLostException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
 
 version = (0,9,0, 'parallel')
 
@@ -53,6 +53,7 @@ pycsp.current.Spawn = Spawn
 pycsp.current.current_process_id = current_process_id
 pycsp.current.FairSelect = FairSelect
 pycsp.current.AltSelect = AltSelect
+pycsp.current.PriSelect = PriSelect
 pycsp.current.InputGuard = InputGuard
 pycsp.current.OutputGuard = OutputGuard
 pycsp.current.shutdown = shutdown

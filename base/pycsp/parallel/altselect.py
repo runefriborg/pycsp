@@ -139,10 +139,111 @@ class OutputGuard:
             raise InfoException('Can not use ' + str(ch_end_write) + ' as ch_end_write. OutputGuard requires a ChannelEndWrite object')
 
 
+def PriSelect(*guards):
+    """ PriSelect(G1, [G2, .. ,GN])
+    
+    PriSelect performs a prioritized choice from a list of guard objects and
+    returns a tuple with the selected channel end and the read msg if
+    there is one, otherwise None.
+
+    Usage:
+      >>> g,msg = PriSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> print("Message:%s" % (str(msg)))
+
+    Returns:
+      ChannelEnd, message    
+
+    More detailed usage:
+      >>> C = Channel()
+      >>> cin = C.reader()
+
+      >>> ch_end, msg = PriSelect(InputGuard(cin), SkipGuard())
+
+      >>> if ch_end == cin:
+      ...     print msg
+      ... else:
+      ...     print msg == None
+      True
+
+
+      PriSelect supports skip, timeout, input and output guards.
+
+      >>> @choice 
+      ... def callback(type, channel_input = None):
+      ...    print type, channel_input
+
+      >>> A, B = Channel('A'), Channel('B')
+      >>> cin, cout = A.reader(), B.writer()
+      >>> g1 = InputGuard(cin, action=callback('input'))
+      >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
+      >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
+    
+      >>> _ = PriSelect(g1, g2, g3)
+      timeout None
+    
+
+      Note that PriSelect always performs the guard that was chosen,
+      i.e. channel input or output is executed within the PriSelect so
+      even the empty choice with an PriSelect or where
+      the results are simply ignored, still performs the guarded input or
+      output.
+
+      >>> L = []
+
+      >>> @choice 
+      ... def action(channel_input):
+      ...     L.append(channel_input)
+
+      >>> @process
+      ... def P1(cout, n=5):
+      ...     for i in range(n):
+      ...         cout(i)
+    
+      >>> @process
+      ... def P2(cin1, cin2, n=10):
+      ...     for i in range(n):
+      ...         _ = PriSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
+                
+      >>> C1, C2 = Channel(), Channel()
+      >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+
+      >>> len(L)
+      10
+
+      >>> L.sort()
+      >>> L
+      [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+    """
+    L = []
+    # Build guard list
+    for item in guards:                
+        try:
+            if type(item) == list:
+                for item2 in item:
+                    L.append(item2.g)
+            else:
+                L.append(item.g)        
+        except AttributeError:
+            if type(item)==list:
+                raise InfoException('Cannot use ' + str(item2) + ' as guard. Only use *Guard types for PriSelect')
+            else:
+                raise InfoException('Cannot use ' + str(item) + ' as guard. Only use *Guard types for PriSelect')
+
+    if pycsp.current.trace:
+        import pycsp.common.trace as trace
+        a = trace.Alternation(L, ensurePriority=True)
+        a._set_execute_frame(-3)
+    else:
+        a = Alternation(L, ensurePriority=True)
+        a._set_execute_frame(-2)
+
+    return a.execute()
+
+
 def AltSelect(*guards):
     """ AltSelect(G1, [G2, .. ,GN])
     
-    AltSelect performs a prioritized choice from a list of guard objects and
+    AltSelect performs a choice from a list of guard objects and
     returns a tuple with the selected channel end and the read msg if
     there is one, otherwise None.
 
@@ -154,19 +255,10 @@ def AltSelect(*guards):
       ChannelEnd, message    
 
     More detailed usage:
-      >>> C = Channel()
-      >>> cin = C.reader()
 
-      >>> ch_end, msg = AltSelect(InputGuard(cin), SkipGuard())
-
-      >>> if ch_end == cin:
-      ...     print msg
-      ... else:
-      ...     print msg == None
-      True
-
-
-      AltSelect supports skip, timeout, input and output guards.
+      AltSelect supports skip, timeout, input and output guards. Though,
+      it is recommended to use the slightly slower PriSelect when using
+      skip guards.
 
       >>> @choice 
       ... def callback(type, channel_input = None):

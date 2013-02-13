@@ -83,6 +83,8 @@ class Alternation:
     
     Alternation supports the SkipGuard, TimeoutGuard, ChannelEndRead
     or ChannelEndWrite objects.
+
+    Alternation guarantees priority if the flag ensurePriority = True
     
     Note that alternation always performs the guard that was chosen,
     i.e. channel input or output is executed within the alternation so
@@ -135,7 +137,9 @@ class Alternation:
       >>> if g == cin:
       ...     print("Got: %s" % (msg))
     """
-    def __init__(self, guards):
+    def __init__(self, guards, ensurePriority=False):
+        self.enableAcks = ensurePriority
+
         # Preserve tuple entries and convert dictionary entries to tuple entries
         self.guards = []
         for g in guards:
@@ -201,14 +205,17 @@ class Alternation:
             for prio_item in self.guards:
                 if len(prio_item) == 3:
                     c, msg, action = prio_item
-                    c._post_write(p, msg)
+                    c._post_write(p, msg, ack=self.enableAcks)
                     op=WRITE
                 else:
                     c, action = prio_item
-                    c._post_read(p)
+                    c._post_read(p, ack=self.enableAcks)
                     op=READ
 
                 reqs[c]=(idx, op)
+
+                if self.enableAcks:
+                    p.wait_ack()
 
                 if p.state != READY:
                     # state has been changed by process lockthread, thus we can abort and read p.state.
