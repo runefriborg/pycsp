@@ -54,14 +54,23 @@ cout = BufferC[0].writer()
 cin = BufferC[4].reader()
 }}}
 
-The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in the AltSelect or as an alternative the FairSelect can be used to balance the guards.
+The use of buffered channels can be tricky, when used as output guards with AltSelect (external choice). The reason is that buffered channels are ready to receive messages until the buffer is full. To avoid starving other guards, buffered channels should be used as the last elements in a PriSelect or as an alternative the FairSelect can be used to balance the guards.
 
 
 _In a distributed PyCSP application the buffer of a buffered channel is located where the Channel is hosted. Thus, hosting the Channel at the receiving end would enable some latency hiding by transferring the communicated data before a channel communication is committed._
 
-= External Choice (AltSelect, FairSelect) =
+= External Choice (AltSelect, PriSelect and FairSelect) =
 
-The external choice selects a single guard from a set of guards. The current guard types are:
+The external choice selects a single guard from a set of guards. The different selection types are:
+
+{{{
+* AltSelect(G1, [G2, .. ,GN]) - The fastest choice, but does not guarantee priority. Guards are tested in the order they are given, but final selection may depend on other factors, such as network latency.
+* PriSelect(G1, [G2, .. ,GN]) - Guarantees prioritised selection. Use PriSelect when using SkipGuards!
+* FairSelect(G1, [G2, .. ,GN]) - Performs a fair selection by reordering guards based on previous choices and then executes a PriSelect on the new order of guards  
+}}}
+
+
+The current guard types are:
 
 {{{
 * InputGuard(cin, action=[optional])
@@ -76,7 +85,7 @@ cin = <chan>.reader()
 cout = <chan>.writer()
 }}}
 
-AltSelect will perform a prioritized selection between the given guards. To select from multiple channels:
+AltSelect will perform a selection between the given guards. To select from multiple channels:
 
 {{{
 @process
