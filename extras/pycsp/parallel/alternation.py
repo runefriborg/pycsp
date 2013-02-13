@@ -179,7 +179,7 @@ class Alternation:
                 if isinstance(c, Guard):
                     if c.id == p.result_ch:
                         act = c
-                    c._cancel()
+                    c._close()
                     
                 elif c.channel.name == p.result_ch:
                     act = c
