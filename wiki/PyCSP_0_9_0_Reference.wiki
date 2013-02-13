@@ -682,27 +682,36 @@ AltSelect(*guards)
 </pre>
 ==<pre>PriSelect</pre>==
 <pre>
-Help on function AltSelect in module pycsp.parallel.altselect:
+Help on function PriSelect in module pycsp.parallel.altselect:
 
-AltSelect(*guards)
-    AltSelect(G1, [G2, .. ,GN])
+PriSelect(*guards)
+    PriSelect(G1, [G2, .. ,GN])
     
-    AltSelect performs a choice from a list of guard objects and
+    PriSelect performs a prioritized choice from a list of guard objects and
     returns a tuple with the selected channel end and the read msg if
     there is one, otherwise None.
     
     Usage:
-      >>> g,msg = AltSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> g,msg = PriSelect(InputGuard(cin1), InputGuard(cin2))
       >>> print("Message:%s" % (str(msg)))
     
     Returns:
       ChannelEnd, message    
     
     More detailed usage:
+      >>> C = Channel()
+      >>> cin = C.reader()
     
-      AltSelect supports skip, timeout, input and output guards. Though,
-      it is recommended to use the slightly slower PriSelect when using
-      skip guards.
+      >>> ch_end, msg = PriSelect(InputGuard(cin), SkipGuard())
+    
+      >>> if ch_end == cin:
+      ...     print msg
+      ... else:
+      ...     print msg == None
+      True
+    
+    
+      PriSelect supports skip, timeout, input and output guards.
     
       >>> @choice 
       ... def callback(type, channel_input = None):
@@ -714,13 +723,13 @@ AltSelect(*guards)
       >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
       >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
     
-      >>> _ = AltSelect(g1, g2, g3)
+      >>> _ = PriSelect(g1, g2, g3)
       timeout None
     
     
-      Note that AltSelect always performs the guard that was chosen,
-      i.e. channel input or output is executed within the AltSelect so
-      even the empty choice with an AltSelect or where
+      Note that PriSelect always performs the guard that was chosen,
+      i.e. channel input or output is executed within the PriSelect so
+      even the empty choice with an PriSelect or where
       the results are simply ignored, still performs the guarded input or
       output.
     
@@ -738,7 +747,7 @@ AltSelect(*guards)
       >>> @process
       ... def P2(cin1, cin2, n=10):
       ...     for i in range(n):
-      ...         _ = AltSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
+      ...         _ = PriSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
                 
       >>> C1, C2 = Channel(), Channel()
       >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
