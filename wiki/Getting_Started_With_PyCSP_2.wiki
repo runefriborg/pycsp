@@ -63,11 +63,11 @@ _In a distributed PyCSP application the buffer of a buffered channel is located 
 
 The external choice selects a single guard from a set of guards. The different selection types are:
 
-{{{
-* AltSelect(G1, [G2, .. ,GN]) - The fastest choice, but does not guarantee priority. Guards are tested in the order they are given, but final selection may depend on other factors, such as network latency.
-* PriSelect(G1, [G2, .. ,GN]) - Guarantees prioritised selection. Use PriSelect when using SkipGuards!
-* FairSelect(G1, [G2, .. ,GN]) - Performs a fair selection by reordering guards based on previous choices and then executes a PriSelect on the new order of guards  
-}}}
+*AltSelect(G1, [G2, .. ,GN])* - The fastest choice, but does not guarantee priority. Guards are tested in the order they are given, but final selection may depend on other factors, such as network latency.
+
+*PriSelect(G1, [G2, .. ,GN])* - Guarantees prioritised selection. Use PriSelect when using SkipGuards!
+
+*FairSelect(G1, [G2, .. ,GN])* - Performs a fair selection by reordering guards based on previous choices and then executes a PriSelect on the new order of guards  
 
 
 The current guard types are:
