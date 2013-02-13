@@ -243,7 +243,7 @@ def PriSelect(*guards):
 def AltSelect(*guards):
     """ AltSelect(G1, [G2, .. ,GN])
     
-    AltSelect performs a choice from a list of guard objects and
+    AltSelect performs a fast choice from a list of guard objects and
     returns a tuple with the selected channel end and the read msg if
     there is one, otherwise None.
 
@@ -385,10 +385,10 @@ def FairSelect(*guards):
 
     if pycsp.current.trace:
         import pycsp.common.trace as trace
-        a = trace.Alternation(L)
+        a = trace.Alternation(L, ensurePriority=True)
         a._set_execute_frame(-3)
     else:
-        a = Alternation(L)
+        a = Alternation(L, ensurePriority=True)
         a._set_execute_frame(-2)
 
     result =  a.execute()
