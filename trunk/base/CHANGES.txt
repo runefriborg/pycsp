@@ -15,7 +15,7 @@
   perform only slightly more work than an unbuffered channel. Also the buffer
   has a location, which means that a buffered channel can be used to hide the
   latency induced by the data-transfer latency.
-* All channels pycsp.parallel are created as network-enabled channels and supports
+* All channels in pycsp.parallel are created as network-enabled channels and supports
   communicating with remote processes.
 * Added a new process type @multiprocess which runs as an OS-process. This enables
   mixing @process and @multiprocess in one PyCSP network.
@@ -23,6 +23,10 @@
   importing pycsp. It closes the channel references and waits for all references to
   leave hosted channels, thus ensuring that the PyCSP network is left in a robust
   state.
+* Found a design flaw in AltSelect, which means that AltSelect does not guarantee
+  priority when affected by network and scheduling latencies. A new PriSelect have
+  been added which is slightly slower but does guarantee priority and thus should
+  be used whenever the SkipGuard is needed.
 
 0.7.0 - 0.7.1
 ----------
