@@ -13,6 +13,12 @@ import sys
 import select, threading
 import errno
 
+try:    
+    import multiprocessing
+    MULTIPROCESSING_ENABLED=1
+except ImportError:
+    MULTIPROCESSING_ENABLED=0
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -110,14 +116,11 @@ class SocketDispatcher(object):
 
         cls.__condObj.acquire()
         try:
-            try:
-                import multiprocessing 
+            if MULTIPROCESSING_ENABLED:                
                 if cls.__instance is not None:
                     subprocess = multiprocessing.current_process()
                     if cls.__instance.interpreter != subprocess:
                         cls.__instance = None
-            except ImportError:
-                pass
 
             if cls.__instance is None:
                 # Initialize **the unique** instance
@@ -125,11 +128,8 @@ class SocketDispatcher(object):
                 cls.__instance.condObj = cls.__condObj
 
                 # Record interpreter subprocess if multiprocessing is available
-                try:
-                    import multiprocessing
+                if MULTIPROCESSING_ENABLED:
                     cls.__instance.interpreter = multiprocessing.current_process()
-                except ImportError:
-                    pass
 
                 # Init SocketThreadData                
                 cls.__instance.socketthreaddata = SocketThreadData(cls.__instance.condObj)
