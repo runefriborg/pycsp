@@ -124,7 +124,12 @@ class Channel(object):
         
         # Check args
         if name == None and connect != None:
-            raise Exception("Must provide name when connecting to remote channel")
+            raise InfoException("Must provide name when connecting to remote channel")
+
+        # Set buffer
+        self.buffer = buffer
+        if self.buffer != 0 and connect != None:
+            raise InfoException("Do not specify buffer size when connecting to a hosted channel.")
 
         # Set name
         if name == None:
@@ -155,7 +160,7 @@ class Channel(object):
                         raise InfoException("Reusing channel name in same process namespace")
 
                 # Get local channel home
-                self._channelhomethread = protocol.ChannelHomeThread(self.name, buffer)
+                self._channelhomethread = protocol.ChannelHomeThread(self.name, self.buffer)
                 self._channelhomethread.start()
                 self.address = self._channelhomethread.addr
 
@@ -331,10 +336,13 @@ class Channel(object):
 
     # syntactic sugar: Channel() * N
     def __mul__(self, multiplier):
-        new = [self]
-        for i in range(multiplier-1):
-            new.append(Channel())
-        return new
+        if self._channelhomethread:
+            new = [self]
+            for i in range(multiplier-1):
+                new.append(Channel(buffer=self.buffer))
+            return new
+        else:
+            raise InfoException("Only hosted channels may be multiplied. Such as Channel()*10.")
 
     # syntactic sugar: N * Channel()
     def __rmul__(self, multiplier):
