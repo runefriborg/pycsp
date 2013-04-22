@@ -24,8 +24,8 @@ from pycsp.parallel.exceptions import *
 conf = Configuration()
 
 # Decorators
-def multiprocess(func=None, host='', port=None):
-    """ @multiprocess(host='', port=None)
+def multiprocess(func=None, pycsp_host='', pycsp_port=None):
+    """ @multiprocess(pycsp_host='', pycsp_port=None)
 
     @multiprocess decorator for making a function into a CSP MultiProcess factory.
     Each generated CSP process is implemented as a single OS process.
@@ -41,7 +41,7 @@ def multiprocess(func=None, host='', port=None):
       >>> P = filter(A.reader(), B.writer(), "42", debug=True)
 
       or
-      >>> @multiprocess(host="localhost", port=9998)
+      >>> @multiprocess(pycsp_host="localhost", pycsp_port=9998)
       >>> def filter(dataIn, dataOut, tag, debug=False):
       >>>   pass # perform filtering
       >>>
@@ -54,13 +54,15 @@ def multiprocess(func=None, host='', port=None):
         def _call(*args, **kwargs):
             host = ''
             port = None
-            return MultiProcess(func, host, port, *args, **kwargs)
+            return MultiProcess(func, *args, **kwargs)
         _call.func_name = func.func_name
         return _call
     else:
         def wrap_process(func):
             def _call(*args, **kwargs):
-                return MultiProcess(func, host, port, *args, **kwargs)
+                kwargs['pycsp_host']= pycsp_host
+                kwargs['pycsp_port']= pycsp_port
+                return MultiProcess(func, *args, **kwargs)
             _call.func_name = func.func_name
             return _call
         return wrap_process
@@ -69,7 +71,7 @@ def multiprocess(func=None, host='', port=None):
 
 # Classes
 class MultiProcess(multiprocessing.Process):
-    """ MultiProcess(func, host, port, *args, **kwargs)
+    """ MultiProcess(func, *args, **kwargs)
 
     CSP process implemented as a single OS process.
 
@@ -80,9 +82,9 @@ class MultiProcess(multiprocessing.Process):
       >>> def filter(dataIn, dataOut, tag, debug=False):
       >>>   pass # perform filtering
       >>>
-      >>> P = MultiProcess(filter, "localhost", 0, A.reader(), B.writer(), "42", debug=True) 
+      >>> P = MultiProcess(filter, A.reader(), B.writer(), "42", debug=True) 
 
-    MultiProcess(func, host, port, *args, **kwargs)
+    MultiProcess(func, *args, **kwargs)
     func
       The function object to wrap and execute in the body of the process.
     args and kwargs
@@ -92,7 +94,7 @@ class MultiProcess(multiprocessing.Process):
     Public variables:
       MultiProcess.name       Unique name to identify the process
     """
-    def __init__(self, fn, host, port, *args, **kwargs):
+    def __init__(self, fn, *args, **kwargs):
         multiprocessing.Process.__init__(self)
         self.fn = fn
         self.args = args
@@ -114,8 +116,15 @@ class MultiProcess(multiprocessing.Process):
         self.sequence_number = 1
 
         # Host and Port address will be set for the SocketDispatcher (one per interpreter/multiprocess)
-        self.host = host
-        self.port = port
+        if self.kwargs.has_key("pycsp_host"):
+            self.host = self.kwargs.pop("pycsp_host")
+        else:
+            self.host = ''
+            
+        if self.kwargs.has_key("pycsp_port"):
+            self.port = self.kwargs.pop("pycsp_port")
+        else:
+            self.port = None
 
         # Protect against early termination of mother-processes leavings childs in an invalid state
         self.spawned = []
@@ -263,11 +272,13 @@ class MultiProcess(multiprocessing.Process):
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, self.host, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        kwargs = self.__mul_channel_ends(self.kwargs)
+        kwargs['pycsp_host']=self.host
+        return [self] + [MultiProcess(self.fn, *self.__mul_channel_ends(self.args), **kwargs) for i in range(multiplier - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
-        return [self] + [MultiProcess(self.fn, self.host, 0, *self.__mul_channel_ends(self.args), **self.__mul_channel_ends(self.kwargs)) for i in range(multiplier - 1)]
+        return self.__mul__(multiplier)
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
