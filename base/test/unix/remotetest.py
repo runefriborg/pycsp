@@ -60,11 +60,11 @@ def ConnectCatchFailed():
 
 def BindCatchFailed():
     addr = ('localhost', 22223)
-    Spawn(MultiProcess(host_writer, host=addr[0], port=addr[1]))
+    Spawn(MultiProcess(host_writer, pycsp_host=addr[0], pycsp_port=addr[1]))
 
     # Fail to bind!
     try:
-        Parallel(MultiProcess(host_writer, host=addr[0], port=addr[1]))
+        Parallel(MultiProcess(host_writer, pycsp_host=addr[0], pycsp_port=addr[1]))
     except ChannelBindException as e:
         sys.stdout.write('OK')
     
@@ -81,7 +81,7 @@ def ConnectOne(sleeper, port):
     if sleeper:
         sleeper()
 
-    Parallel(MultiProcess(host_writer, host=addr[0], port=addr[1]))
+    Parallel(MultiProcess(host_writer, pycsp_host=addr[0], pycsp_port=addr[1]))
 
     sys.stdout.write('OK')
 
@@ -93,7 +93,7 @@ def ConnectMultiple(sleeper, port):
     if sleeper:
         sleeper()
 
-    Parallel(MultiProcess(host_writer, host=addr[0], port=addr[1], N=10))
+    Parallel(MultiProcess(host_writer, N=10, pycsp_host=addr[0], pycsp_port=addr[1]))
 
     sys.stdout.write('OK')
    
