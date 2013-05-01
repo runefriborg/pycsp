@@ -34,6 +34,7 @@ class Process():
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
+        self.return_value = None
 
         # Create unique id
         self.id = str(random.random())+str(time.time())
@@ -77,7 +78,7 @@ class Process():
     def run(self):
         self.executed = False
         try:
-            self.fn(*self.args, **self.kwargs)
+            self.return_value = self.fn(*self.args, **self.kwargs)
         except ChannelPoisonException:
             # look for channels and channel ends
             self.__check_poison(self.args)
@@ -171,8 +172,10 @@ class Process():
 
 def Parallel(*plist):
     """ Parallel(P1, [P2, .. ,PN])
+
+    Returns a list of return values from P1..PN
     """
-    _parallel(plist, True)
+    return _parallel(plist, True)
 
 def Spawn(*plist):
     """ Spawn(P1, [P2, .. ,PN])
@@ -196,10 +199,13 @@ def _parallel(plist, block = True):
 
     if block:
         s.join(processes)
-
+        return [p.return_value for p in processes]
+    
        
 def Sequence(*plist):
     """ Sequence(P1, [P2, .. ,PN])
+
+    Returns a list of return values from P1..PN
     """
     processes=[]
     for p in plist:
@@ -215,12 +221,15 @@ def Sequence(*plist):
     s = Scheduler()
     _p = s.current
     _p_original_id = _p.id
+    return_values = []
     for p in processes:
         _p.id = p.id
 
         # Call Run directly instead of start() and join() 
         p.run()
+        return_values.append(p.return_value)
     _p.id = _p_original_id
+    return return_values
 
 def current_process_id():
     s = Scheduler()
