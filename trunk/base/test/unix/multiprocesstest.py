@@ -84,6 +84,12 @@ def par_pri_reader(cin1,cin2,cin3,cin4, cnt, sleeper, assertCheck=None):
             InputGuard(cin4, action(assertCheck, 3))
             )
 
+@multiprocess
+def return_msg(cin, sleeper):
+    if sleeper: sleeper()
+    return cin()
+
+
 @io
 def sleep_one():
     time.sleep(0.01)
@@ -92,17 +98,41 @@ def sleep_one():
 def sleep_random():
     time.sleep(random.random()/100)
 
+def Parallel_Test(sleeper):
+    
+    c1=Channel()
+    
+    L= Parallel(writer(c1.writer(), 0, 10, sleeper), 10 * return_msg(c1.reader(), sleeper))
+    
+    if len(L) == 11 and L[0] == None and not None in L[1:]:
+        print("OK - Parallel_Test"+str(sleeper))
+    else:
+        print("Error - Parallel_Test"+str(sleeper))
+        print(str(L))
+
+def Sequence_Test(sleeper):
+    
+    c1=Channel()
+    
+    Spawn(writer(c1.writer(), 0, 10, sleeper))
+    L= Sequence(10 * return_msg(c1.reader(), sleeper))
+    
+    if len(L) == 10 and not None in L:
+        print("OK - Sequence_Test"+str(sleeper))
+    else:
+        print("Error - Sequence_Test"+str(sleeper))
+        print(str(L))
 
 def One2One_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
+    Spawn(check.Assert(x.reader(), "MultiProcess_One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
 
     c1=Channel()
     Parallel(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
+    Spawn(check.Assert(x.reader(), "MultiProcess_Any2One_Alting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
 
     c1=Channel()
     c2=Channel()
@@ -119,7 +149,7 @@ def Any2One_Alting_Test(read_sleeper, write_sleeper):
 
 def Any2One_FairAlting_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any2One_FairAlting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
+    Spawn(check.Assert(x.reader(), "MultiProcess_Any2One_FairAlting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
 
     c1=Channel()
     c2=Channel()
@@ -136,7 +166,7 @@ def Any2One_FairAlting_Test(read_sleeper, write_sleeper):
 
 def Any2One_PriAlting_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any2One_PriAlting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
+    Spawn(check.Assert(x.reader(), "MultiProcess_Any2One_PriAlting_Test"+str(read_sleeper)+str(write_sleeper), count=40, minimum=10, vocabulary=[0,1,2,3], quit_on_count=True))
 
     c1=Channel()
     c2=Channel()
@@ -153,7 +183,7 @@ def Any2One_PriAlting_Test(read_sleeper, write_sleeper):
 
 def Any2Any_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
+    Spawn(check.Assert(x.reader(), "MultiProcess_Any2Any_Test"+str(read_sleeper)+str(write_sleeper), count=40, vocabulary=[0,1,2,3]))
 
     c1=Channel()    
     cnt = 10
@@ -166,6 +196,10 @@ def Any2Any_Test(read_sleeper, write_sleeper):
 
 def autotest():
     for read_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
+
+        Sequence_Test(read_sleep[1])
+        Parallel_Test(read_sleep[1])
+
         for write_sleep in [('Zero', None), ('One',sleep_one), ('Random',sleep_random)]:
             rname, rsleep = read_sleep
             wname, wsleep = write_sleep
