@@ -126,9 +126,10 @@ def Parallel(*plist):
     
     val['type'] = 'BlockOnParallel'
     sendTrace(val)
-    pycsp.Parallel(*plist)
+    result = pycsp.Parallel(*plist)
     val['type'] = 'DoneParallel'
     sendTrace(val)
+    return result
 
 def Sequence(*plist):
     process_id = pycsp.current_process_id()
@@ -141,9 +142,10 @@ def Sequence(*plist):
             val['processes'].append({'func_name':p.fn.func_name, 'process_id':p.id})
     val['type'] = 'BlockOnSequence'
     sendTrace(val)
-    pycsp.Sequence(*plist)
+    result = pycsp.Sequence(*plist)
     val['type'] = 'DoneSequence'
     sendTrace(val)
+    return result
 
 def Spawn(*plist):
     process_id = pycsp.current_process_id()
