@@ -115,11 +115,15 @@ class SocketDispatcher(object):
             cls.__instance = None
 
         cls.__condObj.acquire()
+
         try:
-            if MULTIPROCESSING_ENABLED:                
+            if MULTIPROCESSING_ENABLED:                        
                 if cls.__instance is not None:
                     subprocess = multiprocessing.current_process()
                     if cls.__instance.interpreter != subprocess:
+                        del cls.__condObj
+                        cls.__condObj = threading.Condition()
+                        del cls.__instance
                         cls.__instance = None
 
             if cls.__instance is None:
@@ -133,6 +137,7 @@ class SocketDispatcher(object):
 
                 # Init SocketThreadData                
                 cls.__instance.socketthreaddata = SocketThreadData(cls.__instance.condObj)
+                                
         finally:
             #  Exit from critical section whatever happens
             cls.__condObj.release()
@@ -368,7 +373,6 @@ class SocketThreadData:
             host = os.environ[ENVVAL_HOST]
         addr = (host, port)
 
-        
         self.server_socket, self.server_addr = ossocket.start_server(addr)
 
         self.active_socket_list = [self.server_socket]

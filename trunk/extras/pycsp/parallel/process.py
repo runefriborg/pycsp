@@ -68,6 +68,7 @@ class Process(threading.Thread):
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
+        self.return_value = None
 
         # Create 64 byte unique id based on network address, sequence number and time sample.
         self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
@@ -100,6 +101,10 @@ class Process(threading.Thread):
         # report execution error
         self._error = None
 
+    def update(self, **kwargs):
+        # Ignore update of parameters, as this processes accepts none.
+        return self
+ 
     def wait_ack(self):
         self.cond.acquire()
         while not self.ack:
@@ -114,16 +119,17 @@ class Process(threading.Thread):
             self.cond.wait()
         self.cond.release()
 
-    def _report(self):
-        # Method to execute after process have quit.
+    def join_report(self):
         # This method enables propagation of errors to parent processes and threads.
+        # It also transfers the return value from function
+
+        # Wait for process to finish
+        self.join()
+
+        # return result of process/function
+        return self.return_value
         
-        # It is optional whether the parent process/threads calls this method, thus
-        # no cleanup should be made from this method. Purely reporting.
-        pass
-        
-    def run(self):
-        
+    def run(self):        
         # Create remote lock
         self.cond = threading.Condition()        
         dispatch = SocketDispatcher().getThread()
@@ -131,8 +137,7 @@ class Process(threading.Thread):
         dispatch.registerProcess(self.id, RemoteLock(self))
 
         try:
-            # Store the returned value from the process
-            self.fn(*self.args, **self.kwargs)
+            self.return_value = self.fn(*self.args, **self.kwargs)
         except ChannelPoisonException as e:
             # look for channels and channel ends
             self.__check_poison(self.args)
@@ -144,7 +149,7 @@ class Process(threading.Thread):
 
         # Join spawned processes
         for p in self.spawned:
-            p.join()
+            p.join_report()
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in self.activeChanList:
@@ -248,7 +253,7 @@ class Process(threading.Thread):
         return args
                 
 # Functions
-def Parallel(*plist):
+def Parallel(*plist, **kwargs):
     """ Parallel(P1, [P2, .. ,PN])
 
     Performs concurrent synchronous execution of the supplied CSP processes. 
@@ -270,9 +275,9 @@ def Parallel(*plist):
       >>> C = Channel()  
       >>> Parallel(P1(C.writer()), P2(C.reader()))
     """
-    _parallel(plist, True)
+    return _parallel(plist, True, kwargs)
 
-def Spawn(*plist):
+def Spawn(*plist, **kwargs):
     """ Spawn(P1, [P2, .. ,PN])
 
     Performs concurrent asynchronous execution of the supplied CSP processes. 
@@ -292,9 +297,9 @@ def Spawn(*plist):
       ...     while True:
       ...         cin()
     """
-    _parallel(plist, False)
+    _parallel(plist, False, kwargs)
 
-def _parallel(plist, block = True):
+def _parallel(plist, block, kwargs):
     processes=[]
     for p in plist:
         if type(p)==list:
@@ -302,19 +307,29 @@ def _parallel(plist, block = True):
                 processes.append(q)
         else:
             processes.append(p)
+    
+    # Update process parameters
+    if kwargs:
+        for p in processes:
+            p.update(**kwargs)
 
+    # Start processes
     for p in processes:
         p.start()
 
     if block:
+        # Blocking behaviour
+        return_values = []
         for p in processes:
-            p.join()
-            p._report()
+            return_values.append(p.join_report())
+        return return_values
+
     else:
+        # Spawn
         p,_ = getThreadAndName()
         p.spawned.extend(processes)
     
-def Sequence(*plist):
+def Sequence(*plist, **kwargs):
     """ Sequence(P1, [P2, .. ,PN])
 
     Performs synchronous execution of the supplied CSP processes. 
@@ -339,18 +354,20 @@ def Sequence(*plist):
         else:
             processes.append(p)
 
-    # For every process we simulate a new process_id.
-    t, name = getThreadAndName()
+    # Update process parameters
+    if kwargs:
+        for p in processes:
+            p.update(**kwargs)
 
-    t_original_id = t.id
+    # Run processes sequentially but each as a real separate process.
+    # For simplicity we no longer execute the .run method directly,
+    # but use the same approach as in the _parallel function.
+    return_values = []
     for p in processes:
-        t.id = p.id
-
-        # Call Run directly instead of start() and join() 
-        p.run()
-        p._report()
-
-    t.id = t_original_id
+        p.start()
+        return_values.append(p.join_report())
+    
+    return return_values
 
 
 def current_process_id():
@@ -476,7 +493,7 @@ def shutdown():
         dispatch = SocketDispatcher().getThread()
 
         for p in current_proc.spawned:
-            p.join()
+            p.join_report()
 
         # Initiate clean up and waiting for channels to finish outstanding operations.
         for channel in current_proc.activeChanList:
