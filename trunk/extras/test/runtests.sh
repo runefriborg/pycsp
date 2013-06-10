@@ -14,3 +14,6 @@ $PYTHON selecttest.py $IMPL
 cd unix
 $PYTHON remotetest.py $IMPL
 $PYTHON multiprocesstest.py $IMPL
+$PYTHON shellprocesstest.py $IMPL
+$PYTHON sshprocesstest.py $IMPL
+$PYTHON clusterprocesstest.py $IMPL
