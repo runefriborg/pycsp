@@ -14,11 +14,14 @@ from pycsp.parallel.altselect import FairSelect, PriSelect, AltSelect, InputGuar
 from pycsp.parallel.channel import Channel, retire, poison
 from pycsp.parallel.process import Process, process, Sequence, Parallel, Spawn, current_process_id, shutdown
 from pycsp.parallel.multiprocess import MultiProcess, multiprocess
+from pycsp.parallel.shellprocess import ShellProcess, shellprocess
+from pycsp.parallel.sshprocess import SSHProcess, sshprocess
+from pycsp.parallel.clusterprocess import ClusterProcess, clusterprocess
 from pycsp.parallel.exceptions import ChannelRetireException, ChannelPoisonException, ChannelSocketException, ChannelConnectException, ChannelBindException, ChannelLostException, FatalException, InfoException
 from pycsp.parallel.configuration import *
 from pycsp.parallel.compat import *
 
-__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'PriSelect', 'AltSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'ChannelConnectException', 'ChannelBindException', 'ChannelLostException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
+__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'PriSelect', 'AltSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'ClusterProcess', 'clusterprocess', 'ShellProcess', 'shellprocess', 'SSHProcess', 'sshprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'ChannelConnectException', 'ChannelBindException', 'ChannelLostException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
 
 version = (0,9,1, 'parallel')
 
@@ -60,4 +63,10 @@ pycsp.current.shutdown = shutdown
 
 pycsp.current.MultiProcess = MultiProcess
 pycsp.current.multiprocess = multiprocess
+pycsp.current.ClusterProcess = ClusterProcess
+pycsp.current.clusterprocess = clusterprocess
+pycsp.current.ShellProcess = ShellProcess
+pycsp.current.shellprocess = shellprocess
+pycsp.current.SSHProcess = SSHProcess
+pycsp.current.sshprocess = sshprocess
 
