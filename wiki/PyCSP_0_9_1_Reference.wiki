@@ -1,2 +1,1628 @@
-#summary Documentation for all components in PyCSP ver. 0.9.0
+#summary Documentation for all components in PyCSP ver. 0.9.1
+#labels Featured
 #sidebar TutorialList
+
+
+<wiki:toc max_depth="2" />
+=<pre>Process</pre>=
+==<pre>@process</pre>==
+<pre>
+Help on function process in module pycsp.parallel.process:
+
+process(func)
+    @process decorator for making a function into a CSP Process factory.
+    Each generated CSP process is implemented as a single OS thread.
+    
+    Usage:
+      >>> @process
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+    The CSP Process factory returned by the @process decorator:
+      func(*args, **kwargs)
+
+</pre>
+==<pre>Process</pre>==
+<pre>
+Help on class Process in module pycsp.parallel.process:
+
+class Process(threading.Thread)
+ |  Process(func, *args, **kwargs)
+ |  
+ |  CSP process implemented as a single OS thread.
+ |  
+ |  It is recommended to use the @process decorator, to create Process instances.
+ |  See help(pycsp.process)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = Process(filter, A.reader(), B.writer(), "42", debug=True) 
+ |  
+ |  Process(func, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs
+ |    are passed directly to the execution of the function object.
+ |  
+ |  Public variables:
+ |    Process.name       Unique name to identify the process
+ |  
+ |  Method resolution order:
+ |      Process
+ |      threading.Thread
+ |      threading._Verbose
+ |      __builtin__.object
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  join_report(self)
+ |  
+ |  run(self)
+ |  
+ |  update(self, **kwargs)
+ |  
+ |  wait(self)
+ |  
+ |  wait_ack(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from threading.Thread:
+ |  
+ |  __repr__(self)
+ |  
+ |  getName(self)
+ |  
+ |  isAlive(self)
+ |  
+ |  isDaemon(self)
+ |  
+ |  is_alive = isAlive(self)
+ |  
+ |  join(self, timeout=None)
+ |  
+ |  setDaemon(self, daemonic)
+ |  
+ |  setName(self, name)
+ |  
+ |  start(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from threading.Thread:
+ |  
+ |  daemon
+ |  
+ |  ident
+ |  
+ |  name
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from threading._Verbose:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+</pre>
+==<pre>@multiprocess</pre>==
+<pre>
+Help on function multiprocess in module pycsp.parallel.multiprocess:
+
+multiprocess(func=None, pycsp_host='', pycsp_port=None)
+    @multiprocess(pycsp_host='', pycsp_port=None)
+    
+    @multiprocess decorator for making a function into a CSP MultiProcess factory.
+    Each generated CSP process is implemented as a single OS process.
+    
+    All objects and variables provided to multiprocesses through the
+    parameter list must support pickling.
+    
+    Usage:
+      >>> @multiprocess
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+      or
+      >>> @multiprocess(pycsp_host="localhost", pycsp_port=9998)
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+      
+    The CSP MultiProcess factory returned by the @multiprocess decorator:
+      func(*args, **kwargs)
+
+</pre>
+==<pre>MultiProcess</pre>==
+<pre>
+Help on class MultiProcess in module pycsp.parallel.multiprocess:
+
+class MultiProcess(multiprocessing.process.Process)
+ |  MultiProcess(func, *args, **kwargs)
+ |  
+ |  CSP process implemented as a single OS process.
+ |  
+ |  It is recommended to use the @multiprocess decorator, to create MultiProcess instances.
+ |  See help(pycsp.multiprocess)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = MultiProcess(filter, A.reader(), B.writer(), "42", debug=True, pycsp_host='localhost') 
+ |  
+ |  MultiProcess(func, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs
+ |    are pickled and sent to the multiprocess where it is reassembled and
+ |    passed to the execution of the function object.
+ |  
+ |  Public variables:
+ |    MultiProcess.name       Unique name to identify the process
+ |  
+ |  Method resolution order:
+ |      MultiProcess
+ |      multiprocessing.process.Process
+ |      __builtin__.object
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  join_report(self)
+ |  
+ |  run(self)
+ |  
+ |  update(self, **kwargs)
+ |  
+ |  wait(self)
+ |  
+ |  wait_ack(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from multiprocessing.process.Process:
+ |  
+ |  __repr__(self)
+ |  
+ |  is_alive(self)
+ |      Return whether process is alive
+ |  
+ |  join(self, timeout=None)
+ |      Wait until child process terminates
+ |  
+ |  start(self)
+ |      Start child process
+ |  
+ |  terminate(self)
+ |      Terminate process; sends SIGTERM signal or uses TerminateProcess()
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from multiprocessing.process.Process:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |  
+ |  authkey
+ |  
+ |  daemon
+ |      Return whether process is a daemon
+ |  
+ |  exitcode
+ |      Return exit code of process or `None` if it has yet to stop
+ |  
+ |  ident
+ |      Return identifier (PID) of process or `None` if it has yet to start
+ |  
+ |  name
+ |  
+ |  pid
+ |      Return identifier (PID) of process or `None` if it has yet to start
+
+</pre>
+=<pre>Remote Process</pre>=
+==<pre>@shellprocess</pre>==
+<pre>
+Help on function shellprocess in module pycsp.parallel.shellprocess:
+
+shellprocess(func=None, pycsp_host='', pycsp_port=0, shell_python='python')
+    @shellprocess(pycsp_host='', pycsp_port=0, shell_python='python')
+    
+    ** MS windows not supported! **
+    
+    CSP process running in a new Python interpreter started from a new shell.
+    
+    This may be used to run processes in parallel using different interpreter versions
+    in one CSP network.
+    
+    @shellprocess decorator for making a function into a CSP ShellProcess factory.
+    
+    All objects and variables provided to shellprocesses through the
+    parameter list must support pickling.
+    
+    Usage:
+      >>> @shellprocess
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+      or
+      >>> @shellprocess(pycsp_host="localhost", pycsp_port=9998, shell_python='python-2.6')
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+      
+    The CSP ShellProcess factory returned by the @shellprocess decorator:
+      func(*args, **kwargs)
+
+</pre>
+==<pre>ShellProcess</pre>==
+<pre>
+Help on class ShellProcess in module pycsp.parallel.shellprocess:
+
+class ShellProcess(__builtin__.object)
+ |  ShellProcess(func, *args, **kwargs)
+ |  
+ |  ** MS windows not supported! **
+ |  
+ |  CSP process running in a new Python interpreter started from a new shell.
+ |  
+ |  It is recommended to use the @shellprocess decorator, to create ShellProcess instances.
+ |  See help(pycsp.shellprocess)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = ShellProcess(filter, A.reader(), B.writer(), "42", debug=True, shell_python='python-2.7') 
+ |  
+ |  ShellProcess(func, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs
+ |    are pickled and sent to the multiprocess where it is reassembled and
+ |    passed to the execution of the function object.
+ |  
+ |  Public variables:
+ |    ShellProcess.name       Unique name to identify the process
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  join_report(self)
+ |  
+ |  start(self)
+ |  
+ |  update(self, **kwargs)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+</pre>
+==<pre>@sshprocess</pre>==
+<pre>
+Help on function sshprocess in module pycsp.parallel.sshprocess:
+
+sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python')
+    @sshprocess(pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python')
+    
+    This may be used to create a CSP network spanning remote hosts.
+    Create CSP processes running in a new Python interpreter started on a remote host using the
+    SSH2 protocol (paramiko module)
+    
+    It is not recommended to use the password argument. Instead, setup the remote host
+    for a passwordless login using private/public key authorisation.
+    
+    
+    @sshprocess decorator for making a function into a CSP SSHProcess factory.
+    
+    All objects and variables provided to sshprocesses through the
+    parameter list must support pickling.
+    
+    Usage:
+      >>> @sshprocess(ssh_host="10.22.32.10")
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+      or
+      >>> @sshprocess(ssh_host="10.0.10.1", ssh_user="guest", ssh_password="42", ssh_python='python-2.6')
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+      
+    The CSP SSHProcess factory returned by the @sshprocess decorator:
+      func(*args, **kwargs)
+
+</pre>
+==<pre>SSHProcess</pre>==
+<pre>
+Help on class SSHProcess in module pycsp.parallel.sshprocess:
+
+class SSHProcess(__builtin__.object)
+ |  SSHProcess(func, *args, **kwargs)
+ |  
+ |  This may be used to create a CSP network spanning remote hosts.
+ |  Create CSP processes running in a new Python interpreter started on a remote host using the
+ |  SSH2 protocol (paramiko module)
+ |  
+ |  It is recommended to use the @sshprocess decorator, to create SSHProcess instances.
+ |  See help(pycsp.sshprocess)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = SSHProcess(filter, A.reader(), B.writer(), "42", debug=True, ssh_host='10.0.0.2', ssh_python='python-2.7') 
+ |  
+ |  SSHProcess(func, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs
+ |    are pickled and sent to the multiprocess where it is reassembled and
+ |    passed to the execution of the function object.
+ |  
+ |  Public variables:
+ |    SSHProcess.name       Unique name to identify the process
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  join_report(self)
+ |  
+ |  start(self)
+ |  
+ |  update(self, **kwargs)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+</pre>
+==<pre>@clusterprocess</pre>==
+<pre>
+Help on function clusterprocess in module pycsp.parallel.clusterprocess:
+
+clusterprocess(func=None, cluster_nodefile='$PBS_NODEFILE', cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22, cluster_python='python')
+    @clusterprocess(cluster_nodefile="", cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22, cluster_python='python')
+    
+    This may be used to create a CSP network spanning remote hosts provided in a nodefile.
+    
+    Example of a 'nodefile':
+    node1.host.org
+    node1.host.org
+    node2.host.org
+    node2.host.org
+    
+    The location of this nodefile may then be provided using the Environment variable $PBS_NODEFILE.
+    
+    cluster_pin=X is used to pin a process to Xth entry in the nodefile.
+    
+    cluster_hint=[ 'blocked', 'strided', 'local' ] selects a distribution scheme for processes.
+    
+    All objects and variables provided to clusterprocesses through the
+    parameter list must support pickling.
+    
+    Usage:
+      >>> @clusterprocess
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+      or
+      >>> @clusterprocess(cluster_hint="local")
+      >>> def filter(dataIn, dataOut, tag, debug=False):
+      >>>   pass # perform filtering
+      >>>
+      >>> P = filter(A.reader(), B.writer(), "42", debug=True)
+    
+      The cluster_* variables may overwritten in Parallel/Sequence/Spawn
+      >>> Parallel(P, cluster_hint='blocked')
+      
+    The CSP ClusterProcess factory returned by the @clusterprocess decorator:
+      func(*args, **kwargs)
+
+</pre>
+==<pre>ClusterProcess</pre>==
+<pre>
+Help on class ClusterProcess in module pycsp.parallel.clusterprocess:
+
+class ClusterProcess(__builtin__.object)
+ |  ClusterProcess(func, *args, **kwargs)
+ |  
+ |  This may be used to create a CSP network spanning remote hosts.
+ |  
+ |  It is recommended to use the @clusterprocess decorator, to create ClusterProcess instances.
+ |  See help(pycsp.clusterprocess)
+ |  
+ |  Usage:
+ |    >>> def filter(dataIn, dataOut, tag, debug=False):
+ |    >>>   pass # perform filtering
+ |    >>>
+ |    >>> P = ClusterProcess(filter, A.reader(), B.writer(), "42", debug=True, cluster_pin=1) 
+ |  
+ |  ClusterProcess(func, *args, **kwargs)
+ |  func
+ |    The function object to wrap and execute in the body of the process.
+ |  args and kwargs
+ |    are pickled and sent to the multiprocess where it is reassembled and
+ |    passed to the execution of the function object.
+ |  
+ |  Public variables:
+ |    ClusterProcess.name       Unique name to identify the process
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, fn, *args, **kwargs)
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
+ |  
+ |  join_report(self)
+ |  
+ |  start(self)
+ |  
+ |  update(self, **kwargs)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+</pre>
+=<pre>Process Execution</pre>=
+==<pre>Parallel</pre>==
+<pre>
+Help on function Parallel in module pycsp.parallel.process:
+
+Parallel(*plist, **kwargs)
+    Parallel(P1, [P2, .. ,PN])
+    
+    Performs concurrent synchronous execution of the supplied CSP processes. 
+    
+    Blocks until all processes have exited.
+    
+    Usage:
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
+    
+      >>> @process
+      ... def P2(cin):
+      ...     while True:
+      ...         cin()
+    
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()), P2(C.reader()))
+
+</pre>
+==<pre>Spawn</pre>==
+<pre>
+Help on function Spawn in module pycsp.parallel.process:
+
+Spawn(*plist, **kwargs)
+    Spawn(P1, [P2, .. ,PN])
+    
+    Performs concurrent asynchronous execution of the supplied CSP processes. 
+    
+    Usage:
+      >>> @process
+      ... def P1(cout):
+      ...     for i in range(10):
+      ...         cout(i)
+      ...     retire(cout)
+    
+      >>> C = Channel()  
+      >>> Parallel(P1(C.writer()))
+    
+      >>> cin = C.reader()
+      ... try:
+      ...     while True:
+      ...         cin()
+
+</pre>
+==<pre>Sequence</pre>==
+<pre>
+Help on function Sequence in module pycsp.parallel.process:
+
+Sequence(*plist, **kwargs)
+    Sequence(P1, [P2, .. ,PN])
+    
+    Performs synchronous execution of the supplied CSP processes. 
+    
+    The supplied processes are executed in order.
+    
+    Blocks until the last process has exited.
+    
+    Usage:
+      >>> @process
+      ... def P1(id):
+      ...     print(id)
+    
+      >>> L = [P1(i) for i in range(10)]
+      >>> Sequence(L)
+
+</pre>
+=<pre>Channel</pre>=
+==<pre>Channel</pre>==
+<pre>
+Help on class Channel in module pycsp.parallel.channel:
+
+class Channel(__builtin__.object)
+ |  Channel(name=None, buffer=0, connect=None)
+ |  
+ |  Any-2-any channel for communication between both local and remote processes.
+ |  
+ |  To communicate on this channel, channel ends must be requested using the .reader/.writer methods.
+ |  
+ |  Usage:
+ |    >>> A = Channel("A")
+ |    >>> cout = A.writer()
+ |    >>> cout("Hello World")
+ |  
+ |  A channel is registered at the Python interpreter level and hosted in the interpreter where it
+ |  was created.
+ |  
+ |  Retrieving the address and name of a channel:
+ |  >>> print(A.address)
+ |  ('10.11.105.254', 33703)
+ |  >>> print(A.name)
+ |  A
+ |  
+ |  Channel(name=None, buffer=0, connect=None):
+ |  name
+ |    is a string used for identifying the Channel and must be unique for every Channel instance.
+ |    The name is limited to maximum 32 characters. If name=None then a unique name is generated.
+ |  buffer
+ |    The channel may be buffered by configuring a buffer of size <buffer>.
+ |    buffer=3 will create a channel which can contain three elements, before blocking send.
+ |  connect
+ |    If provided with (host, port), the channel will not create a host, but instead try to connect
+ |    to (host, port) and register at the channel here.
+ |    A name must be provided when connect is set.
+ |  
+ |  Public variables:
+ |    Channel.address    (host, port) where the channel is hosted
+ |    Channel.name       name to identify the hosted channel
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, name=None, buffer=0, connect=None)
+ |      # Constructor
+ |  
+ |  __mul__(self, multiplier)
+ |      # syntactic sugar: Channel() * N
+ |  
+ |  __neg__(self)
+ |      # syntactic sugar: cout = -chan
+ |  
+ |  __pos__(self)
+ |      # syntactic sugar: cin = +chan
+ |  
+ |  __rmul__(self, multiplier)
+ |      # syntactic sugar: N * Channel()
+ |  
+ |  disconnect(self)
+ |      Explicit close is only relevant for channel references
+ |      connected to remote channels
+ |      
+ |      It can be used to make an early close, to allow another interpreter
+ |      hosting the channel home, to quit. This is especially useful when
+ |      used in a server - client setting, where the client has provied a 
+ |      reply channel and desires to disconnect after having received the reply.
+ |      
+ |      The channel reference will automatically open and reconnect if it is used after a close.
+ |  
+ |  reader(self)
+ |      Create and return a receiving end of the channel
+ |      
+ |      Returns:
+ |        ChannelEndRead object
+ |      
+ |      Usage:
+ |        >>> C = Channel()
+ |        >>> cin = C.reader()
+ |        >>> print( cin() ) # Read
+ |  
+ |  writer(self)
+ |      Create and return a writing end of the channel
+ |      
+ |      Returns:
+ |        ChannelEndWrite object
+ |      
+ |      Usage:
+ |        >>> C = Channel()
+ |        >>> cout = C.writer()
+ |        >>> cout("Hello reader")
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+</pre>
+==<pre>ChannelEndRead</pre>==
+<pre>
+Help on instance of ChannelEndRead in module pycsp.parallel.channel:
+
+class ChannelEndRead(ChannelEnd)
+ |  The reading end of a channel. 
+ |  
+ |  Usage:
+ |    >>> val = reading_end()
+ |  
+ |  Throws:
+ |    ChannelPoisonException()
+ |    ChannelRetireException()
+ |  
+ |  If the poison and retire exceptions are not caught explicitly they will automatically be
+ |  propagated to all other known channelends provided to the process in the argument list.
+ |  
+ |  Methods defined here:
+ |  
+ |  __call__(self)
+ |  
+ |  __init__(self, channel)
+ |  
+ |  __repr__(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from ChannelEnd:
+ |  
+ |  __getstate__(self)
+ |      Enables channel end mobility
+ |  
+ |  __setstate__(self, dict)
+ |      Enables channel end mobility
+ |  
+ |  disconnect(self)
+ |      Explicit close is only relevant for mobile channel ends to invoke an
+ |      early close.
+ |      
+ |      The reason for an early close is to allow another interpreter
+ |      hosting the channel home, to quit. This is especially useful when
+ |      used in a server/client setting, where the client has provided a 
+ |      reply channel and desires to disconnect after having received the reply.
+ |      
+ |      The mobile channel end reference will automatically open and reconnect if
+ |      it is used after a close.
+ |  
+ |  isReader(self)
+ |      Returns True for ChannelEndRead object
+ |  
+ |  isWriter(self)
+ |      Returns True for ChannelEndWrite object
+ |  
+ |  poison(self)
+ |      Poison channel end
+ |      
+ |      When a channel end is poisoned, the channel is set into a poisoned state where
+ |      after all actions on the channel will invoke a ChannelPoisonException which
+ |      is propagated through the PyCSP network to shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+ |      See retire for an improved shutdown method.
+ |  
+ |  retire(self)
+ |      Retire channel end
+ |      
+ |      When a channel end is retired, the channel is signaled that a channel end
+ |      has now left the channel. When the set of all reading or writing channel ends is set
+ |      to none, then the channel enters a retired state whereafter
+ |      all actions on the channel will invoke a ChannelRetireException which
+ |      is propagated through the PyCSP network to nicely shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Retiring is an improved version of poisoning, which avoids the race condition issue
+ |      when terminating multiple concurrent processes.
+
+</pre>
+==<pre>ChannelEndWrite</pre>==
+<pre>
+Help on instance of ChannelEndWrite in module pycsp.parallel.channel:
+
+class ChannelEndWrite(ChannelEnd)
+ |  Methods defined here:
+ |  
+ |  __call__(self, msg)
+ |  
+ |  __init__(self, channel)
+ |  
+ |  __repr__(self)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from ChannelEnd:
+ |  
+ |  __getstate__(self)
+ |      Enables channel end mobility
+ |  
+ |  __setstate__(self, dict)
+ |      Enables channel end mobility
+ |  
+ |  disconnect(self)
+ |      Explicit close is only relevant for mobile channel ends to invoke an
+ |      early close.
+ |      
+ |      The reason for an early close is to allow another interpreter
+ |      hosting the channel home, to quit. This is especially useful when
+ |      used in a server/client setting, where the client has provided a 
+ |      reply channel and desires to disconnect after having received the reply.
+ |      
+ |      The mobile channel end reference will automatically open and reconnect if
+ |      it is used after a close.
+ |  
+ |  isReader(self)
+ |      Returns True for ChannelEndRead object
+ |  
+ |  isWriter(self)
+ |      Returns True for ChannelEndWrite object
+ |  
+ |  poison(self)
+ |      Poison channel end
+ |      
+ |      When a channel end is poisoned, the channel is set into a poisoned state where
+ |      after all actions on the channel will invoke a ChannelPoisonException which
+ |      is propagated through the PyCSP network to shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+ |      See retire for an improved shutdown method.
+ |  
+ |  retire(self)
+ |      Retire channel end
+ |      
+ |      When a channel end is retired, the channel is signaled that a channel end
+ |      has now left the channel. When the set of all reading or writing channel ends is set
+ |      to none, then the channel enters a retired state whereafter
+ |      all actions on the channel will invoke a ChannelRetireException which
+ |      is propagated through the PyCSP network to nicely shutdown all processes unless
+ |      caugth by the user with a try/except clause.
+ |      
+ |      Retiring is an improved version of poisoning, which avoids the race condition issue
+ |      when terminating multiple concurrent processes.
+
+</pre>
+==<pre>ChannelConnectException</pre>==
+<pre>
+ ChannelConnectException(addr, msg)
+    
+    This exception is raised when a channel is unable to connect
+    to the destination provided in the connect parameter.
+
+    Usage:
+      >>> try:
+      ...     A = Channel('A', connect=('unknown', 999))
+      ... except ChannelConnectException as e:
+      ...     print("Addr %s is unavailable
+", % (str(e.addr)))
+
+    If a mobile channel end is sent to another remote interpreter, where
+    the channel end is unable to reconnect with the channel host, then
+    a ChannelConnectException is also raised.
+    
+</pre>
+==<pre>ChannelBindException</pre>==
+<pre>
+ ChannelBindException(addr, msg)
+    
+    This exception is raised when PyCSP is unable to bind to a port.
+
+    The host and port to bind to is ('', 0) which binds
+    to 0.0.0.0 and any available port number, unless provided through
+    environment variables, configuration variables or from parameters
+    to multiprocess.
+
+    Usage:
+      >>> @multiprocess(port=99)
+      ... def runner(chanName):
+      ...     A = Channel(chanName)
+      ...     cin = A.reader()
+      ...     print(cin())
+
+      >>> try:
+      ...     Parallel(runner('A'))
+      ... except ChannelBindException:
+      ...     print("Can not bind to port 80")
+    
+</pre>
+==<pre>ChannelLostException</pre>==
+<pre>
+ ChannelLostException(addr, msg)
+    
+    This exception is raised when PyCSP has a channel which is left
+    in an unstable state caused by a broken network connection, which
+    could not be reestablished.
+
+    Usually PyCSP can not recover from this exception.    
+    
+</pre>
+=<pre>AltSelect</pre>=
+==<pre>AltSelect</pre>==
+<pre>
+Help on function AltSelect in module pycsp.parallel.altselect:
+
+AltSelect(*guards)
+    AltSelect(G1, [G2, .. ,GN])
+    
+    AltSelect performs a fast choice from a list of guard objects and
+    returns a tuple with the selected channel end and the read msg if
+    there is one, otherwise None.
+    
+    Usage:
+      >>> g,msg = AltSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> print("Message:%s" % (str(msg)))
+    
+    Returns:
+      ChannelEnd, message    
+    
+    More detailed usage:
+    
+      AltSelect supports skip, timeout, input and output guards. Though,
+      it is recommended to use the slightly slower PriSelect when using
+      skip guards.
+    
+      >>> @choice 
+      ... def callback(type, channel_input = None):
+      ...    print type, channel_input
+    
+      >>> A, B = Channel('A'), Channel('B')
+      >>> cin, cout = A.reader(), B.writer()
+      >>> g1 = InputGuard(cin, action=callback('input'))
+      >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
+      >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
+    
+      >>> _ = AltSelect(g1, g2, g3)
+      timeout None
+    
+    
+      Note that AltSelect always performs the guard that was chosen,
+      i.e. channel input or output is executed within the AltSelect so
+      even the empty choice with an AltSelect or where
+      the results are simply ignored, still performs the guarded input or
+      output.
+    
+      >>> L = []
+    
+      >>> @choice 
+      ... def action(channel_input):
+      ...     L.append(channel_input)
+    
+      >>> @process
+      ... def P1(cout, n=5):
+      ...     for i in range(n):
+      ...         cout(i)
+    
+      >>> @process
+      ... def P2(cin1, cin2, n=10):
+      ...     for i in range(n):
+      ...         _ = AltSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
+                
+      >>> C1, C2 = Channel(), Channel()
+      >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+    
+      >>> len(L)
+      10
+    
+      >>> L.sort()
+      >>> L
+      [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+
+</pre>
+==<pre>PriSelect</pre>==
+<pre>
+Help on function PriSelect in module pycsp.parallel.altselect:
+
+PriSelect(*guards)
+    PriSelect(G1, [G2, .. ,GN])
+    
+    PriSelect performs a prioritized choice from a list of guard objects and
+    returns a tuple with the selected channel end and the read msg if
+    there is one, otherwise None.
+    
+    Usage:
+      >>> g,msg = PriSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> print("Message:%s" % (str(msg)))
+    
+    Returns:
+      ChannelEnd, message    
+    
+    More detailed usage:
+      >>> C = Channel()
+      >>> cin = C.reader()
+    
+      >>> ch_end, msg = PriSelect(InputGuard(cin), SkipGuard())
+    
+      >>> if ch_end == cin:
+      ...     print msg
+      ... else:
+      ...     print msg == None
+      True
+    
+    
+      PriSelect supports skip, timeout, input and output guards.
+    
+      >>> @choice 
+      ... def callback(type, channel_input = None):
+      ...    print type, channel_input
+    
+      >>> A, B = Channel('A'), Channel('B')
+      >>> cin, cout = A.reader(), B.writer()
+      >>> g1 = InputGuard(cin, action=callback('input'))
+      >>> g2 = OutputGuard(cout, msg=[range(10),range(100)], action=callback('output'))
+      >>> g3 = TimeoutGuard(seconds=0.1, action=callback('timeout'))
+    
+      >>> _ = PriSelect(g1, g2, g3)
+      timeout None
+    
+    
+      Note that PriSelect always performs the guard that was chosen,
+      i.e. channel input or output is executed within the PriSelect so
+      even the empty choice with an PriSelect or where
+      the results are simply ignored, still performs the guarded input or
+      output.
+    
+      >>> L = []
+    
+      >>> @choice 
+      ... def action(channel_input):
+      ...     L.append(channel_input)
+    
+      >>> @process
+      ... def P1(cout, n=5):
+      ...     for i in range(n):
+      ...         cout(i)
+    
+      >>> @process
+      ... def P2(cin1, cin2, n=10):
+      ...     for i in range(n):
+      ...         _ = PriSelect( InputGuard(cin1, action=action()), InputGuard(cin2, action=action()) )
+                
+      >>> C1, C2 = Channel(), Channel()
+      >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+    
+      >>> len(L)
+      10
+    
+      >>> L.sort()
+      >>> L
+      [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+
+</pre>
+==<pre>FairSelect</pre>==
+<pre>
+Help on function FairSelect in module pycsp.parallel.altselect:
+
+FairSelect(*guards)
+    FairSelect(G1, [G2, .. ,GN])
+    
+    FairSelect sorts the list of guards in order based on the history for
+    the chosen guards in this FairSelect.
+    
+    Internally it invokes a priority select on the new order of guards.
+    
+    Timer and Skip guards are always given lowest priority.
+    
+    Usage:
+      >>> g,msg = FairSelect(InputGuard(cin1), InputGuard(cin2))
+      >>> print("Message:%s" % (str(msg)))
+    
+    Returns:
+      ChannelEnd, message
+    
+    More detailed usage:
+      see help(pycsp.AltSelect)
+
+</pre>
+==<pre>InputGuard</pre>==
+<pre>
+Help on class InputGuard in module pycsp.parallel.altselect:
+
+class InputGuard
+ |  InputGuard(ch_end_read, action=None)
+ |  
+ |  InputGuard wraps a ChannelEndRead for use with AltSelect/FairSelect.
+ |  
+ |  If the Inputguard is selected and an action is configured, then the action is executed.
+ |  
+ |  Usage:
+ |    >>> ch_end, msg = AltSelect( InputGuard(cin) )
+ |    >>> ch_end, msg = AltSelect( InputGuard(cin, action="print(channel_input)") )
+ |    1
+ |  
+ |    >>> @choice
+ |    ... def Action(val1, val2, sendResult, channel_input=None):
+ |    ...     sendResult(channel_input)      
+ |  
+ |    >>> ch_end, msg = AltSelect( InputGuard(cin, action=Action('going into val1', 'going into val2', cout)) )
+ |  
+ |  InputGuard(ch_end_read, action=None)
+ |  ch_end_read
+ |    The ChannelEndRead object to configure as an InputGuard
+ |  action
+ |    An action may be provided as a string, a callable function object or a Choice object.
+ |    The Choice object is the recommended use of action.
+ |    
+ |    A string:
+ |      >>> action="L.append(channel_input)"
+ |    
+ |      The string passed to the action parameter is evaluted in the current namespace and can 
+ |      read variables, but can only write output by editing the content of existing mutable variables.
+ |      Newly created immutable and mutable variables will only exist in the evalutation of this string.
+ |    
+ |    callable(func):
+ |      >>> def func(channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func
+ |      
+ |      The callable function object must accept one parameter for actions on InputGuards and must
+ |      accept zero parameters for actions on OutputGuards.
+ |  
+ |    Choice:
+ |      >>> @choice
+ |      ... def func(L, channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func(gatherList)
+ |  
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
+ |      different parameters depending on the use case. See help(pycsp.choice)
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, ch_end_read, action=None)
+
+</pre>
+==<pre>OutputGuard</pre>==
+<pre>
+Help on class OutputGuard in module pycsp.parallel.altselect:
+
+class OutputGuard
+ |  OutputGuard(ch_end_write, msg, action=None)
+ |  
+ |  OutputGuard wraps a ChannelEndWrite for use with AltSelect/FairSelect.
+ |  
+ |  If the Outputguard is selected and an action is configured, then the action is executed.
+ |  
+ |  Usage:
+ |    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=0) )
+ |    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=1, action="print('done')") )
+ |    done
+ |  
+ |    >>> @choice
+ |    ... def Action(val1, val2):
+ |    ...     print('%s %s sent' % (val1, val2))
+ |  
+ |    >>> ch_end, msg = AltSelect( OutputGuard(cout, msg=4, action=Action('going into val1', 'going into val2')) )
+ |    sent
+ |  
+ |  OutputGuard(ch_end_read, action=None)
+ |  ch_end_read
+ |    The ChannelEndWrite object to configure as an OutputGuard
+ |  msg
+ |    The message to send. This may be any object for local communication and any object
+ |    supporting pickling for remote communication.
+ |  action
+ |    An action may be provided as a string, a callable function object or a Choice object.
+ |    The Choice object is the recommended use of action.
+ |    
+ |    A string:
+ |      >>> action="L.append(True)"
+ |    
+ |      The string passed to the action parameter is evaluted in the current namespace and can 
+ |      read variables, but can only write output by editing the content of existing mutable variables.
+ |      Newly created immutable and mutable variables will only exist in the evalutation of this string.
+ |    
+ |    callable(func):
+ |      >>> def func()
+ |      ...     print("Value sent")
+ |      >>> action=func
+ |      
+ |      The callable function object must accept one parameter for actions on InputGuards and must
+ |      accept zero parameters for actions on OutputGuards.
+ |  
+ |    Choice:
+ |      >>> @choice
+ |      ... def func(L, val)
+ |      ...     L.remove(val)
+ |      >>> action=func(gatherList, sending_value)
+ |  
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
+ |      different parameters depending on the use case. See help(pycsp.choice)
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, ch_end_write, msg, action=None)
+
+</pre>
+==<pre>SkipGuard</pre>==
+<pre>
+Help on class SkipGuard in module pycsp.parallel.guard:
+
+class SkipGuard(Guard)
+ |  SkipGuard(action=None)
+ |  
+ |  SkipGuard will commit a successful communication the moment it is posted.
+ |  
+ |  Usage:
+ |    >>> C = Channel()
+ |    >>> Cin = C.reader()
+ |    >>> (g, msg) = AltSelect(InputGuard(Cin),  SkipGuard() )
+ |  
+ |  SkipGuard(action=None)
+ |  action
+ |    An action may be provided as a string, a callable function object or a Choice object.
+ |    The Choice object is the recommended use of action.
+ |    
+ |    A string:
+ |      >>> action="L.append(channel_input)"
+ |    
+ |      The string passed to the action parameter is evaluted in the current namespace and can 
+ |      read variables, but can only write output by editing the content of existing mutable variables.
+ |      Newly created immutable and mutable variables will only exist in the evalutation of this string.
+ |    
+ |    callable(func):
+ |      >>> def func(channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func
+ |      
+ |      The callable function object must accept one parameter for actions on InputGuards and must
+ |      accept zero parameters for actions on OutputGuards.
+ |  
+ |    Choice:
+ |      >>> @choice
+ |      ... def func(L, channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func(gatherList)
+ |  
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
+ |      different parameters depending on the use case. See help(pycsp.choice)
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, action=None)
+
+</pre>
+==<pre>TimeoutGuard</pre>==
+<pre>
+Help on class TimeoutGuard in module pycsp.parallel.guard:
+
+class TimeoutGuard(Guard)
+ |  TimeoutGuard(seconds, action=None)
+ |  
+ |  TimeoutGuard spawns a timer thread, when posted. If removed
+ |  before timeout, then the timer thread is cancelled.
+ |  
+ |  When the timer expires, the timer thread will commit a successful communication.
+ |  
+ |  Usage:
+ |    >>> C = Channel()
+ |    >>> Cin = C.reader()
+ |    >>> (g, msg) = AltSelect( InputGuard(Cin), TimeoutGuard(seconds=0.5) )
+ |  
+ |  TimeoutGuard(action=None)
+ |  seconds
+ |    Set the seconds to wait before timeout. eg. 0.5s
+ |  action
+ |    An action may be provided as a string, a callable function object or a Choice object.
+ |    The Choice object is the recommended use of action.
+ |    
+ |    A string:
+ |      >>> action="L.append(channel_input)"
+ |    
+ |      The string passed to the action parameter is evaluted in the current namespace and can 
+ |      read variables, but can only write output by editing the content of existing mutable variables.
+ |      Newly created immutable and mutable variables will only exist in the evalutation of this string.
+ |    
+ |    callable(func):
+ |      >>> def func(channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func
+ |      
+ |      The callable function object must accept one parameter for actions on InputGuards and must
+ |      accept zero parameters for actions on OutputGuards.
+ |  
+ |    Choice:
+ |      >>> @choice
+ |      ... def func(L, channel_input=None)
+ |      ...     L.append(channel_input)
+ |      >>> action=func(gatherList)
+ |  
+ |      The choice decorator can be used to make a Choice factory, which can generate actions with
+ |      different parameters depending on the use case. See help(pycsp.choice)
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, seconds, action=None)
+
+</pre>
+==<pre>@choice</pre>==
+<pre>
+Help on function choice in module pycsp.parallel.alternation:
+
+choice(func)
+    @choice decorator for making a function into a Choice factory.
+    
+    Each generated Choice object can be used as actions in one of
+    the four guards: InputGuard, OutputGuard, SkipGuard or TimeoutGuard.
+    
+    The keyword variable channel_input is special and is provided in the
+    execution of the choice. Choice functions must accept the channel_input
+    parameter, when used in InputGuards.
+    
+    Usage:
+      >>> @choice
+      ... def add_service(serviceDB, channel_input):
+      ...     (id, request) = channel_input
+      ...     if serviceDB.has_key(id):
+      ...         serviceDB[id].append(request)
+      ...     else:
+      ...         serviceDB[id] = [request]
+    
+      >>> @choice
+      ... def quit(ch_end):
+      ...   poison(ch_end)
+      
+      >>> _,_ = AltSelect(
+                  InputGuard(request, action=add_service(services)),
+                  TimeoutGuard(action=quit(request)))
+    
+      The Choice factory returned by the @choice decorator:
+      func(*args, **kwargs)
+
+</pre>
+=<pre>Alternation (alternative to AltSelect)</pre>=
+<pre>
+Help on class Alternation in module pycsp.parallel.alternation:
+
+class Alternation
+ |  Alternation([{cin0:None, (cout0,val):None}])
+ |  
+ |  Alternation provides the basic interface to Alt. It is recommended
+ |  to use AltSelect / FairSelect as these are much more user-friendly.
+ |  
+ |  Alternation supports the SkipGuard, TimeoutGuard, ChannelEndRead
+ |  or ChannelEndWrite objects.
+ |  
+ |  Alternation guarantees priority if the flag ensurePriority = True
+ |  
+ |  Note that alternation always performs the guard that was chosen,
+ |  i.e. channel input or output is executed within the alternation so
+ |  even the empty choice with an alternation execution or a choice where
+ |  the results are simply ignored, still performs the guarded input or
+ |  output.
+ |  
+ |  Usage:
+ |    >>> L = []
+ |  
+ |    >>> @choice 
+ |    ... def action(channel_input):
+ |    ...     L.append(channel_input)
+ |  
+ |    >>> @process
+ |    ... def P1(cout, n=5):
+ |    ...     for i in range(n):
+ |    ...         cout(i)
+ |  
+ |    >>> @process
+ |    ... def P2(cin1, cin2, n=10):
+ |    ...     alt = Alternation([{cin1:action(), cin2:action()}])
+ |    ...     for i in range(n):
+ |    ...         alt.execute()
+ |              
+ |    >>> C1, C2 = Channel(), Channel()
+ |    >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+ |  
+ |    >>> len(L)
+ |    10
+ |  
+ |    >>> L.sort()
+ |    >>> L
+ |    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+ |  
+ |  
+ |    Performing a non-blocking write
+ |  
+ |    >>> Alternation([
+ |    ...   { ( cout , datablock ): None } ,  # Try to write to a channel
+ |    ...   { SkipGuard (): " print('skipped !') } # Skip the alternation
+ |    ... ]).execute()     
+ |    
+ |    Input with a timeout
+ |  
+ |    >>> g, msg = Alternation([
+ |    ...   { cin : None } ,
+ |    ...   { TimeoutGuard (seconds=1): " print('Ignore this message !') }
+ |    ... ]).select()      
+ |    >>> if g == cin:
+ |    ...     print("Got: %s" % (msg))
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, guards, ensurePriority=False)
+ |  
+ |  execute(self)
+ |      Selects the guard and executes the attached action. Action is a function or python code passed in a string.
+ |      
+ |      >>> L1,L2 = [],[]
+ |      
+ |      >>> @process
+ |      ... def P1(cout, n):
+ |      ...     for i in range(n):
+ |      ...         cout(i)
+ |      
+ |      >>> @process
+ |      ... def P2(cin1, cin2, n):
+ |      ...     alt = Alternation([{
+ |      ...               cin1:"L1.append(channel_input)",
+ |      ...               cin2:"L2.append(channel_input)"
+ |      ...           }])
+ |      ...     for i in range(n):
+ |      ...         alt.execute()
+ |      
+ |      >>> C1, C2 = Channel(), Channel()
+ |      >>> Parallel(P1(C1.writer(),n=10), P1(C2.writer(),n=5), P2(C1.reader(), C2.reader(), n=15))
+ |      
+ |      >>> len(L1), len(L2)
+ |      (10, 5)
+ |  
+ |  select(self)
+ |      Selects the guard.
+ |      
+ |      >>> L1,L2 = [],[]
+ |      
+ |      >>> @process
+ |      ... def P1(cout, n=5):
+ |      ...     for i in range(n):
+ |      ...         cout(i)
+ |      
+ |      >>> @process
+ |      ... def P2(cin1, cin2, n=10):
+ |      ...     alt = Alternation([{
+ |      ...               cin1:None,
+ |      ...               cin2:None
+ |      ...           }])
+ |      ...     for i in range(n):
+ |      ...         (g, msg) = alt.select()
+ |      ...         if g == cin1:
+ |      ...             L1.append(msg)
+ |      ...         if g == cin2:
+ |      ...             L2.append(msg)
+ |      
+ |      >>> C1, C2 = Channel(), Channel()
+ |      >>> Parallel(P1(C1.writer()), P1(C2.writer()), P2(C1.reader(), C2.reader()))
+ |      
+ |      >>> len(L1), len(L2)
+ |      (5, 5)
+
+</pre>
+=<pre>Termination</pre>=
+==<pre>retire</pre>==
+<pre>
+Help on function retire in module pycsp.parallel.channel:
+
+retire(*list_of_channelEnds)
+    retire(C1, [C2, .. , CN])
+    
+    Retire channel ends
+    
+    When a channel end is retired, the channel is signaled that a channel end
+    has now left the channel. When the set of all reading or writing channel ends is set
+    to none, then the channel enters a retired state whereafter
+    all actions on the channel will invoke a ChannelRetireException which
+    is propagated through the PyCSP network to nicely shutdown all processes unless
+    caugth by the user with a try/except clause.
+    
+    Retiring is an improved version of poisoning, which avoids the race condition issue
+    when terminating multiple concurrent processes.
+    
+    Usage:
+    >>> retire(cin0)
+    >>> retire(cin0, cin1, cout0)
+    >>> retire(cinList)
+
+</pre>
+==<pre>poison</pre>==
+<pre>
+Help on function poison in module pycsp.parallel.channel:
+
+poison(*list_of_channelEnds)
+    poison(C1, [C2, .. , CN])
+    
+    Poison channel ends
+    
+    When a channel end is poisoned, the channel is set into a poisoned state where
+    after all actions on the channel will invoke a ChannelPoisonException which
+    is propagated through the PyCSP network to shutdown all processes unless
+    caugth by the user with a try/except clause.
+    
+    Notice that poisoning may cause race conditions, when terminating multiple concurrent processes.
+    See retire for an improved shutdown method.
+    
+    Usage:
+    >>> poison(cin0)
+    >>> poison(cin0, cin1, cout0)
+    >>> poison(cinList)
+
+</pre>
+==<pre>ChannelRetireException</pre>==
+<pre>
+ ChannelRetireException()
+    
+    Exception thrown by a read or write operation on a channel end.
+
+    In case a ChannelRetireException is raised in a CSP process and not caught, the CSP process
+    will look for channel ends in the argument list and invoke a retire signal to every found channel end.
+    
+    The following network can be shutdown like this:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     while True:
+      ...         cout(cin()+cin())
+
+      >>> L1, L2, L3 = Channel(), Channel(), Channel()
+      >>> Parallel(
+      ...   P1(L1.reader(), L2.writer()),
+      ...   P1(L2.reader(), L3.writer())       
+      ... )
+      >>> cout = L1.writer()
+
+    The first P1 process will automatically propagate the signal to the other P1 process
+      >>> cout.retire()
+
+    Another configuration for process P1 using a custom propagation:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     try:
+      ...         while True:
+      ...             cout(cin()+cin())
+      ...     except ChannelRetireException:
+      ...         print("Terminating P1")
+      ...         cout.retire()
+    
+</pre>
+==<pre>ChannelPoisonException</pre>==
+<pre>
+ ChannelPoisonException()
+
+    Exception thrown by a read or write operation on a channel end.
+    
+    In case a ChannelPoisonException is raised in a CSP process and not caught, the CSP process
+    will look for channel ends in the argument list and invoke a poison signal to every found channel end.
+    
+    The following network can be shutdown like this:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     while True:
+      ...         cout(cin()+cin())
+
+      >>> L1, L2, L3 = Channel(), Channel(), Channel()
+      >>> Parallel(
+      ...   P1(L1.reader(), L2.writer()),
+      ...   P1(L2.reader(), L3.writer())       
+      ... )
+      >>> cout = L1.writer()
+
+    The first P1 process will automatically propagate the signal to the other P1 process
+      >>> cout.poison()
+
+    Another configuration for process P1 using a custom propagation:
+      >>> @process
+      ... def P1(cin, cout):
+      ...     try:
+      ...         while True:
+      ...             cout(cin()+cin())
+      ...     except ChannelPoisonException:
+      ...         print("Terminating P1")
+      ...         cout.poison()
+    
+</pre>
+=<pre>Other</pre>=
+==<pre>InfoException</pre>==
+<pre>
+ InfoException(msg)
+
+    This exception is raised to inform that there is an error in the usage of
+    PyCSP and also provide a likely solution to fix the error.
+    
+</pre>
+==<pre>FatalException</pre>==
+<pre>
+ FatalException(msg)
+    
+    This exception is raised if PyCSP is in an unexpected unstable state, which
+    is guaranteed to be unrecoverable.
+    
+</pre>
+==<pre>current_process_id</pre>==
+<pre>
+Help on function current_process_id in module pycsp.parallel.process:
+
+current_process_id()
+    Returns the id of the executing CSP process.
+
+</pre>
+==<pre>shutdown</pre>==
+<pre>
+Help on function shutdown in module pycsp.parallel.process:
+
+shutdown()
+    Closing the PYCSP instance
+    
+    Every PyCSP application will create a server thread, to serve incoming communications
+    on channels. For this reason, it is required to always end the PyCSP application with
+    a call to shutdown()
+    
+    Usage:
+      >>> shutdown()
+    
+    Performs a stable shutdown of hosted channels, waiting for local and remote
+    processes to disconnect from the hosted channels.
+
+</pre>
