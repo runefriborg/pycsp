@@ -205,6 +205,7 @@ def autotest():
             Any2One_FairAlting_Test(rsleep, wsleep)
             Any2One_PriAlting_Test(rsleep, wsleep)
             Any2Any_Test(rsleep, wsleep)
+            shutdown()
             
 if __name__ == '__main__':
     autotest()

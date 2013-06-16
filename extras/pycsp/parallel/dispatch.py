@@ -324,7 +324,8 @@ class SocketThread(threading.Thread):
 
                             elif (header.cmd & PROCESS_CMD):
                                 if header.id in self.processes:
-                                    self.processes[header.id].handle(m)                                
+                                    p = self.processes[header.id]
+                                    p.handle(m)                                
                                 elif (header.cmd & REQ_REPLY):
                                     raise FatalException("A REQ_REPLY message should always be valid!")
                                 elif (header.cmd & IGN_UNKNOWN):
@@ -333,22 +334,26 @@ class SocketThread(threading.Thread):
                                     if not header.id in self.data.processes_unknown:
                                         self.data.processes_unknown[header.id] = []
                                     self.data.processes_unknown[header.id].append(m)
+
                             else:
                                 if header.id in self.channels:
+                                    c = self.channels[header.id]
                                     if (header.cmd & IS_REPLY):
-                                        self.channels[header.id].put_reply(m)
+                                        c.put_reply(m)
                                     else:
-                                        self.channels[header.id].put_normal(m)
+                                        c.put_normal(m)
                                 elif (header.cmd & IGN_UNKNOWN):
                                     pass
                                 else:                                
                                     if not header.id in self.data.channels_unknown:
                                         self.data.channels_unknown[header.id] = QueueBuffer()
 
+                                    c = self.data.channels_unknown[header.id]
+
                                     if (header.cmd & IS_REPLY):
-                                        self.data.channels_unknown[header.id].put_reply(m)
+                                        c.put_reply(m)
                                     else:
-                                        self.data.channels_unknown[header.id].put_normal(m)
+                                        c.put_normal(m)
                             self.cond.release()
 
 class SocketThreadData:
