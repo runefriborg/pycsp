@@ -27,7 +27,6 @@ except ImportError, e:
     pass
 
 from pycsp.parallel.channel import Channel
-from pycsp.parallel.noderunner import *
 
 
 class NodeRunnerThread(threading.Thread):
