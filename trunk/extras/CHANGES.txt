@@ -2,6 +2,10 @@
 * Parallel and Sequence now returns a list of return values from all the processes.
   >>> Parallel(P1(), P2())
   ['Hello', 'World']
+* Added remote process implementations
+  @sshprocess(ssh_host, ssh_port=22, ssh_user, ssh_password, ssh_python='python')
+  @clusterprocess(cluster_nodefile="$PBS_NODEFILE", cluster_pin, cluster_hint='blocked', cluster_ssh_port=22, cluster_python='python'):
+   
 
 0.7.1 - 0.9.0
 ----------
