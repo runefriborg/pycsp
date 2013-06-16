@@ -6,7 +6,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from exceptions import *
+from pycsp.greenlets.exceptions import *
 
 def shutdown():
     """
@@ -21,13 +21,6 @@ def multiprocess(func=None, pycsp_host='', pycsp_port=None):
 class MultiProcess():
     def __init__(self, fn, *args, **kwargs):
         raise InfoException("MultiProcess not available for greenlets. Use pycsp.parallel")
-
-def shellprocess(func=None, pycsp_host='', pycsp_port=0, shell_python='python'):
-    raise InfoException("shellprocess not available for greenlets. Use pycsp.parallel")
-
-class ShellProcess():
-    def __init__(self, fn, *args, **kwargs):
-        raise InfoException("ShellProcess not available for greenlets. Use pycsp.parallel")
 
 def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python'):
     raise InfoException("sshprocess not available for greenlets. Use pycsp.parallel")

@@ -10,10 +10,10 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from .channel import Channel, ChannelPoisonException, ChannelRetireException
-from .channelend import poison, retire
-from .process import process, Spawn
-from .alternation import Alternation
+from pycsp.greenlets.channel import Channel, ChannelPoisonException, ChannelRetireException
+from pycsp.greenlets.channelend import poison, retire
+from pycsp.greenlets.process import process, Spawn
+from pycsp.greenlets.alternation import Alternation
 
 import pycsp.current
 if pycsp.current.trace:

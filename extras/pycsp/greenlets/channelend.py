@@ -6,7 +6,7 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from exceptions import *
+from pycsp.greenlets.exceptions import *
 from pycsp.common.const import *
 
 def retire(*list_of_channelEnds):

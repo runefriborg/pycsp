@@ -16,17 +16,17 @@ except ImportError, e:
         raise ImportError(e)
 
 # Imports
-from scheduling import Io, io
-from guard import Skip, Timeout, SkipGuard, TimeoutGuard
-from alternation import choice, Alternation
-from altselect import FairSelect, AltSelect, PriSelect, InputGuard, OutputGuard
-from channel import Channel
-from channelend import retire, poison
-from process import Process, process, Sequence, Parallel, Spawn, current_process_id
-from exceptions import ChannelPoisonException, ChannelRetireException, FatalException, InfoException
-from compat import *
+from pycsp.greenlets.scheduling import Io, io
+from pycsp.greenlets.guard import Skip, Timeout, SkipGuard, TimeoutGuard
+from pycsp.greenlets.alternation import choice, Alternation
+from pycsp.greenlets.altselect import FairSelect, AltSelect, PriSelect, InputGuard, OutputGuard
+from pycsp.greenlets.channel import Channel
+from pycsp.greenlets.channelend import retire, poison
+from pycsp.greenlets.process import Process, process, Sequence, Parallel, Spawn, current_process_id
+from pycsp.greenlets.exceptions import ChannelPoisonException, ChannelRetireException, FatalException, InfoException
+from pycsp.greenlets.compat import *
 
-__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'PriSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'ClusterProcess', 'clusterprocess', 'ShellProcess', 'shellprocess', 'SSHProcess', 'sshprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
+__all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'PriSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'ClusterProcess', 'clusterprocess', 'SSHProcess', 'sshprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
 
 version = (0,9,1, 'greenlets')
 
