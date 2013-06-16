@@ -11,18 +11,16 @@ See LICENSE.txt for licensing details (MIT License).
 import os
 import sys
 import types
-import uuid
 import threading
 
 has_paramiko= False
 try:
-    import paramiko, select
+    import paramiko
     has_paramiko= True
 except ImportError, e:
     # Ignore for now
     pass
 
-from pycsp.parallel.channel import Channel
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.const import *
 from pycsp.parallel.noderunner import *

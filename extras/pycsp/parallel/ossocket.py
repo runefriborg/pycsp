@@ -13,7 +13,6 @@ import errno
 import os, platform
 import socket
 import sys
-import threading
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.configuration import *
 from pycsp.parallel.const import *
@@ -65,7 +64,6 @@ def _connect(addr, reconnect=True):
     while (not connected):
         try:
             
-            #print(str(threading.currentThread())+"Creating connection to "+str(addr))
 
             # Create IPv4 TCP socket (TODO: add support for IPv6)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -211,7 +209,6 @@ class ConnHandler(object):
         self.cacheSockets = {}
 
     def updateCache(self, addr, sock):
-        #print(str(threading.currentThread())+"update cache with "+str(addr))
         if ENABLE_CACHE:
             if not addr in self.cacheSockets:
                 self.cacheSockets[addr] = sock

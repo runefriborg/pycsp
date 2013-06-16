@@ -9,7 +9,6 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 import os
-import sys
 import select, threading
 import errno
 
@@ -23,8 +22,6 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-
-import struct
 
 
 from pycsp.parallel import ossocket

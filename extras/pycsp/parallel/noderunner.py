@@ -8,10 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-import os
 import sys
-import types
-import uuid
 import threading
 
 
