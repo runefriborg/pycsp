@@ -7,13 +7,9 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-try: from greenlet import greenlet
-except ImportError, e:
-    from py.magic import greenlet
-    
-from scheduling import Scheduler
-from channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
-from exceptions import *
+from pycsp.greenlets.scheduling import Scheduler
+from pycsp.greenlets.channelend import ChannelEndRead, ChannelEndWrite, ChannelRetireException
+from pycsp.greenlets.exceptions import *
 
 from pycsp.common.const import *
 

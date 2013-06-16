@@ -9,7 +9,7 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import inspect
 import types
-from channel import *
+from pycsp.greenlets.channel import *
 from pycsp.common.const import *
 
 # Decorators

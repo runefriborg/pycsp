@@ -10,9 +10,8 @@ See LICENSE.txt for licensing details (MIT License).
 from greenlet import greenlet
 import time, random
 import types
-from scheduling import Scheduler
-from channel import ChannelPoisonException, ChannelRetireException, Channel
-from channelend import ChannelEndRead, ChannelEndWrite
+from pycsp.greenlets.scheduling import Scheduler
+from pycsp.greenlets.channel import ChannelPoisonException, ChannelRetireException
 from pycsp.common.const import *
 
 # Decorators

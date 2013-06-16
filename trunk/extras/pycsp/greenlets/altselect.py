@@ -8,8 +8,8 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
-from alternation import Alternation
-from process import current_process_id
+from pycsp.greenlets.alternation import Alternation
+from pycsp.greenlets.process import current_process_id
 
 from pycsp.common.const import *
 import pycsp.current
