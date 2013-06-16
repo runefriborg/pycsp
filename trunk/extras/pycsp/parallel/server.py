@@ -17,96 +17,72 @@ import types
 import os
 
 # Extract paramenters
-cwd, ip, port, name, scriptPath, funcName = sys.argv[1:]
+cwd, ip, port, input_name  = sys.argv[1:]
 
 # Change to working dir
 os.chdir(cwd)
 
 # Load pycsp modules
-from pycsp.parallel import serverresult
-real_stdout = serverresult.save_stdout()
 from pycsp.parallel.clusterprocess import NodePlacement
-from pycsp.parallel.process import init
+from pycsp.parallel.multiprocess import MultiProcess
+from pycsp.parallel.process import init, Spawn, Sequence, Process
 from pycsp.parallel import *
 
 # Init main process
 init()
 
+
 # Connect to channel
-chan = Channel(name, connect=(ip, int(port)))
+input_chan = Channel(input_name, connect=(ip, int(port)))
 
-# Retrive args, kwargs
-val = chan.reader()()
-if len(val) == 2:
-    args, kwargs = val
-else:
-    # For clusterprocesses
-    args, kwargs, available_nodes = val
-    if available_nodes:
-        nodefile, group_state = available_nodes
-        NodePlacement().set_nodegroup(nodefile, group_state)
+# Get channel ends
+input_chan_end = input_chan.reader()
 
 
-# Load script
-sys.path.insert(0, os.path.dirname(scriptPath))
-moduleName = os.path.basename(scriptPath)
+# PyCSP MultiProcess (Spawn)
+def RunFunc(output_chan_name, fn, args, kwargs):
+    output_chan = Channel(output_chan_name, connect=(ip, int(port)))
+    send_return_value = output_chan.writer()
 
-if moduleName[-3:] == '.py':
-    moduleName = moduleName[:-3]
+    val = Parallel(Process(fn, *args, **kwargs))
 
-m = __import__(moduleName)
-
-# Run function
-fn = getattr(m, funcName)
-
-return_value = None
+    send_return_value(val[0])
+                   
 try:
-    return_value = fn().fn(*args, **kwargs)
-except ChannelPoisonException as e:
-    # look for channels and channel ends
-    def __check_poison(args):
-        for arg in args:
-            try:
-                if types.ListType == type(arg) or types.TupleType == type(arg):
-                    self.__check_poison(arg)
-                elif types.DictType == type(arg):
-                    self.__check_poison(arg.keys())
-                    self.__check_poison(arg.values())
-                elif type(arg.poison) == types.UnboundMethodType:
-                    arg.poison()
-            except AttributeError:
-                pass
+    while True:
+        
+        # Retrive args, kwargs
+        val = input_chan_end()
+        if len(val) == 7:
+            h, p, output_chan_name, scriptPath, funcName, args, kwargs = val
+        else:
+            # For clusterprocesses
+            h, p, output_chan_name, scriptPath, funcName, args, kwargs, available_nodes = val
+            if available_nodes:
+                nodefile, group_state = available_nodes
+                NodePlacement().set_nodegroup(nodefile, group_state)
+        
+        # Load script
+        sys.path.insert(0, os.path.dirname(scriptPath))
+        moduleName = os.path.basename(scriptPath)
 
+        if moduleName[-3:] == '.py':
+            moduleName = moduleName[:-3]
 
-    __check_poison(args)
-    __check_poison(kwargs.values())
+        m = __import__(moduleName)
 
-except ChannelRetireException as e:
-    # look for channel ends
-    def __check_retire(args):
-        for arg in args:
-            try:
-                if types.ListType == type(arg) or types.TupleType == type(arg):
-                    self.__check_retire(arg)
-                elif types.DictType == type(arg):
-                    self.__check_retire(arg.keys())
-                    self.__check_retire(arg.values())
-                elif type(arg.retire) == types.UnboundMethodType:
-                    # Ignore if try to retire an already retired channel end.
-                    try:
-                        arg.retire()
-                    except ChannelRetireException:
-                        pass
-            except AttributeError:
-                pass
+        # Get function by
+        #  1. retrieve process factory function. 
+        #  2. generate process from process factory
+        #  3. Fetch function from generated process
+        fn = getattr(m, funcName)().fn
 
-    __check_retire(args)
-    __check_retire(kwargs.values())
-finally:
+        # Spawn a runner
+        Spawn(MultiProcess(RunFunc, output_chan_name, fn, args, kwargs), pycsp_host=h, pycsp_port=p)
 
-    # Output result to parallel
-    serverresult.output_and_restore_stdout(return_value, real_stdout)
+except ChannelPoisonException:
+    pass
 
-    # The rest of process clean up is done in shutdown
-    shutdown()
+# The rest of process clean up is done in shutdown
+shutdown()
 

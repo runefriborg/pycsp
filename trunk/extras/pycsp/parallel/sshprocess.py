@@ -25,7 +25,7 @@ except ImportError, e:
 from pycsp.parallel.channel import Channel
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.const import *
-from pycsp.parallel import serverresult
+from pycsp.parallel.noderunner import *
 
 # Decorators
 def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python'):
@@ -83,38 +83,6 @@ def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh
 
 
 # Classes
-class _sshthread(threading.Thread):
-    def __init__(self, host, port, user, password, command):
-        threading.Thread.__init__(self)
-        
-        self.host     = host
-        self.port     = port
-        self.user     = user
-        self.password = password
-        self.command  = command
-        self.result   = None
-
-    def run(self):
-        try:
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.WarningPolicy())
-    
-            client.connect(self.host, port=self.port, username=self.user, password=self.password)
- 
-            stdin, stdout, stderr = client.exec_command(self.command)
-            sys.stderr.write(stderr.read())
-            
-            # Get result value from function
-            self.result = serverresult.retrieve_value_from_stream(stdout)
-
-            sys.stdout.write(stdout.read())
- 
- 
-        finally:
-            client.close()
-
-
 class SSHProcess(object):
     """ SSHProcess(func, *args, **kwargs)
 
@@ -210,36 +178,29 @@ class SSHProcess(object):
         else:
             ssh_python = "python"
 
-        # Must be the script containing fn.
-        self.scriptPath = self.fn.func_code.co_filename
 
-        # Setup channel to communicate data to process
-        self.channel = Channel(buffer=1)
-        self.send = self.channel.writer()
+        
+        self.result_chan = NodeRunner().run(ssh_host      = ssh_host,
+                         ssh_port      = ssh_port,
+                         ssh_python    = ssh_python,
+                         cwd           = os.getcwd(),
+                         pycsp_host    = pycsp_host,
+                         pycsp_port    = pycsp_port,
+                         script_path   = self.fn.func_code.co_filename,
+                         func_name     = self.fn.func_name,
+                         func_args     = self.args,
+                         func_kwargs   = self.kwargs,
+                         cluster_state = None )                         
+                         
 
-        # Send arguments to new process
-        self.send((self.args, self.kwargs))
-
-        command= " ".join(["/usr/bin/env", 
-                           "PYCSP_HOST="+str(pycsp_host),
-                           "PYCSP_PORT="+str(pycsp_port),
-                           ssh_python, "-m", "pycsp.parallel.server",
-                           os.getcwd(), self.channel.address[0], str(self.channel.address[1]), self.channel.name, self.scriptPath, self.fn.func_name])
-
-	# Must be able to put this session in the background.
-        self.p = _sshthread(ssh_host, ssh_port, ssh_user, ssh_password, command)
-	self.p.start()       
-
+       
     def join_report(self):
         # This method enables propagation of errors to parent processes and threads.
         # It also transfers the return value from function
 
-        # Wait for process to finish
-        if self.p:
-            self.p.join()
+        result = NodeRunner().get_result(self.result_chan)
+        return result
 
-        # Return read value
-        return self.p.result
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):

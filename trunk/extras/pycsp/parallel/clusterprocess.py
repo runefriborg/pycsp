@@ -13,11 +13,10 @@ import sys
 import types
 import uuid
 import threading
-import time, random
 
 has_paramiko= False
 try:
-    import paramiko
+    import paramiko, select
     has_paramiko= True
 except ImportError, e:
     # Ignore for now
@@ -26,8 +25,7 @@ except ImportError, e:
 from pycsp.parallel.channel import Channel
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.const import *
-
-from pycsp.parallel import serverresult
+from pycsp.parallel.noderunner import *
 
 
 # Decorators
@@ -91,44 +89,6 @@ def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None
 
 
 # Classes
-class _sshthread(threading.Thread):
-    def __init__(self, host, port, user, password, command):
-        threading.Thread.__init__(self)
-        
-        self.host     = host
-        self.port     = port
-        self.user     = user
-        self.password = password
-        self.command  = command
-        self.result   = None
-
-    def run(self):
-        ok= False
-
-        try:
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.WarningPolicy())
-    
-            client.connect(self.host, port=self.port, username=self.user, password=self.password)
-            ok = True
-
-            stdin, stdout, stderr = client.exec_command(self.command)
-            
-            sys.stderr.write(stderr.read())
-
-            # Get result value from function
-            self.result = serverresult.retrieve_value_from_stream(stdout)
-
-            sys.stdout.write(stdout.read())            
-
-        finally:
-            client.close()
-
-        if not ok:
-            print "NOT OK!"
-
-
 class NodeGroup(object):
     def __init__(self, cond, nodefile, override=None):
         self.cond = cond
@@ -290,7 +250,8 @@ class ClusterProcess(object):
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
-        self.p = None
+
+        self.result_chan = None
 
         # This is not the real process, thus we use the id of the calling process.
         # The process started in method start, will have another new id.
@@ -298,7 +259,7 @@ class ClusterProcess(object):
         self.id = t.id
 
     def update(self, **kwargs):
-        if self.p:
+        if self.result_chan:
             raise FatalException("Can not update process settings after it has been started")
  
         diff= set(kwargs.keys()).difference(["cluster_nodefile", "cluster_pin", "cluster_hint", "cluster_ssh_port", "cluster_python"])
@@ -359,44 +320,27 @@ class ClusterProcess(object):
         else:
             ssh_python = "python"
 
-        # Must be the script containing fn.
-        self.scriptPath = self.fn.func_code.co_filename
-
-        # Setup channel to communicate data to process
-        self.channel = Channel(buffer=1)
-        self.send = self.channel.writer()
-
-        # Send arguments to new process
-        self.send((self.args, self.kwargs, (cluster_nodefile, group.get_state())))
-
-        command= " ".join(["/usr/bin/env", 
-                           "PYCSP_HOST="+str(pycsp_host),
-                           "PYCSP_PORT="+str(pycsp_port),
-                           ssh_python, "-m", "pycsp.parallel.server",
-                           os.getcwd(), self.channel.address[0], str(self.channel.address[1]), self.channel.name, self.scriptPath, self.fn.func_name])
-
-
-        # Hack to avoid the SSH client to fail from many simultanious connections.
-        # Suggested fix: 
-        time.sleep(0.05)
-
-
-
-	# Must be able to put this session in the background.
-        self.p = _sshthread(nodehost, ssh_port, None, None, command)
-	self.p.start()
+        
+        self.result_chan = NodeRunner().run(ssh_host      = nodehost,
+                         ssh_port      = ssh_port,
+                         ssh_python    = ssh_python,
+                         cwd           = os.getcwd(),
+                         pycsp_host    = pycsp_host,
+                         pycsp_port    = pycsp_port,
+                         script_path   = self.fn.func_code.co_filename,
+                         func_name     = self.fn.func_name,
+                         func_args     = self.args,
+                         func_kwargs   = self.kwargs,
+                         cluster_state = (cluster_nodefile, group.get_state()) )                         
+                         
 
        
     def join_report(self):
         # This method enables propagation of errors to parent processes and threads.
         # It also transfers the return value from function
 
-        # Wait for process to finish
-        if self.p:
-            self.p.join()
-
-        # Return read value
-        return self.p.result
+        result = NodeRunner().get_result(self.result_chan)
+        return result
 
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
