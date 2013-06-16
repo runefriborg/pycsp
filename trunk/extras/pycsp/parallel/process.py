@@ -12,8 +12,7 @@ import uuid
 import threading
 
 from pycsp.parallel.dispatch import SocketDispatcher
-from pycsp.parallel.protocol import RemoteLock, ChannelMessenger
-from pycsp.parallel.channel import Channel, ChannelEndRead, ChannelEndWrite
+from pycsp.parallel.protocol import RemoteLock
 from pycsp.parallel.const import *
 from pycsp.parallel.exceptions import *
 

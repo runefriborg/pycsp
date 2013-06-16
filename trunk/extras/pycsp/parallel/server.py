@@ -13,7 +13,6 @@ See LICENSE.txt for licensing details (MIT License).
 
 
 import sys
-import types
 import os
 
 # Extract paramenters
@@ -24,8 +23,7 @@ os.chdir(cwd)
 
 # Load pycsp modules
 from pycsp.parallel.clusterprocess import NodePlacement
-from pycsp.parallel.multiprocess import MultiProcess
-from pycsp.parallel.process import init, Spawn, Sequence, Process
+from pycsp.parallel.process import init
 from pycsp.parallel import *
 
 # Init main process

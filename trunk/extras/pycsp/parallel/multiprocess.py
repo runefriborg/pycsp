@@ -11,12 +11,10 @@ import types
 import uuid
 import threading
 
-from multiprocessing import Process, Pipe
-from multiprocessing.sharedctypes import RawValue
+import multiprocessing
 
 from pycsp.parallel.dispatch import SocketDispatcher
 from pycsp.parallel.protocol import RemoteLock
-from pycsp.parallel.channel import Channel, ChannelEndRead, ChannelEndWrite
 from pycsp.parallel.const import *
 from pycsp.parallel.configuration import *
 from pycsp.parallel.exceptions import *
@@ -99,7 +97,7 @@ class MultiProcess(multiprocessing.Process):
         self.kwargs = kwargs
         
         # Create return pipe for return value
-        self.return_pipe = Pipe()
+        self.return_pipe = multiprocessing.Pipe()
 
         # Create 64 byte unique id based on network address, sequence number and time sample.
         self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
@@ -131,7 +129,7 @@ class MultiProcess(multiprocessing.Process):
         self.maintained= True
 
         # report execution error
-        self._error = RawValue('i', 0)
+        self._error = multiprocessing.RawValue('i', 0)
 
     def update(self, **kwargs):
         if self.cond:

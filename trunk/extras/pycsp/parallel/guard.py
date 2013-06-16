@@ -10,7 +10,6 @@ See LICENSE.txt for licensing details (MIT License).
 import threading
 import uuid
 
-from pycsp.parallel.process import Process
 from pycsp.parallel.const import *
 from pycsp.parallel.protocol import AddrID, ChannelReq, LockMessenger
 from pycsp.parallel.dispatch import SocketDispatcher
