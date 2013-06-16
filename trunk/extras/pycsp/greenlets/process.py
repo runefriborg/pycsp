@@ -7,7 +7,10 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Imports
-from greenlet import greenlet
+try: from greenlet import greenlet
+except ImportError, e:
+    from py.magic import greenlet
+
 import time, random
 import types
 from pycsp.greenlets.scheduling import Scheduler
