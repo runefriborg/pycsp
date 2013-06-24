@@ -175,6 +175,34 @@ class Channel(object):
         self._register()
 
 
+    def __getstate__(self):
+        """
+        Enables channel mobility
+        """
+
+        # To be able to support the pickle module, we erase the reference
+        # to the channel home, before pickling.
+        # Also, the total number of namespace_references should be kept constant after
+        # a __getstate__ and a _restore
+
+        # Clear everything
+        odict = {}
+        
+        # Only save address and name
+        odict['_restore_info'] = (self.address, self.name)
+
+        return odict
+
+    def __setstate__(self, dict):
+        """
+        Enables channel end mobility
+        """        
+
+        self.__dict__.update(dict)
+
+        # Reconnect to channel
+        Channel.__init__(self, name=self._restore_info[1], connect=self._restore_info[0])
+
 
     def _register(self):
         # Register this channel reference at the channel home thread
