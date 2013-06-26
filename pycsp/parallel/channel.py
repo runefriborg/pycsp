@@ -119,8 +119,9 @@ class Channel(object):
     # Constructor
     def __init__(self, name=None, buffer=0, connect=None):
 
-        self._ispoisoned=False
-        self._isretired=False
+        self._ispoisoned = False
+        self._isretired  = False
+        self._ismoved    = False
         
         # Check args
         if name == None and connect != None:
@@ -195,7 +196,7 @@ class Channel(object):
 
     def __setstate__(self, dict):
         """
-        Enables channel end mobility
+        Enables channel mobility
         """        
 
         self.__dict__.update(dict)
@@ -234,6 +235,8 @@ class Channel(object):
             raise ChannelPoisonException()
         if self._isretired:
             raise ChannelRetireException()
+        if self._ismoved:
+            raise ChannelMovedException()
     
 
     def _read(self):
@@ -261,6 +264,32 @@ class Channel(object):
             self._ispoisoned = True
         elif p.state == RETIRE:
             self._isretired = True
+        elif p.state == CHAN_MOVED:
+            new_addr= pickle.loads(p.chan_moved_to)
+
+            p,_ = getThreadAndName()
+            # Initiate clean up and wait for channel to finish outstanding operations.
+            if self in p.activeChanList:
+                self._CM.leave(self, p)
+            
+                # Wait for channel        
+                p.cond.acquire()
+                if not self.name in p.closedChanList:
+                    p.cond.wait()
+                p.cond.release()
+
+            p.closedChanList.remove(self.name)
+            p.activeChanList.remove(self)
+
+            # Tell channel to disconnect
+            self.disconnect()
+
+            Channel.__init__(self, name=self.name, connect=new_addr)
+            self._check_registration()
+            self._CM.join(self, direction=READ)
+            result = self._read()
+            if p.state == SUCCESS:
+                return result
 
         self._check_termination()
 
@@ -287,6 +316,32 @@ class Channel(object):
             self._ispoisoned = True
         elif p.state == RETIRE:
             self._isretired = True
+        elif p.state == CHAN_MOVED:
+            new_addr= pickle.loads(p.chan_moved_to)
+
+            p,_ = getThreadAndName()
+            # Initiate clean up and wait for channel to finish outstanding operations.
+            if self in p.activeChanList:
+                self._CM.leave(self, p)
+            
+                # Wait for channel        
+                p.cond.acquire()
+                if not self.name in p.closedChanList:
+                    p.cond.wait()
+                p.cond.release()
+
+            p.closedChanList.remove(self.name)
+            p.activeChanList.remove(self)
+
+            # Tell channel to disconnect
+            self.disconnect()
+
+            Channel.__init__(self, name=self.name, connect=new_addr)
+            self._check_registration()
+            self._CM.join(self, direction=WRITE)
+            self._write(msg)
+            if p.state == SUCCESS:
+                return
 
         self._check_termination()
 
@@ -324,6 +379,12 @@ class Channel(object):
         self._check_registration()
         self._CM.join(self, direction=WRITE)
         return ChannelEndWrite(self)
+
+    def _chan_moved(self):
+        if not self._ismoved:
+            self._check_registration()
+            self._ismoved = True
+            self._CM.chan_moved(self)
 
     def _retire(self, direction):
         if not self._isretired:
@@ -424,6 +485,30 @@ class ChannelEnd:
         
     def _poison(self, *ignore):
         raise ChannelPoisonException()
+
+    def become_home(self):
+        if self.channel.address == self.channel._CM.get_address():
+            # Channel is already home
+            print("Channel home is at this location")
+        else:
+            print("Channel moving")
+            # Create new
+            new_chan = Channel(name=self.channel.name)
+
+            # Inform old channel to go into CHAN_MOVED state.
+            self.channel._chan_moved()
+
+            # Disconnect from old
+            self.disconnect()
+
+            # Update to new
+            self.channel = new_chan
+
+            # Join new channel
+            self.channel._check_registration()
+            self.channel._CM.join(self.channel, direction=self._op)
+
+
 
     def poison(self):
         """ Poison channel end

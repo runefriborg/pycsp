@@ -175,6 +175,10 @@ class InfoException(Exception):
         return repr(self.msg)
     
 # Private exceptions
+class ChannelMovedException(Exception):
+    def __init__(self):
+        pass
+
 class AddrUnavailableException(Exception):
     def __init__(self, addr):
         self.addr = addr
