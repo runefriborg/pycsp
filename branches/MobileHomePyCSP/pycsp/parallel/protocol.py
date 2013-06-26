@@ -11,6 +11,11 @@ See LICENSE.txt for licensing details (MIT License).
 import sys
 import threading
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from pycsp.parallel.exceptions import *
 from pycsp.parallel.header import *
 from pycsp.parallel.dispatch import *
@@ -33,6 +38,9 @@ class ChannelMessenger(object):
         else:
             self.dispatch = SocketDispatcher().getThread()
             
+    def get_address(self):
+        self.restore()
+        return self.dispatch.server_addr
 
     def register(self, channel):
         """
@@ -72,6 +80,20 @@ class ChannelMessenger(object):
             # Unable to join channel
             raise ChannelLostException(channel.address, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
+    def chan_moved(self, channel):
+        self.restore()
+
+        try:
+            self.dispatch.send(channel.address,
+                               Header(CHANTHREAD_MOVE, channel.name))
+        except SocketException:
+            # Unable to move channel
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise ChannelLostException(channel.address, "PyCSP (move channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
+            else:
+                sys.stderr.write("PyCSP (move channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
+        
+            
     def retire(self, channel, direction):
         self.restore()
 
@@ -277,6 +299,16 @@ class LockMessenger(object):
             except SocketException:
                 raise AddrUnavailableException(dest)
 
+    def remote_chan_moved(self, source_header, dest, moved_to):
+        if dest.active:
+            try:
+                h = Header(LOCKTHREAD_CHAN_MOVED, dest.id)
+                h._source_id = self.channel_id
+                self.dispatch.reply(source_header, h, payload=pickle.dumps(moved_to, protocol = PICKLE_PROTOCOL))
+            except SocketException:
+                raise AddrUnavailableException(dest)
+
+
     def remote_release(self, source_header, dest):
         """
         Ignore socket exceptions on remote_release
@@ -394,6 +426,21 @@ class RemoteLock:
             else:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
+        elif header.cmd == LOCKTHREAD_CHAN_MOVED:
+            print("%s CHAN_MOVED\n" % (self.process.id))
+            if self.lock_acquired == header._source_id:
+                self.cond.acquire()
+                if self.process.state == READY:
+
+                    # Unpickling of payload postponed to the @process
+                    self.process.chan_moved_to = message.payload
+
+                    self.process.state = CHAN_MOVED
+                    self.cond.notify()
+                self.cond.release()
+            else:
+                raise Exception("Fatal error!, Remote lock has not been acquired!")
+
         elif header.cmd == LOCKTHREAD_RELEASE_LOCK:
             #print("%s RELEASE\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
@@ -486,6 +533,7 @@ class ChannelHome(object):
     def __init__(self, name, buffer):
         self.readqueue=[]
         self.writequeue=[]
+        self.moved_to=None
         self.ispoisoned=False
         self.isretired=False
         self.readers=0
@@ -527,6 +575,8 @@ class ChannelHome(object):
             raise ChannelPoisonException()
         if self.isretired:
             raise ChannelRetireException()
+        if self.moved_to:
+            raise ChannelMovedException()
 
     def post_read(self, req):
         self.check_termination()
@@ -659,6 +709,15 @@ class ChannelHome(object):
             self.readqueue = []
             self.writequeue = []
 
+    def chan_moved(self, moved_to):
+        self.moved_to = moved_to
+
+        for p in self.readqueue:
+            p.chan_moved(moved_to)
+
+        for p in self.writequeue:
+            p.chan_moved(moved_to)
+
     def retire_reader(self):
         self.readers-=1
 
@@ -767,6 +826,22 @@ class ChannelReq(object):
                 raise FatalException("PyCSP (retire notification) unable to reach process (%s)" % str(self.process))
             else:
                 sys.stderr.write("PyCSP (retire notification) unable to reach process (%s)\n" % str(self.process))
+
+    def chan_moved(self, moved_to):
+        try:
+            conn, state, seq = self.LM.remote_acquire_and_get_state(self.process)
+            #print "remote retire"
+            if seq == self.seq_check:
+                self.LM.remote_chan_moved(conn, self.process, moved_to)
+            #Ignore if sequence is incorrect
+            self.LM.remote_release(conn, self.process)
+        except AddrUnavailableException:
+            # Unable to reach process to notify channel moved
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise FatalException("PyCSP (channel moved notification) unable to reach process (%s)" % str(self.process))
+            else:
+                sys.stderr.write("PyCSP (channel moved notification) unable to reach process (%s)\n" % str(self.process))
+
             
 
     def offer(self, reader):
@@ -863,6 +938,16 @@ class ChannelHomeThread(threading.Thread):
 
             #print("GOT %s for %s" % (cmd2str(header.cmd), self.id))
 
+            if header.cmd == CHANTHREAD_MOVE:
+                # Move channel.
+                # 1. Register channel at new location? 
+                #   That has already been done by the process requesting the move
+                # 2. Set the channel as moved, so that new requests will be requested to reconnect to the new location.
+                #   This should happen the same way as if the channel was retired
+                # 3. 
+                moved_to = (header._source_host, header._source_port)
+                self.channel.chan_moved(moved_to)
+                
             if header.cmd == CHANTHREAD_JOIN_READER:
                 self.channel.join_reader()
             elif header.cmd == CHANTHREAD_JOIN_WRITER:
@@ -929,6 +1014,22 @@ class ChannelHomeThread(threading.Thread):
                         else:
                             sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
 
+                except ChannelMovedException:
+                    try:                    
+                        lock_s, state, seq = LM.remote_acquire_and_get_state(process)
+                        if seq == header.seq_number:
+                            if state == READY:
+                                LM.remote_chan_moved(lock_s, process, self.channel.moved_to)
+                        # Ignore if wrong sequence number
+
+                        LM.remote_release(lock_s, process)
+                    except AddrUnavailableException:
+                        # Unable to reach process to notify retire
+                        if conf.get(SOCKETS_STRICT_MODE):
+                            raise FatalException("PyCSP (retire notification:2) unable to reach process (%s)" % str(process))
+                        else:
+                            sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
+                    
                 # Send acknowledgement to process. (used to ensure prioritized select)
                 if header.cmd == CHANTHREAD_POST_ACK_WRITE:
                     LM.ack(process)
@@ -969,6 +1070,22 @@ class ChannelHomeThread(threading.Thread):
                             raise FatalException("PyCSP (retire notification:3) unable to reach process (%s)" % str(process))
                         else:
                             sys.stderr.write("PyCSP (retire notification:3) unable to reach process (%s)\n" % str(process))
+
+                except ChannelMovedException:
+                    try:                    
+                        lock_s, state, seq = LM.remote_acquire_and_get_state(process)
+                        if seq == header.seq_number:
+                            if state == READY:
+                                LM.remote_chan_moved(lock_s, process, self.channel.moved_to)
+                        # Ignore if wrong sequence number
+
+                        LM.remote_release(lock_s, process)
+                    except AddrUnavailableException:
+                        # Unable to reach process to notify retire
+                        if conf.get(SOCKETS_STRICT_MODE):
+                            raise FatalException("PyCSP (retire notification:2) unable to reach process (%s)" % str(process))
+                        else:
+                            sys.stderr.write("PyCSP (retire notification:2) unable to reach process (%s)\n" % str(process))
 
                 # Send acknowledgement to process. (used to ensure prioritized select)
                 if header.cmd == CHANTHREAD_POST_ACK_READ:

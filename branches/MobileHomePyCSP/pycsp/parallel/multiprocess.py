@@ -104,6 +104,7 @@ class MultiProcess(multiprocessing.Process):
 
         # Channel request state
         self.cond = None
+        self.chan_moved_to = None
         self.state = FAIL
         self.result_ch_idx = None
         self.result_msg = None

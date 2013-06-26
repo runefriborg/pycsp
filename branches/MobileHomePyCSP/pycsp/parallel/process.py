@@ -73,6 +73,7 @@ class Process(threading.Thread):
         self.id = uuid.uuid1().hex + "." + fn.func_name[:31]
         
         # Channel request state
+        self.chan_moved_to = None
         self.state = FAIL        
         self.result_ch_idx = None
         self.result_msg = None
