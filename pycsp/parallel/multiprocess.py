@@ -10,6 +10,7 @@ See LICENSE.txt for licensing details (MIT License).
 import types
 import uuid
 import threading
+import os
 
 import multiprocessing
 
@@ -193,12 +194,18 @@ class MultiProcess(multiprocessing.Process):
         if self.kwargs.has_key("pycsp_port"):
             self.port = self.kwargs.pop("pycsp_port")
         else:
-            self.port = None
+            self.port = 0
 
         if self.host != '':
             conf.set(PYCSP_HOST, self.host)
-        if self.port != None:
-            conf.set(PYCSP_PORT, self.port)
+
+        # Set a new port, to overwrite PYCSP_PORT as that is already taken by the mother process.
+        conf.set(PYCSP_PORT, self.port)
+
+        # Also clear PYCSP_PORT environment variable 
+        if os.environ.has_key("PYCSP_PORT"):
+            del os.environ["PYCSP_PORT"]
+
 
         try:            
             SocketDispatcher(reset=True)
@@ -226,7 +233,7 @@ class MultiProcess(multiprocessing.Process):
             self.__check_retire(self.kwargs.values())
         finally:
             self.return_pipe[1].send(return_value)
-    
+
         # Join spawned processes
         for p in self.spawned:
             p.join_report()
