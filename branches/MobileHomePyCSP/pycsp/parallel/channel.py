@@ -549,6 +549,9 @@ class ChannelEnd:
         become_home is safe from multiple invocations of become_home from different processes and
         also allows interleaved communication on the channel.
 
+        The prioritisation of communication commits are not safe during a channel move, because requests are reordered as all
+        peers must repost their requests.
+
         Channel.become_home will throw a retire or poison exception, if the channel is retired or poisoned
         when moved. 
         """
