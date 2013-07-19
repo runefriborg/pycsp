@@ -294,7 +294,7 @@ class ConnHandler(object):
             for item in self.cacheSockets.items():
                 if (item[1] == sock):
                     addr = item[0]
-                    self.forceclose(addr)
+                    self._forceclose(addr)
 
             if addr == None:
                 raise Exception("Fatal error: Could not find cached socket " + str(sock))
@@ -333,13 +333,13 @@ class ConnHandler(object):
                     for item in self.cacheSockets.items():
                         if (item[1] == sock):
                             addr = item[0]
-                            self.forceclose(addr)
+                            self._forceclose(addr)
 
                     if addr == None:
                         raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
                     # Reconnect
-                    sock = self.connect(addr)
+                    sock = self._connect(addr)
                     new = True
 
         # Return "possibly new" socket
