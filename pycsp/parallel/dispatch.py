@@ -49,9 +49,8 @@ class Message:
 
         if not (self.header.cmd & HAS_PAYLOAD):
 
-            sock = handler.connect(addr)
-            sock = handler.sendall(sock, self.header)
-            handler.close(addr)
+            # Connect and send
+            sock = handler.send(addr, self.header)
 
             # NATFIX Update SocketThread with new sock
             if (self.header.cmd == CHANTHREAD_ENTER):
@@ -68,13 +67,8 @@ class Message:
 
             self.header.arg = len(payload_bin_data)
             
-            # Connect or fetch connected socket
-            sock = handler.connect(addr)            
-
-            # Send header and payload
-            sock = handler.sendall(sock, self.header)
-            handler.sendallNOreconnect(sock, payload_bin_data)
-            handler.close(addr)            
+            # Connect and send
+            handler.send(addr, self.header, payload_bin_data)
 
     def __repr__(self):
         return repr("<pycsp.dispatch.Message cmd:%s>" % (cmd2str(self.header.cmd)))
@@ -414,9 +408,7 @@ class SocketThreadData:
                     self.active_socket_list_add.append(sock)
                     h = Header(SOCKETTHREAD_PING)
                     # This connection is made only to the local server
-                    sock = self.handler.connect(self.server_addr)
-                    self.handler.sendall(sock, h)
-                    self.handler.close(sock)
+                    self.handler.send(self.server_addr, h)
             finally:
                 self.lock.release()
 
@@ -450,7 +442,6 @@ class SocketThreadData:
 
     """
     def registerChannel(self, name_id):
-        print self, "registerChannel", name_id
         self.lock.acquire()
         try:
             if name_id in self.channels_unknown:
@@ -476,13 +467,11 @@ class SocketThreadData:
         return q
 
     def deregisterChannel(self, name_id):
-        print self, "deregisterChannel", name_id
         self.lock.acquire()
         try:
             if name_id in self.channels:
                 del self.channels[name_id]
             if len(self.channels) == 0 and len(self.processes) == 0:
-                print "STOP"
                 self.stopThread()           
         finally:
             self.lock.release()
@@ -541,9 +530,9 @@ class SocketThreadData:
         m = Message(header, payload)
         
         # is destination address the same as my own address? 
-        self.lock.acquire()
-        try:
-            if addr == self.server_addr:
+        if addr == self.server_addr:
+            self.lock.acquire()
+            try:
                 if (header.cmd & PROCESS_CMD):
                     # Process message
                     if header.id in self.processes:
@@ -569,13 +558,13 @@ class SocketThreadData:
                         if not header.id in self.channels_unknown:
                             self.channels_unknown[header.id] = QueueBuffer()
                         self.channels_unknown[header.id].put_normal(m)
+            finally:
+                self.lock.release()
+        else:
+            if otherhandler:
+                m.transmit(otherhandler, addr)
             else:
-                if otherhandler:
-                    m.transmit(otherhandler, addr)
-                else:
-                    m.transmit(self.handler, addr)
-        finally:
-            self.lock.release()
+                m.transmit(self.handler, addr)
 
 
     def reply(self, source_header, header, payload="", otherhandler=None):
@@ -590,9 +579,9 @@ class SocketThreadData:
         m = Message(header, payload)
     
         # is destination address the same as my own address? 
-        self.lock.acquire()
-        try:
-            if addr == self.server_addr:
+        if addr == self.server_addr:
+            self.lock.acquire()
+            try:
                 if (header.cmd & PROCESS_CMD):
                     # Process message
                     if header.id in self.processes:
@@ -616,13 +605,13 @@ class SocketThreadData:
                         if not header.id in self.channels_unknown:
                             self.channels_unknown[header.id] = QueueBuffer()
                         self.channels_unknown[header.id].put_reply(m)                
+            finally:
+                self.lock.release()
+        else:
+            if otherhandler:
+                m.transmit(otherhandler, addr)
             else:
-                if otherhandler:
-                    m.transmit(otherhandler, addr)
-                else:
-                    m.transmit(self.handler, addr)
-        finally:
-            self.lock.release()
+                m.transmit(self.handler, addr)
         
 
         

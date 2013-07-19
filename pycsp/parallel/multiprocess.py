@@ -120,8 +120,7 @@ class MultiProcess(multiprocessing.Process):
         self.spawned = []
 
         # Protect against early termination of channelhomes leaving processes in an invalid state
-        self.registeredChanHomeList = []
-        self.registeredChanConnectList = []
+        self.registeredChanDict = {}
 
         # Protect against early termination of processes leaving channelhomes in an invalid state
         self.activeChanList = []
@@ -252,12 +251,11 @@ class MultiProcess(multiprocessing.Process):
         dispatch.deregisterProcess(self.id)
 
         # Deregister namespace references
-        for chan in self.registeredChanConnectList:
-            chan._deregister()
-        for chan in self.registeredChanHomeList:
-            chan._deregister()
+        for chan in self.registeredChanDict:
+            address = self.registeredChanDict[chan]
+            chan._deregister(other_address=address)
 
-        for chan in self.registeredChanHomeList:
+        for chan in self.registeredChanDict:
             chan._threadjoin()
 
         # Wait for sub-processes as these may not yet have quit.

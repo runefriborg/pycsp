@@ -88,8 +88,7 @@ class Process(threading.Thread):
         self.spawned = []
 
         # Protect against early termination of channelhomes leaving channel references in an invalid state
-        self.registeredChanHomeList = []
-        self.registeredChanConnectList = []
+        self.registeredChanDict = {}
 
         # Protect against early termination of processes leaving channelhomes in an invalid state
         self.activeChanList = []
@@ -165,12 +164,11 @@ class Process(threading.Thread):
         dispatch.deregisterProcess(self.id)
 
         # Deregister channel references
-        for chan in self.registeredChanConnectList:
-            chan._deregister()
-        for chan in self.registeredChanHomeList:
-            chan._deregister()
+        for chan in self.registeredChanDict:
+            address = self.registeredChanDict[chan]
+            chan._deregister(other_address=address)
 
-        for chan in self.registeredChanHomeList:
+        for chan in self.registeredChanDict:
             chan._threadjoin()
 
     def __check_poison(self, args):
@@ -432,8 +430,7 @@ def init():
         current_proc.spawned = []
 
         # Protect against early termination of channelhomes leaving channel references in an invalid state
-        current_proc.registeredChanHomeList = []
-        current_proc.registeredChanConnectList = []
+        current_proc.registeredChanDict = {}
 
         # Protect against early termination of processes leaving channelhomes in an invalid state
         current_proc.activeChanList = []
@@ -492,6 +489,7 @@ def shutdown():
     try:
         dispatch = SocketDispatcher().getThread()
 
+        # Join and finish spawned processes
         for p in current_proc.spawned:
             p.join_report()
 
@@ -509,19 +507,17 @@ def shutdown():
         dispatch.deregisterProcess(current_proc.id)
 
         # Deregister channel references
-        for chan in current_proc.registeredChanConnectList:
-            chan._deregister()        
-        for chan in current_proc.registeredChanHomeList:
-            chan._deregister()        
-            
+        for chan in current_proc.registeredChanDict:
+            address = current_proc.registeredChanDict[chan]
+            chan._deregister(other_address=address)
+
         # Wait for channelhomethreads to terminate
-        for chan in current_proc.registeredChanHomeList:
+        for chan in current_proc.registeredChanDict:
             chan._threadjoin()
 
         # Cleaning structures
         current_proc.spawned = []
-        current_proc.registeredChanHomeList = []
-        current_proc.registeredChanConnectList = []
+        current_proc.registeredChanDict = {}
         current_proc.activeChanList = []
         current_proc.closedChanList = []
 

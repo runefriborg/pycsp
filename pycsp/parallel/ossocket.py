@@ -10,6 +10,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 import time
 import errno
+import threading
 import os, platform
 import socket
 import sys
@@ -63,8 +64,7 @@ def _connect(addr, reconnect=True):
 
     while (not connected):
         try:
-            
-
+            #print getThreadAndName(init=False), "connect", addr
             # Create IPv4 TCP socket (TODO: add support for IPv6)
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -205,15 +205,46 @@ def recvall(sock, msg_len):
 
 
 class ConnHandler(object):
+    """
+    Connection handler. This exists to be able to use the same socket from multiple threads, thus reducing the amount of sockets necessary.
+    
+    The connection handler is thread safe for sending.
+    """
     def __init__(self):
         self.cacheSockets = {}
+        self.lock = threading.Lock()
+
+    def send(self, addr, header, payload_bin_data=None):
+
+        sock = None
+        self.lock.acquire()
+        try:
+            # Connect or fetch connected socket
+            sock = self._connect(addr)
+
+            # Send header
+            sock = self._sendall(sock, header)
+
+            if not payload_bin_data == None:
+                # Send payload right after header
+                self._sendallNOreconnect(sock, payload_bin_data)
+                
+        finally:
+            self.lock.release()
+
+        return sock
 
     def updateCache(self, addr, sock):
-        if ENABLE_CACHE:
-            if not addr in self.cacheSockets:
-                self.cacheSockets[addr] = sock
+        
+        self.lock.acquire()
+        try:
+            if ENABLE_CACHE:
+                if not addr in self.cacheSockets:
+                    self.cacheSockets[addr] = sock
+        finally:
+            self.lock.release()
 
-    def connect(self, addr, reconnect=True):
+    def _connect(self, addr, reconnect=True):
         """
         Retrieve old connection or acquire new connection
 
@@ -225,16 +256,29 @@ class ConnHandler(object):
             sock = self.cacheSockets[addr]
             return sock
 
-        sock = _connect(addr, reconnect)
+        # Reverse locking
+        self.lock.release()
+        try:
+        
+            # Perform the connection without a lock
+            sock = _connect(addr, reconnect)
+        finally:
+            self.lock.acquire()
 
-        # Save connection
+        # Check whether someone already saved a connection, while we were connecting.
         if ENABLE_CACHE:
-            self.cacheSockets[addr] = sock
+            if addr in self.cacheSockets:
+                # Ok another thread got a connection before us. Thus, we close ours.
+                sock.close()
+                sock = self.cacheSockets[addr]
+            else:
+                # Save connection
+                self.cacheSockets[addr] = sock
 
         return sock
 
     
-    def sendallNOreconnect(self, sock, data):
+    def _sendallNOreconnect(self, sock, data):
         """
         Send all data on socket. Do not reconnect on error.
         """
@@ -260,7 +304,7 @@ class ConnHandler(object):
 
 
 
-    def sendall(self, sock, data):
+    def _sendall(self, sock, data):
         """
         Send all data on socket. Reconnect once if socket fails and the socket was cached.
 
@@ -302,14 +346,7 @@ class ConnHandler(object):
         return sock
 
 
-    def close(self, addr):
-        """
-        Do not close socket. As they kept for later reuse
-        """
-        pass
-
-    
-    def forceclose(self, addr):
+    def _forceclose(self, addr):
         """
         Close socket and remove cached socket
         """
@@ -320,7 +357,7 @@ class ConnHandler(object):
 
             sock.close()
 
-    def closeall(self):
+    def _closeall(self):
         """
         Close all sockets owned by thread
         """
