@@ -156,8 +156,8 @@ class Channel(object):
                 # case, then throw exception.
                 p,_ = getThreadAndName()
 
-                for c in p.registeredChanHomeList:
-                    if self.name == c.name:
+                for c in p.registeredChanDict:
+                    if c._channelhomethread and self.name == c.name:
                         raise InfoException("Reusing channel name in same process namespace")
 
                 # Get local channel home
@@ -210,17 +210,14 @@ class Channel(object):
         # and at the current process. The current process will call deregister,
         # upon exit.
         self._CM.register(self)
-
+        
         p,_ = getThreadAndName()
-        if self._channelhomethread:
-            p.registeredChanHomeList.append(self)
-        else:
-            p.registeredChanConnectList.append(self)
+        p.registeredChanDict[self] = self.address
 
         self._registered = True
 
-    def _deregister(self):
-        self._CM.deregister(self)
+    def _deregister(self, other_address=None):
+        self._CM.deregister(self, address = other_address)
 
     def _check_registration(self):
         if not self._registered:
@@ -284,8 +281,12 @@ class Channel(object):
             # Tell channel to disconnect
             self.disconnect()
 
-            Channel.__init__(self, name=self.name, connect=new_addr)
+            # Update object to new channel
+            self.address = new_addr
+
+
             self._check_registration()
+
             self._CM.join(self, direction=READ)
             result = self._read()
             if p.state == SUCCESS:
@@ -336,8 +337,10 @@ class Channel(object):
             # Tell channel to disconnect
             self.disconnect()
 
-            Channel.__init__(self, name=self.name, connect=new_addr)
+            # Update object to new channel
+            self.address = new_addr
             self._check_registration()
+
             self._CM.join(self, direction=WRITE)
             self._write(msg)
             if p.state == SUCCESS:
@@ -382,9 +385,58 @@ class Channel(object):
 
     def _chan_moved(self):
         if not self._ismoved:
+            self._check_termination()
             self._check_registration()
-            self._ismoved = True
-            self._CM.chan_moved(self)
+
+            p,_ = getThreadAndName()
+            p.state = READY
+            p.sequence_number += 1
+
+            self._CM.post_move(self, p)
+
+            if p.state == READY:
+                p.wait()
+        
+            if p.state == POISON:
+                self._ispoisoned = True
+            elif p.state == RETIRE:
+                self._isretired = True
+            elif p.state == CHAN_MOVED:
+                new_addr= pickle.loads(p.chan_moved_to)
+                
+                p,_ = getThreadAndName()
+                # Initiate clean up and wait for channel to finish outstanding operations.
+                if self in p.activeChanList:
+                    self._CM.leave(self, p)
+            
+                    # Wait for channel        
+                    p.cond.acquire()
+                    if not self.name in p.closedChanList:
+                        p.cond.wait()
+                    p.cond.release()
+
+                p.closedChanList.remove(self.name)
+                p.activeChanList.remove(self)        
+
+                # Disconnect from channel thread
+                self.disconnect()
+
+                if new_addr == self._CM.get_address():
+                    # Success, moved here.
+                    return True
+                else:
+
+                    # Update object to new channel
+                    self.address = new_addr
+                    self._check_registration()
+
+                    return False
+
+            self._check_termination()
+            
+            print('We should not get here in move!!! ' + str(p.state) + ' ' + str(msg))
+            return None
+                
 
     def _retire(self, direction):
         if not self._isretired:
@@ -408,12 +460,14 @@ class Channel(object):
         reply channel and desires to disconnect after having received the reply.
 
         The channel reference will automatically open and reconnect if it is used after a close.
-        """
+        """        
         p,_ = getThreadAndName()
-        if self in p.registeredChanConnectList:
-            self._deregister()
-            p.registeredChanConnectList.remove(self)
 
+        if self in p.registeredChanDict:
+            address = p.registeredChanDict.pop(self)
+            self._deregister(other_address=address)
+            self._threadjoin()
+            self._registered = False
 
     # syntactic sugar: cin = +chan
     def __pos__(self):
@@ -487,26 +541,42 @@ class ChannelEnd:
         raise ChannelPoisonException()
 
     def become_home(self):
+        """
+        *** experimental ***
+
+        Moves the channel home of a channel, to the current Python interpreter.
+
+        become_home is safe from multiple invocations of become_home from different processes and
+        also allows interleaved communication on the channel.
+
+        Channel.become_home will throw a retire or poison exception, if the channel is retired or poisoned
+        when moved. 
+        """
         if self.channel.address == self.channel._CM.get_address():
             # Channel is already home
-            print("Channel home is at this location")
+            #print("Channel home is at this location")
+            pass
         else:
-            print("Channel moving")
+            #print("Channel moving")
             # Create new
             new_chan = Channel(name=self.channel.name)
 
             # Inform old channel to go into CHAN_MOVED state.
-            self.channel._chan_moved()
+            if self.channel._chan_moved():
+                # Channel has been successfully moved
+                # Update to new
+                self.channel = new_chan
 
-            # Disconnect from old
-            self.disconnect()
-
-            # Update to new
-            self.channel = new_chan
+            else:
+                new_chan.disconnect()
+                del new_chan
+                # Channel has been moved elsewhere by another process
+                #print("Channel moved elsewhere, move abandoned")
 
             # Join new channel
             self.channel._check_registration()
             self.channel._CM.join(self.channel, direction=self._op)
+                
 
 
 

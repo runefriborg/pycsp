@@ -55,12 +55,20 @@ class ChannelMessenger(object):
             # Unable to register at channel home thread
             raise ChannelConnectException(channel.address, "PyCSP (register channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
-    def deregister(self, channel):
+    def deregister(self, channel, address=None):
+        """
+        The address parameter is necessary as the channel address may be different from the address registered at the channel, because some channel references are
+        registered at old locations, before the channel may have been moved.
+        """
         self.restore()
 
+        if not address:
+            address = channel.address
+
         try:
-            self.dispatch.send(channel.address,
-                                        Header(CHANTHREAD_DEREGISTER, channel.name))
+            self.dispatch.send(address,
+                               Header(CHANTHREAD_DEREGISTER, channel.name))
+
         except SocketException:
             # Unable to deregister at channel home thread
             # The channel thread may have been terminated forcefully, thus this is an acceptable situation.
@@ -80,19 +88,6 @@ class ChannelMessenger(object):
             # Unable to join channel
             raise ChannelLostException(channel.address, "PyCSP (join channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
 
-    def chan_moved(self, channel):
-        self.restore()
-
-        try:
-            self.dispatch.send(channel.address,
-                               Header(CHANTHREAD_MOVE, channel.name))
-        except SocketException:
-            # Unable to move channel
-            if conf.get(SOCKETS_STRICT_MODE):
-                raise ChannelLostException(channel.address, "PyCSP (move channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
-            else:
-                sys.stderr.write("PyCSP (move channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
-        
             
     def retire(self, channel, direction):
         self.restore()
@@ -131,6 +126,25 @@ class ChannelMessenger(object):
             else:
                 sys.stderr.write("PyCSP (poison channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
 
+
+    def post_move(self, channel, process):
+        self.restore()
+
+        # Enter channel and update NAT socket
+        if not channel in process.activeChanList:
+            process.activeChanList.append(channel)
+            self.enter(channel, process)
+
+        try:
+            self.dispatch.send(channel.address,
+                               Header(CHANTHREAD_MOVE, channel.name, process.sequence_number, _source_id=process.id))
+        except SocketException:
+            # Unable to move channel
+            if conf.get(SOCKETS_STRICT_MODE):
+                raise ChannelLostException(channel.address, "PyCSP (move channel) unable to reach channel home thread (%s at %s)" % (channel.name, str(channel.address)))
+            else:
+                sys.stderr.write("PyCSP (move channel) unable to reach channel home thread (%s at %s)\n" % (channel.name, str(channel.address)))
+        
 
     def post_read(self, channel, process, ack=False):
         self.restore()
@@ -427,7 +441,7 @@ class RemoteLock:
                 raise Exception("Fatal error!, Remote lock has not been acquired!")
 
         elif header.cmd == LOCKTHREAD_CHAN_MOVED:
-            print("%s CHAN_MOVED\n" % (self.process.id))
+            #print("%s CHAN_MOVED\n" % (self.process.id))
             if self.lock_acquired == header._source_id:
                 self.cond.acquire()
                 if self.process.state == READY:
@@ -709,14 +723,21 @@ class ChannelHome(object):
             self.readqueue = []
             self.writequeue = []
 
-    def chan_moved(self, moved_to):
-        self.moved_to = moved_to
+    def post_move(self, moved_to, req):
+        """
+        Do not update, if the channel has already been moved.
+        """
+        if not self.moved_to:
+            self.moved_to = moved_to
 
-        for p in self.readqueue:
-            p.chan_moved(moved_to)
+            for p in self.readqueue:
+                p.chan_moved(moved_to)
+            
+            for p in self.writequeue:
+                p.chan_moved(moved_to)
 
-        for p in self.writequeue:
-            p.chan_moved(moved_to)
+        req.chan_moved(self.moved_to)
+
 
     def retire_reader(self):
         self.readers-=1
@@ -938,16 +959,6 @@ class ChannelHomeThread(threading.Thread):
 
             #print("GOT %s for %s" % (cmd2str(header.cmd), self.id))
 
-            if header.cmd == CHANTHREAD_MOVE:
-                # Move channel.
-                # 1. Register channel at new location? 
-                #   That has already been done by the process requesting the move
-                # 2. Set the channel as moved, so that new requests will be requested to reconnect to the new location.
-                #   This should happen the same way as if the channel was retired
-                # 3. 
-                moved_to = (header._source_host, header._source_port)
-                self.channel.chan_moved(moved_to)
-                
             if header.cmd == CHANTHREAD_JOIN_READER:
                 self.channel.join_reader()
             elif header.cmd == CHANTHREAD_JOIN_WRITER:
@@ -962,7 +973,6 @@ class ChannelHomeThread(threading.Thread):
 
                 is_final = self.channel.deregister()
                 if is_final:
-                    #print "SHUTDOWN"
                     # TODO: Ensure that the channel is unused
                     # TODO: Check if any unread messages is left in channel?
                     self.dispatch.deregisterChannel(self.id)
@@ -973,6 +983,18 @@ class ChannelHomeThread(threading.Thread):
 
             elif header.cmd == CHANTHREAD_POISON_WRITER:
                 self.channel.poison_writer()
+
+            elif header.cmd == CHANTHREAD_MOVE:
+                # Move channel.
+                # 1. Register channel at new location? 
+                #   That has already been done by the process requesting the move
+                # 2. Set the channel as moved, so that new requests will be requested to reconnect to the new location.
+                #   This should happen the same way as if the channel was retired
+                # 3. 
+                process = AddrID((header._source_host, header._source_port), header._source_id)                               
+                moved_to = (header._source_host, header._source_port)
+                self.channel.post_move(moved_to, ChannelReq(LM, process, header.seq_number, self.channel.name))
+                
 
             elif header.cmd == CHANTHREAD_POST_WRITE or header.cmd == CHANTHREAD_POST_ACK_WRITE:
                 process = AddrID((header._source_host, header._source_port), header._source_id)
