@@ -58,7 +58,7 @@ class Configuration(object):
                 SOCKETS_BIND_RETRY_DELAY:0.5,
                 PYCSP_PORT:0,
                 PYCSP_HOST:'',
-                SOCKETS_STRICT_MODE:False
+                SOCKETS_STRICT_MODE:True
                 }
             
         return cls.__instance

@@ -23,6 +23,12 @@ try:
 except ImportError:
     import pickle
 
+try:
+    # Or StringIO on old Pythons, they are the same
+    from io import BytesIO 
+except ImportError:
+    import StringIO as BytesIO
+
 
 from pycsp.parallel import ossocket
 from pycsp.parallel.header import *
@@ -268,7 +274,24 @@ class SocketThread(threading.Thread):
                         header.cmd = ERROR_CMD
                         self.lock.acquire()
                         try:
-                            s.recv_into(header)
+                            got = s.recv_into(header)
+                            if got > 0 and got < HEADERLEN:
+                                # Didn't get the entire header. Fetch the rest!
+                                rest = ossocket.recvall(s, HEADERLEN-got)
+                                
+                                # Make voodoo to concat to header
+                                # First. Retrieve bytestream.
+                                stream = BytesIO()
+                                stream.write(header)
+                                header_c_struct = stream.getvalue()
+                                
+                                # Second. Concat the two streams and update a new header 
+                                stream = BytesIO(header_c_struct[:got] + rest)
+                                newheader = Header()
+                                got = stream.readinto(newheader)
+                                header = newheader
+                                if got > 0 and got < HEADERLEN:
+                                    raise FatalException("header received was "+str(got)+" bytes long, expected "+str(HEADERLEN))
                         except ossocket.socket.error as e:
                             if e.errno == errno.ECONNRESET:
                                 # Connection has been reset
