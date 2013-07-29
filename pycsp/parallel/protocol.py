@@ -463,7 +463,7 @@ class RemoteLock:
                 if self.waiting:
                     self.handle(self.waiting.pop(0))
             else:
-                raise Exception("Fatal error!, Remote lock has not been acquired!")
+                raise Exception("Fatal error!, Remote lock has not been acquired! '" + str(self.lock_acquired) + "' != '" + str(header._source_id) +"'")
 
 
 

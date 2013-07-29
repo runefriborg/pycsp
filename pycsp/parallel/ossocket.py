@@ -83,7 +83,7 @@ def _connect(addr, reconnect=True):
                 sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
             if sock:
                 sock.close()
-            if e.errno != errno.ECONNREFUSED:            
+            if e.errno != errno.ECONNREFUSED:
                 raise Exception("Fatal error: Could not open socket: " + e.message)
         if not connected:
             if t1 == None:
@@ -300,8 +300,6 @@ class ConnHandler(object):
                 raise Exception("Fatal error: Could not find cached socket " + str(sock))
 
             raise SocketSendException()
-
-
 
 
     def _sendall(self, sock, data):
