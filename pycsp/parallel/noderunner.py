@@ -142,6 +142,7 @@ class NodeRunner(object):
         return cls.__instance
     getInstance = classmethod(getInstance)
 
+
     def get_result(self, result_chan):
         
         # Fetch result
@@ -170,7 +171,6 @@ class NodeRunner(object):
 
         
     def run(self, ssh_host, ssh_port, ssh_python, cwd, pycsp_host, pycsp_port, script_path, func_name, func_args, func_kwargs, cluster_state = None):
-        
         
         result_chan = Channel(buffer=1)
 
