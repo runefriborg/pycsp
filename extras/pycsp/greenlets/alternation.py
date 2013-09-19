@@ -52,7 +52,7 @@ class Alternation:
     the results are simply ignored, still performs the guarded input or
     output.
     """
-    def __init__(self, guards):
+    def __init__(self, guards, ensurePriority=True):
         # Preserve tuple entries and convert dictionary entries to tuple entries
         self.guards = []
         for g in guards:
@@ -75,7 +75,7 @@ class Alternation:
         # Default is to go one up in stackframe.
         self.execute_frame = -1
 
-    def set_execute_frame(self, steps):
+    def _set_execute_frame(self, steps):
         if steps > 0:
             self.execute_frame = -1*steps
         else:
