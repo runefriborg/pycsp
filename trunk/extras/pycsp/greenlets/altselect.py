@@ -45,7 +45,7 @@ class InputGuard:
     """
     def __init__(self, ch_end, action=None):
         try:
-            if ch_end.op == READ:
+            if ch_end._op == READ:
                 self.g = (ch_end, action)
             else:
                 raise Exception('InputGuard requires an input ch_end')
@@ -82,7 +82,7 @@ class OutputGuard:
     """
     def __init__(self, ch_end, msg, action=None):
         try:
-            if ch_end.op == WRITE:
+            if ch_end._op == WRITE:
                 self.g = (ch_end, msg, action)
             else:
                 raise Exception('OutputGuard requires an output ch_end')
@@ -171,10 +171,10 @@ def PriSelect(*guards):
     if pycsp.current.trace:
         import pycsp.common.trace as trace
         a = trace.Alternation(L)
-        a.set_execute_frame(-3)
+        a._set_execute_frame(-3)
     else:
         a = Alternation(L)
-        a.set_execute_frame(-2)
+        a._set_execute_frame(-2)
 
     return a.execute()
 
@@ -214,10 +214,10 @@ def FairSelect(*guards):
     if pycsp.current.trace:
         import pycsp.common.trace as trace
         a = trace.Alternation(L)
-        a.set_execute_frame(-3)
+        a._set_execute_frame(-3)
     else:
         a = Alternation(L)
-        a.set_execute_frame(-2)
+        a._set_execute_frame(-2)
 
     result =  a.execute()
     try:
