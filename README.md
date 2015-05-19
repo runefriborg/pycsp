@@ -1,4 +1,4 @@
-# pycsp
+# PyCSP
 Automatically exported from code.google.com/p/pycsp
 
 PyCSP is a CSP library for Python that implements core CSP
