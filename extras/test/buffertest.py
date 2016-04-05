@@ -63,7 +63,7 @@ def sleep_one():
 
 def Buffer_Test(read_sleeper, write_sleeper):
     x = Channel()
-    Spawn(check.Assert(x.reader(), "Buffer_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=range(10)))
+    Spawn(check.Assert(x.reader(), "Buffer_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=list(range(10))))
 
     cnt = 10
     c=Channel(buffer=cnt)

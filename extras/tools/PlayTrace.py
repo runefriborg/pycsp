@@ -16,7 +16,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 import wx
 import subprocess, time, random, sys, os
-import cStringIO
+import io
 
 # Import installed pycsp or try to import pycsp from parent dir.
 try:
@@ -31,8 +31,8 @@ except ImportError:
 # Get dot
 DOT = toolkit.which('dot')
 
-STATE_INIT, STATE_BLOCKED, STATE_RUNNING = range(3)
-READ, WRITE = range(2)
+STATE_INIT, STATE_BLOCKED, STATE_RUNNING = list(range(3))
+READ, WRITE = list(range(2))
 
 THEMES = [
     {'Name':'Default',
@@ -423,7 +423,7 @@ class MainFrame(wx.Frame):
 
             if True:
                 # Convert image
-                stream = cStringIO.StringIO(img)
+                stream = io.StringIO(img)
                 bmp = wx.BitmapFromImage( wx.ImageFromStream( stream ))
 
                 # Draw converted image
@@ -465,13 +465,13 @@ class MainFrame(wx.Frame):
             
         dlg.Destroy()
 
-        print """TIP:              
+        print("""TIP:              
               To convert the exported gifs into an animated movie
               use ImageMagick convert cmd.
 
               Example:
                 convert -dispose previous -page 500x500  -delay 20 -loop 0   img*.gif   animate.gif
-              """
+              """)
 
     def Shutdown(self, evt):
         """Event handler for shutting down."""
@@ -503,20 +503,20 @@ class TracedChannel():
             parent_count = {}
             for a in self.reading:
                 parent, p = a
-                if parent_count.has_key(parent):
+                if parent in parent_count:
                     parent_count[parent] += 1
                 else:
                     parent_count[parent] = 1
 
             for b in self.writing:
                 parent, p = b
-                if parent_count.has_key(parent):
+                if parent in parent_count:
                     parent_count[parent] += 1
                 else:
                     parent_count[parent] = 1
             
             max = (0,0)
-            for parent, count in parent_count.items():
+            for parent, count in list(parent_count.items()):
                 if count > max[1]:
                     max = (parent, count)
 
@@ -534,7 +534,7 @@ class TracedChannel():
             update_data = self.reading
 
         key = (parent_process_id, process_id)
-        if update_data.has_key(key):
+        if key in update_data:
             update_data[key] += 1
         else:
             update_data[key] = 1
@@ -560,8 +560,8 @@ class TracedChannel():
     def to_dot(self, theme):
         
         if len(self.reading) == 1 and len(self.writing) == 1:
-            cin_id = self.reading.keys()[0]
-            cout_id = self.writing.keys()[0]
+            cin_id = list(self.reading.keys())[0]
+            cout_id = list(self.writing.keys())[0]
 
             # test active
             color = ""
@@ -611,7 +611,7 @@ class TracedChannel():
 class TracedProcess():
     def __init__(self, id, func_name):
         self.id = id
-        self.func_name = func_name
+        self.__name__ = func_name
         self.processes = []
         self.parent = None
 
@@ -653,9 +653,9 @@ class TracedProcess():
             msg = " ("+self.state_msg+")"
 
         if self.processes:
-            return ('cluster_'+DOT_ID(self.id), '['+str(len(self.processes))+'] '+self.func_name+msg)
+            return ('cluster_'+DOT_ID(self.id), '['+str(len(self.processes))+'] '+self.__name__+msg)
         else:
-            return (DOT_ID(self.id), self.func_name+msg)
+            return (DOT_ID(self.id), self.__name__+msg)
 
     def to_dot(self, theme, l=1):
         msg = ""
@@ -665,7 +665,7 @@ class TracedProcess():
         if self.processes:
             contents = []
             contents.append("\t"*l + "subgraph cluster_"+DOT_ID(self.id)+" {")
-            contents.append("\t"*(l+1) + "label=\""+self.func_name+msg+"\";")
+            contents.append("\t"*(l+1) + "label=\""+self.__name__+msg+"\";")
             contents.append("\t"*(l+1) + "style=filled;")
             if self.state == STATE_BLOCKED:                
                 contents.append("\t"*(l+1) + "fillcolor=\""+theme['Cluster.blocking']+"\";")
@@ -685,9 +685,9 @@ class TracedProcess():
             return contents
         else:
             if self.state == STATE_BLOCKED:
-                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\""+theme['Process.blocking']+"\"];"]
+                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.__name__+msg+"\", style=filled, fillcolor=\""+theme['Process.blocking']+"\"];"]
             else:
-                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.func_name+msg+"\", style=filled, fillcolor=\""+theme['Process.active']+"\"];"]
+                return ["\t"*l + DOT_ID(self.id) + " [label=\""+self.__name__+msg+"\", style=filled, fillcolor=\""+theme['Process.active']+"\"];"]
 
 @process
 def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_node_data):
@@ -715,7 +715,7 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
             # Generate node list
             ids = []
             labels = []
-            for p in trace_processes.values():
+            for p in list(trace_processes.values()):
                 id, label = p.get_id_n_label()
                 ids.append(id)
                 labels.append(label)
@@ -735,10 +735,10 @@ def GenerateDotFiles(get_objects, send_objects, send_dotfile, get_setup, send_no
 
         contents = []
 
-        if trace_processes.has_key('__main__'):
+        if '__main__' in trace_processes:
             contents.extend(trace_processes['__main__'].to_dot(theme=theme))
 
-        for chan in trace_channels.values():
+        for chan in list(trace_channels.values()):
             contents.extend(chan.to_dot(theme=theme))
             
         return header + "\n".join(contents) + "\n}"
@@ -818,7 +818,7 @@ def RunDot2fileParser(get_dotfile_and_setup):
     while True:
         dotfile, setup = get_dotfile_and_setup()
 
-        print dotfile
+        print(dotfile)
 
         p = subprocess.Popen((DOT, '-T' + setup['filetype'], '-o' + setup['filename']), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         p.communicate(dotfile)
@@ -853,7 +853,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     
                     CHANGE_LEVEL = 2
                 elif trace['type'] == 'BlockOnParallel':
-                    if not trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] not in trace_processes:
                         # Main process
                         p = TracedProcess(trace['process_id'], '__main__')
                         trace_processes[trace['process_id']] = p
@@ -871,7 +871,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     parent.state_msg = 'Parallel'
                     CHANGE_LEVEL = 3
                 elif trace['type'] == 'BlockOnSequence':
-                    if not trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] not in trace_processes:
                         # Main process
                         p = TracedProcess(trace['process_id'], '__main__')
                         trace_processes[trace['process_id']] = p
@@ -889,7 +889,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     parent.state_msg = 'Sequence'
                     CHANGE_LEVEL = 3
                 elif trace['type'] == 'Spawn':
-                    if not trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] not in trace_processes:
                         # Main process
                         p = TracedProcess(trace['process_id'], '__main__')
                         trace_processes[trace['process_id']] = p
@@ -908,7 +908,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                     proc = trace_processes.pop(trace['process_id'])
 
                     for id in proc.cleanup():
-                        if trace_processes.has_key(id):
+                        if id in trace_processes:
                             trace_processes.pop(id)
 
                     if proc.parent != None:
@@ -932,10 +932,10 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                 elif (trace['type'] == 'BlockOnRead' or 
                       trace['type'] == 'BlockOnWrite'):
                     
-                    if trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] in trace_processes:
                         trace_processes[trace['process_id']].state = STATE_BLOCKED
 
-                        if not trace_channels.has_key(trace['chan_name']):
+                        if trace['chan_name'] not in trace_channels:
                             trace_channels[trace['chan_name']] = TracedChannel(trace['chan_name'])                    
 
                         chan = trace_channels[trace['chan_name']]
@@ -955,17 +955,17 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                         CHANGE_LEVEL = 3   
                 elif (trace['type'] == 'DoneRead' or
                       trace['type'] == 'DoneWrite'):
-                    if trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] in trace_processes:
                         trace_processes[trace['process_id']].state = STATE_RUNNING
                         CHANGE_LEVEL = 2
                 elif (trace['type'] == 'BlockOnAlternation.execute' or
                       trace['type'] == 'BlockOnAlternation.select'):
-                    if trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] in trace_processes:
                         trace_processes[trace['process_id']].state = STATE_BLOCKED
                         CHANGE_LEVEL = 2
                 elif (trace['type'] == 'DoneAlternation.execute' or
                       trace['type'] == 'DoneAlternation.select'):
-                    if trace_processes.has_key(trace['process_id']):
+                    if trace['process_id'] in trace_processes:
                         trace_processes[trace['process_id']].state = STATE_RUNNING
                         guard = trace['guard']
 
@@ -977,7 +977,7 @@ def UpdateTrace(get_trace, get_objects, send_objects):
 
                         if _type != None:
 
-                            if not trace_channels.has_key(guard['chan_name']):
+                            if guard['chan_name'] not in trace_channels:
                                 trace_channels[guard['chan_name']] = TracedChannel(guard['chan_name'])
 
                             chan = trace_channels[guard['chan_name']]
@@ -992,8 +992,8 @@ def UpdateTrace(get_trace, get_objects, send_objects):
                             p.talking_to(chan)
 
                         CHANGE_LEVEL = 3
-            except Exception, e:
-                print 'KeyError', e
+            except Exception as e:
+                print('KeyError', e)
             send_objects((trace_processes, trace_channels, trace_output, CHANGE_LEVEL ))
 
 
@@ -1029,7 +1029,7 @@ if len(sys.argv) > 1:
     poison(+IMAGE_FILE_CHAN, +DOT2_FILE_CHAN)
 
 else:
-    print __doc__
+    print(__doc__)
 
 
 shutdown()

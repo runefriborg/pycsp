@@ -30,7 +30,7 @@ def par_reader(cin1,cin2,cin3,cin4, cnt, sleeper):
             InputGuard(cin4)
             )
             
-        print 'From ',c ,'got',msg
+        print('From ',c ,'got',msg)
 
 @process
 def par_reader_pri(cin1,cin2,cin3,cin4, cnt, sleeper):
@@ -44,7 +44,7 @@ def par_reader_pri(cin1,cin2,cin3,cin4, cnt, sleeper):
             InputGuard(cin4)
             )
             
-        print 'From ',c ,'got',msg
+        print('From ',c ,'got',msg)
 
 @process
 def par_reader_fair(cin1,cin2,cin3,cin4, cnt, sleeper):
@@ -58,7 +58,7 @@ def par_reader_fair(cin1,cin2,cin3,cin4, cnt, sleeper):
             InputGuard(cin4)
             )
             
-        print 'From ',c ,'got',msg
+        print('From ',c ,'got',msg)
 
 
 def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
@@ -76,11 +76,11 @@ def Any2One_Alting_Test(par_reader, read_sleeper, write_sleeper):
              writer(-c4,3,cnt, write_sleeper))
 
 if __name__ == '__main__':
-    print "Any2One_Alting_Test - AltSelect"
+    print("Any2One_Alting_Test - AltSelect")
     Any2One_Alting_Test(par_reader, sleep_random, sleep_random)
-    print "Any2One_Alting_Test - PriSelect"
+    print("Any2One_Alting_Test - PriSelect")
     Any2One_Alting_Test(par_reader_pri, sleep_random, sleep_random)
-    print "Any2One_Alting_Test - FairSelect"
+    print("Any2One_Alting_Test - FairSelect")
     Any2One_Alting_Test(par_reader_fair, sleep_random, sleep_random)
 
     shutdown()

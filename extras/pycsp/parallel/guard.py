@@ -25,6 +25,7 @@ class Guard:
 
         # Id similar to channel name, to correctly select the chosen guard among the guard set.
         self.id = uuid.uuid1().hex
+        self.id = self.id.encode()
 
         # Necessary to allow for correct locking
         self.dispatch = SocketDispatcher().getThread()

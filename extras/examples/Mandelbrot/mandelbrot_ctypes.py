@@ -31,13 +31,13 @@ if os.path.exists('mandelbrot_kernel.dylib'):
 elif os.path.exists('mandelbrot_kernel.so'):
     mandelbrot=CDLL('mandelbrot_kernel.so')
 else:
-    print 'Compile mandelbrot_kernel!'
-    print 'See mandelbrot_kernel.c for instructions'
+    print('Compile mandelbrot_kernel!')
+    print('See mandelbrot_kernel.c for instructions')
     sys.exit(0)
 
 args = sys.argv
 if (len(args) < 5):
-    print 'Usage:\n\tpython mandelbrot_ctypes.py <workers> <jobcount> <width> <height>'
+    print('Usage:\n\tpython mandelbrot_ctypes.py <workers> <jobcount> <width> <height>')
     sys.exit(0)
 
 workers = int(args[1])
@@ -109,7 +109,7 @@ def manager(workerOut, workerIn, w, h, jobcount):
     # Generate jobs
     # Tuple: (job_id, w_start, w_step, width, h_start(job), h_step, job_h)
     jobs = []
-    for job_id in xrange(jobcount):
+    for job_id in range(jobcount):
         jobs.append(
             (job_id,
             w_start, w_step, w,
@@ -156,10 +156,10 @@ def manager(workerOut, workerIn, w, h, jobcount):
 
 if __name__ == '__main__':
 
-    print 'PyCSP mandelbrot'
-    print ' workers  :', workers
-    print ' jobcount :',jobcount
-    print ' size     :', (width, height)
+    print('PyCSP mandelbrot')
+    print(' workers  :', workers)
+    print(' jobcount :',jobcount)
+    print(' size     :', (width, height))
 
     rec_time_t = init_time_record()
 
@@ -174,3 +174,5 @@ if __name__ == '__main__':
     sys.stdout.write(' NB: includes channel create, job create and process startup/exit times\n')
     sys.stdout.write(' @%s\n' % (repr((jobcount, width, height, workers, rec_time_t['total'], "PyCSP"))))
     #pylab.show()
+
+    shutdown()

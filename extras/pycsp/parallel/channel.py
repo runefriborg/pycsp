@@ -8,11 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 import uuid
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 from pycsp.parallel import protocol
 from pycsp.parallel.exceptions import *
@@ -139,8 +135,9 @@ class Channel(object):
             if len(name) > 32:
                 raise Exception("Channel names are limited to 32 characters")
 
-            self.name=name
+            self.name= name
 
+        self.name = self.name.encode()
 
         self._CM = protocol.ChannelMessenger()
 
@@ -264,7 +261,7 @@ class Channel(object):
 
         self._check_termination()
 
-        print('We should not get here in read!!!' + str(p.state))
+        print(('We should not get here in read!!!' + str(p.state)))
         return None
 
     
@@ -290,7 +287,7 @@ class Channel(object):
 
         self._check_termination()
 
-        print('We should not get here in write!!! ' + str(p.state) + ' ' + str(msg))
+        print(('We should not get here in write!!! ' + str(p.state) + ' ' + str(msg)))
         return None
     
     def reader(self):
@@ -390,6 +387,9 @@ class ChannelEnd:
 
         self._restore_info = None
 
+    def __lt__(self, other):
+        # Needed for sorting in FairSelect
+        return self
 
     def __getstate__(self):
         """

@@ -103,10 +103,10 @@ def Parallel_Test(sleeper):
     L= Parallel(writer(c1.writer(), 0, 10, sleeper), 10 * return_msg(c1.reader(), sleeper))
     
     if L and len(L) == 11 and L[0] == None and not None in L[1:]:
-        print("OK - SSHProcess_Parallel_Test"+str(sleeper))
+        print(("OK - SSHProcess_Parallel_Test"+str(sleeper)))
     else:
-        print("Error - SSHProcess_Parallel_Test"+str(sleeper))
-        print(str(L))
+        print(("Error - SSHProcess_Parallel_Test"+str(sleeper)))
+        print((str(L)))
 
 def Sequence_Test(sleeper):
     
@@ -116,17 +116,17 @@ def Sequence_Test(sleeper):
     L= Sequence(10 * return_msg(c1.reader(), sleeper))
     
     if L and len(L) == 10 and not None in L:
-        print("OK - SSHProcess_Sequence_Test"+str(sleeper))
+        print(("OK - SSHProcess_Sequence_Test"+str(sleeper)))
     else:
-        print("Error - SSHProcess_Sequence_Test"+str(sleeper))
-        print(str(L))
+        print(("Error - SSHProcess_Sequence_Test"+str(sleeper)))
+        print((str(L)))
 
 def One2One_Test(read_sleeper, write_sleeper):
     x = Channel()
     Spawn(check.Assert(x.reader(), "SSHProcess_One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
 
     c1=Channel()
-    Parallel(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper), ssh_python='python2.7')
+    Parallel(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()

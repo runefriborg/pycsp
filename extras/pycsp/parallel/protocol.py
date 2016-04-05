@@ -249,7 +249,7 @@ class LockMessenger(object):
         #sys.stderr.write("\nEXIT REMOTE ACQUIRE SUCCESS\n")
         return (header, header.arg, header.seq_number)
 
-    def remote_notify(self, source_header, dest, result_ch, result_msg=""):
+    def remote_notify(self, source_header, dest, result_ch, result_msg=b""):
         if dest.active:
             try:
                 h = Header(LOCKTHREAD_NOTIFY_SUCCESS, dest.id)
@@ -706,7 +706,7 @@ class ChannelHome(object):
         return False
     
 class AddrID(object):
-    def __init__(self, addr=('',0), id=""):
+    def __init__(self, addr=(b"",0), id=b""):
         self.hostNport = addr
         self.id = id
         self.active = True

@@ -6,6 +6,8 @@ Copyright (c) 2009 John Markus Bjoerndalen <jmb@cs.uit.no>,
 See LICENSE.txt for licensing details (MIT License). 
 """
 
+
+from pycsp.common.six import string_types
 import pycsp.current as pycsp
 
 if pycsp.trace:
@@ -23,45 +25,45 @@ def which(cmd):
 
 @pycsp.process
 def file_r(cout, file, retire_on_eof=True, sep="\n"):
-    if types.StringType == type(file):
-        file = open(file, 'r')
-    
-    if types.FileType == type(file):
-        try:
-            buf = []
-            line = file.readline()
-            while (line):
-                buf.append(line)
-                if buf[-1].find(sep) > -1:
-                    cout(buf)
-                    buf = []
-                line = file.readline()
-            if buf:
-                cout(buf)
-        except:
-            pass
 
-        file.close()
-        if retire_on_eof:
-            pycsp.retire(cout)
+    if isinstance(file, string_types):
+        file = open(file, 'r')
+        
+    try:
+        buf = []
+        line = file.readline()
+        while (line):
+            buf.append(line)
+            if buf[-1].find(sep) > -1:
+                cout(buf)
+                buf = []
+            line = file.readline()
+        if buf:
+            cout(buf)
+    except:
+        pass
+
+    file.close()
+    if retire_on_eof:
+        pycsp.retire(cout)
 
 
 @pycsp.process
 def file_w(cin, file):
-    if types.StringType == type(file):
+    
+    if isinstance(file, string_types):
         file = open(file, 'w')
 
-    if types.FileType == type(file):
-        try:
-            while True:
-                data = cin()
-                if type(data) == types.ListType:
-                    file.write(''.join(data))
-                else:
-                    file.write(data)
-                file.flush()
-        except:
-            file.close()
+    try:
+        while True:
+            data = cin()
+            if type(data) == list:
+                file.write(''.join(data))
+            else:
+                file.write(data)
+            file.flush()
+    except:
+        file.close()
 
 
 @pycsp.process

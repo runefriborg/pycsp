@@ -8,7 +8,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 # Imports
 try: from greenlet import greenlet
-except ImportError, e:
+except ImportError as e:
     from py.magic import greenlet
 
 import threading
@@ -88,7 +88,7 @@ class Io(threading.Thread):
     def run(self):
         try:
             self.retval = self.fn(*self.args, **self.kwargs)
-        except Exception, e:
+        except Exception as e:
             # Save exception for greenlet.
             self.exception = e
 
@@ -160,8 +160,8 @@ class Scheduler(object):
             cls.__instance = object.__new__(cls)
 
             # Initialize members for scheduler
-            cls.__instance.new = []
-            cls.__instance.next = []
+            cls.__instance.newQ = []
+            cls.__instance.nextQ = []
             cls.__instance.main_process = MainProcess(greenlet.getcurrent(), cls.__instance)
             cls.__instance.current = cls.__instance.main_process
 
@@ -184,7 +184,7 @@ class Scheduler(object):
         new_time = seconds + time.time()
 
         inserted = False
-        for i in xrange(len(self.timers)):
+        for i in range(len(self.timers)):
             if new_time < self.timers[i][0]:
                 self.timers.insert(i,(new_time, p))
                 inserted = True
@@ -195,7 +195,7 @@ class Scheduler(object):
 
     # Called by MainThread
     def timer_cancel(self, p):
-        for i in xrange(len(self.timers)):
+        for i in range(len(self.timers)):
             if self.timers[i][1] == p:
                 self.timers.pop(i)
                 break
@@ -229,10 +229,10 @@ class Scheduler(object):
     def addBulk(self, processes):
 
         # We reverse the list of added processes, if the total amount of new processes exceeds 1000.
-        if len(self.new) + len(processes) > 1000:
+        if len(self.newQ) + len(processes) > 1000:
             processes.reverse()
             
-        self.new.extend(processes)
+        self.newQ.extend(processes)
 
     # Main loop
     # When all queues are empty all greenlets have been executed.
@@ -243,23 +243,23 @@ class Scheduler(object):
             if self.timers and self.timers[0][0] < time.time():
                 _,self.current = self.timers.pop(0)
                 self.current.greenlet.switch()
-            elif self.new:
-                if len(self.new) > 1000:
+            elif self.newQ:
+                if len(self.newQ) > 1000:
                     # Pop from end, if the new list might be large.
-                    self.current = self.new.pop(-1)
+                    self.current = self.newQ.pop(-1)
                 else:
                     # Pop from beginning to be more fair
-                    self.current = self.new.pop(0)
+                    self.current = self.newQ.pop(0)
                 self.current.greenlet.switch()
-            elif self.next:
+            elif self.nextQ:
                 # Pop from the beginning
-                self.current = self.next.pop(0)
+                self.current = self.nextQ.pop(0)
                 self.current.greenlet.switch()
 
             # We enter a critical region, since timer threads or blocking io threads,
             # might try to update the internal queues.
             self.cond.acquire()
-            if not (self.next or self.new):
+            if not (self.nextQ or self.newQ):
                 # Waiting on blocking processes or all processes have finished!
                 if self.timers:
                     # Set timer to lowest activation time
@@ -310,15 +310,15 @@ class Scheduler(object):
 
     # Get next greenlet available for scheduling
     def getNext(self):
-        if self.new:            
+        if self.newQ:            
             # Returning scheduler, to avoid exceeding the recursion limit.
             # All new greenlets must be started from the scheduler, to have the
             # scheduler as parent greenlet.
             # Switch to main loop
             return self
-        elif self.next:
+        elif self.nextQ:
             # Quick choice
-            self.current = self.next.pop(0)
+            self.current = self.nextQ.pop(0)
             return self.current
         else:
             # Some processes are blocking or all have been executed.
@@ -327,4 +327,4 @@ class Scheduler(object):
 
 
     def activate(self, process):
-        self.next.append(process)
+        self.nextQ.append(process)

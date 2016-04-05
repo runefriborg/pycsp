@@ -14,7 +14,7 @@ def wait(seconds):
 @process
 def delay_output(msg, seconds):
     wait(seconds)
-    print(str(msg))
+    print((str(msg)))
 
 Parallel(
     [ delay_output('%d second delay' % (i),i) for i in range(10)]

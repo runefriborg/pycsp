@@ -9,9 +9,9 @@ See LICENSE.txt for licensing details (MIT License).
 # Test for Greenlets
 import sys
 try: from greenlet import greenlet
-except ImportError, e:
+except ImportError as e:
     try: from py.magic import greenlet
-    except ImportError, e: 
+    except ImportError as e: 
         sys.stderr.write("PyCSP.greenlets requires the greenlet module, recommended version is 0.2 or above and is\navailable from http://pypi.python.org/pypi/greenlet/.\n\n")
         raise ImportError(e)
 
@@ -28,7 +28,7 @@ from pycsp.greenlets.compat import *
 
 __all__ = ['Skip', 'SkipGuard', 'Timeout', 'TimeoutGuard', 'InputGuard', 'OutputGuard', 'choice', 'Alternation', 'FairSelect', 'AltSelect', 'PriSelect', 'Channel', 'retire', 'poison', 'Process', 'process', 'MultiProcess', 'multiprocess', 'ClusterProcess', 'clusterprocess', 'SSHProcess', 'sshprocess', 'Sequence', 'Parallel', 'Spawn', 'current_process_id', 'shutdown', 'ChannelRetireException', 'ChannelPoisonException', 'ChannelSocketException', 'InfoException', 'FatalException', 'io', 'Io', 'Configuration', 'SOCKETS_CONNECT_TIMEOUT', 'SOCKETS_CONNECT_RETRY_DELAY', 'SOCKETS_BIND_TIMEOUT', 'SOCKETS_BIND_RETRY_DELAY', 'PYCSP_PORT', 'PYCSP_HOST', 'SOCKETS_STRICT_MODE', 'version']
 
-version = (0,9,1, 'greenlets')
+version = (0,9,2, 'greenlets')
 
 # Set current implementation
 import pycsp.current

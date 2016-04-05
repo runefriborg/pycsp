@@ -18,10 +18,7 @@ try:
 except ImportError:
     MULTIPROCESSING_ENABLED=0
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 
 from pycsp.parallel import ossocket
@@ -38,9 +35,9 @@ class Message:
     header : Must be of Header class type
     payload : Any serializable type
     """
-    def __init__(self, header, payload=""):
+    def __init__(self, header, payload=b""):
         self.header = header
-        self.payload = payload 
+        self.payload = payload
 
         # transport for natfix
         self.natfix = None
@@ -258,7 +255,7 @@ class SocketThread(threading.Thread):
             if not ready and not exceptready:
                 # Timeout. Invoke ticks
                 self.cond.acquire()
-                for c in self.channels.values():
+                for c in list(self.channels.values()):
                     c.timeout_tick()
                 self.cond.release()
 
@@ -373,9 +370,13 @@ class SocketThreadData:
             port = int(os.environ[ENVVAL_PORT])
         if host == '' and ENVVAL_HOST in os.environ:
             host = os.environ[ENVVAL_HOST]
+
+        host = host.encode()
+
         addr = (host, port)
 
         self.server_socket, self.server_addr = ossocket.start_server(addr)
+        self.server_addr = (self.server_addr[0].encode(), self.server_addr[1])
 
         self.active_socket_list = [self.server_socket]
         self.active_socket_list_add = []
@@ -523,7 +524,7 @@ class SocketThreadData:
         #print("\n### DeregisterProcess\n%s: channels: %s,processes: %s,guards: %s" % (name_id, str(self.channels), str(self.processes), str(self.guards)))
 
 
-    def send(self, addr, header, payload="", otherhandler=None):
+    def send(self, addr, header, payload=b"", otherhandler=None):
         # Update message source
         header._source_host, header._source_port = self.server_addr
         
@@ -567,7 +568,7 @@ class SocketThreadData:
             self.cond.release()
 
 
-    def reply(self, source_header, header, payload="", otherhandler=None):
+    def reply(self, source_header, header, payload=b"", otherhandler=None):
         addr = (source_header._source_host, source_header._source_port)
 
         # Update message source

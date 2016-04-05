@@ -9,10 +9,8 @@ See LICENSE.txt for licensing details (MIT License).
 # Imports
 import inspect
 import types
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import collections
+import pickle
 
 from pycsp.parallel.guard import Guard
 from pycsp.parallel.exceptions import *
@@ -143,11 +141,11 @@ class Alternation:
         # Preserve tuple entries and convert dictionary entries to tuple entries
         self.guards = []
         for g in guards:
-            if type(g) == types.TupleType:
+            if type(g) == tuple:
                 self.guards.append(g)
-            elif type(g) == types.DictType:
-                for elem in g.keys():
-                    if type(elem) == types.TupleType:
+            elif type(g) == dict:
+                for elem in list(g.keys()):
+                    if type(elem) == tuple:
                         self.guards.append((elem[0], elem[1], g[elem]))
                     else:
                         self.guards.append((elem, g[elem]))
@@ -175,7 +173,7 @@ class Alternation:
             
 
         if p.state==SUCCESS:
-            for c in reqs.keys():
+            for c in list(reqs.keys()):
                 if isinstance(c, Guard):
                     if c.id == p.result_ch:
                         act = c
@@ -260,7 +258,7 @@ class Alternation:
             if type(msg) == list:
                 msg = msg[0]
             else:
-                if msg == "":
+                if msg == b"":
                     msg = None
                 else:
                     msg = pickle.loads(msg)[0]
@@ -305,9 +303,9 @@ class Alternation:
                     action.invoke_on_input(result_msg)
 
             # Executing callback function object
-            elif callable(action):
+            elif isinstance(action, collections.Callable):
                 # Choice function not allowed as callback
-                if type(action) == types.FunctionType and action.func_name == '__choice_fn':
+                if type(action) == types.FunctionType and action.__name__ == '__choice_fn':
                     raise InfoException('@choice function is not instantiated. Please use action() and not just action')
                 else:
                     # Execute callback function
@@ -317,7 +315,7 @@ class Alternation:
                         action(channel_input=result_msg)
 
             # Compiling and executing string
-            elif type(action) == types.StringType:
+            elif type(action) == str:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe()
                 steps = self.execute_frame
@@ -335,7 +333,7 @@ class Alternation:
                 # Execute action
                 exec(code, f_globals, f_locals)
 
-            elif type(action) == types.NoneType:
+            elif type(action) == type(None):
                 pass
             else:
                 raise Exception('Failed executing action: '+str(action))

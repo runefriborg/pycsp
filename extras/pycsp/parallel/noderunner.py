@@ -22,7 +22,7 @@ has_paramiko= False
 try:
     import paramiko, select
     has_paramiko= True
-except ImportError, e:
+except ImportError as e:
     # Ignore for now
     pass
 
@@ -52,10 +52,10 @@ class NodeRunnerThread(threading.Thread):
             client.set_missing_host_key_policy(paramiko.WarningPolicy())
     
             client.connect(self.ssh_host, port=self.ssh_port, username=self.ssh_user, password=self.ssh_password)
-
+            
             command= " ".join(["/usr/bin/env", 
                                self.ssh_python, "-m", "pycsp.parallel.server",
-                               self.cwd, self.arg_chan_host, self.arg_chan_port, self.arg_chan_name])
+                               self.cwd, self.arg_chan_host, self.arg_chan_port, self.arg_chan_name.decode()])
 
             transport = client.get_transport()
             session = transport.open_session()
@@ -69,12 +69,12 @@ class NodeRunnerThread(threading.Thread):
                         data = r[0].recv(4096)
                         if data:
                             got_data = True
-                            sys.stdout.write(data)
+                            sys.stdout.write(data.decode())
                     if session.recv_stderr_ready():
                         data = r[0].recv_stderr(4096)
                         if data:
                             got_data = True
-                            sys.stderr.write(data)
+                            sys.stderr.write(data.decode())
                     if not got_data:
                         break
 

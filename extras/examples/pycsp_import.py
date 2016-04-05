@@ -16,8 +16,8 @@ if (mod == 'parallel'):
 elif (mod == 'greenlets'):
     from pycsp.greenlets import *
 else:
-    print "python",sys.argv[0],"[ parallel | greenlets ]"
+    print("python",sys.argv[0],"[ parallel | greenlets ]")
     from pycsp.parallel import *
 
-print 'Using version', version
+print('Using version', version)
 

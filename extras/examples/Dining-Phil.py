@@ -41,7 +41,7 @@ def philosopher(id, left, right, down, up):
             up(True)
 
     except ChannelRetireException:
-        print 'philosopher '+str(id)+' has eaten '+str(eat)+' times'
+        print('philosopher '+str(id)+' has eaten '+str(eat)+' times')
         retire(left, right)
 
 @process
@@ -61,7 +61,7 @@ def fork(left, right):
 def security(steps, down, up):
     max = 4
     n_sat_down = [0] # use call by reference
-    for step in xrange(steps):
+    for step in range(steps):
         guards = []
 
         if n_sat_down[0] < max: # don't allow max at a time

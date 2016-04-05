@@ -14,8 +14,8 @@ from pycsp.common.plugNplay import *
 
 @process
 def Printer(cin, limit):
-    for i in xrange(limit):
-        print cin(),
+    for i in range(limit):
+        print(cin())
     poison(cin)
 
 A = Channel('A')

@@ -138,7 +138,7 @@ class BufferedChannel:
                 # Queue full
                 else:
                     cout(queue.popleft())
-            except ChannelPoisonException, e:
+            except ChannelPoisonException as e:
                 poisoned = True
-            except ChannelRetireException, e:
+            except ChannelRetireException as e:
                 retired = True

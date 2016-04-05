@@ -40,7 +40,7 @@ def par_reader_skip_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
             InputGuard(cin4)
             )
 
-        print 'From ',c ,'got',msg
+        print('From ',c ,'got',msg)
     retire(cin1, cin2, cin3, cin4)
 
 @process
@@ -56,7 +56,7 @@ def par_reader_timeout_sel(cin1,cin2,cin3,cin4, cnt, sleeper):
             TimeoutGuard(seconds=0.1)
             )
 
-        print 'From ',c ,'got',msg
+        print('From ',c ,'got',msg)
     retire(cin1, cin2, cin3, cin4)
 
 @process
@@ -65,11 +65,11 @@ def par_reader_skip_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
         if sleeper: sleeper()
 
         PriSelect(
-            InputGuard(cin1, action="print 'From cin1 got', channel_input"),
-            InputGuard(cin2, action="print 'From cin2 got', channel_input"),
-            SkipGuard(action="print 'SkipGuard()'"),
-            InputGuard(cin3, action="print 'From cin3 got', channel_input"),
-            InputGuard(cin4, action="print 'From cin4 got', channel_input")
+            InputGuard(cin1, action="print('From cin1 got', channel_input)"),
+            InputGuard(cin2, action="print('From cin2 got', channel_input)"),
+            SkipGuard(action="print('SkipGuard()')"),
+            InputGuard(cin3, action="print('From cin3 got', channel_input)"),
+            InputGuard(cin4, action="print('From cin4 got', channel_input)")
             )
 
     retire(cin1, cin2, cin3, cin4)
@@ -80,11 +80,11 @@ def par_reader_timeout_exec(cin1,cin2,cin3,cin4, cnt, sleeper):
         if sleeper: sleeper()
 
         PriSelect(
-            InputGuard(cin1, action="print 'From cin1 got', channel_input"),
-            InputGuard(cin2, action="print 'From cin2 got', channel_input"),
-            InputGuard(cin3, action="print 'From cin3 got', channel_input"),
-            InputGuard(cin4, action="print 'From cin4 got', channel_input"),
-            TimeoutGuard(seconds=0.1, action="print 'TimeoutGuard(seconds=0.1)'")
+            InputGuard(cin1, action="print('From cin1 got', channel_input)"),
+            InputGuard(cin2, action="print('From cin2 got', channel_input)"),
+            InputGuard(cin3, action="print('From cin3 got', channel_input)"),
+            InputGuard(cin4, action="print('From cin4 got', channel_input)"),
+            TimeoutGuard(seconds=0.1, action="print('TimeoutGuard(seconds=0.1)')")
             )
 
     retire(cin1, cin2, cin3, cin4)
@@ -133,29 +133,29 @@ def Any2Any_Alting_Test(par_reader, read_sleeper, write_sleeper):
 
 
 if __name__ == '__main__':
-    print "Any2One_Alting_Test(par_reader_skip_sel, sleep_random, sleep_random)"
+    print("Any2One_Alting_Test(par_reader_skip_sel, sleep_random, sleep_random)")
     Any2One_Alting_Test(par_reader_skip_sel, sleep_random, sleep_random)
-    print
+    print()
 
-    print "Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)"
+    print("Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)")
     Any2One_Alting_Test(par_reader_timeout_sel, sleep_random, sleep_long_random)
-    print
+    print()
 
-    print "Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)"
+    print("Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)")
     Any2One_Alting_Test(par_reader_skip_exec, sleep_random, sleep_random)
-    print
+    print()
 
-    print "Any2One_Alting_Test(par_reader_timeout_exec, sleep_random, sleep_long_random)"
+    print("Any2One_Alting_Test(par_reader_timeout_exec, sleep_random, sleep_long_random)")
     Any2One_Alting_Test(par_reader_timeout_exec, sleep_random, sleep_long_random)
-    print
+    print()
 
-    print "Any2Any_Alting_Test(par_reader_skip_sel, None, sleep_long)"
+    print("Any2Any_Alting_Test(par_reader_skip_sel, None, sleep_long)")
     Any2Any_Alting_Test(par_reader_skip_sel, None, sleep_long)
-    print
+    print()
 
-    print "Any2Any_Alting_Test(par_reader_timeout_sel, None, sleep_long)"
+    print("Any2Any_Alting_Test(par_reader_timeout_sel, None, sleep_long)")
     Any2Any_Alting_Test(par_reader_timeout_sel, None, sleep_long)
-    print
+    print()
 
         
     shutdown()

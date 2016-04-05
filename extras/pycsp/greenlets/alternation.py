@@ -11,6 +11,7 @@ import inspect
 import types
 from pycsp.greenlets.channel import *
 from pycsp.common.const import *
+import collections
 
 # Decorators
 def choice(func):
@@ -56,11 +57,11 @@ class Alternation:
         # Preserve tuple entries and convert dictionary entries to tuple entries
         self.guards = []
         for g in guards:
-            if type(g) == types.TupleType:
+            if type(g) == tuple:
                 self.guards.append(g)
-            elif type(g) == types.DictType:
-                for elem in g.keys():
-                    if type(elem) == types.TupleType:
+            elif type(g) == dict:
+                for elem in list(g.keys()):
+                    if type(elem) == tuple:
                         self.guards.append((elem[0], elem[1], g[elem]))
                     else:
                         self.guards.append((elem, g[elem]))
@@ -85,7 +86,7 @@ class Alternation:
         act=None
         poison=False
         retire=False
-        for req in reqs.keys():
+        for req in list(reqs.keys()):
             _, c, op = reqs[req]
             if op==READ:
                 c._remove_read(req)
@@ -143,7 +144,7 @@ class Alternation:
                 if retire:
                     raise ChannelRetireException()
 
-                print 'We should not get here in choice!!!'
+                print('We should not get here in choice!!!')
 
         idx, c, op = reqs[act]
         return (idx, act, c, op)
@@ -164,9 +165,9 @@ class Alternation:
                     action.invoke_on_input(req.msg)
 
             # Executing callback function object
-            elif callable(action):
+            elif isinstance(action, collections.Callable):
                 # Choice function not allowed as callback
-                if type(action) == types.FunctionType and action.func_name == '__choice_fn':
+                if type(action) == types.FunctionType and action.__name__ == '__choice_fn':
                     raise Exception('@choice function is not instantiated. Please use action() and not just action')
                 else:
                     # Execute callback function
@@ -176,7 +177,7 @@ class Alternation:
                         action(channel_input=req.msg)
 
             # Compiling and executing string
-            elif type(action) == types.StringType:
+            elif type(action) == str:
                 # Fetch process frame and namespace
                 processframe= inspect.currentframe()
                 steps = self.execute_frame
@@ -194,7 +195,7 @@ class Alternation:
                 # Execute action
                 exec(code, f_globals, f_locals)
 
-            elif type(action) == types.NoneType:
+            elif type(action) == type(None):
                 pass
             else:
                 raise Exception('Failed executing action: '+str(action))

@@ -34,7 +34,7 @@ def worker(cin, cout):
 @process
 def printer(cin):
     while True:
-        print cin()
+        print(cin())
 
 
 first=Channel()

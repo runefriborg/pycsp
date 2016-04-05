@@ -16,7 +16,7 @@ has_paramiko= False
 try:
     import paramiko
     has_paramiko= True
-except ImportError, e:
+except ImportError as e:
     # Ignore for now
     pass
 
@@ -61,7 +61,7 @@ def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh
     if func:
         def _call(*args, **kwargs):
             return SSHProcess(func, *args, **kwargs)
-        _call.func_name = func.func_name
+        _call.__name__ = func.__name__
         return _call
     else:
         def wrap_process(func):
@@ -74,7 +74,7 @@ def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh
                 kwargs['ssh_password']= ssh_password
                 kwargs['ssh_python']= ssh_python
                 return SSHProcess(func, *args, **kwargs)
-            _call.func_name = func.func_name
+            _call.__name__ = func.__name__
             return _call
         return wrap_process
 
@@ -140,42 +140,40 @@ class SSHProcess(object):
             raise ImportError("paramiko")
 
         # Host and Port address will be set in the new environment
-        if self.kwargs.has_key("pycsp_host"):
+        if "pycsp_host" in self.kwargs:
             pycsp_host = self.kwargs.pop("pycsp_host")
         else:
             pycsp_host = ''
             
-        if self.kwargs.has_key("pycsp_port"):
+        if "pycsp_port" in self.kwargs:
             pycsp_port = self.kwargs.pop("pycsp_port")
         else:
             pycsp_port = 0
 
-        if self.kwargs.has_key("ssh_host"):
+        if "ssh_host" in self.kwargs:
             ssh_host = self.kwargs.pop("ssh_host")
         else:
             ssh_host = "localhost"
 
-        if self.kwargs.has_key("ssh_port"):
+        if "ssh_port" in self.kwargs:
             ssh_port = self.kwargs.pop("ssh_port")
         else:
             ssh_port = 22
 
-        if self.kwargs.has_key("ssh_user"):
+        if "ssh_user" in self.kwargs:
             ssh_user = self.kwargs.pop("ssh_user")
         else:
             ssh_user = None
 
-        if self.kwargs.has_key("ssh_password"):
+        if "ssh_password" in self.kwargs:
             ssh_password = self.kwargs.pop("ssh_password")
         else:
             ssh_password = None
 
-        if self.kwargs.has_key("ssh_python"):
+        if "ssh_python" in self.kwargs:
             ssh_python = self.kwargs.pop("ssh_python")
         else:
             ssh_python = "python"
-
-
         
         self.result_chan = NodeRunner().run(ssh_host      = ssh_host,
                          ssh_port      = ssh_port,
@@ -183,8 +181,8 @@ class SSHProcess(object):
                          cwd           = os.getcwd(),
                          pycsp_host    = pycsp_host,
                          pycsp_port    = pycsp_port,
-                         script_path   = self.fn.func_code.co_filename,
-                         func_name     = self.fn.func_name,
+                         script_path   = self.fn.__code__.co_filename,
+                         func_name     = self.fn.__name__,
                          func_args     = self.args,
                          func_kwargs   = self.kwargs,
                          cluster_state = None )                         
@@ -202,7 +200,7 @@ class SSHProcess(object):
     # syntactic sugar:  Process() * 2 == [Process<1>,Process<2>]
     def __mul__(self, multiplier):
         kwargs = self.__mul_channel_ends(self.kwargs)        
-        return [self] + [SSHProcess(self.fn, *self.__mul_channel_ends(self.args), **kwargs) for i in range(multiplier - 1)]
+        return [self] + [SSHProcess(self.fn, *self.__mul_channel_ends(self.args), **kwargs) for i in range(int(multiplier) - 1)]
 
     # syntactic sugar:  2 * Process() == [Process<1>,Process<2>]
     def __rmul__(self, multiplier):
@@ -210,39 +208,39 @@ class SSHProcess(object):
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
-        if types.ListType == type(args) or types.TupleType == type(args):
+        if list == type(args) or tuple == type(args):
             R = []
             for item in args:
                 try:                    
-                    if type(item.isReader) == types.UnboundMethodType and item.isReader():
+                    if type(item.isReader) == types.MethodType and item.isReader():
                         R.append(item.channel.reader())
-                    elif type(item.isWriter) == types.UnboundMethodType and item.isWriter():
+                    elif type(item.isWriter) == types.MethodType and item.isWriter():
                         R.append(item.channel.writer())
                 except AttributeError:
-                    if item == types.ListType or item == types.DictType or item == types.TupleType:
+                    if item == list or item == dict or item == tuple:
                         R.append(self.__mul_channel_ends(item))
                     else:
                         R.append(item)
 
-            if types.TupleType == type(args):
+            if tuple == type(args):
                 return tuple(R)
             else:
                 return R
             
-        elif types.DictType == type(args):
+        elif dict == type(args):
             R = {}
             for key in args:
                 try:
-                    if type(key.isReader) == types.UnboundMethodType and key.isReader():
+                    if type(key.isReader) == types.MethodType and key.isReader():
                         R[key.channel.reader()] = args[key]
-                    elif type(key.isWriter) == types.UnboundMethodType and key.isWriter():
+                    elif type(key.isWriter) == types.MethodType and key.isWriter():
                         R[key.channel.writer()] = args[key]
-                    elif type(args[key].isReader) == types.UnboundMethodType and args[key].isReader():
+                    elif type(args[key].isReader) == types.MethodType and args[key].isReader():
                         R[key] = args[key].channel.reader()
-                    elif type(args[key].isWriter) == types.UnboundMethodType and args[key].isWriter():
+                    elif type(args[key].isWriter) == types.MethodType and args[key].isWriter():
                         R[key] = args[key].channel.writer()
                 except AttributeError:
-                    if args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
+                    if args[key] == list or args[key] == dict or args[key] == tuple:
                         R[key] = self.__mul_channel_ends(args[key])
                     else:
                         R[key] = args[key]

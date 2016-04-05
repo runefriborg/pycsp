@@ -86,10 +86,10 @@ def Parallel_Test(sleeper):
     L= Parallel(writer(c1.writer(), 0, 10, sleeper), 10 * return_msg(c1.reader(), sleeper))
     
     if len(L) == 11 and L[0] == None and not None in L[1:]:
-        print("OK - Parallel_Test"+str(sleeper))
+        print(("OK - Parallel_Test"+str(sleeper)))
     else:
-        print("Error - Parallel_Test"+str(sleeper))
-        print(str(L))
+        print(("Error - Parallel_Test"+str(sleeper)))
+        print((str(L)))
 
 def Sequence_Test(sleeper):
     
@@ -99,10 +99,10 @@ def Sequence_Test(sleeper):
     L= Sequence(10 * return_msg(c1.reader(), sleeper))
     
     if len(L) == 10 and not None in L:
-        print("OK - Sequence_Test"+str(sleeper))
+        print(("OK - Sequence_Test"+str(sleeper)))
     else:
-        print("Error - Sequence_Test"+str(sleeper))
-        print(str(L))
+        print(("Error - Sequence_Test"+str(sleeper)))
+        print((str(L)))
 
     
 def One2One_Test(read_sleeper, write_sleeper):

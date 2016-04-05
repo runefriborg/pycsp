@@ -199,7 +199,7 @@ def FairSelect(*guards):
     for item in guards:
         try:
             chan_name = item.g[0].channel.name
-            if H.has_key(chan_name):
+            if chan_name in H:
                 L.append((H[chan_name], item.g))
             else:
                 L.append((0, item.g))
@@ -253,16 +253,16 @@ class AltHistory(object):
     getInstance = classmethod(getInstance)
 
     def get_history(self, alt_key):
-        if not self.history.has_key(alt_key):
+        if alt_key not in self.history:
             self.history[alt_key] = {}
         return self.history[alt_key]
 
     def update_history(self, alt_key, chan_name):
-        if not self.history.has_key(alt_key):
+        if alt_key not in self.history:
             self.history[alt_key] = {}
 
         H = self.history[alt_key]
-        if H.has_key(chan_name):
+        if chan_name in H:
             H[chan_name] += 1
         else:
             H[chan_name] = 1

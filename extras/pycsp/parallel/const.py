@@ -20,10 +20,10 @@ PICKLE_PROTOCOL= 2
 ENABLE_CACHE = 1
 
 # Operation type
-READ, WRITE = range(2)
+READ, WRITE = list(range(2))
 
 # Constants used for both ChannelReq results and ReqStatus states.
-READY, FAIL, SUCCESS, POISON, RETIRE = range(5)
+READY, FAIL, SUCCESS, POISON, RETIRE = list(range(5))
 
 
 def getThreadAndName(init=True):
@@ -70,7 +70,7 @@ def getThreadAndName(init=True):
     except AttributeError:
         if init:
             # Engaging auto init
-            import process
-            process.init()
+            from pycsp.parallel.process import init
+            init()
 
     return (thread, name)

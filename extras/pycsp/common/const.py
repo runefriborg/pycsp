@@ -7,13 +7,13 @@ See LICENSE.txt for licensing details (MIT License).
 """
 
 # Operation type
-READ, WRITE = range(2)
+READ, WRITE = list(range(2))
 
 # Result of a channel request (ChannelReq)
-FAIL, SUCCESS = range(2)
+FAIL, SUCCESS = list(range(2))
 
 # State of a channel request status (ReqStatus)
-ACTIVE, DONE = range(2)
+ACTIVE, DONE = list(range(2))
 
 # Constants used for both ChannelReq results and ReqStatus states.
-POISON, RETIRE = range(2,4)
+POISON, RETIRE = list(range(2,4))

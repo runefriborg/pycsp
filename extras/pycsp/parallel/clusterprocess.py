@@ -17,7 +17,7 @@ has_paramiko= False
 try:
     import paramiko
     has_paramiko= True
-except ImportError, e:
+except ImportError as e:
     # Ignore for now
     pass
 
@@ -70,7 +70,7 @@ def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None
     if func:
         def _call(*args, **kwargs):
             return ClusterProcess(func, *args, **kwargs)
-        _call.func_name = func.func_name
+        _call.__name__ = func.__name__
         return _call
     else:
         def wrap_process(func):
@@ -81,7 +81,7 @@ def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None
                 kwargs['cluster_ssh_port'] = cluster_ssh_port
                 kwargs['cluster_python']   = cluster_python
                 return ClusterProcess(func, *args, **kwargs)
-            _call.func_name = func.func_name
+            _call.__name__ = func.__name__
             return _call
         return wrap_process
 
@@ -277,19 +277,19 @@ class ClusterProcess(object):
             sys.stderr.write("The clusterprocess requires the Python paramiko module for SSH connections.\nSee https://pypi.python.org/pypi/paramiko/\n\n")
             raise ImportError("paramiko")
 
-        if self.kwargs.has_key("cluster_nodefile"):
+        if "cluster_nodefile" in self.kwargs:
             cluster_nodefile = self.kwargs.pop("cluster_nodefile")
         else:
             cluster_nodefile = "$PBS_NODEFILE"
     
         group = NodePlacement().get_nodegroup(cluster_nodefile)
 
-        if self.kwargs.has_key("cluster_pin"):
+        if "cluster_pin" in self.kwargs:
             cluster_pin = self.kwargs.pop("cluster_pin")
         else:
             cluster_pin = None
 
-        if self.kwargs.has_key("cluster_hint"):
+        if "cluster_hint" in self.kwargs:
             cluster_hint = self.kwargs.pop("cluster_hint")
         else:
             cluster_hint = "blocked"
@@ -308,12 +308,12 @@ class ClusterProcess(object):
         pycsp_port = 0
 
         
-        if self.kwargs.has_key("cluster_ssh_port"):
+        if "cluster_ssh_port" in self.kwargs:
             ssh_port = self.kwargs.pop("cluster_ssh_port")
         else:
             ssh_port = 22
 
-        if self.kwargs.has_key("cluster_python"):
+        if "cluster_python" in self.kwargs:
             ssh_python = self.kwargs.pop("cluster_python")
         else:
             ssh_python = "python"
@@ -325,8 +325,8 @@ class ClusterProcess(object):
                          cwd           = os.getcwd(),
                          pycsp_host    = pycsp_host,
                          pycsp_port    = pycsp_port,
-                         script_path   = self.fn.func_code.co_filename,
-                         func_name     = self.fn.func_name,
+                         script_path   = self.fn.__code__.co_filename,
+                         func_name     = self.fn.__name__,
                          func_args     = self.args,
                          func_kwargs   = self.kwargs,
                          cluster_state = (cluster_nodefile, group.get_state()) )                         
@@ -351,39 +351,39 @@ class ClusterProcess(object):
 
     # Copy lists and dictionaries
     def __mul_channel_ends(self, args):
-        if types.ListType == type(args) or types.TupleType == type(args):
+        if list == type(args) or tuple == type(args):
             R = []
             for item in args:
                 try:                    
-                    if type(item.isReader) == types.UnboundMethodType and item.isReader():
+                    if type(item.isReader) == types.MethodType and item.isReader():
                         R.append(item.channel.reader())
-                    elif type(item.isWriter) == types.UnboundMethodType and item.isWriter():
+                    elif type(item.isWriter) == types.MethodType and item.isWriter():
                         R.append(item.channel.writer())
                 except AttributeError:
-                    if item == types.ListType or item == types.DictType or item == types.TupleType:
+                    if item == list or item == dict or item == tuple:
                         R.append(self.__mul_channel_ends(item))
                     else:
                         R.append(item)
 
-            if types.TupleType == type(args):
+            if tuple == type(args):
                 return tuple(R)
             else:
                 return R
             
-        elif types.DictType == type(args):
+        elif dict == type(args):
             R = {}
             for key in args:
                 try:
-                    if type(key.isReader) == types.UnboundMethodType and key.isReader():
+                    if type(key.isReader) == types.MethodType and key.isReader():
                         R[key.channel.reader()] = args[key]
-                    elif type(key.isWriter) == types.UnboundMethodType and key.isWriter():
+                    elif type(key.isWriter) == types.MethodType and key.isWriter():
                         R[key.channel.writer()] = args[key]
-                    elif type(args[key].isReader) == types.UnboundMethodType and args[key].isReader():
+                    elif type(args[key].isReader) == types.MethodType and args[key].isReader():
                         R[key] = args[key].channel.reader()
-                    elif type(args[key].isWriter) == types.UnboundMethodType and args[key].isWriter():
+                    elif type(args[key].isWriter) == types.MethodType and args[key].isWriter():
                         R[key] = args[key].channel.writer()
                 except AttributeError:
-                    if args[key] == types.ListType or args[key] == types.DictType or args[key] == types.TupleType:
+                    if args[key] == list or args[key] == dict or args[key] == tuple:
                         R[key] = self.__mul_channel_ends(args[key])
                     else:
                         R[key] = args[key]

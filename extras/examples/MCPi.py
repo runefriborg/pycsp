@@ -6,6 +6,7 @@ See LICENSE.txt for licensing details (MIT License).
 
 from pycsp_import import *
 from random import random
+from functools import reduce
 
 @process
 def producer(job_out, bagsize, bags):
@@ -16,7 +17,7 @@ def producer(job_out, bagsize, bags):
 def worker(job_in, result_out):
    while True:
        cnt=job_in()           #Get task
-       sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), range(cnt))
+       sum = reduce(lambda x,y: x+(random()**2+random()**2<1.0), list(range(cnt)))
        result_out((4.0*sum)/cnt)  #Forward result
 
 
@@ -26,10 +27,10 @@ def consumer(result_in):
    try:
        while True:
            cnt+=1
-           print str(cnt) + ' ' + str(sum)
+           print(str(cnt) + ' ' + str(sum))
            sum=(sum*cnt+result_in())/(cnt+1)    #Get result
    except ChannelRetireException:
-       print 'Result:',sum            #We are done - print result
+       print('Result:',sum)            #We are done - print result
 
 jobs=Channel()
 results=Channel()

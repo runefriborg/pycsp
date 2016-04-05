@@ -201,7 +201,7 @@ def recvall(sock, msg_len):
             sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
         raise SocketClosedException()
         
-    return "".join(msg_chunks)
+    return b"".join(msg_chunks)
 
 
 class ConnHandler(object):
@@ -247,7 +247,7 @@ class ConnHandler(object):
 
             # Expire socket
             addr = None
-            for item in self.cacheSockets.items():
+            for item in list(self.cacheSockets.items()):
                 if (item[1] == sock):
                     addr = item[0]
                     self.forceclose(addr)
@@ -286,7 +286,7 @@ class ConnHandler(object):
                 else:
                     # Expire socket
                     addr = None
-                    for item in self.cacheSockets.items():
+                    for item in list(self.cacheSockets.items()):
                         if (item[1] == sock):
                             addr = item[0]
                             self.forceclose(addr)

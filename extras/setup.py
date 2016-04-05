@@ -32,7 +32,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='pycsp',
-      version='0.9.1',
+      version='0.9.2',
       description='PyCSP - Python CSP Library',
       long_description=read('README.txt'),
       keywords = "python csp concurrency parallel distributed communicating sequential processes",
