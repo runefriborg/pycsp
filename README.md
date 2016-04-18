@@ -1,6 +1,3 @@
-# PyCSP
-Automatically exported from code.google.com/p/pycsp
-
 PyCSP is a CSP library for Python that implements core CSP
 functionality with some extensions from pi-calculus.
 
@@ -16,3 +13,5 @@ Providing
 * A PyCSP providing local and distributed communication using only standard python modules bundled with CPython
 * NAT traversal
 * Tracing PyCSP executions to a log file, for later visualisation
+
+See https://github.com/runefriborg/pycsp/wiki for more information.
