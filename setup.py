@@ -34,7 +34,7 @@ def read(fname):
 setup(name='pycsp',
       version='0.9.2',
       description='PyCSP - Python CSP Library',
-      long_description=read('README.txt'),
+      long_description=read('README.md'),
       keywords = "python csp concurrency parallel distributed communicating sequential processes",
       author='Rune M. Friborg',
       author_email='rune.m.friborg@gmail.com',
