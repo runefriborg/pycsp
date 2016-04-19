@@ -27,7 +27,7 @@ def process(func):
     return _call
 
 # Classes
-class Process():
+class Process(object):
     """ Process(fn, *args, **kwargs)
     It is recommended to use the @process decorator, to create Process instances
     See process.__doc__

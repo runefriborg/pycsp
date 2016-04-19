@@ -16,7 +16,7 @@ from pycsp.common.const import *
 import time, random
 
 # Classes
-class ChannelReq:
+class ChannelReq(object):
     def __init__(self, process, msg=None):
         self.msg = msg
         self.result = FAIL

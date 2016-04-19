@@ -95,7 +95,7 @@ class Io(threading.Thread):
         self.s.io_unblock(self.p)
 
 
-class MainProcess():
+class MainProcess(object):
     """
     A special process implementation for the __main__ namespace.
     

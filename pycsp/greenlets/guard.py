@@ -13,7 +13,7 @@ from pycsp.greenlets.process import Process
 from pycsp.common.const import *
 
 # Classes
-class Guard():
+class Guard(object):
     """
     The empty interface of a guard.
     """

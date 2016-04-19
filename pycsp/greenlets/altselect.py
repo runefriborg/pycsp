@@ -16,7 +16,7 @@ import pycsp.current
 
 import inspect
 
-class InputGuard:
+class InputGuard(object):
     """
     InputGuard wraps an input ch_end for use with AltSelect.
 
@@ -52,7 +52,7 @@ class InputGuard:
         except AttributeError:
             raise Exception('Cannot use ' + str(ch_end) + ' as input ch_end')
 
-class OutputGuard:
+class OutputGuard(object):
     """
     OutputGuard wraps an output ch_end for use with AltSelect.
 

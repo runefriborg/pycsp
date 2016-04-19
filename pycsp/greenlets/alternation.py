@@ -24,7 +24,7 @@ def choice(func):
     return __choice_fn
 
 # Classes
-class Choice:
+class Choice(object):
     """ Choice(func, *args, **kwargs)
     It is recommended to use the @choice decorator, to create Choice instances
     """
@@ -42,7 +42,7 @@ class Choice:
         self.fn(*self.args, **self.kwargs)
 
 
-class Alternation:
+class Alternation(object):
     """
     Alternation supports input and output guards. Guards are ChannelEnd
     or Guard objects.

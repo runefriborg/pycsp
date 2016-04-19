@@ -18,21 +18,21 @@ def shutdown():
 def multiprocess(func=None, pycsp_host='', pycsp_port=None):
     raise InfoException("multiprocess not available for greenlets. Use pycsp.parallel")
 
-class MultiProcess():
+class MultiProcess(object):
     def __init__(self, fn, *args, **kwargs):
         raise InfoException("MultiProcess not available for greenlets. Use pycsp.parallel")
 
 def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python'):
     raise InfoException("sshprocess not available for greenlets. Use pycsp.parallel")
 
-class SSHProcess():
+class SSHProcess(object):
     def __init__(self, fn, *args, **kwargs):
         raise InfoException("SSHProcess not available for greenlets. Use pycsp.parallel")
 
 def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22, cluster_python='python'):
     raise InfoException("clusterprocess not available for greenlets. Use pycsp.parallel")
 
-class ClusterProcess():
+class ClusterProcess(object):
     def __init__(self, fn, *args, **kwargs):
         raise InfoException("ClusterProcess not available for greenlets. Use pycsp.parallel")
 
