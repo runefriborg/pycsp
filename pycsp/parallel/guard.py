@@ -16,7 +16,7 @@ from pycsp.parallel.dispatch import SocketDispatcher
 from pycsp.parallel.exceptions import *
 
 # Classes
-class Guard:
+class Guard(object):
     """
     The empty interface of a guard.
     """

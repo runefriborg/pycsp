@@ -55,7 +55,7 @@ class NodeRunnerThread(threading.Thread):
             
             command= " ".join(["/usr/bin/env", 
                                self.ssh_python, "-m", "pycsp.parallel.server",
-                               self.cwd, self.arg_chan_host, self.arg_chan_port, self.arg_chan_name.decode()])
+                               self.cwd, self.arg_chan_host, self.arg_chan_port, self.arg_chan_name])
 
             transport = client.get_transport()
             session = transport.open_session()
@@ -187,9 +187,9 @@ class NodeRunner(object):
             running = []
             self.connections[key] = arg_chan
             self.running[key] = running
-            
+
             # Start NodeRunnerThread
-            t = NodeRunnerThread(ssh_host, ssh_port, ssh_python, cwd, str(arg_chan.address[0]), str(arg_chan.address[1]), arg_chan.name)
+            t = NodeRunnerThread(ssh_host, ssh_port, ssh_python, cwd, arg_chan.address[0].decode(), str(arg_chan.address[1]), arg_chan.name.decode())
             t.start()
             self.threads[key] = t
 

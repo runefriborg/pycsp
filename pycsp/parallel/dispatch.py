@@ -29,7 +29,7 @@ from pycsp.parallel.configuration import *
         
 conf = Configuration()
 
-class Message:
+class Message(object):
     """
     Message object which is used to exchange messages to both local and remote hosts
     header : Must be of Header class type
@@ -143,7 +143,7 @@ class SocketDispatcher(object):
     def getThread(self):
         return self.socketthreaddata
 
-class QueueBuffer:
+class QueueBuffer(object):
     def __init__(self):
         self.normal = []
         self.reply = []
@@ -350,7 +350,7 @@ class SocketThread(threading.Thread):
                                         c.put_normal(m)
                             self.cond.release()
 
-class SocketThreadData:
+class SocketThreadData(object):
     def __init__(self, cond):
 
         self.channels = {}

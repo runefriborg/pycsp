@@ -55,7 +55,7 @@ def choice(func):
     return __choice_fn
 
 # Classes
-class Choice:
+class Choice(object):
     """ Choice(func, *args, **kwargs)
     It is recommended to use the @choice decorator, to create Choice instances
     """
@@ -73,7 +73,7 @@ class Choice:
         self.fn(*self.args, **self.kwargs)
 
 
-class Alternation:
+class Alternation(object):
     """ Alternation([{cin0:None, (cout0,val):None}])
 
     Alternation provides the basic interface to Alt. It is recommended

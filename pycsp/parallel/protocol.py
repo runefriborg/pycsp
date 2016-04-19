@@ -304,7 +304,7 @@ class LockMessenger(object):
         
 
 
-class RemoteLock:
+class RemoteLock(object):
     def __init__(self, process):
         self.process = process
         self.cond = process.cond

@@ -137,7 +137,8 @@ class Channel(object):
 
             self.name= name
 
-        self.name = self.name.encode()
+        if type(self.name) != bytes:
+            self.name = self.name.encode()
 
         self._CM = protocol.ChannelMessenger()
 
@@ -374,10 +375,9 @@ class Channel(object):
         return self.__mul__(multiplier)
 
 
-class ChannelEnd:
+class ChannelEnd(object):
     def __init__(self, channel):
-
-
+        
         self.channel = channel
         self._op = WRITE
 
@@ -386,7 +386,7 @@ class ChannelEnd:
         self._ispoisoned = False
 
         self._restore_info = None
-
+        
     def __lt__(self, other):
         # Needed for sorting in FairSelect
         return self
@@ -414,8 +414,8 @@ class ChannelEnd:
     def __setstate__(self, dict):
         """
         Enables channel end mobility
-        """        
-
+        """
+                
         self.__dict__.update(dict)
 
         # restore Channel immediately, as the receiving end must register a new channel reference, before
@@ -519,10 +519,11 @@ class ChannelEnd:
 
     
 class ChannelEndWrite(ChannelEnd):
+        
     def __init__(self, channel):
         ChannelEnd.__init__(self, channel)
         self._op = WRITE
-
+ 
     def __call__(self, msg):
         if not self.channel:
             raise FatalException("The user have tried to communicate on a channel end which have been moved to another process")

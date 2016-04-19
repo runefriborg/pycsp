@@ -72,7 +72,6 @@ def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh
                 kwargs['ssh_port']= ssh_port
                 kwargs['ssh_user']= ssh_user
                 kwargs['ssh_password']= ssh_password
-                kwargs['ssh_python']= ssh_python
                 return SSHProcess(func, *args, **kwargs)
             _call.__name__ = func.__name__
             return _call
@@ -170,10 +169,7 @@ class SSHProcess(object):
         else:
             ssh_password = None
 
-        if "ssh_python" in self.kwargs:
-            ssh_python = self.kwargs.pop("ssh_python")
-        else:
-            ssh_python = "python"
+        ssh_python = sys.executable
         
         self.result_chan = NodeRunner().run(ssh_host      = ssh_host,
                          ssh_port      = ssh_port,

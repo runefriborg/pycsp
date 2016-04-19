@@ -29,7 +29,6 @@ from pycsp.parallel import *
 # Init main process
 init()
 
-
 # Connect to channel
 input_chan = Channel(input_name, connect=(ip, int(port)))
 

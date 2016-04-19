@@ -18,7 +18,7 @@ from pycsp.parallel.exceptions import *
 import pycsp.current
 
 
-class InputGuard:
+class InputGuard(object):
     """ InputGuard(ch_end_read, action=None)
 
     InputGuard wraps a ChannelEndRead for use with AltSelect/FairSelect.
@@ -76,7 +76,7 @@ class InputGuard:
         except AttributeError:
             raise InfoException('Can not use ' + str(ch_end_read) + ' as ch_end_read. InputGuard requires a ChannelEndRead object')
 
-class OutputGuard:
+class OutputGuard(object):
     """ OutputGuard(ch_end_write, msg, action=None)
 
     OutputGuard wraps a ChannelEndWrite for use with AltSelect/FairSelect.
