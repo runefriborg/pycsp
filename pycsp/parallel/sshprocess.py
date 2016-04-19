@@ -25,8 +25,8 @@ from pycsp.parallel.const import *
 from pycsp.parallel.noderunner import *
 
 # Decorators
-def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python'):
-    """ @sshprocess(pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None, ssh_python='python')
+def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None):
+    """ @sshprocess(pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh_port=22, ssh_user=None, ssh_password=None)
 
     This may be used to create a CSP network spanning remote hosts.
     Create CSP processes running in a new Python interpreter started on a remote host using the
@@ -49,7 +49,7 @@ def sshprocess(func=None, pycsp_host='', pycsp_port=0, ssh_host='localhost', ssh
       >>> P = filter(A.reader(), B.writer(), "42", debug=True)
 
       or
-      >>> @sshprocess(ssh_host="10.0.10.1", ssh_user="guest", ssh_password="42", ssh_python='python-2.6')
+      >>> @sshprocess(ssh_host="10.0.10.1", ssh_user="guest", ssh_password="42")
       >>> def filter(dataIn, dataOut, tag, debug=False):
       >>>   pass # perform filtering
       >>>
@@ -93,7 +93,7 @@ class SSHProcess(object):
       >>> def filter(dataIn, dataOut, tag, debug=False):
       >>>   pass # perform filtering
       >>>
-      >>> P = SSHProcess(filter, A.reader(), B.writer(), "42", debug=True, ssh_host='10.0.0.2', ssh_python='python-2.7') 
+      >>> P = SSHProcess(filter, A.reader(), B.writer(), "42", debug=True, ssh_host='10.0.0.2') 
 
     SSHProcess(func, *args, **kwargs)
     func
@@ -121,7 +121,7 @@ class SSHProcess(object):
         if self.p:
             raise FatalException("Can not update process settings after it has been started")
     
-        diff= set(kwargs.keys()).difference(["pycsp_host", "pycsp_port", "ssh_host", "ssh_port", "ssh_user", "ssh_password", "ssh_python"])
+        diff= set(kwargs.keys()).difference(["pycsp_host", "pycsp_port", "ssh_host", "ssh_port", "ssh_user", "ssh_password"])
         if diff:
             raise InfoException("Parameters %s not valid for SSHProcess, use another process type or remove parameters." % (str(diff)))
         

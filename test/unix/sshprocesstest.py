@@ -111,10 +111,10 @@ def Parallel_Test(sleeper):
 def Sequence_Test(sleeper):
     
     c1=Channel()
-    
+
     Spawn(writer(c1.writer(), 0, 10, sleeper))
     L= Sequence(10 * return_msg(c1.reader(), sleeper))
-    
+
     if L and len(L) == 10 and not None in L:
         print(("OK - SSHProcess_Sequence_Test"+str(sleeper)))
     else:

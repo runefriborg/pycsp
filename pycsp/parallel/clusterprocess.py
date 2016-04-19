@@ -27,8 +27,8 @@ from pycsp.parallel.noderunner import *
 
 
 # Decorators
-def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22, cluster_python='python'):
-    """ @clusterprocess(cluster_nodefile="", cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22, cluster_python='python')
+def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22):
+    """ @clusterprocess(cluster_nodefile="", cluster_pin=None, cluster_hint='blocked', cluster_ssh_port=22)
 
     This may be used to create a CSP network spanning remote hosts provided in a nodefile.
 
@@ -79,7 +79,6 @@ def clusterprocess(func=None, cluster_nodefile="$PBS_NODEFILE", cluster_pin=None
                 kwargs['cluster_pin']      = cluster_pin
                 kwargs['cluster_hint']     = cluster_hint
                 kwargs['cluster_ssh_port'] = cluster_ssh_port
-                kwargs['cluster_python']   = cluster_python
                 return ClusterProcess(func, *args, **kwargs)
             _call.__name__ = func.__name__
             return _call
@@ -260,7 +259,7 @@ class ClusterProcess(object):
         if self.result_chan:
             raise FatalException("Can not update process settings after it has been started")
  
-        diff= set(kwargs.keys()).difference(["cluster_nodefile", "cluster_pin", "cluster_hint", "cluster_ssh_port", "cluster_python"])
+        diff= set(kwargs.keys()).difference(["cluster_nodefile", "cluster_pin", "cluster_hint", "cluster_ssh_port"])
         if diff:
             raise InfoException("Parameters %s not valid for ClusterProcess, use another process type or remove parameters." % (str(diff)))
         
@@ -313,11 +312,7 @@ class ClusterProcess(object):
         else:
             ssh_port = 22
 
-        if "cluster_python" in self.kwargs:
-            ssh_python = self.kwargs.pop("cluster_python")
-        else:
-            ssh_python = "python"
-
+        ssh_python = sys.executable
         
         self.result_chan = NodeRunner().run(ssh_host      = nodehost,
                          ssh_port      = ssh_port,

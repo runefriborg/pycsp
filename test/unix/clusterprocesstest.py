@@ -126,7 +126,7 @@ def One2One_Test(read_sleeper, write_sleeper):
     Spawn(check.Assert(x.reader(), "ClusterProcess_One2One_Test"+str(read_sleeper)+str(write_sleeper), count=10, vocabulary=[0]))
 
     c1=Channel()
-    Parallel(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper), cluster_python='python2.7')
+    Parallel(reader(c1.reader(), 0 , read_sleeper, x.writer()), writer(c1.writer(),1,10, write_sleeper))
 
 def Any2One_Alting_Test(read_sleeper, write_sleeper):
     x = Channel()
