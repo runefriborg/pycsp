@@ -1,7 +1,8 @@
 PyCSP is a CSP library for Python that implements core CSP
 functionality with some extensions from pi-calculus.
 
-Providing
+Providing:
+
 * Synchronous communication
 * Buffered channels
 * Multiple process types such as, greenlets, threads, processes and remote processes
