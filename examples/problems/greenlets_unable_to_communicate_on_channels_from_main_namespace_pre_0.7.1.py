@@ -26,10 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # In PyCSP 0.7.1 this issue is fixed.
 
-import sys
-sys.path.append("../..")
-
-from pycsp.greenlets import *
+from pycsp_import import *
 
 @process
 def func(cout):
@@ -41,4 +38,8 @@ ch = Channel()
 cin, cout = +ch, -ch
 Spawn(func(cout))
 
-print cin()
+print(cin())
+
+poison(cin)
+
+shutdown()

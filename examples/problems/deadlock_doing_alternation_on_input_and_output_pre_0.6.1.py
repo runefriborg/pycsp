@@ -28,11 +28,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 # PyCSP 0.6.1 fixes this issue by introducing ordering of locks by memory address, before actual locking.
 
-from common import *
+from pycsp_import import *
 
 @process
 def P(id, c1, c2):
-    for i in xrange(10000):
+    for i in range(10000):
         Alternation([{(c1,True):None, c2:None}]).select()
     poison(c1,c2)
 

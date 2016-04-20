@@ -28,10 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # existing processes are blocked on channels, we now raise an Exception with the
 # message Deadlock!
 
-import sys
-sys.path.append("../..")
-
-from pycsp.greenlets import *
+from pycsp_import import *
 
 A = Channel()
 

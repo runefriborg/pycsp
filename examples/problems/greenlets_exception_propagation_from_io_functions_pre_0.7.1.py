@@ -23,10 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # In pycsp.greenlets pre 0.7.1 this does not propagate exceptions.
 
-import sys
-sys.path.append("../..")
-
-from pycsp.greenlets import *
+from pycsp_import import *
 import time
 
 @io
@@ -39,8 +36,8 @@ def show():
     try:
         blocking()
     except Exception as ex:
-        print 'Exception caught: %s' % str(ex)
+        print('Exception caught: %s' % str(ex))
     else:
-        print 'No exception!'
+        print('No exception!')
 
 Parallel(show())
