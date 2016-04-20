@@ -251,7 +251,32 @@ class SocketThread(threading.Thread):
         handler = ossocket.ConnHandler()
 
         while(not self.finished):
-            ready, _, exceptready = select.select(self.data.active_socket_list, [], [], 10.0)
+
+            # Performing select.select on possibly EBADF. A lingering socket may be left in the active_socket_list.
+            # The following select.select is robust against Bad File Descriptors, and will remove them from the active_socket_list
+            # The only way to test for a bad file descriptor, is to cause a socket.error exception.
+            
+            OK = False
+            while (not OK):
+                import socket
+                try:
+                    ready, _, exceptready = select.select(self.data.active_socket_list, [], [], 10.0)
+                    OK = True
+                except:
+                    new_socket_list = []
+                    for s in self.data.active_socket_list:
+                        try:
+                            if s.fileno() > 0:
+                                new_socket_list.append(s)
+                        except socket.error:
+                            # Ignoring EBADF file descriptor errors
+                            pass
+                        except ValueError:
+                            # Ignoring file descriptors with a value of -1
+                            pass
+                    self.data.active_socket_list = new_socket_list
+            # Select finished OK
+                    
             if not ready and not exceptready:
                 # Timeout. Invoke ticks
                 self.cond.acquire()
