@@ -98,7 +98,7 @@ def Dispatcher(register, inc):
                 guards.append( OutputGuard(req, msg=(GET, result)) )
             AltSelect(*guards)
         else:
-            result(b"Service '"+str(service_id).encode+ b"' not found!<br>")
+            result(b"Service '"+str(service_id).encode() + b"' not found!<br>")
         
     def add_service(channel_input):
         (id, request) = channel_input
