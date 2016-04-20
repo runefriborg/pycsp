@@ -445,6 +445,9 @@ class ChannelEnd(object):
             self.__call__ = self._poison
             self._ispoisoned = True
 
+        # As a final action. The channel end should be disconnected.
+        self.disconnect()
+            
     def _retire(self, *ignore):
         raise ChannelRetireException()
 
@@ -469,6 +472,9 @@ class ChannelEnd(object):
             self.channel._retire(direction=self._op)
             self.__call__ = self._retire
             self._isretired = True
+
+        # As a final action. The channel end should be disconnected.
+        self.disconnect()
 
     def __repr__(self):
         return "<ChannelEndWrite on channel named %s>" % self.channel.name
