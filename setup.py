@@ -43,7 +43,7 @@ setup(name='pycsp',
       packages=['pycsp', 'pycsp.parallel', 'pycsp.greenlets', 'pycsp.common', 'pycsp.current'],
       platforms=['any'],
       classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",        
