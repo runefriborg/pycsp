@@ -62,6 +62,9 @@ def BindCatchFailed():
     addr = ('localhost', 22223)
     Spawn(MultiProcess(host_writer, pycsp_host=addr[0], pycsp_port=addr[1]))
 
+    # Wait for spawned process
+    time.sleep(1)
+
     # Fail to bind!
     try:
         Parallel(MultiProcess(host_writer, pycsp_host=addr[0], pycsp_port=addr[1]))
