@@ -72,6 +72,7 @@ def _connect(addr, reconnect=True):
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
             # Connect to addr
+            print('ossocket connect ' + str(addr))
             sock.connect(addr)
 
             connected = True
@@ -102,6 +103,7 @@ def start_server(server_addr=('', 0)):
 
     Retries binding, if the address and port is in use. Aborts after a specified time.
     """
+    """
     ok = False
     t1 = None
     sock = None
@@ -125,6 +127,7 @@ def start_server(server_addr=('', 0)):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             
             # Bind to address
+            print("ossocket bind " + str(server_addr))
             sock.bind(server_addr)
 
             # Initiate listening for connections. Create queue of 5 for unaccepted connections
@@ -155,6 +158,8 @@ def start_server(server_addr=('', 0)):
         address = (_get_ip(), address[1])
 
     return sock, address
+    """
+    return None, ("NONE",-1)
 
 def connectNOcache(addr):
     """
