@@ -99,65 +99,7 @@ def _connect(addr, reconnect=True):
 
 def start_server(server_addr=('', 0)):
     """
-    Bind to address and port with the Nagle algorithm disabled.
-
-    Retries binding, if the address and port is in use. Aborts after a specified time.
-    """
-    """
-    ok = False
-    t1 = None
-    sock = None
-    
-    while (not ok):
-        try:
-            if PLATFORM_SYSTEM == 'Darwin':
-                # This is an awfull hack for darwin systems. There is a flaw in
-                # the module function socket.bind(addr), which may cause socket.bind(addr)
-                # to block when multiple OS processes try to bind at the same time.
-                time.sleep(0.1)
-
-
-            # Create IPv4 TCP socket (TODO: add support for IPv6)
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-            # Disable Nagle's algorithem, to enable faster send
-            sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-
-            # Enable reuse of sockets in TIME_WAIT state.  
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            
-            # Bind to address
-            print("ossocket bind " + str(server_addr))
-            sock.bind(server_addr)
-
-            # Initiate listening for connections. Create queue of 5 for unaccepted connections
-            sock.listen(5)
-
-            ok = True
-            
-        except socket.error as e:
-            if STDERR_OUTPUT:
-                sys.stderr.write("PyCSP socket issue (%d): %s\n" % (e.errno, e.message))
-            if sock:
-                sock.close()
-            if e.errno != errno.EADDRINUSE:       
-                raise Exception("Fatal error: Could not bind to socket: " + e.message)
-        if not ok:
-            if t1 == None:
-                t1 = time.time()
-            else:
-                if (time.time()-t1) > conf.get(SOCKETS_BIND_TIMEOUT):
-                    raise SocketBindException(server_addr)
-            time.sleep(conf.get(SOCKETS_BIND_RETRY_DELAY))
-
-    # Obtain binded addresses
-    address = sock.getsockname()
-
-    # If bounded address equals '0.0.0.0', then lookup the best candidate for a public IP.
-    if address[0] == '0.0.0.0':
-        address = (_get_ip(), address[1])
-
-    return sock, address
+    Dummified, to prevent a security bug, disabling listening on port.
     """
     return None, ("NONE",-1)
 
