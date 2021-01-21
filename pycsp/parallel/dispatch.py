@@ -439,7 +439,7 @@ class SocketThreadData(object):
                 self.cond.release()
 
     def startThread(self):
-        print("startThread dummy")
+        #print("startThread dummy")
         """
         self.cond.acquire()
         try:
@@ -449,6 +449,7 @@ class SocketThreadData(object):
         finally:
             self.cond.release()
         """
+        pass
 
             
     def stopThread(self):
@@ -554,7 +555,7 @@ class SocketThreadData(object):
 
     def send(self, addr, header, payload=b"", otherhandler=None):
         # Update message source
-        print("dispatch.send " + str(self.server_addr))
+        #print("dispatch.send " + str(self.server_addr))
         header._source_host, header._source_port = self.server_addr
         
         m = Message(header, payload)
