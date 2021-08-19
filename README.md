@@ -1,7 +1,13 @@
-PyCSP is a CSP library for Python that implements core CSP
+This PyCSP implementation has been discontinued.
+
+Go to https://pycsp.github.io/ for other more recent implementations.
+
+
+
+PyCSP was a CSP library for Python that implemented core CSP
 functionality with some extensions from pi-calculus.
 
-Providing:
+Provided:
 
 * Synchronous communication
 * Buffered channels
