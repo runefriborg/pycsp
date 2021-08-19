@@ -1,6 +1,10 @@
-This PyCSP implementation has been discontinued.
+
+This PyCSP implementation has been <b>discontinued</b>.
 
 Go to https://pycsp.github.io/ for other more recent implementations.
+
+<hr>
+
 
 
 
